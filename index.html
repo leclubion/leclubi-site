@@ -161,7 +161,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       <div>
         <div class="status"><span class="dot"></span>Hors ligne pour le moment</div>
         <h1>Des parties tranquilles, une communauté qui choisit.</h1>
-        <p class="lead">Je stream mes découvertes et mes classiques en direct. Vous votez pour les prochains jeux, vous collectionnez les cartes de chaque saison.</p>
+        <p class="lead">Prépare toi à découvrir pas mal de jeux sur cette chaîne avec de l'horreur, de l'indépendant et des AAA. Mais ce n'est pas tout ! Tu peux bien évidemment voter pour les jeux à venir mais aussi collectionner les cartes des différentes saisons en place durant les streams !</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
@@ -177,7 +177,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <section>
     <div class="wrap">
       <h2>Prochain jeu du stream</h2>
-      <p class="lead">Un vote par visiteur. Le jeu en tête passe en direct la semaine suivante.</p>
+      <p class="lead">Un vote par visiteur. Le jeu en tête passera dans les semaines à venir.</p>
       <div class="poll" id="poll" aria-live="polite"></div>
     </div>
   </section>
@@ -248,7 +248,7 @@ var COLLECTIONS = {
 // Lien CSV de ton Google Sheet (voir les explications). Laisse vide pour utiliser COLLECTIONS ci-dessus.
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
 var SEASONS = [
-  {id:'s1', label:'Saison 1', intro:'Chaque carte se dévoile au fil des streams.',
+  {id:'s1', label:'Saison 1', intro:'Est-ce que tu pourras toutes les collectionner ?',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',1,'Spéciale']]},
   {id:'halloween', label:'Saison Halloween', intro:'La collection spéciale Halloween.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
