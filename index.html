@@ -529,11 +529,15 @@ renderPoll();
 loadPoll();
 
 // ---- Galerie des jeux ----
-// Chaque image mène à la page Steam du jeu. Pour un lien précis, colle l'adresse de la page Steam du jeu ci-dessous.
-// Sans lien précis, le clic ouvre une recherche Steam avec le nom du jeu.
+// Chaque image mène à la page Steam du jeu. La clé doit être identique au nom du jeu dans la liste du sondage.
+// Sans lien pour un jeu, le clic ouvre une recherche Steam avec son nom.
 var GAME_LINKS = {
-  'Signalis': 'https://store.steampowered.com/app/1262350/SIGNALIS/'
-  // 'Luto': 'https://store.steampowered.com/app/XXXXXXX/Luto/',
+  'Luto': 'https://store.steampowered.com/app/1729740/Luto/',
+  'Signalis': 'https://store.steampowered.com/app/1262350/SIGNALIS/',
+  'Karma : The Dark World': 'https://store.steampowered.com/app/1376200/KARMA_The_Dark_World/',
+  'Post Trauma': 'https://store.steampowered.com/app/1750030/Post_Trauma/',
+  'Tormented Souls': 'https://store.steampowered.com/app/1367590/Tormented_Souls/',
+  'Heartworm': 'https://store.steampowered.com/app/1257030/Heartworm/'
 };
 // Images : d'abord le dossier "jeux" (nom du jeu en minuscules, sans accents, tirets entre les mots :
 // ex. karma-the-dark-world.jpg ; formats .jpg, .png ou .webp), puis l'image officielle de Steam si le lien précis est connu.
