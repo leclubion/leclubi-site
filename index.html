@@ -94,6 +94,36 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .card[data-r="Rare"] .front{border-color:rgba(199,154,75,.6)}
 .card[data-r="Légendaire"] .front,.card[data-r="Spéciale"] .front{border-color:var(--accent)}
 .sel{margin-left:8px;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+.rg{margin-bottom:44px}
+.rh{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.rh span{position:relative;padding-left:16px}
+.rh span::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--rc,var(--muted))}
+.rh small{font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:13px}
+.rg[data-r="Commune"]{--rc:#9a978f}
+.rg[data-r="Peu commune"]{--rc:#7fa27a}
+.rg[data-r="Rare"]{--rc:#b5584f}
+.rg[data-r="Légendaire"]{--rc:#c79a4b}
+.rg[data-r="Spéciale"]{--rc:#8d8f96}
+.rcards{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+.card.open{cursor:zoom-in}
+#zoom{position:fixed;inset:0;z-index:20;background:rgba(10,10,12,.88);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom))}
+#zoom[hidden]{display:none}
+#zbody{text-align:center;color:#ece8df}
+#zbody img{display:block;margin:0 auto;max-width:min(92vw,560px);max-height:80vh;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+#zbody p{margin:14px 0 0;font-size:14px;color:#b9b6ad}
+.zfb{width:min(80vw,340px);aspect-ratio:2/3;border:1px solid rgba(199,154,75,.6);border-radius:14px;background:linear-gradient(160deg,#26272b,#18191b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.zfb em{font-style:normal;color:#c79a4b}
+.zfb strong{font-size:22px;font-weight:600}
+.zb{position:absolute;width:46px;height:46px;border:0;border-radius:50%;background:rgba(255,255,255,.1);color:#ece8df;font-size:26px;line-height:1;cursor:pointer;transition:background .2s}
+.zb:hover{background:rgba(255,255,255,.2)}
+.zc{top:max(14px,env(safe-area-inset-top));right:14px}
+.zp{left:14px;top:50%;margin-top:-23px}
+.zn{right:14px;top:50%;margin-top:-23px}
+.opt:disabled{color:var(--text);cursor:default}
+.opt:disabled:hover{border-color:var(--line)}
+.opt.voted:disabled:hover{border-color:var(--accent)}
+@media (max-width:860px){.rcards{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.rcards{grid-template-columns:repeat(2,1fr);gap:14px}}
 @media (max-width:860px){
   .hero{grid-template-columns:1fr;gap:32px}
   .grid.full{grid-template-columns:repeat(3,1fr)}
@@ -185,6 +215,13 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 </div>
 </main>
 
+<div id="zoom" role="dialog" aria-modal="true" aria-label="Carte en grand" hidden>
+  <button class="zb zc" data-z="close" aria-label="Fermer">&times;</button>
+  <button class="zb zp" data-z="prev" aria-label="Carte précédente">&lsaquo;</button>
+  <div id="zbody"></div>
+  <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
+</div>
+
 <footer><div class="wrap">© LeClubi. Tous droits réservés.</div></footer>
 
 <script>
@@ -246,6 +283,16 @@ function cardHtml(c, total, newId){
     '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div></div>';
 }
 
+function groupsHtml(s, cards, newId){
+  var idx = 0;
+  return s.groups.map(function(g){
+    var part = cards.slice(idx, idx + g[1]), n = part.filter(function(c){ return has(c.id); }).length;
+    idx += g[1];
+    return '<div class="rg" data-r="' + g[0] + '"><h3 class="rh"><span>' + g[0] + '</span><small>' +
+      (who ? n + ' / ' + g[1] : g[1] + (g[1] > 1 ? ' cartes' : ' carte')) + '</small></h3>' +
+      '<div class="rcards">' + part.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') + '</div></div>';
+  }).join('');
+}
 function render(newId){
   var s = SEASONS.filter(function(x){ return x.id === current; })[0], cards = cardsOf(s);
   var got = cards.filter(function(c){ return has(c.id); }).length, names = Object.keys(COLLECTIONS);
@@ -262,9 +309,7 @@ function render(newId){
   }).join('');
 
   document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
-    ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p><ul class="rar" aria-label="Répartition par rareté">' +
-      s.groups.map(function(g){ return '<li><strong>' + g[1] + '</strong>' + g[2] + '</li>'; }).join('') + '</ul>' +
-      '<div class="grid full">' + cards.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') + '</div>'
+    ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId)
     : '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>');
 
   if(newId) setTimeout(function(){
@@ -298,7 +343,7 @@ document.addEventListener('click', function(e){
     var id = t.dataset.id, k = sid(id), list = COLLECTIONS[who][k] = COLLECTIONS[who][k] || [], i = list.indexOf(id);
     if(i > -1) list.splice(i, 1); else list.push(id);
     saveDraft(); render(i > -1 ? null : id);
-  }
+  } else if(t.classList.contains('card') && t.dataset.id && has(t.dataset.id)){ openZoom(t.dataset.id); }
 });
 
 function parseCsv(t){
@@ -332,35 +377,130 @@ function loadSheet(){
   }).catch(function(){});
 }
 
+// ---- Zoom ----
+var zoomEl = document.getElementById('zoom'), zbody = document.getElementById('zbody'), zid = null;
+function ownedList(){
+  var s = SEASONS.filter(function(x){ return x.id === current; })[0];
+  return cardsOf(s).filter(function(c){ return has(c.id); });
+}
+function openZoom(id){
+  var list = ownedList(), c = list.filter(function(x){ return x.id === id; })[0];
+  if(!c) return;
+  zid = id;
+  var total = cardsOf(SEASONS.filter(function(x){ return x.id === current; })[0]).length;
+  var img = new Image();
+  img.alt = 'Carte ' + pad(c.n) + ', ' + c.r;
+  img.onerror = function(){
+    var d = document.createElement('div');
+    d.className = 'zfb';
+    d.innerHTML = '<em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong>';
+    img.replaceWith(d);
+  };
+  img.src = 'cartes/' + id + '.png';
+  var cap = document.createElement('p');
+  cap.textContent = 'Carte ' + pad(c.n) + ' sur ' + total + ' : ' + c.r;
+  zbody.innerHTML = '';
+  zbody.appendChild(img);
+  zbody.appendChild(cap);
+  zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
+  zoomEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  zoomEl.querySelector('.zc').focus();
+}
+function closeZoom(){
+  zoomEl.hidden = true;
+  document.body.style.overflow = '';
+  var el = zid && document.querySelector('[data-id="' + zid + '"]');
+  if(el) el.focus();
+}
+function stepZoom(d){
+  var list = ownedList(), i = -1;
+  list.forEach(function(c, k){ if(c.id === zid) i = k; });
+  if(i > -1 && list.length) openZoom(list[(i + d + list.length) % list.length].id);
+}
+zoomEl.addEventListener('click', function(e){
+  var a = e.target.dataset.z;
+  if(e.target === zoomEl || a === 'close') closeZoom();
+  else if(a === 'prev') stepZoom(-1);
+  else if(a === 'next') stepZoom(1);
+});
+document.addEventListener('keydown', function(e){
+  if(zoomEl.hidden){
+    if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('card')){ e.preventDefault(); e.target.click(); }
+    return;
+  }
+  if(e.key === 'Escape') closeZoom();
+  else if(e.key === 'ArrowLeft') stepZoom(-1);
+  else if(e.key === 'ArrowRight') stepZoom(1);
+});
+
 window.addEventListener('hashchange', function(){ render(); });
 render();
 loadSheet();
 if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce navigateur.');
 
-// Sondage (local, à remplacer par un vrai service : Strawpoll, Twitch Poll API, etc.)
-var games = [
-  {n:'Hollow Knight', v:42}, {n:'Stardew Valley', v:31},
-  {n:'Hades', v:27}, {n:'Outer Wilds', v:19}
-];
-var voted = null;
-var pollEl = document.getElementById('poll');
+// ---- Sondage ----
+// Sondage partagé grâce à un Google Forms (voir les explications).
+// Tant que formUrl, entry et resultsUrl sont vides, le sondage est un simple aperçu non partagé.
+var POLL = {
+  id: 'sondage-1', // change cet identifiant à chaque nouveau sondage
+  games: ['Luto', 'Signalis', 'Karma : The Dark World', 'Post Trauma', 'Tormented Souls', 'Heartworm'],
+  formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfiuwqLMSEL5mvfy9BgWyOwYAMZMmqYb-Y6T_NxRkYxeJ2tdQ/formResponse',
+  entry: 'entry.2036648890', // identifiant de la question du formulaire
+  resultsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRPTVuR06cF23-mu4GMuoJkB232Ryb2u3s_IJIPp7ZnC_n34sxK1lEBiVqpQepH4dt1iO8qbzEV9T/pub?gid=1047093953&single=true&output=csv',
+  // Texte exact de l'option dans le formulaire, quand il diffère de l'affichage. Supprime cette ligne si tu corriges le formulaire.
+  formValues: {'Heartworm': 'HeartWorm'}
+};
+var pollEl = document.getElementById('poll'), pollCounts = {}, myVote = null;
+POLL.games.forEach(function(g){ pollCounts[g] = 0; });
+try{
+  var prev = localStorage.getItem('leclubi-' + POLL.id);
+  if(prev && POLL.games.indexOf(prev) > -1) myVote = prev;
+}catch(e){}
+
 function renderPoll(){
-  var total = games.reduce(function(s,g){ return s + g.v; }, 0);
-  pollEl.innerHTML = games.map(function(g,i){
-    var pct = voted === null ? 0 : Math.round(g.v / total * 100);
-    return '<button class="opt' + (voted === i ? ' voted' : '') + '" data-i="' + i + '"' + (voted !== null ? ' disabled' : '') + '>' +
-      '<i class="fill" style="width:' + pct + '%"></i><span>' + g.n + '</span>' +
-      '<span>' + (voted === null ? '' : pct + ' %') + '</span></button>';
-  }).join('') + '<p class="note">' + (voted === null ? 'Choisissez un jeu pour voir les résultats.' : 'Merci, votre vote est pris en compte (' + total + ' votes).') + '</p>';
+  var total = POLL.games.reduce(function(n, g){ return n + pollCounts[g]; }, 0), done = myVote !== null;
+  pollEl.innerHTML = POLL.games.map(function(g, i){
+    var c = pollCounts[g], pct = done && total ? Math.round(c / total * 100) : 0;
+    return '<button class="opt' + (myVote === g ? ' voted' : '') + '" data-i="' + i + '"' + (done ? ' disabled' : '') + '>' +
+      '<i class="fill" style="width:' + pct + '%"></i><span>' + esc(g) + '</span>' +
+      '<span>' + (done ? c + (c > 1 ? ' votes' : ' vote') + ' (' + pct + ' %)' : '') + '</span></button>';
+  }).join('') + '<p class="note">' +
+    (done ? 'Merci, ton vote est pris en compte. ' + total + (total > 1 ? ' votes' : ' vote') + ' au total.' : 'Choisis un jeu pour voter et voir les résultats.') +
+    (POLL.formUrl && POLL.entry ? '' : ' Aperçu : les votes ne sont pas encore partagés.') + '</p>';
 }
+
+function loadPoll(){
+  if(!POLL.resultsUrl) return;
+  fetch(POLL.resultsUrl).then(function(r){ return r.text(); }).then(function(t){
+    var c = {};
+    POLL.games.forEach(function(g){ c[g] = 0; });
+    parseCsv(t).slice(1).forEach(function(r){
+      var v = (r[1] || '').trim().toLowerCase();
+      POLL.games.forEach(function(g){ if(g.toLowerCase() === v) c[g]++; });
+    });
+    pollCounts = c;
+    renderPoll();
+  }).catch(function(){});
+}
+
 pollEl.addEventListener('click', function(e){
   var b = e.target.closest('.opt');
-  if(!b || voted !== null) return;
-  voted = +b.dataset.i;
-  games[voted].v++;
+  if(!b || myVote !== null) return;
+  var g = POLL.games[+b.dataset.i];
+  myVote = g;
+  pollCounts[g]++;
+  try{ localStorage.setItem('leclubi-' + POLL.id, g); }catch(err){}
+  if(POLL.formUrl && POLL.entry){
+    var body = new URLSearchParams();
+    body.append(POLL.entry, POLL.formValues[g] || g);
+    fetch(POLL.formUrl, {method:'POST', mode:'no-cors', body: body}).catch(function(){});
+  }
   renderPoll();
 });
+
 renderPoll();
+loadPoll();
 </script>
 </body>
 </html>
