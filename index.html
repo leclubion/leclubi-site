@@ -137,6 +137,29 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   section{padding:48px 0}
   .grid,.grid.full{grid-template-columns:repeat(2,1fr);gap:14px}
 }
+.pollgrid{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+.pollgrid .poll{max-width:none}
+.gal{min-width:0}
+.gview{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.gs{position:absolute;inset:0;display:block;color:inherit;opacity:0;transition:opacity .6s ease;pointer-events:none}
+.gs.on{opacity:1;pointer-events:auto}
+.gs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gfb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;text-align:center;padding:20px}
+.gcap{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:30px 18px 14px;background:linear-gradient(transparent,rgba(10,10,12,.82));color:#ece8df;font-weight:600;font-size:17px}
+.gcap small{font-weight:400;font-size:13px;color:#b9b6ad;white-space:nowrap}
+.gs:hover .gcap small{color:#ece8df}
+.gb{position:absolute;top:50%;margin-top:-21px;z-index:2;width:42px;height:42px;border:0;border-radius:50%;background:rgba(10,10,12,.55);color:#ece8df;font-size:24px;line-height:1;cursor:pointer;transition:background .2s}
+.gb:hover{background:rgba(10,10,12,.8)}
+.gp{left:10px}
+.gn{right:10px}
+.gbar{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.gdots{display:flex}
+.gd{position:relative;width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer}
+.gd::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid var(--muted)}
+.gd[aria-current="true"]::after{background:var(--accent);border-color:var(--accent)}
+.gt{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px}
+.gt:hover{color:var(--text)}
+@media (max-width:860px){.pollgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -161,7 +184,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       <div>
         <div class="status"><span class="dot"></span>Hors ligne pour le moment</div>
         <h1>Des parties tranquilles, une communauté qui choisit.</h1>
-        <p class="lead">Prépare toi à découvrir pas mal de jeux sur cette chaîne avec de l'horreur, de l'indépendant et des AAA. Mais ce n'est pas tout ! Tu peux bien évidemment voter pour les jeux à venir mais aussi collectionner les cartes des différentes saisons en place durant les streams !</p>
+        <p class="lead">Je stream mes découvertes et mes classiques en direct. Vous votez pour les prochains jeux, vous collectionnez les cartes de chaque saison.</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
@@ -177,8 +200,11 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <section>
     <div class="wrap">
       <h2>Prochain jeu du stream</h2>
-      <p class="lead">Un vote par visiteur. Le jeu en tête passera dans les semaines à venir.</p>
-      <div class="poll" id="poll" aria-live="polite"></div>
+      <p class="lead">Un vote par visiteur. Le jeu en tête passe en direct la semaine suivante.</p>
+      <div class="pollgrid">
+        <div class="gal" id="gal" role="region" aria-roledescription="carrousel" aria-label="Aperçu des jeux proposés"></div>
+        <div class="poll" id="poll" aria-live="polite"></div>
+      </div>
     </div>
   </section>
 
@@ -248,7 +274,7 @@ var COLLECTIONS = {
 // Lien CSV de ton Google Sheet (voir les explications). Laisse vide pour utiliser COLLECTIONS ci-dessus.
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
 var SEASONS = [
-  {id:'s1', label:'Saison 1', intro:'Est-ce que tu pourras toutes les collectionner ?',
+  {id:'s1', label:'Saison 1', intro:'Chaque carte se dévoile au fil des streams.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',1,'Spéciale']]},
   {id:'halloween', label:'Saison Halloween', intro:'La collection spéciale Halloween.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
@@ -501,6 +527,91 @@ pollEl.addEventListener('click', function(e){
 
 renderPoll();
 loadPoll();
+
+// ---- Galerie des jeux ----
+// Chaque image mène à la page Steam du jeu. Pour un lien précis, colle l'adresse de la page Steam du jeu ci-dessous.
+// Sans lien précis, le clic ouvre une recherche Steam avec le nom du jeu.
+var GAME_LINKS = {
+  'Signalis': 'https://store.steampowered.com/app/1262350/SIGNALIS/'
+  // 'Luto': 'https://store.steampowered.com/app/XXXXXXX/Luto/',
+};
+// Images : d'abord le dossier "jeux" (nom du jeu en minuscules, sans accents, tirets entre les mots :
+// ex. karma-the-dark-world.jpg ; formats .jpg, .png ou .webp), puis l'image officielle de Steam si le lien précis est connu.
+var GEXT = ['jpg', 'png', 'webp'], GSRC = {};
+var gal = document.getElementById('gal'), gi = 0, gTimer = null;
+var gReduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var gPaused = gReduce;
+function slug(t){ return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+function steamUrl(g){ return GAME_LINKS[g] || 'https://store.steampowered.com/search/?term=' + encodeURIComponent(g); }
+function gameSrcs(g){
+  var sl = slug(g), id = (steamUrl(g).match(/\/app\/(\d+)/) || [])[1];
+  var a = GEXT.map(function(x){ return 'jeux/' + sl + '.' + x; });
+  if(id) a.push('https://cdn.akamai.steamstatic.com/steam/apps/' + id + '/capsule_616x353.jpg', 'https://cdn.akamai.steamstatic.com/steam/apps/' + id + '/header.jpg');
+  return a;
+}
+
+function buildGal(){
+  gal.innerHTML = '<div class="gview">' + POLL.games.map(function(g, i){
+    var sl = slug(g), srcs = GSRC[sl] = gameSrcs(g);
+    return '<a class="gs' + (i === 0 ? ' on' : '') + '" href="' + steamUrl(g) + '" target="_blank" rel="noopener noreferrer" ' +
+      'aria-label="Voir ' + esc(g) + ' sur Steam (nouvel onglet)"' + (i === 0 ? '' : ' aria-hidden="true" tabindex="-1"') + '>' +
+      '<span class="gfb">Aperçu à venir</span>' +
+      '<img alt="Image du jeu ' + esc(g) + '" data-n="' + sl + '" data-e="0" src="' + srcs[0] + '">' +
+      '<div class="gcap"><span>' + esc(g) + '</span><small>Voir sur Steam &rarr;</small></div></a>';
+  }).join('') +
+    '<button class="gb gp" data-g="prev" aria-label="Jeu précédent">&lsaquo;</button>' +
+    '<button class="gb gn" data-g="next" aria-label="Jeu suivant">&rsaquo;</button></div>' +
+    '<div class="gbar"><div class="gdots">' + POLL.games.map(function(g, i){
+      return '<button class="gd" data-d="' + i + '" aria-label="Voir ' + esc(g) + '"' + (i === 0 ? ' aria-current="true"' : '') + '></button>';
+    }).join('') + '</div><button class="gt" data-g="toggle">' + (gPaused ? 'Lecture' : 'Pause') + '</button></div>';
+}
+function showG(i){
+  var n = POLL.games.length;
+  gi = (i + n) % n;
+  gal.querySelectorAll('.gs').forEach(function(el, k){
+    el.classList.toggle('on', k === gi);
+    el.setAttribute('aria-hidden', k !== gi);
+    el.setAttribute('tabindex', k === gi ? '0' : '-1');
+  });
+  gal.querySelectorAll('.gd').forEach(function(el, k){ if(k === gi) el.setAttribute('aria-current', 'true'); else el.removeAttribute('aria-current'); });
+}
+function stopG(){ clearInterval(gTimer); gTimer = null; }
+function playG(){ stopG(); if(gPaused) return; gTimer = setInterval(function(){ showG(gi + 1); }, 5000); }
+
+// Image introuvable : essaie la source suivante, puis garde le texte « Aperçu à venir »
+gal.addEventListener('error', function(e){
+  var im = e.target;
+  if(!im || im.tagName !== 'IMG') return;
+  var list = GSRC[im.dataset.n] || [], n = +im.dataset.e + 1;
+  if(n < list.length){ im.dataset.e = n; im.src = list[n]; }
+  else im.remove();
+}, true);
+
+gal.addEventListener('click', function(e){
+  var b = e.target.closest('[data-g],[data-d]');
+  if(!b) return;
+  if(b.dataset.d !== undefined) showG(+b.dataset.d);
+  else if(b.dataset.g === 'prev') showG(gi - 1);
+  else if(b.dataset.g === 'next') showG(gi + 1);
+  else if(b.dataset.g === 'toggle'){ gPaused = !gPaused; b.textContent = gPaused ? 'Lecture' : 'Pause'; }
+  playG();
+});
+gal.addEventListener('mouseenter', stopG);
+gal.addEventListener('mouseleave', playG);
+gal.addEventListener('focusin', stopG);
+gal.addEventListener('focusout', playG);
+var gx = null;
+gal.addEventListener('touchstart', function(e){ gx = e.changedTouches[0].clientX; }, {passive:true});
+gal.addEventListener('touchend', function(e){
+  if(gx === null) return;
+  var dx = e.changedTouches[0].clientX - gx;
+  gx = null;
+  if(Math.abs(dx) > 40){ showG(gi + (dx < 0 ? 1 : -1)); playG(); }
+});
+document.addEventListener('visibilitychange', function(){ if(document.hidden) stopG(); else playG(); });
+
+buildGal();
+playG();
 </script>
 </body>
 </html>
