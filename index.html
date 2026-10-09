@@ -4,6 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LeClubi — Chaîne Twitch</title>
+<meta name="description" content="LeClubi : lives Twitch, sondage pour choisir les prochains jeux et cartes à collectionner à chaque saison.">
+<meta name="theme-color" content="#17181a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317181a'/%3E%3Cpath d='M22 14v30h22' fill='none' stroke='%23c79a4b' stroke-width='7' stroke-linecap='square'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LeClubi">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="LeClubi — Chaîne Twitch">
+<meta property="og:description" content="Jouez. Choisissez. Collectionnez. Lives Twitch, sondage des prochains jeux et cartes à collectionner.">
+<meta property="og:url" content="https://leclubion.github.io/leclubi-site/">
+<meta property="og:image" content="https://leclubion.github.io/leclubi-site/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LeClubi — Chaîne Twitch">
+<meta name="twitter:description" content="Jouez. Choisissez. Collectionnez. Lives Twitch, sondage des prochains jeux et cartes à collectionner.">
+<meta name="twitter:image" content="https://leclubion.github.io/leclubi-site/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -241,6 +258,46 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .hnote{margin:0;color:var(--muted);font-size:14px}
 @media (max-width:860px){.hc{grid-template-columns:1fr;gap:32px}}
 @media (max-width:700px){.hlast{grid-template-columns:repeat(3,1fr);gap:12px}.hlast .hl:nth-child(n+4){display:none}.hseas{grid-template-columns:1fr}}
+.nx-sec{padding:48px 0 72px}
+.nx{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;min-height:240px;padding:32px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#1b1c1f;color:#ece8df;isolation:isolate}
+.nx img,.pdc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .6s ease}
+.nx::before,.pdc::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(15,16,18,.15) 0%,rgba(15,16,18,.55) 55%,rgba(15,16,18,.92) 100%)}
+.nx::before{background:linear-gradient(90deg,rgba(15,16,18,.92) 0%,rgba(15,16,18,.6) 50%,rgba(15,16,18,.25) 100%)}
+.nx:hover img,.pdc:hover img{transform:scale(1.03)}
+.nx .eb{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#c79a4b}
+.nx h2{margin:0;font-size:clamp(26px,3.6vw,40px);color:#ece8df}
+.nx .when{margin:0;font-size:16px;color:#d8d4ca}
+.nx .go{margin-top:10px;font-size:14px;color:#c79a4b}
+.wk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.wk strong{min-width:210px;text-align:center;font-weight:500}
+.wk .btn{padding:8px 14px}
+.wk [hidden]{display:none}
+.pweek{display:grid;grid-template-columns:repeat(7,1fr);gap:14px}
+.pd{min-width:0;display:flex;flex-direction:column;gap:10px}
+.pdh{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--muted)}
+.pdh b{font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
+.pd.today .pdh b{color:var(--accent)}
+.pd.today .pdh span::after{content:" · aujourd'hui"}
+.pdc{position:relative;display:flex;flex-direction:column;justify-content:space-between;aspect-ratio:2/3;padding:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#1b1c1f;color:#ece8df;isolation:isolate;transition:border-color .3s ease}
+a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
+.pd.today .pdc{border-color:var(--accent)}
+.pd.past .pdc{opacity:.55}
+.pdc .tm{align-self:flex-start;padding:4px 10px;border-radius:999px;background:var(--accent);color:#17181a;font-weight:600;font-size:13px}
+.pdc .gn{font-size:17px;font-weight:600;line-height:1.25}
+.pdc .nt{display:block;margin-top:4px;font-size:13px;color:#c9c5bb}
+.pdc.empty{align-items:center;justify-content:center;background:transparent;border-style:dashed;color:var(--muted);font-size:13px}
+.pdc.empty::before{display:none}
+@media (max-width:980px){
+  .pweek{grid-template-columns:1fr;gap:10px}
+  .pd{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:14px}
+  .pdh{align-items:flex-start}
+  .pdc{aspect-ratio:auto;min-height:92px;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:12px}
+  .pdc .tm{align-self:flex-start}
+  .pdc .tx{text-align:right}
+  .pdc.empty{min-height:52px;justify-content:flex-start}
+  .nx{padding:24px;min-height:210px}
+  .wk strong{min-width:0;flex:1 1 100%;order:-1;text-align:left}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -251,6 +308,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
     <a class="logo" href="#accueil">LeClubi</a>
     <nav aria-label="Navigation principale">
       <a href="#accueil" data-nav="accueil">Accueil</a>
+      <a href="#planning" data-nav="planning">Planning</a>
       <a href="#collection" data-nav="collection">Collection de Cartes</a>
       <a href="#collectionneurs" data-nav="collectionneurs">Collectionneurs</a>
       <a href="#apropos" data-nav="apropos">À propos</a>
@@ -282,6 +340,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
         <p>Le live s'affiche ici dès que le site est en ligne.</p>
         <a class="btn ghost" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Ouvrir la chaîne</a>
       </div>
+    </div>
+  </section>
+
+  <section class="nx-sec">
+    <div class="wrap">
+      <a class="nx" id="nx" href="#planning" aria-live="polite"></a>
     </div>
   </section>
 
@@ -326,6 +390,24 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
         <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
         <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
       </div>
+    </div>
+  </section>
+</div>
+
+<!-- PLANNING -->
+<div class="view" id="v-planning" hidden>
+  <section>
+    <div class="wrap">
+      <h1>Planning</h1>
+      <p class="lead">Les prochains lives de LeClubi, du lundi au dimanche (heure de Paris).</p>
+      <div class="wk">
+        <button class="btn ghost" data-wk="-1" aria-label="Semaine précédente">&lsaquo;</button>
+        <strong id="wklabel"></strong>
+        <button class="btn ghost" data-wk="1" aria-label="Semaine suivante">&rsaquo;</button>
+        <button class="btn ghost" data-wk="0" id="wktoday">Cette semaine</button>
+      </div>
+      <div class="pweek" id="pweek"></div>
+      <p class="note">Le planning peut évoluer. Rendez-vous sur Twitch et sur Discord pour les mises à jour.</p>
     </div>
   </section>
 </div>
@@ -425,8 +507,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <script>
 // Navigation
 function route(){
-  var h = location.hash, page = h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'collection', 'collectionneurs', 'apropos'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'collection', 'collectionneurs', 'apropos'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   document.querySelectorAll('[data-nav]').forEach(function(a){
     if(a.dataset.nav === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
@@ -760,6 +842,82 @@ renderColl();
 loadSheet();
 loadActivity();
 if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce navigateur.');
+
+// ---- Planning ----
+// Une ligne par live : date (AAAA-MM-JJ), heure (heure de Paris), jeu, lien Steam (facultatif), note (facultatif).
+// Pour l'image : mets un fichier dans le dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
+// sinon l'image officielle de Steam est utilisée grâce au lien.
+var PLANNING = [
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', note:''}
+];
+var JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+var MABR = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+var PIMG = {}, wkOff = 0;
+function ymd(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function mkDate(str, time){ var a = str.split('-'), t = (time || '00:00').split(':'); return new Date(+a[0], a[1] - 1, +a[2], +t[0], +t[1]); }
+function hh(t){ var a = t.split(':'); return a[0] + 'h' + a[1]; }
+function planSrcs(e){
+  var id = (e.steam || '').match(/\/app\/(\d+)/), a = ['jeux/' + slug(e.game) + '.jpg', 'jeux/' + slug(e.game) + '.png', 'jeux/' + slug(e.game) + '.webp'];
+  if(id) a.push('https://cdn.akamai.steamstatic.com/steam/apps/' + id[1] + '/library_600x900.jpg', 'https://cdn.akamai.steamstatic.com/steam/apps/' + id[1] + '/header.jpg');
+  return a;
+}
+function planImg(e, wide){
+  var k = slug(e.game), a = PIMG[k] = planSrcs(e);
+  if(wide) a = PIMG[k] = a.filter(function(u){ return u.indexOf('library_600x900') < 0; }).concat(a.filter(function(u){ return u.indexOf('library_600x900') > -1; }));
+  return '<img alt="" data-pk="' + k + '" data-e="0" src="' + a[0] + '">';
+}
+document.addEventListener('error', function(e){
+  var im = e.target;
+  if(!im || im.tagName !== 'IMG' || !im.dataset.pk) return;
+  var list = PIMG[im.dataset.pk] || [], n = +im.dataset.e + 1;
+  if(n < list.length){ im.dataset.e = n; im.src = list[n]; } else im.remove();
+}, true);
+function nextLive(){
+  var now = new Date(), best = null;
+  PLANNING.forEach(function(e){
+    var d = mkDate(e.date, e.time);
+    if(d.getTime() + 4 * 3600000 >= now.getTime() && (!best || d < best.d)) best = {e:e, d:d};
+  });
+  return best;
+}
+function renderNext(){
+  var el = document.getElementById('nx'), n = nextLive();
+  if(!n){ el.innerHTML = '<span class="eb">Prochain live</span><h2>À venir</h2><p class="when">La date du prochain live sera annoncée bientôt.</p><span class="go">Voir le planning &rarr;</span>'; return; }
+  var now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), d0 = new Date(n.d.getFullYear(), n.d.getMonth(), n.d.getDate());
+  var diff = Math.round((d0 - t0) / 86400000);
+  var rel = diff <= 0 ? 'Aujourd\'hui' : diff === 1 ? 'Demain' : 'Dans ' + diff + ' jours';
+  var day = JOURS[(n.d.getDay() + 6) % 7] + ' ' + n.d.getDate() + ' ' + MOIS[n.d.getMonth()];
+  el.innerHTML = planImg(n.e, true) + '<span class="eb">Prochain live · ' + rel + '</span><h2>' + esc(n.e.game) + '</h2>' +
+    '<p class="when">' + day + ' à ' + hh(n.e.time) + (n.e.note ? ' · ' + esc(n.e.note) : '') + '</p><span class="go">Voir le planning &rarr;</span>';
+}
+function renderPlan(){
+  var now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var mon = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() - ((t0.getDay() + 6) % 7) + wkOff * 7);
+  var days = [0, 1, 2, 3, 4, 5, 6].map(function(i){ return new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i); });
+  var last = days[6];
+  document.getElementById('wklabel').textContent = 'Semaine du ' + mon.getDate() + (mon.getMonth() !== last.getMonth() ? ' ' + MOIS[mon.getMonth()] : '') + ' au ' + last.getDate() + ' ' + MOIS[last.getMonth()];
+  document.getElementById('wktoday').hidden = wkOff === 0;
+  document.getElementById('pweek').innerHTML = days.map(function(d, i){
+    var key = ymd(d), list = PLANNING.filter(function(e){ return e.date === key; }), cls = (+d === +t0 ? ' today' : '') + (d < t0 ? ' past' : '');
+    var head = '<div class="pdh"><b>' + JOURS[i] + '</b><span>' + d.getDate() + ' ' + MABR[d.getMonth()] + '</span></div>';
+    var body = list.length ? list.map(function(e){
+      var tag = e.steam ? 'a href="' + esc(e.steam) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(e.game) + ', ' + hh(e.time) + ' (page Steam, nouvel onglet)"' : 'div';
+      return '<' + tag.split(' ')[0] + tag.slice(tag.split(' ')[0].length) + ' class="pdc">' + planImg(e) + '<span class="tm">' + hh(e.time) + '</span>' +
+        '<span class="tx"><span class="gn">' + esc(e.game) + '</span>' + (e.note ? '<small class="nt">' + esc(e.note) + '</small>' : '') + '</span></' + tag.split(' ')[0] + '>';
+    }).join('') : '<div class="pdc empty">Pas de live</div>';
+    return '<div class="pd' + cls + '">' + head + body + '</div>';
+  }).join('');
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-wk]');
+  if(!b) return;
+  var v = +b.dataset.wk;
+  wkOff = v === 0 ? 0 : wkOff + v;
+  renderPlan();
+});
+renderNext();
+renderPlan();
 
 // ---- Sondage ----
 // Sondage partagé grâce à un Google Forms (voir les explications).
