@@ -210,6 +210,37 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .ptable td:nth-child(2){white-space:nowrap}
 .ab .note{margin:0 0 32px}
 @media (max-width:560px){.arow{flex-direction:column;align-items:flex-start;gap:14px}}
+.mini{margin:0 0 14px;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hc{display:grid;grid-template-columns:1.7fr 1fr;gap:40px;align-items:start}
+.hlast{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.hl{display:block;min-width:0}
+.hl .th{position:relative;aspect-ratio:2/3;border:1px solid rgba(199,154,75,.55);border-radius:10px;background:linear-gradient(160deg,var(--card-a,#2b2c30),var(--card-b,#1b1c1f));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#ece8df;text-align:center;overflow:hidden;transition:transform .3s ease,border-color .3s ease}
+.hl .th em{font-style:normal;font-size:12px;color:#c79a4b}
+.hl .th strong{font-size:14px;font-weight:600}
+.hl .th small{font-size:11px;color:#9a978f;padding:0 6px}
+.hl .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hl:hover .th,.hl:focus-visible .th{transform:translateY(-4px);border-color:var(--accent)}
+.hl p{margin:8px 0 0;font-size:13px;line-height:1.35;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hl p b{display:block;color:var(--text);font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis}
+.htop{display:grid;gap:10px}
+.ht{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:6px 12px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:border-color .2s}
+.ht:hover{border-color:var(--muted)}
+.ht .rk{font-size:18px;font-weight:600;color:var(--accent);text-align:center}
+.ht .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ht .sc{font-size:14px;color:var(--muted)}
+.ht .sc b{color:var(--text);font-weight:600}
+.ht .bar3{grid-column:2/4;margin:0}
+.hseas{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:40px}
+.hs{display:flex;flex-direction:column;gap:12px;padding:20px 22px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:border-color .2s}
+.hs:hover{border-color:var(--muted)}
+.hs h3{margin:0;font-size:17px;font-weight:600;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.hs h3 small{font-weight:400;color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
+.hs .more{font-size:14px;color:var(--accent)}
+.hnote{margin:0;color:var(--muted);font-size:14px}
+@media (max-width:860px){.hc{grid-template-columns:1fr;gap:32px}}
+@media (max-width:700px){.hlast{grid-template-columns:repeat(3,1fr);gap:12px}.hlast .hl:nth-child(n+4){display:none}.hseas{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -269,16 +300,22 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
     <div class="wrap">
       <div class="head">
         <div>
-          <h2>Cartes vedettes</h2>
-          <p class="lead" style="margin:0">Trois cartes de la Saison 1, encore cachées.</p>
+          <h2>La communauté en cartes</h2>
+          <p class="lead" style="margin:0">Les cartes débloquées par les viewers, saison après saison.</p>
         </div>
-        <a class="btn ghost" href="#collection">Voir toute la collection</a>
+        <a class="btn ghost" href="#collectionneurs">Voir les collectionneurs</a>
       </div>
-      <div class="grid">
-        <div><div class="card" tabindex="0" aria-label="Carte rare, face cachée"><b>?</b></div><p class="cap">Rare</p></div>
-        <div><div class="card" tabindex="0" aria-label="Carte légendaire, face cachée"><b>?</b></div><p class="cap">Légendaire</p></div>
-        <div><div class="card" tabindex="0" aria-label="Carte spéciale, face cachée"><b>?</b></div><p class="cap">Spéciale</p></div>
+      <div class="hc">
+        <div>
+          <h3 class="mini" id="hlt">Derniers déblocages</h3>
+          <div class="hlast" id="hlast"></div>
+        </div>
+        <div>
+          <h3 class="mini">Top 3 des collectionneurs</h3>
+          <div class="htop" id="htop"></div>
+        </div>
       </div>
+      <div class="hseas" id="hseas"></div>
     </div>
   </section>
   <section>
@@ -613,6 +650,7 @@ function copyLink(){
 }
 function owns(name, id){ return ((COLLECTIONS[name] || {})[sid(id)] || []).indexOf(id) > -1; }
 function renderColl(){
+  renderHome();
   var el = document.getElementById('coll'), cnt = document.getElementById('ccount');
   var q = (document.getElementById('cq').value || '').trim().toLowerCase();
   var seasons = SEASONS.filter(function(x){ return x.groups.length; }).map(function(x){ return {s:x, cards:cardsOf(x)}; });
@@ -635,11 +673,92 @@ function renderColl(){
 }
 document.getElementById('cq').addEventListener('input', renderColl);
 
+// ---- Accueil : communauté en cartes ----
+// Optionnel : onglet « Derniers » de ton tableur (colonnes : viewer, carte, date), publié en CSV.
+// Une ligne par déblocage, la plus récente en bas. Laisse vide pour afficher les cartes les plus rares déjà débloquées.
+var ACTIVITY_URL = '';
+var ACTIVITY = null;
+function cardInfo(id){
+  var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0];
+  if(!s || !s.groups.length) return null;
+  var c = cardsOf(s).filter(function(x){ return x.id === id; })[0];
+  return c ? {c:c, s:s} : null;
+}
+function thumb(id){
+  var i = cardInfo(id);
+  return '<div class="th"><em>' + (i ? i.c.r : '') + '</em><strong>' + (i ? 'Carte ' + pad(i.c.n) : '') + '</strong><small>' + (i ? esc(i.s.label) : '') + '</small><img src="cartes/' + esc(id) + '.png" alt="" loading="lazy" onerror="this.remove()"></div>';
+}
+function renderHome(){
+  var last = document.getElementById('hlast');
+  if(!last) return;
+  var top = document.getElementById('htop'), seas = document.getElementById('hseas'), lt = document.getElementById('hlt');
+  var note = function(t){ return '<p class="hnote">' + t + '</p>'; };
+  if(sheetState === 'loading'){ last.innerHTML = top.innerHTML = note('Chargement…'); return; }
+  if(sheetState === 'error'){ last.innerHTML = top.innerHTML = note('Les collections sont momentanément indisponibles.'); }
+  var names = Object.keys(COLLECTIONS), seasons = SEASONS.filter(function(x){ return x.groups.length; });
+  var total = seasons.reduce(function(n, x){ return n + cardsOf(x).length; }, 0);
+  var count = function(n){ return seasons.reduce(function(k, x){ return k + cardsOf(x).filter(function(c){ return owns(n, c.id); }).length; }, 0); };
+
+  if(sheetState !== 'error'){
+    // Derniers déblocages, ou à défaut les cartes les plus rares
+    var items = [];
+    if(ACTIVITY && ACTIVITY.length){
+      lt.textContent = 'Derniers déblocages';
+      items = ACTIVITY.filter(function(a){ return cardInfo(a.id); }).slice(-5).reverse().map(function(a){
+        return {id:a.id, who:a.who, href:'#collection=' + encodeURIComponent(a.who), sub:cardInfo(a.id).c.r + (a.date ? ' · ' + esc(a.date) : '')};
+      });
+    } else {
+      lt.textContent = 'Cartes les plus rares débloquées';
+      var order = ['Légendaire', 'Spéciale', 'Rare', 'Peu commune', 'Commune'], owners = {}, all = [];
+      names.forEach(function(n){ seasons.forEach(function(x){ cardsOf(x).forEach(function(c){
+        if(owns(n, c.id)){ (owners[c.id] = owners[c.id] || []).push(n); if(owners[c.id].length === 1) all.push(c); }
+      }); }); });
+      all.sort(function(a, b){ return order.indexOf(a.r) - order.indexOf(b.r) || owners[a.id].length - owners[b.id].length || (a.id < b.id ? -1 : 1); });
+      items = all.slice(0, 5).map(function(c){
+        var o = owners[c.id], one = o.length === 1;
+        return {id:c.id, who:one ? o[0] : o.length + ' viewers', href:one ? '#collection=' + encodeURIComponent(o[0]) : '#collectionneurs', sub:c.r};
+      });
+    }
+    last.innerHTML = items.length ? items.map(function(i){
+      return '<a class="hl" href="' + i.href + '">' + thumb(i.id) + '<p><b>' + esc(i.who) + '</b>' + i.sub + '</p></a>';
+    }).join('') : note('Aucune carte débloquée pour le moment.');
+
+    // Top 3
+    var rows = names.map(function(n){ return {name:n, n:count(n)}; }).filter(function(r){ return r.n > 0; })
+      .sort(function(a, b){ return b.n - a.n || a.name.localeCompare(b.name, 'fr'); }).slice(0, 3);
+    top.innerHTML = rows.length ? rows.map(function(r, i){
+      return '<a class="ht" href="#collection=' + encodeURIComponent(r.name) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + '</span>' +
+        '<span class="sc"><b>' + r.n + '</b> / ' + total + '</span><div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div></a>';
+    }).join('') : note('Le classement apparaîtra dès les premières cartes.');
+  }
+
+  // Aperçu des saisons
+  var seen = names.length;
+  seas.innerHTML = seasons.map(function(x){
+    var cards = cardsOf(x), k = names.filter(function(n){ return cards.some(function(c){ return owns(n, c.id); }); }).length;
+    return '<a class="hs" href="#collection" data-season="' + x.id + '"><h3>' + x.label + '<small>' + cards.length + ' cartes' +
+      (sheetState === 'ok' ? ' · ' + k + (k > 1 ? ' collectionneurs' : ' collectionneur') : '') + '</small></h3>' +
+      '<div class="chips">' + x.groups.map(function(g){ return '<span>' + g[1] + ' ' + g[2] + '</span>'; }).join('') + '</div>' +
+      '<span class="more">Voir la collection</span></a>';
+  }).join('');
+}
+function loadActivity(){
+  if(!ACTIVITY_URL) return;
+  var re = /^[a-z0-9]+-\d+$/;
+  fetch(ACTIVITY_URL).then(function(r){ if(!r.ok) throw new Error(); return r.text(); }).then(function(t){
+    ACTIVITY = parseCsv(t).slice(1).map(function(r){ return {who:(r[0] || '').trim(), id:(r[1] || '').trim().toLowerCase(), date:(r[2] || '').trim()}; })
+      .filter(function(a){ return a.who && re.test(a.id); });
+    renderHome();
+  }).catch(function(){});
+}
+
+
 window.addEventListener('hashchange', function(){ applyHash(); render(); renderColl(); });
 applyHash();
 render();
 renderColl();
 loadSheet();
+loadActivity();
 if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce navigateur.');
 
 // ---- Sondage ----
