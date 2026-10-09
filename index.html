@@ -26,13 +26,13 @@
 <style>
 :root{
   --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --accent-ink:#17181a;
-  --card-a:#26272b; --card-b:#18191b; --yt:#e0473f; --dc:#6b76f5;
+  --card-a:#26272b; --card-b:#18191b; --yt:#e0473f; --dc:#6b76f5; --tw:#9d6bff;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--card-a:#2b2c30;--card-b:#1b1c1f;--yt:#c2352d;--dc:#4752c4}
+  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--card-a:#2b2c30;--card-b:#1b1c1f;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
 }
-:root[data-theme="light"]{--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--yt:#c2352d;--dc:#4752c4}
+:root[data-theme="light"]{--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 Inter,Roboto,"Helvetica Neue",Arial,sans-serif}
@@ -197,14 +197,16 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .cc p{display:flex;justify-content:space-between;gap:8px}
 .cc p b{font-weight:400;color:var(--text);white-space:nowrap}
 @media (max-width:980px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 16px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}}
-@media (max-width:560px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 12px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}.hlinks{gap:6px}.hlinks .btn{padding:7px 10px;font-size:13px}.cgrid{grid-template-columns:repeat(2,1fr);gap:12px}.cc{padding:14px}.cc p{font-size:12px}}
-.btn.yt,.btn.dc{background:transparent;color:var(--text)}
+@media (max-width:560px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 12px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}.hlinks{gap:6px}.hlinks .btn{padding:5px 10px;font-size:12.5px}.cgrid{grid-template-columns:repeat(2,1fr);gap:12px}.cc{padding:14px}.cc p{font-size:12px}}
+.btn.yt,.btn.dc,.btn.tw{background:transparent;color:var(--text)}
 .btn.yt{border-color:var(--yt)}
 .btn.dc{border-color:var(--dc)}
+.btn.tw{border-color:var(--tw)}
+.btn.tw:hover{background:color-mix(in srgb,var(--tw) 14%,transparent);opacity:1}
 .btn.yt:hover{background:color-mix(in srgb,var(--yt) 14%,transparent);opacity:1}
 .btn.dc:hover{background:color-mix(in srgb,var(--dc) 14%,transparent);opacity:1}
-.hlinks{display:flex;gap:10px;align-items:center}
-.hlinks .btn{padding:8px 14px;font-size:14px}
+.hlinks{display:flex;gap:8px;align-items:center}
+.hlinks .btn{padding:5px 11px;font-size:13px;border-radius:5px}
 .hero h1{font-size:clamp(32px,4.4vw,52px)}
 .hero .lead{margin-bottom:16px}
 .hero .lead.end{color:var(--text);font-weight:500;margin-bottom:28px}
@@ -298,6 +300,39 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
   .nx{padding:24px;min-height:210px}
   .wk strong{min-width:0;flex:1 1 100%;order:-1;text-align:left}
 }
+.wrap.wide,.planw .bar,.planw footer .wrap{max-width:1680px}
+.wrap.wide{width:100%}
+.plan-sec .lead{max-width:none}
+.plan-sec{padding:48px 0 64px}
+.plan-sec h1{margin-bottom:6px}
+.plan-sec .wk strong{font-size:18px}
+.plan-sec .pweek{gap:18px}
+.plan-sec .pdh{font-size:14px;gap:4px}
+.plan-sec .pdh b{font-size:16px}
+.plan-sec .pdc{aspect-ratio:auto;min-height:clamp(420px,52vh,640px);padding:20px;border-radius:12px}
+.plan-sec .pdc .tm{font-size:17px;padding:6px 14px}
+.plan-sec .pdc .gn{font-size:clamp(18px,1.7vw,26px)}
+.plan-sec .pdc .nt{font-size:14px}
+.plan-sec .pdc.empty{font-size:14px}
+.btn.tw,.btn.yt,.btn.dc{white-space:nowrap}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.vid{display:block;min-width:0}
+.vid .vt{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.vid .vt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.vid:hover .vt img,.vid:focus-visible .vt img{transform:scale(1.04)}
+.vid .vt::after{content:"";position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(15,16,18,.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 7l9 5-9 5z' fill='%23ece8df'/%3E%3C/svg%3E") center/26px no-repeat;border:1px solid rgba(236,232,223,.35)}
+.vid h3{margin:12px 0 4px;font-size:16px;font-weight:500;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vid small{color:var(--muted);font-size:13px}
+@media (max-width:860px){.vgrid{grid-template-columns:1fr;gap:20px}}
+@media (min-width:561px) and (max-width:860px){.vgrid{grid-template-columns:repeat(2,1fr)}.vgrid .vid:nth-child(3){display:none}}
+@media (max-width:980px){
+  .plan-sec .pweek{gap:10px}
+  .plan-sec .pdc{min-height:96px;padding:14px;border-radius:10px}
+  .plan-sec .pdc.empty{min-height:52px}
+  .plan-sec .pdc .tm{font-size:14px;padding:4px 11px}
+  .plan-sec .pdc .gn{font-size:18px}
+  .plan-sec .pdh b{font-size:14px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -316,7 +351,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
     <div class="hlinks">
       <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a>
       <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a>
-      <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Mon Twitch</a>
+      <a class="btn tw" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a>
     </div>
   </div>
 </header>
@@ -384,6 +419,18 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
   </section>
   <section>
     <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Dernières vidéos</h2>
+          <p class="lead" style="margin:0">Les trois dernières vidéos de la chaîne YouTube.</p>
+        </div>
+        <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
+      </div>
+      <div class="vgrid" id="vgrid" aria-live="polite"></div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
       <h2>Rejoindre la communauté</h2>
       <p class="lead">Retrouve LeClubi ailleurs que sur Twitch.</p>
       <div class="row">
@@ -396,8 +443,8 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 
 <!-- PLANNING -->
 <div class="view" id="v-planning" hidden>
-  <section>
-    <div class="wrap">
+  <section class="plan-sec">
+    <div class="wrap wide">
       <h1>Planning</h1>
       <p class="lead">Les prochains lives de LeClubi, du lundi au dimanche (heure de Paris).</p>
       <div class="wk">
@@ -512,6 +559,7 @@ function route(){
   document.querySelectorAll('[data-nav]').forEach(function(a){
     if(a.dataset.nav === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
+  document.body.classList.toggle('planw', page === 'planning');
   window.scrollTo(0,0);
 }
 window.addEventListener('hashchange', route);
@@ -918,6 +966,42 @@ document.addEventListener('click', function(e){
 });
 renderNext();
 renderPlan();
+
+// ---- Dernières vidéos YouTube ----
+// Les 3 dernières vidéos se chargent toutes seules depuis le flux de la chaîne (via le service rss2json).
+// Si le chargement échoue, le site affiche la liste VIDEOS ci-dessous : l'identifiant est la fin du lien (youtube.com/watch?v=IDENTIFIANT).
+var YT_CHANNEL = 'UCsQgQj4iEPF76ITUJ0kEPuA';
+var VIDEOS = [
+  // {id:'IDENTIFIANT', title:'Titre de la vidéo', date:'2026-10-01'}
+];
+function vidHtml(v){
+  var d = '';
+  if(v.date){ var a = (v.date.slice(0, 10)).split('-'); if(a.length === 3) d = +a[2] + ' ' + MOIS[a[1] - 1] + ' ' + a[0]; }
+  return '<a class="vid" href="https://www.youtube.com/watch?v=' + encodeURIComponent(v.id) + '" target="_blank" rel="noopener noreferrer">' +
+    '<div class="vt"><img src="https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg" alt="" loading="lazy" onerror="this.closest(\'.vt\').style.display=\'none\'"></div>' +
+    '<h3>' + esc(v.title || 'Voir la vidéo') + '</h3>' + (d ? '<small>' + d + '</small>' : '') + '</a>';
+}
+function showVideos(list){
+  var el = document.getElementById('vgrid');
+  el.innerHTML = list.length ? list.slice(0, 3).map(vidHtml).join('') :
+    '<p class="hnote">Retrouve toutes les vidéos directement sur la chaîne YouTube.</p>';
+}
+function loadVideos(){
+  showVideos(VIDEOS);
+  if(!YT_CHANNEL) return;
+  var feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + YT_CHANNEL;
+  fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed)).then(function(r){
+    if(!r.ok) throw new Error('http ' + r.status);
+    return r.json();
+  }).then(function(j){
+    var list = (j.items || []).map(function(it){
+      var id = ((it.guid || '').match(/yt:video:([\w-]{6,})/) || (it.link || '').match(/[?&]v=([\w-]{6,})/) || [])[1];
+      return id ? {id:id, title:it.title, date:it.pubDate} : null;
+    }).filter(Boolean);
+    if(list.length) showVideos(list);
+  }).catch(function(){});
+}
+loadVideos();
 
 // ---- Sondage ----
 // Sondage partagé grâce à un Google Forms (voir les explications).
