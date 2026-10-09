@@ -160,6 +160,26 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .gt{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px}
 .gt:hover{color:var(--text)}
 @media (max-width:860px){.pollgrid{grid-template-columns:1fr}}
+.player.live{display:block;position:relative;padding:0;overflow:hidden}
+.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.flinks{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.fl{display:flex;gap:20px}
+.fl a:hover{color:var(--text)}
+.cfilter{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.cfilter input{flex:1 1 240px;max-width:360px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
+.cfilter span{color:var(--muted);font-size:14px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.cc{display:block;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:border-color .2s,transform .3s}
+.cc:hover,.cc:focus-visible{border-color:var(--accent);transform:translateY(-3px)}
+.cc h3{margin:0 0 10px;font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.cc .big{font-size:26px;font-weight:600;line-height:1.2}
+.cc .big small{font-size:14px;font-weight:400;color:var(--muted)}
+.bar3{height:6px;border-radius:3px;background:var(--line);margin:10px 0 14px;overflow:hidden}
+.bar3 i{display:block;height:100%;background:var(--accent)}
+.cc p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.cc p{display:flex;justify-content:space-between;gap:8px}
+.cc p b{font-weight:400;color:var(--text);white-space:nowrap}
+@media (max-width:560px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 12px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;overflow-x:auto}.cgrid{grid-template-columns:repeat(2,1fr);gap:12px}.cc{padding:14px}.cc p{font-size:12px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -171,6 +191,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
     <nav aria-label="Navigation principale">
       <a href="#accueil" data-nav="accueil">Accueil</a>
       <a href="#collection" data-nav="collection">Collection de Cartes</a>
+      <a href="#collectionneurs" data-nav="collectionneurs">Collectionneurs</a>
     </nav>
     <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Mon Twitch</a>
   </div>
@@ -182,17 +203,15 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <section>
     <div class="wrap hero">
       <div>
-        <div class="status"><span class="dot"></span>Hors ligne pour le moment</div>
-        <h1>Jouez. Choisissez. Collectionnez.</h1>
-        <p class="lead">Bienvenue sur le site ! Vous pourrez y retrouver les sondages permettant de voter pour le prochain jeu que nous ferons en stream. Mais surtout, vous pourrez retrouver et collectionner vos cartes des différentes saisons, à obtenir directement sur la chaîne.
-          Alors, serez-vous capable de toutes les collectionner ?</p>
+        <h1>Des parties tranquilles, une communauté qui choisit.</h1>
+        <p class="lead">Je stream mes découvertes et mes classiques en direct. Vous votez pour les prochains jeux, vous collectionnez les cartes de chaque saison.</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
         </div>
       </div>
       <div class="player" role="img" aria-label="Emplacement du lecteur Twitch">
-        <p>Le lecteur Twitch s'affichera ici.</p>
+        <p>Le live s'affiche ici dès que le site est en ligne.</p>
         <a class="btn ghost" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Ouvrir la chaîne</a>
       </div>
     </div>
@@ -225,6 +244,28 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       </div>
     </div>
   </section>
+  <section>
+    <div class="wrap">
+      <h2>Rejoindre la communauté</h2>
+      <p class="lead">Retrouve LeClubi ailleurs que sur Twitch.</p>
+      <div class="row">
+        <a class="btn" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
+        <a class="btn ghost" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- COLLECTIONNEURS -->
+<div class="view" id="v-collectionneurs" hidden>
+  <section>
+    <div class="wrap">
+      <h1>Collectionneurs</h1>
+      <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
+      <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
+      <div class="cgrid" id="coll"></div>
+    </div>
+  </section>
 </div>
 
 <!-- COLLECTION -->
@@ -249,14 +290,13 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
 </div>
 
-<footer><div class="wrap">© LeClubi. Tous droits réservés.</div></footer>
+<footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés.</span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
 // Navigation
 function route(){
-  var page = location.hash.indexOf('#collection') === 0 ? 'collection' : 'accueil';
-  document.getElementById('v-accueil').hidden = page !== 'accueil';
-  document.getElementById('v-collection').hidden = page !== 'collection';
+  var h = location.hash, page = h === '#collectionneurs' ? 'collectionneurs' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'collection', 'collectionneurs'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   document.querySelectorAll('[data-nav]').forEach(function(a){
     if(a.dataset.nav === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
@@ -273,9 +313,11 @@ var COLLECTIONS = {
   'Viewer 2': {s1:['s1-2','s1-3','s1-16'], halloween:['halloween-1','halloween-5','halloween-17']}
 };
 // Lien CSV de ton Google Sheet (voir les explications). Laisse vide pour utiliser COLLECTIONS ci-dessus.
+var sheetState = 'local';
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
+if(SHEET_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
-  {id:'s1', label:'Saison 1', intro:'Est-ce que tu pourras toutes les collectionner ?.',
+  {id:'s1', label:'Saison 1', intro:'Chaque carte se dévoile au fil des streams.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',1,'Spéciale']]},
   {id:'halloween', label:'Saison Halloween', intro:'La collection spéciale Halloween.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
@@ -329,7 +371,7 @@ function render(newId){
     names.map(function(n, i){ return '<option value="' + i + '"' + (n === who ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') +
     '</select></label>' +
     '<p>' + (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '') + '</p>' +
-    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : '');
+    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
@@ -350,6 +392,7 @@ document.addEventListener('change', function(e){
   if(e.target.id !== 'who') return;
   who = e.target.value === '' ? '' : Object.keys(COLLECTIONS)[+e.target.value];
   setMsg(streamer() && who ? 'Mode streamer : clique sur une carte pour la débloquer ou la retirer.' : '');
+  if(!streamer()) try{ history.replaceState(null, '', who ? '#collection=' + encodeURIComponent(who) : '#collection'); }catch(err){}
   render();
 });
 
@@ -358,7 +401,8 @@ document.addEventListener('click', function(e){
   if(!t) return;
   if(t.dataset.season){ current = t.dataset.season; return render(); }
   var a = t.dataset.act;
-  if(a === 'add'){
+  if(a === 'link'){ copyLink(); }
+  else if(a === 'add'){
     var n = (prompt('Nom du viewer :') || '').trim();
     if(n && !COLLECTIONS[n]){ COLLECTIONS[n] = {}; who = n; saveDraft(); render(); }
   } else if(a === 'copy'){
@@ -389,7 +433,7 @@ function parseCsv(t){
 function loadSheet(){
   if(!SHEET_URL) return;
   var re = /^[a-z0-9]+-\d+$/, yes = ['x','1','oui','yes','true','vrai','v','\u2713','\u2714'];
-  fetch(SHEET_URL).then(function(r){ return r.text(); }).then(function(t){
+  fetch(SHEET_URL).then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(function(t){
     var rows = parseCsv(t), head = (rows[0] || []).map(function(h){ return (h || '').trim().toLowerCase(); });
     var matrix = head.length > 1 && re.test(head[1]), data = {};
     rows.slice(1).forEach(function(r){
@@ -400,8 +444,10 @@ function loadSheet(){
       if(matrix) head.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((r[i] || '').trim().toLowerCase()) > -1) add(id); });
       else (r[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)) add(id); });
     });
-    if(Object.keys(data).length){ COLLECTIONS = data; if(who && !COLLECTIONS[who]) who = ''; render(); }
-  }).catch(function(){});
+    COLLECTIONS = data; sheetState = 'ok';
+    if(who && !COLLECTIONS[who]) who = '';
+    applyHash(); render(); renderColl();
+  }).catch(function(){ sheetState = 'error'; renderColl(); });
 }
 
 // ---- Zoom ----
@@ -461,8 +507,45 @@ document.addEventListener('keydown', function(e){
   else if(e.key === 'ArrowRight') stepZoom(1);
 });
 
-window.addEventListener('hashchange', function(){ render(); });
+function applyHash(){
+  var h = location.hash;
+  if(h.indexOf('#collection=') !== 0) return;
+  var n = '';
+  try{ n = decodeURIComponent(h.slice(12)); }catch(e){}
+  if(Object.prototype.hasOwnProperty.call(COLLECTIONS, n)) who = n;
+}
+function copyLink(){
+  if(navigator.clipboard) navigator.clipboard.writeText(location.href).then(function(){ setMsg('Lien copié.'); }, function(){ setMsg('Copie impossible : copie l\'adresse dans la barre du navigateur.'); });
+  else setMsg('Copie l\'adresse dans la barre du navigateur.');
+}
+function owns(name, id){ return ((COLLECTIONS[name] || {})[sid(id)] || []).indexOf(id) > -1; }
+function renderColl(){
+  var el = document.getElementById('coll'), cnt = document.getElementById('ccount');
+  var q = (document.getElementById('cq').value || '').trim().toLowerCase();
+  var seasons = SEASONS.filter(function(x){ return x.groups.length; }).map(function(x){ return {s:x, cards:cardsOf(x)}; });
+  var total = seasons.reduce(function(n, x){ return n + x.cards.length; }, 0);
+  var msg = function(t){ return '<p class="soon" style="grid-column:1/-1">' + t + '</p>'; };
+  if(sheetState === 'loading'){ cnt.textContent = ''; el.innerHTML = msg('Chargement des collections…'); return; }
+  if(sheetState === 'error'){ cnt.textContent = ''; el.innerHTML = msg('Impossible de charger les collections pour le moment. Réessaie dans un instant.'); return; }
+  var rows = Object.keys(COLLECTIONS).map(function(name){
+    var per = seasons.map(function(x){ return x.cards.filter(function(c){ return owns(name, c.id); }).length; });
+    return {name:name, per:per, n:per.reduce(function(a, b){ return a + b; }, 0)};
+  }).sort(function(a, b){ return b.n - a.n || a.name.localeCompare(b.name, 'fr'); });
+  var shown = rows.filter(function(r){ return r.name.toLowerCase().indexOf(q) > -1; });
+  cnt.textContent = q ? shown.length + ' sur ' + rows.length : rows.length + (rows.length > 1 ? ' collectionneurs' : ' collectionneur');
+  el.innerHTML = shown.length ? shown.map(function(r){
+    return '<a class="cc" href="#collection=' + encodeURIComponent(r.name) + '"><h3>' + esc(r.name) + '</h3>' +
+      '<div class="big">' + r.n + ' <small>/ ' + total + ' cartes</small></div>' +
+      '<div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div>' +
+      seasons.map(function(x, i){ return '<p><span>' + x.s.label + '</span><b>' + r.per[i] + ' / ' + x.cards.length + '</b></p>'; }).join('') + '</a>';
+  }).join('') : msg(rows.length ? 'Aucun viewer ne correspond à cette recherche.' : 'Aucun collectionneur pour le moment.');
+}
+document.getElementById('cq').addEventListener('input', renderColl);
+
+window.addEventListener('hashchange', function(){ applyHash(); render(); renderColl(); });
+applyHash();
 render();
+renderColl();
 loadSheet();
 if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce navigateur.');
 
@@ -617,6 +700,16 @@ document.addEventListener('visibilitychange', function(){ if(document.hidden) st
 
 buildGal();
 playG();
+
+// ---- Lecteur Twitch ----
+(function(){
+  var p = document.querySelector('.player');
+  if(!p || !location.hostname) return;
+  p.className = 'player live';
+  p.removeAttribute('role');
+  p.removeAttribute('aria-label');
+  p.innerHTML = '<iframe title="Live Twitch de LeClubi" src="https://player.twitch.tv/?channel=leclubi&parent=' + encodeURIComponent(location.hostname) + '&muted=true" allowfullscreen loading="lazy"></iframe>';
+})();
 </script>
 </body>
 </html>
