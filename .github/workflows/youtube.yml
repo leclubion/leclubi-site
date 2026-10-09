@@ -1,0 +1,45 @@
+name: Mise à jour des vidéos YouTube
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'   # toutes les 3 heures
+  workflow_dispatch:         # bouton "Run workflow" pour lancer à la main
+
+permissions:
+  contents: write
+
+jobs:
+  videos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Récupérer le flux YouTube
+        run: |
+          curl -fsSL "https://www.youtube.com/feeds/videos.xml?channel_id=UCsQgQj4iEPF76ITUJ0kEPuA" -o feed.xml
+
+      - name: Écrire videos.json
+        run: |
+          python3 - <<'PY'
+          import json, xml.etree.ElementTree as ET
+          ns = {'a': 'http://www.w3.org/2005/Atom', 'yt': 'http://www.youtube.com/xml/schemas/2015'}
+          out = []
+          for e in ET.parse('feed.xml').getroot().findall('a:entry', ns)[:6]:
+              out.append({
+                  'id': e.find('yt:videoId', ns).text,
+                  'title': e.find('a:title', ns).text,
+                  'date': e.find('a:published', ns).text[:10],
+              })
+          if not out:
+              raise SystemExit('Aucune vidéo trouvée, fichier inchangé')
+          with open('videos.json', 'w', encoding='utf-8') as f:
+              json.dump(out, f, ensure_ascii=False, indent=2)
+          PY
+          rm -f feed.xml
+
+      - name: Enregistrer si changement
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add videos.json
+          git diff --cached --quiet || (git commit -m "Mise à jour des vidéos YouTube" && git push)
