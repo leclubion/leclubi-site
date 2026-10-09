@@ -9,13 +9,13 @@
 <style>
 :root{
   --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --accent-ink:#17181a;
-  --card-a:#26272b; --card-b:#18191b;
+  --card-a:#26272b; --card-b:#18191b; --yt:#e0473f; --dc:#6b76f5;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--card-a:#2b2c30;--card-b:#1b1c1f}
+  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--card-a:#2b2c30;--card-b:#1b1c1f;--yt:#c2352d;--dc:#4752c4}
 }
-:root[data-theme="light"]{--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff}
+:root[data-theme="light"]{--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--yt:#c2352d;--dc:#4752c4}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 Inter,Roboto,"Helvetica Neue",Arial,sans-serif}
@@ -179,7 +179,37 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .cc p{margin:2px 0 0;font-size:13px;color:var(--muted)}
 .cc p{display:flex;justify-content:space-between;gap:8px}
 .cc p b{font-weight:400;color:var(--text);white-space:nowrap}
-@media (max-width:560px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 12px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;overflow-x:auto}.cgrid{grid-template-columns:repeat(2,1fr);gap:12px}.cc{padding:14px}.cc p{font-size:12px}}
+@media (max-width:980px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 16px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}}
+@media (max-width:560px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 12px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}.hlinks{gap:6px}.hlinks .btn{padding:7px 10px;font-size:13px}.cgrid{grid-template-columns:repeat(2,1fr);gap:12px}.cc{padding:14px}.cc p{font-size:12px}}
+.btn.yt,.btn.dc{background:transparent;color:var(--text)}
+.btn.yt{border-color:var(--yt)}
+.btn.dc{border-color:var(--dc)}
+.btn.yt:hover{background:color-mix(in srgb,var(--yt) 14%,transparent);opacity:1}
+.btn.dc:hover{background:color-mix(in srgb,var(--dc) 14%,transparent);opacity:1}
+.hlinks{display:flex;gap:10px;align-items:center}
+.hlinks .btn{padding:8px 14px;font-size:14px}
+.hero h1{font-size:clamp(32px,4.4vw,52px)}
+.hero .lead{margin-bottom:16px}
+.hero .lead.end{color:var(--text);font-weight:500;margin-bottom:28px}
+.ab{max-width:760px}
+.ab h2{margin:56px 0 12px}
+.ab h3{margin:28px 0 12px;font-size:16px;font-weight:600}
+.ab .lead{max-width:60ch}
+.arow{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 0;border-top:1px solid var(--line)}
+.arow:last-of-type{border-bottom:1px solid var(--line)}
+.arow h3{margin:0 0 4px;font-size:18px}
+.arow p{margin:0;color:var(--muted);max-width:50ch}
+.arow .btn{flex:none}
+.steps{margin:0 0 32px;padding:0;list-style:none;counter-reset:s}
+.steps li{position:relative;min-height:28px;padding:2px 0 18px 44px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--accent)}
+.tscroll{overflow-x:auto;margin:0 0 12px}
+.ptable{width:100%;border-collapse:collapse;font-size:15px}
+.ptable th,.ptable td{text-align:left;padding:12px 16px 12px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.ptable th{font-weight:500;color:var(--muted);font-size:13px}
+.ptable td:nth-child(2){white-space:nowrap}
+.ab .note{margin:0 0 32px}
+@media (max-width:560px){.arow{flex-direction:column;align-items:flex-start;gap:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -192,8 +222,13 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       <a href="#accueil" data-nav="accueil">Accueil</a>
       <a href="#collection" data-nav="collection">Collection de Cartes</a>
       <a href="#collectionneurs" data-nav="collectionneurs">Collectionneurs</a>
+      <a href="#apropos" data-nav="apropos">À propos</a>
     </nav>
-    <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Mon Twitch</a>
+    <div class="hlinks">
+      <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a>
+      <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a>
+      <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Mon Twitch</a>
+    </div>
   </div>
 </header>
 
@@ -203,8 +238,10 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <section>
     <div class="wrap hero">
       <div>
-        <h1>Des parties tranquilles, une communauté qui choisit.</h1>
-        <p class="lead">Je stream mes découvertes et mes classiques en direct. Vous votez pour les prochains jeux, vous collectionnez les cartes de chaque saison.</p>
+        <h1>Jouez. Choisissez. Collectionnez.</h1>
+        <p class="lead">Bienvenue sur la chaîne ! Ici, on découvre des jeux, on partage de bons moments en stream et surtout, c’est la communauté qui participe aux choix de nos prochaines aventures.</p>
+        <p class="lead">Et parce qu’une aventure mérite d’être gardée, chaque saison vous permet également de débloquer et collectionner des cartes uniques liées aux jeux de la chaîne.</p>
+        <p class="lead end">À vous de jouer. À vous de choisir. Et surtout… à vous de toutes les collectionner !</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
@@ -220,7 +257,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
   <section>
     <div class="wrap">
       <h2>Prochain jeu du stream</h2>
-      <p class="lead">Un vote par visiteur. Le jeu en tête passe en direct la semaine suivante.</p>
+      <p class="lead">Le jeu qui passera en tête sera l'un des prochains jeux que je ferai en stream.</p>
       <div class="pollgrid">
         <div class="gal" id="gal" role="region" aria-roledescription="carrousel" aria-label="Aperçu des jeux proposés"></div>
         <div class="poll" id="poll" aria-live="polite"></div>
@@ -249,8 +286,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       <h2>Rejoindre la communauté</h2>
       <p class="lead">Retrouve LeClubi ailleurs que sur Twitch.</p>
       <div class="row">
-        <a class="btn" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
-        <a class="btn ghost" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
+        <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
+        <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
       </div>
     </div>
   </section>
@@ -264,6 +301,62 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
       <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
       <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
       <div class="cgrid" id="coll"></div>
+    </div>
+  </section>
+</div>
+
+<!-- A PROPOS -->
+<div class="view" id="v-apropos" hidden>
+  <section>
+    <div class="wrap ab">
+      <h1>À propos</h1>
+      <p class="lead">LeClubi, c'est une chaîne où l'on découvre des jeux, où l'on partage de bons moments en stream et où la communauté choisit la suite.</p>
+
+      <div class="arow">
+        <div><h3>La chaîne Twitch</h3><p>C'est là que se passent les lives, et que tu débloques des cartes avec les Power-ups.</p></div>
+        <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
+      </div>
+      <div class="arow">
+        <div><h3>La chaîne YouTube</h3><p>Retrouve aussi LeClubi sur YouTube.</p></div>
+        <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
+      </div>
+      <div class="arow">
+        <div><h3>Le Discord</h3><p>Le serveur de la communauté, pour retrouver les autres viewers et discuter entre deux lives.</p></div>
+        <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
+      </div>
+
+      <h2>La collection de cartes</h2>
+      <p class="lead">Chaque saison propose une série de cartes uniques liées aux jeux de la chaîne. Elles sont face cachée tant que tu ne les as pas obtenues.</p>
+      <h3>Saison 1 : 16 cartes</h3>
+      <ul class="rar">
+        <li><strong>6</strong>Communes</li><li><strong>5</strong>Peu Communes</li><li><strong>3</strong>Rares</li><li><strong>1</strong>Légendaire</li><li><strong>1</strong>Spéciale</li>
+      </ul>
+      <h3>Saison Halloween : 17 cartes</h3>
+      <ul class="rar">
+        <li><strong>6</strong>Communes</li><li><strong>5</strong>Peu Communes</li><li><strong>3</strong>Rares</li><li><strong>1</strong>Légendaire</li><li><strong>2</strong>Spéciales</li>
+      </ul>
+
+      <h2>Comment obtenir des cartes</h2>
+      <ol class="steps">
+        <li>Viens sur le live. Les Power-ups ne sont disponibles que pendant que la chaîne est en direct.</li>
+        <li>Ouvre le menu des Power-ups, à côté de la zone de chat, et choisis une carte avec tes Bits (la monnaie de Twitch).</li>
+        <li>Ta carte est ajoutée à ta collection. Retrouve-la dans l'onglet Collectionneurs.</li>
+      </ol>
+      <div class="tscroll">
+        <table class="ptable">
+          <thead><tr><th scope="col">Power-up</th><th scope="col">Prix</th><th scope="col">Ce que tu obtiens</th></tr></thead>
+          <tbody>
+            <tr><td>[Carte Saison 1] Carte Aléatoire</td><td>25 Bits</td><td>Une carte au hasard de la Saison 1</td></tr>
+            <tr><td>[Carte Saison Halloween] Carte Aléatoire</td><td>15 Bits</td><td>Une carte au hasard de la Saison Halloween</td></tr>
+            <tr><td>[Carte] Roue du Destin</td><td>100 Bits</td><td>Une carte au hasard, avec de meilleures chances qu'avec un tirage aléatoire classique</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Les prix peuvent évoluer : ceux affichés sur Twitch font foi.</p>
+      <div class="row">
+        <a class="btn" href="#collection">Voir la collection</a>
+        <a class="btn ghost" href="#collectionneurs">Voir les collectionneurs</a>
+      </div>
     </div>
   </section>
 </div>
@@ -295,8 +388,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <script>
 // Navigation
 function route(){
-  var h = location.hash, page = h === '#collectionneurs' ? 'collectionneurs' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'collection', 'collectionneurs'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var h = location.hash, page = h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'collection', 'collectionneurs', 'apropos'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   document.querySelectorAll('[data-nav]').forEach(function(a){
     if(a.dataset.nav === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
@@ -317,7 +410,7 @@ var sheetState = 'local';
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
 if(SHEET_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
-  {id:'s1', label:'Saison 1', intro:'Chaque carte se dévoile au fil des streams.',
+  {id:'s1', label:'Saison 1', intro:'Est-ce que tu pourras toutes les collectionner ?',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',1,'Spéciale']]},
   {id:'halloween', label:'Saison Halloween', intro:'La collection spéciale Halloween.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
