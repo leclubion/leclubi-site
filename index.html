@@ -968,8 +968,8 @@ renderNext();
 renderPlan();
 
 // ---- Dernières vidéos YouTube ----
-// Les 3 dernières vidéos se chargent toutes seules depuis le flux de la chaîne (via le service rss2json).
-// Si le chargement échoue, le site affiche la liste VIDEOS ci-dessous : l'identifiant est la fin du lien (youtube.com/watch?v=IDENTIFIANT).
+// Les 3 dernières vidéos se chargent depuis videos.json (mis à jour par GitHub toutes les 3 heures), sinon via rss2json.
+// Si tout échoue, le site affiche la liste VIDEOS ci-dessous : l'identifiant est la fin du lien (youtube.com/watch?v=IDENTIFIANT).
 var YT_CHANNEL = 'UCsQgQj4iEPF76ITUJ0kEPuA';
 var VIDEOS = [
   // {id:'IDENTIFIANT', title:'Titre de la vidéo', date:'2026-10-01'}
@@ -988,18 +988,30 @@ function showVideos(list){
 }
 function loadVideos(){
   showVideos(VIDEOS);
-  if(!YT_CHANNEL) return;
-  var feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + YT_CHANNEL;
-  fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed)).then(function(r){
+  var clean = function(list){ return (list || []).filter(function(v){ return v && /^[\w-]{6,}$/.test(v.id || ''); }); };
+  // 1) videos.json, mis à jour automatiquement par GitHub (voir le dossier github-youtube)
+  fetch('videos.json?t=' + Math.floor(Date.now() / 600000)).then(function(r){
     if(!r.ok) throw new Error('http ' + r.status);
     return r.json();
-  }).then(function(j){
-    var list = (j.items || []).map(function(it){
-      var id = ((it.guid || '').match(/yt:video:([\w-]{6,})/) || (it.link || '').match(/[?&]v=([\w-]{6,})/) || [])[1];
-      return id ? {id:id, title:it.title, date:it.pubDate} : null;
-    }).filter(Boolean);
-    if(list.length) showVideos(list);
-  }).catch(function(){});
+  }).then(function(list){
+    list = clean(list);
+    if(!list.length) throw new Error('vide');
+    showVideos(list);
+  }).catch(function(){
+    // 2) à défaut, flux YouTube via rss2json
+    if(!YT_CHANNEL) return;
+    var feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + YT_CHANNEL;
+    fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed)).then(function(r){
+      if(!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).then(function(j){
+      var list = clean((j.items || []).map(function(it){
+        var id = ((it.guid || '').match(/yt:video:([\w-]{6,})/) || (it.link || '').match(/[?&]v=([\w-]{6,})/) || [])[1];
+        return id ? {id:id, title:it.title, date:it.pubDate} : null;
+      }));
+      if(list.length) showVideos(list);
+    }).catch(function(){});
+  });
 }
 loadVideos();
 
