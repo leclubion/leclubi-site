@@ -380,6 +380,26 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .faq details[open] summary::after{content:"\2212"}
 .faq details p{margin:0;padding:0 18px 16px;color:var(--muted)}
 .faq details p b{color:var(--text);font-weight:500}
+.rh{flex-wrap:wrap}
+.rw{margin-left:auto;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)}
+.rwb{margin-left:auto;padding:5px 13px;border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:var(--accent-ink);font:500 13px Inter,sans-serif;letter-spacing:0;text-transform:none;cursor:pointer;transition:opacity .2s}
+.rwb:hover{opacity:.88}
+.rwb.done{background:transparent;color:var(--accent);cursor:default;opacity:1}
+.rws{margin:8px 0 0;padding:14px 18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
+.rws.on{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--accent);background:var(--panel);color:var(--text)}
+.rws.on strong{display:block;font-weight:600}
+.rws.on span{color:var(--muted);font-size:14px}
+.rws .rwb{margin-left:0}
+#prop{position:fixed;inset:0;z-index:21;background:rgba(10,10,12,.82);display:flex;align-items:center;justify-content:center;padding:20px}
+#prop[hidden]{display:none}
+.pbox{position:relative;width:min(520px,100%);max-height:100%;overflow:auto;padding:26px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}
+.pbox h3{margin:0 36px 8px 0;font-size:19px}
+.pbox .pdesc{margin:0 0 16px;color:var(--muted);font-size:14px}
+.pbox label{display:block;margin:0 0 14px;font-size:13px;color:var(--muted)}
+.pbox input,.pbox textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:15px;resize:vertical}
+.pbox .pnote{min-height:20px;margin:0 0 12px;font-size:13px;color:var(--accent)}
+.pbox .pclose{position:absolute;top:10px;right:12px;width:32px;height:32px;border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}
+.pbox .pclose:hover{color:var(--text)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -576,6 +596,22 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
       <h3>Les badges</h3>
       <ul class="rar" id="badges"></ul>
 
+      <h2>Après une ligne complète</h2>
+      <p class="lead">Compléter une ligne de cartes, ou toute une saison, te donne droit à une récompense. Elle s'applique à chaque saison.</p>
+      <div class="tscroll">
+        <table class="ptable">
+          <thead><tr><th scope="col">Quand</th><th scope="col">Ta récompense</th></tr></thead>
+          <tbody>
+            <tr><td>Ligne Commune complète</td><td>Tu proposes une carte Commune pour la prochaine saison</td></tr>
+            <tr><td>Ligne Peu commune complète</td><td>Tu proposes une carte Peu commune pour la prochaine saison</td></tr>
+            <tr><td>Ligne Rare complète</td><td>Une roue gratuite</td></tr>
+            <tr><td>Légendaire et Spéciale</td><td>Rien de prévu pour le moment</td></tr>
+            <tr><td>Saison complète</td><td>Tu proposes une carte Spéciale pour la prochaine saison</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Une proposition peut être un jeu, un personnage, un objet d'un jeu ou une référence à un live. Sur ta fiche (Collection de Cartes), un bouton apparaît à côté de la ligne terminée : tu y écris ta proposition. Pour la roue gratuite, demande-la à LeClubi.</p>
+
       <h2>Questions fréquentes</h2>
       <div class="faq">
         <details><summary>Comment obtenir des cartes ?</summary><p>Pendant un live, ouvre le menu des Power-ups à côté du chat et choisis une carte avec tes Bits : une Carte Aléatoire de la Saison 1 (25 Bits), de la Saison Halloween (15 Bits), ou la Roue du Destin (100 Bits). Les prix affichés sur Twitch font foi.</p></details>
@@ -584,6 +620,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
         <details><summary>À quoi servent les doublons ?</summary><p>Si tu obtiens <b>5 fois la même carte</b> (par exemple 5 fois la carte 1 de la Saison 1), tu gagnes <b>une roue gratuite</b>. Dès que LeClubi annonce qu'un spectateur a obtenu 5 fois la même carte, il peut lui demander d'utiliser sa roue gratuite.</p></details>
         <details><summary>Où retrouver ma collection ?</summary><p>Dans l'onglet <a href="#collectionneurs"><b>Collectionneurs</b></a> : cherche ton pseudo et clique sur ta fiche. Tu peux ensuite copier le lien de ta collection pour la partager.</p></details>
         <details><summary>J'ai obtenu une carte mais elle n'apparaît pas encore, est-ce normal ?</summary><p>Oui, ça peut arriver. LeClubi met les collections à jour en direct dès que les cartes sont tirées. Si les tirages sont nombreux, la mise à jour peut se faire après le live. Rafraîchis la page (Ctrl+F5) et repasse un peu plus tard.</p></details>
+        <details><summary>Que se passe-t-il quand je complète une ligne ou une saison ?</summary><p>Tu débloques une récompense : proposer une carte pour la prochaine saison (lignes Commune et Peu commune, ou saison complète avec une carte Spéciale) ou gagner une roue gratuite (ligne Rare). Le détail est dans la section « Après une ligne complète », plus haut sur cette page.</p></details>
         <details><summary>Comment fonctionnent les titres et les badges ?</summary><p>Ton titre dépend du nombre de cartes que tu possèdes, et les badges récompensent des exploits (saison complète, carte Légendaire, etc.). Le détail est dans la section « Titres et badges », plus haut sur cette page.</p></details>
       </div>
 
@@ -610,6 +647,18 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
   </section>
 </div>
 </main>
+
+<div id="prop" role="dialog" aria-modal="true" aria-labelledby="prop-t" hidden>
+  <form class="pbox" id="pform" autocomplete="off">
+    <button type="button" class="pclose" data-p="close" aria-label="Fermer">&times;</button>
+    <h3 id="prop-t"></h3>
+    <p class="pdesc" id="prop-d"></p>
+    <label>Ton pseudo Twitch<input id="prop-n" type="text" maxlength="60" required></label>
+    <label>Ta proposition<textarea id="prop-x" rows="4" maxlength="400" required placeholder="Un jeu, un personnage, un objet d'un jeu ou une référence à un live"></textarea></label>
+    <p class="pnote" id="prop-m" aria-live="polite"></p>
+    <div class="row"><button class="btn" type="submit" id="prop-s">Envoyer</button><button class="btn ghost" type="button" data-p="close">Annuler</button></div>
+  </form>
+</div>
 
 <div id="zoom" role="dialog" aria-modal="true" aria-label="Carte en grand" hidden>
   <button class="zb zc" data-z="close" aria-label="Fermer">&times;</button>
@@ -718,7 +767,7 @@ function groupsHtml(s, cards, newId){
     var part = cards.slice(idx, idx + g[1]), n = part.filter(function(c){ return has(c.id); }).length;
     idx += g[1];
     return '<div class="rg" data-r="' + g[0] + '"><h3 class="rh"><span>' + rIco(g[0]) + g[0] + '</span><small>' +
-      (who ? n + ' / ' + g[1] : g[1] + (g[1] > 1 ? ' cartes' : ' carte')) + '</small></h3>' +
+      (who ? n + ' / ' + g[1] : g[1] + (g[1] > 1 ? ' cartes' : ' carte')) + '</small>' + lineReward(s, g, !!who && n === g[1]) + '</h3>' +
       '<div class="rcards">' + part.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') + '</div></div>';
   }).join('');
 }
@@ -740,7 +789,7 @@ function render(newId){
   }).join('');
 
   document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
-    ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId)
+    ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId) + seasonReward(s, cards)
     : '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>');
 
   if(newId) setTimeout(function(){
@@ -955,6 +1004,84 @@ function renderTitres(){
   if(bl) bl.innerHTML = BADGE_LIST.map(function(x){ return '<li><strong>' + esc(x[0]) + '</strong>' + esc(x[1]) + '</li>'; }).join('');
 }
 renderTitres();
+
+// ---- Récompenses des lignes complètes ----
+// Formulaire Google (un seul champ « réponse longue ») qui reçoit les propositions. Colle ici le lien du formulaire (se terminant par /formResponse)
+// et l'identifiant du champ (entry.123456789). Tant que c'est vide, le bouton copie la proposition et ouvre le Discord.
+var REWARD_FORM = {formUrl:'https://docs.google.com/forms/d/e/1FAIpQLSdJTzEWlgkY1-FTmZwxcTUrMG5xzfrUEhiAIJ8RWK3cHy2Psw/formResponse', entry:'entry.1028914846'};
+var DISCORD_URL = 'https://discord.gg/hqkDKXTK3T';
+var REWARDS = {
+  'Commune': {kind:'carte Commune', hint:'Ligne complète : propose une carte'},
+  'Peu commune': {kind:'carte Peu commune', hint:'Ligne complète : propose une carte'},
+  'Rare': {wheel:true, hint:'Ligne complète : roue gratuite'}
+};
+var SEASON_REWARD = {kind:'carte Spéciale', hint:'Saison complète : propose une carte Spéciale pour la prochaine saison.'};
+function propKey(sidv, part){ return 'leclubi-prop-' + who + '-' + sidv + '-' + part; }
+function propSent(sidv, part){ try{ return localStorage.getItem(propKey(sidv, part)) === '1'; }catch(e){ return false; } }
+function lineReward(s, g, done){
+  var rw = REWARDS[g[0]];
+  if(!rw) return '';
+  if(!who || !done) return '<span class="rw">' + rw.hint + '</span>';
+  if(rw.wheel) return '<span class="rwb done">Roue gratuite à demander à LeClubi</span>';
+  var part = RSLUG[g[0]];
+  return propSent(s.id, part) ? '<span class="rwb done">Proposition envoyée</span>' :
+    '<button type="button" class="rwb" data-prop="' + s.id + '|' + part + '">Proposer une carte</button>';
+}
+function seasonReward(s, cards){
+  if(!cards.length) return '';
+  if(!who || !cards.every(function(c){ return has(c.id); })) return '<p class="rws">' + SEASON_REWARD.hint + '</p>';
+  return '<div class="rws on"><div><strong>Saison complète !</strong><span>Tu peux proposer une carte Spéciale pour la prochaine saison.</span></div>' +
+    (propSent(s.id, 'saison') ? '<span class="rwb done">Proposition envoyée</span>' : '<button type="button" class="rwb" data-prop="' + s.id + '|saison">Proposer une carte Spéciale</button>') + '</div>';
+}
+var propEl = document.getElementById('prop'), propCtx = null;
+function openProp(val){
+  var a = val.split('|'), s = SEASONS.filter(function(x){ return x.id === a[0]; })[0];
+  if(!s || !who) return;
+  var season = a[1] === 'saison', g = s.groups.filter(function(x){ return RSLUG[x[0]] === a[1]; })[0];
+  if(!season && !g) return;
+  var kind = season ? SEASON_REWARD.kind : REWARDS[g[0]].kind;
+  propCtx = {sid:s.id, part:a[1], kind:kind, season:s.label};
+  document.getElementById('prop-t').textContent = 'Proposer une ' + kind + ' pour la prochaine saison';
+  document.getElementById('prop-d').textContent = (season ? 'Tu as complété la ' + s.label + ' : bravo ! ' : 'Tu as complété la ligne ' + g[0] + ' de la ' + s.label + '. ') +
+    'Propose un jeu, un personnage, un objet d\'un jeu ou une référence à un live.';
+  document.getElementById('prop-n').value = who;
+  document.getElementById('prop-x').value = '';
+  document.getElementById('prop-m').textContent = '';
+  var sb = document.getElementById('prop-s');
+  sb.disabled = false;
+  sb.textContent = REWARD_FORM.formUrl && REWARD_FORM.entry ? 'Envoyer' : 'Copier et ouvrir le Discord';
+  propEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  document.getElementById('prop-x').focus();
+}
+function closeProp(){ propEl.hidden = true; document.body.style.overflow = ''; propCtx = null; }
+document.addEventListener('click', function(e){
+  if(e.target === propEl) return closeProp();
+  var b = e.target.closest('[data-prop],[data-p]');
+  if(!b) return;
+  if(b.dataset.prop) openProp(b.dataset.prop); else closeProp();
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !propEl.hidden) closeProp(); });
+document.getElementById('pform').addEventListener('submit', function(e){
+  e.preventDefault();
+  if(!propCtx) return;
+  var pseudo = document.getElementById('prop-n').value.trim(), txt = document.getElementById('prop-x').value.trim(), note = document.getElementById('prop-m'), sb = document.getElementById('prop-s');
+  if(!pseudo || !txt) return;
+  var msg = '[' + pseudo + '] ' + propCtx.kind + ' · ' + propCtx.season + ' : ' + txt, ctx = propCtx;
+  if(REWARD_FORM.formUrl && REWARD_FORM.entry){
+    var body = new URLSearchParams();
+    body.append(REWARD_FORM.entry, msg);
+    fetch(REWARD_FORM.formUrl, {method:'POST', mode:'no-cors', body: body}).catch(function(){});
+    try{ localStorage.setItem(propKey(ctx.sid, ctx.part), '1'); }catch(err){}
+    sb.disabled = true;
+    note.textContent = 'Merci ! Ta proposition est envoyée à LeClubi.';
+    setTimeout(function(){ closeProp(); render(); }, 1500);
+  } else {
+    if(navigator.clipboard) navigator.clipboard.writeText(msg).catch(function(){});
+    note.textContent = 'Proposition copiée : colle-la sur le Discord.';
+    window.open(DISCORD_URL, '_blank', 'noopener');
+  }
+});
 
 
 // ---- Accueil : communauté en cartes ----
