@@ -127,6 +127,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 /* Effet holographique : cartes Rare, Légendaire, Spéciale */
 .hl{--bx:50%;--by:50%;--ha:.5;--h1:rgba(255,255,255,0);--h2:rgba(255,255,255,.9);--h3:rgba(255,255,255,0)}
 .hl[data-r="Commune"],.hl[data-r="Peu commune"]{--ha:.22;--tx:0}
+.hl[data-r="Rare"]{--ha:.6;--h1:rgba(255,190,150,.55);--h2:rgba(255,60,60,.95);--h3:rgba(190,20,60,.9)}
 .hl[data-r="Légendaire"]{--ha:.6;--h1:rgba(255,200,90,0);--h2:rgba(255,205,110,.95);--h3:rgba(255,200,90,0)}
 .hl[data-r="Spéciale"]{--ha:.6;--h1:rgba(90,220,230,.95);--h2:rgba(190,150,255,.95);--h3:rgba(255,150,210,.95)}
 .hl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s ease;mix-blend-mode:hard-light;
