@@ -125,20 +125,20 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .rcards{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
 .card.open{cursor:zoom-in}
 /* Effet holographique : cartes Rare, Légendaire, Spéciale */
-.hl{--mx:50%;--my:50%;--bx:50%;--hg:.55;--h1:rgba(255,255,255,0);--h2:rgba(255,255,255,0);--h3:rgba(255,255,255,0)}
-.hl[data-r="Légendaire"]{--hg:.6;--h1:rgba(199,154,75,.0);--h2:rgba(255,214,140,.55);--h3:rgba(199,154,75,.0)}
-.hl[data-r="Spéciale"]{--hg:.4;--h1:rgba(79,163,165,.4);--h2:rgba(180,140,255,.4);--h3:rgba(255,160,200,.4)}
-.hl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s ease;mix-blend-mode:color-dodge;
-  background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,var(--hg)),rgba(255,255,255,0) 42%),
-             linear-gradient(115deg,rgba(0,0,0,0) 25%,var(--h1) 38%,var(--h2) 50%,var(--h3) 62%,rgba(0,0,0,0) 75%);
-  background-size:100% 100%,260% 260%;background-position:0 0,var(--bx) var(--bx)}
-.card:hover .hl::after,.card:focus-visible .hl::after,.zh:hover::after{opacity:1}
+.hl{--bx:50%;--by:50%;--ha:.5;--h1:rgba(255,255,255,0);--h2:rgba(255,255,255,.9);--h3:rgba(255,255,255,0)}
+.hl[data-r="Légendaire"]{--ha:.6;--h1:rgba(255,200,90,0);--h2:rgba(255,205,110,.95);--h3:rgba(255,200,90,0)}
+.hl[data-r="Spéciale"]{--ha:.6;--h1:rgba(90,220,230,.95);--h2:rgba(190,150,255,.95);--h3:rgba(255,150,210,.95)}
+.hl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s ease;mix-blend-mode:hard-light;
+  background:linear-gradient(115deg,rgba(255,255,255,0) 20%,var(--h1) 35%,var(--h2) 50%,var(--h3) 65%,rgba(255,255,255,0) 80%),
+             repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 5px,rgba(255,255,255,.14) 5px 6px);
+  background-size:300% 300%,100% 100%;background-position:var(--bx) var(--by),0 0}
+.card:hover .hl::after,.card:focus-visible .hl::after,.zh:hover::after{opacity:var(--ha)}
 .zh{position:relative;display:inline-block;border-radius:14px;transition:transform .2s ease;will-change:transform}
 .card.tilt{transition:transform .12s ease-out,border-color .35s ease,box-shadow .35s ease;transform:translateY(-5px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
 @media (hover:none){
-  .card.open .hl::after{opacity:.75;animation:hl-sheen 5.5s ease-in-out infinite alternate}
+  .card.open .hl::after{opacity:var(--ha);animation:hl-sheen 5.5s ease-in-out infinite alternate}
 }
-@keyframes hl-sheen{from{background-position:0 0,0% 0%}to{background-position:0 0,100% 100%}}
+@keyframes hl-sheen{from{background-position:0% 0%,0 0}to{background-position:100% 100%,0 0}}
 @media (prefers-reduced-motion:reduce){.card.tilt{transform:translateY(-5px)}.zh{transform:none!important}.card.open .hl::after{animation:none!important}}
 #zoom{position:fixed;inset:0;z-index:20;background:rgba(10,10,12,.88);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom))}
 #zoom[hidden]{display:none}
@@ -971,7 +971,7 @@ function loadSheet(){
     if(!hot) return;
     var h = hot.hl; hot.el.classList.remove('tilt');
     ['--rx','--ry'].forEach(function(k){ hot.el.style.removeProperty(k); });
-    ['--mx','--my','--bx'].forEach(function(k){ h.style.removeProperty(k); });
+    ['--bx','--by'].forEach(function(k){ h.style.removeProperty(k); });
     if(hot.zoom) hot.el.style.transform = '';
     hot = null;
   }
@@ -986,9 +986,8 @@ function loadSheet(){
     var r = el.getBoundingClientRect();
     var x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     var y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
-    h.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
-    h.style.setProperty('--my', (y * 100).toFixed(1) + '%');
     h.style.setProperty('--bx', (x * 100).toFixed(1) + '%');
+    h.style.setProperty('--by', (y * 100).toFixed(1) + '%');
     if(reduce) return;
     var rx = ((0.5 - y) * 14).toFixed(2) + 'deg', ry = ((x - 0.5) * 16).toFixed(2) + 'deg';
     if(z){ el.style.transform = 'perspective(900px) rotateX(' + rx + ') rotateY(' + ry + ')'; }
