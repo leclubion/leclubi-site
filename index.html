@@ -124,6 +124,22 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .rg[data-r="Spéciale"]{--rc:#4fa3a5}
 .rcards{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
 .card.open{cursor:zoom-in}
+/* Effet holographique : cartes Rare, Légendaire, Spéciale */
+.hl{--mx:50%;--my:50%;--bx:50%;--hg:.55;--h1:rgba(255,255,255,0);--h2:rgba(255,255,255,0);--h3:rgba(255,255,255,0)}
+.hl[data-r="Légendaire"]{--hg:.6;--h1:rgba(199,154,75,.0);--h2:rgba(255,214,140,.55);--h3:rgba(199,154,75,.0)}
+.hl[data-r="Spéciale"]{--hg:.4;--h1:rgba(79,163,165,.4);--h2:rgba(180,140,255,.4);--h3:rgba(255,160,200,.4)}
+.hl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s ease;mix-blend-mode:color-dodge;
+  background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,var(--hg)),rgba(255,255,255,0) 42%),
+             linear-gradient(115deg,rgba(0,0,0,0) 25%,var(--h1) 38%,var(--h2) 50%,var(--h3) 62%,rgba(0,0,0,0) 75%);
+  background-size:100% 100%,260% 260%;background-position:0 0,var(--bx) var(--bx)}
+.card:hover .hl::after,.card:focus-visible .hl::after,.zh:hover::after{opacity:1}
+.zh{position:relative;display:inline-block;border-radius:14px;transition:transform .2s ease;will-change:transform}
+.card.tilt{transition:transform .12s ease-out,border-color .35s ease,box-shadow .35s ease;transform:translateY(-5px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+@media (hover:none){
+  .card.open .hl::after{opacity:.75;animation:hl-sheen 5.5s ease-in-out infinite alternate}
+}
+@keyframes hl-sheen{from{background-position:0 0,0% 0%}to{background-position:0 0,100% 100%}}
+@media (prefers-reduced-motion:reduce){.card.tilt{transform:translateY(-5px)}.zh{transform:none!important}.card.open .hl::after{animation:none!important}}
 #zoom{position:fixed;inset:0;z-index:20;background:rgba(10,10,12,.88);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom))}
 #zoom[hidden]{display:none}
 #zbody{text-align:center;color:#ece8df}
@@ -837,12 +853,13 @@ try{
 }catch(e){}
 function saveDraft(){ try{ localStorage.setItem('leclubi-draft', JSON.stringify(COLLECTIONS)); draft = true; }catch(e){} }
 
+function holoOf(r){ return r === 'Rare' || r === 'Légendaire' || r === 'Spéciale'; }
 function cardHtml(c, total, newId){
   var got = has(c.id);
   return '<div class="card flip' + (got && c.id !== newId ? ' open' : '') + '" tabindex="0" data-id="' + c.id + '" data-r="' + c.r + '" aria-label="' +
     (got ? 'Carte ' + pad(c.n) + ', ' + c.r : 'Carte ' + c.n + ', face cachée') + '">' +
     '<div class="inner"><div class="face back">' + rIco(c.r, 'rb') + '<b>?</b></div>' +
-    '<div class="face front"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>N° ' + pad(c.n) + ' / ' + total + '</small>' +
+    '<div class="face front' + (holoOf(c.r) ? ' hl" data-r="' + c.r : '') + '"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>N° ' + pad(c.n) + ' / ' + total + '</small>' +
     '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div></div>';
 }
 
@@ -946,6 +963,41 @@ function loadSheet(){
   }).catch(function(){ sheetState = 'error'; renderColl(); });
 }
 
+// ---- Effet holographique (survol) ----
+(function(){
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var hot = null;
+  function clear(){
+    if(!hot) return;
+    var h = hot.hl; hot.el.classList.remove('tilt');
+    ['--rx','--ry'].forEach(function(k){ hot.el.style.removeProperty(k); });
+    ['--mx','--my','--bx'].forEach(function(k){ h.style.removeProperty(k); });
+    if(hot.zoom) hot.el.style.transform = '';
+    hot = null;
+  }
+  document.addEventListener('pointermove', function(e){
+    if(e.pointerType === 'touch') return;
+    var z = e.target.closest && e.target.closest('.zh.hl');
+    var c = !z && e.target.closest && e.target.closest('.card.open');
+    var el = z || c, h = z ? z : (c && c.querySelector('.hl'));
+    if(!el || !h){ clear(); return; }
+    if(hot && hot.el !== el) clear();
+    if(!hot) hot = {el: el, hl: h, zoom: !!z};
+    var r = el.getBoundingClientRect();
+    var x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    var y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+    h.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+    h.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+    h.style.setProperty('--bx', (x * 100).toFixed(1) + '%');
+    if(reduce) return;
+    var rx = ((0.5 - y) * 14).toFixed(2) + 'deg', ry = ((x - 0.5) * 16).toFixed(2) + 'deg';
+    if(z){ el.style.transform = 'perspective(900px) rotateX(' + rx + ') rotateY(' + ry + ')'; }
+    else { el.style.setProperty('--rx', rx); el.style.setProperty('--ry', ry); el.classList.add('tilt'); }
+  });
+  document.addEventListener('pointerout', function(e){ if(hot && !e.relatedTarget) clear(); });
+  window.addEventListener('blur', clear);
+})();
+
 // ---- Zoom ----
 var zoomEl = document.getElementById('zoom'), zbody = document.getElementById('zbody'), zid = null;
 function ownedList(){
@@ -969,7 +1021,11 @@ function openZoom(id){
   var cap = document.createElement('p');
   cap.innerHTML = rIco(c.r) + 'Carte ' + pad(c.n) + ' sur ' + total + ' : ' + c.r;
   zbody.innerHTML = '';
-  zbody.appendChild(img);
+  var zh = document.createElement('div');
+  zh.className = 'zh' + (holoOf(c.r) ? ' hl' : '');
+  zh.setAttribute('data-r', c.r);
+  zh.appendChild(img);
+  zbody.appendChild(zh);
   zbody.appendChild(cap);
   zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
   zoomEl.hidden = false;
@@ -1288,7 +1344,7 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:''},
   {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
