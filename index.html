@@ -120,7 +120,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .rg[data-r="Peu commune"]{--rc:#7fa27a}
 .rg[data-r="Rare"]{--rc:#b5584f}
 .rg[data-r="Légendaire"]{--rc:#c79a4b}
-.rg[data-r="Spéciale"]{--rc:#8d8f96}
+.rg[data-r="Spéciale"]{--rc:#4fa3a5}
 .rcards{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
 .card.open{cursor:zoom-in}
 #zoom{position:fixed;inset:0;z-index:20;background:rgba(10,10,12,.88);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom))}
@@ -333,6 +333,39 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
   .plan-sec .pdc .gn{font-size:18px}
   .plan-sec .pdh b{font-size:14px}
 }
+.ri{width:22px;height:22px;object-fit:contain;flex:none;vertical-align:middle}
+.rh span:not(.noimg)::before{display:none}
+.rh span:not(.noimg){padding-left:0;display:inline-flex;align-items:center;gap:10px}
+.rh .ri{width:30px;height:30px}
+.face.back{gap:8px}
+.face.back .rb{width:50%;height:auto;max-height:58%;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.face.back:not(.noimg) b{font-size:22px;opacity:.7}
+.chips span,.rar li{display:inline-flex;align-items:center;gap:7px}
+.chips .ri{width:16px;height:16px}
+.rar .ri{width:24px;height:24px}
+.cti{display:flex;align-items:center;gap:8px;margin:-4px 0 12px;font-size:13px;color:var(--muted)}
+.cti .ri{width:26px;height:26px}
+.cti b{color:var(--text);font-weight:500}
+.bdg{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.bdg span{padding:3px 9px;border:1px solid color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:999px;font-size:11.5px;color:var(--text)}
+.bdg span.more{border-color:var(--line);color:var(--muted)}
+.ach{display:grid;gap:14px;margin:0 0 28px;padding:20px 22px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.ach .ttl{display:flex;align-items:center;gap:16px}
+.ach .ttl .ri{width:60px;height:60px}
+.ach .ttl strong{display:block;font-size:20px;font-weight:600}
+.ach .ttl span{color:var(--muted);font-size:14px}
+.ach .nx2{margin:0;color:var(--muted);font-size:14px}
+.ach .nx2 b{color:var(--text);font-weight:500}
+.ach .bdg{margin:0}
+.ach .bdg span{font-size:13px;padding:5px 12px}
+.ht .nm small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:0 0 28px}
+.tg{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.tg .ri{width:46px;height:46px}
+.tg strong{display:block;font-weight:600}
+.tg span{font-size:13px;color:var(--muted)}
+#zbody p .ri{width:24px;height:24px;margin-right:8px;vertical-align:-6px}
+.zfb .ri{width:96px;height:96px;margin-bottom:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -495,11 +528,11 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
       <p class="lead">Chaque saison propose une série de cartes uniques liées aux jeux de la chaîne. Elles sont face cachée tant que tu ne les as pas obtenues.</p>
       <h3>Saison 1 : 16 cartes</h3>
       <ul class="rar">
-        <li><strong>6</strong>Communes</li><li><strong>5</strong>Peu Communes</li><li><strong>3</strong>Rares</li><li><strong>1</strong>Légendaire</li><li><strong>1</strong>Spéciale</li>
+        <li><img class="ri" src="rangs/rang-commune.png" alt="" onerror="this.remove()"><strong>6</strong>Communes</li><li><img class="ri" src="rangs/rang-peu-commune.png" alt="" onerror="this.remove()"><strong>5</strong>Peu Communes</li><li><img class="ri" src="rangs/rang-rare.png" alt="" onerror="this.remove()"><strong>3</strong>Rares</li><li><img class="ri" src="rangs/rang-legendaire.png" alt="" onerror="this.remove()"><strong>1</strong>Légendaire</li><li><img class="ri" src="rangs/rang-speciale.png" alt="" onerror="this.remove()"><strong>1</strong>Spéciale</li>
       </ul>
       <h3>Saison Halloween : 17 cartes</h3>
       <ul class="rar">
-        <li><strong>6</strong>Communes</li><li><strong>5</strong>Peu Communes</li><li><strong>3</strong>Rares</li><li><strong>1</strong>Légendaire</li><li><strong>2</strong>Spéciales</li>
+        <li><img class="ri" src="rangs/rang-commune.png" alt="" onerror="this.remove()"><strong>6</strong>Communes</li><li><img class="ri" src="rangs/rang-peu-commune.png" alt="" onerror="this.remove()"><strong>5</strong>Peu Communes</li><li><img class="ri" src="rangs/rang-rare.png" alt="" onerror="this.remove()"><strong>3</strong>Rares</li><li><img class="ri" src="rangs/rang-legendaire.png" alt="" onerror="this.remove()"><strong>1</strong>Légendaire</li><li><img class="ri" src="rangs/rang-speciale.png" alt="" onerror="this.remove()"><strong>2</strong>Spéciales</li>
       </ul>
 
       <h2>Comment obtenir des cartes</h2>
@@ -519,6 +552,12 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
         </table>
       </div>
       <p class="note">Les prix peuvent évoluer : ceux affichés sur Twitch font foi.</p>
+      <h2>Titres et badges</h2>
+      <p class="lead">Plus ta collection grandit, plus ton titre évolue. Il s'affiche sur ta fiche dans l'onglet Collectionneurs, avec les badges que tu as gagnés.</p>
+      <div class="tgrid" id="titres"></div>
+      <h3>Les badges</h3>
+      <ul class="rar" id="badges"></ul>
+
       <div class="row">
         <a class="btn" href="#collection">Voir la collection</a>
         <a class="btn ghost" href="#collectionneurs">Voir les collectionneurs</a>
@@ -533,6 +572,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
     <div class="wrap">
       <h1>Collection Officielle</h1>
       <div class="bar2" id="acct"></div>
+      <div id="ach"></div>
       <div class="tabs" role="tablist" aria-label="Saisons" id="tabs"></div>
       <p class="msg" id="msg" aria-live="polite"></p>
       <div id="export"></div>
@@ -585,6 +625,17 @@ var SEASONS = [
 ];
 var current = 's1', who = '', draft = false;
 
+// Icônes des raretés (dossier "rangs") et titres des collectionneurs
+var RSLUG = {'Commune':'commune', 'Peu commune':'peu-commune', 'Rare':'rare', 'Légendaire':'legendaire', 'Spéciale':'speciale'};
+var TITRES = [
+  {min:1, name:'Égaré', k:'commune'}, {min:5, name:'Rôdeur', k:'peu-commune'},
+  {min:12, name:'Survivant', k:'rare'}, {min:22, name:'Gardien', k:'legendaire'}
+];
+var LEGENDE = {name:'Légende du Club', k:'speciale'};
+function icoK(k, cls){ return '<img class="ri' + (cls ? ' ' + cls : '') + '" src="rangs/rang-' + k + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()">'; }
+function rIco(r, cls){ return icoK(RSLUG[r] || 'commune', cls); }
+
+
 function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 function sid(id){ return id.slice(0, id.lastIndexOf('-')); }
@@ -607,7 +658,7 @@ function cardHtml(c, total, newId){
   var got = has(c.id);
   return '<div class="card flip' + (got && c.id !== newId ? ' open' : '') + '" tabindex="0" data-id="' + c.id + '" data-r="' + c.r + '" aria-label="' +
     (got ? 'Carte ' + pad(c.n) + ', ' + c.r : 'Carte ' + c.n + ', face cachée') + '">' +
-    '<div class="inner"><div class="face back"><b>?</b></div>' +
+    '<div class="inner"><div class="face back">' + rIco(c.r, 'rb') + '<b>?</b></div>' +
     '<div class="face front"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>N° ' + pad(c.n) + ' / ' + total + '</small>' +
     '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div></div>';
 }
@@ -617,7 +668,7 @@ function groupsHtml(s, cards, newId){
   return s.groups.map(function(g){
     var part = cards.slice(idx, idx + g[1]), n = part.filter(function(c){ return has(c.id); }).length;
     idx += g[1];
-    return '<div class="rg" data-r="' + g[0] + '"><h3 class="rh"><span>' + g[0] + '</span><small>' +
+    return '<div class="rg" data-r="' + g[0] + '"><h3 class="rh"><span>' + rIco(g[0]) + g[0] + '</span><small>' +
       (who ? n + ' / ' + g[1] : g[1] + (g[1] > 1 ? ' cartes' : ' carte')) + '</small></h3>' +
       '<div class="rcards">' + part.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') + '</div></div>';
   }).join('');
@@ -632,6 +683,8 @@ function render(newId){
     '</select></label>' +
     '<p>' + (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '') + '</p>' +
     (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
+
+  document.getElementById('ach').innerHTML = who ? achHtml(who) : '';
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
@@ -726,12 +779,12 @@ function openZoom(id){
   img.onerror = function(){
     var d = document.createElement('div');
     d.className = 'zfb';
-    d.innerHTML = '<em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong>';
+    d.innerHTML = rIco(c.r) + '<em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong>';
     img.replaceWith(d);
   };
   img.src = 'cartes/' + id + '.png';
   var cap = document.createElement('p');
-  cap.textContent = 'Carte ' + pad(c.n) + ' sur ' + total + ' : ' + c.r;
+  cap.innerHTML = rIco(c.r) + 'Carte ' + pad(c.n) + ' sur ' + total + ' : ' + c.r;
   zbody.innerHTML = '';
   zbody.appendChild(img);
   zbody.appendChild(cap);
@@ -795,13 +848,65 @@ function renderColl(){
   var shown = rows.filter(function(r){ return r.name.toLowerCase().indexOf(q) > -1; });
   cnt.textContent = q ? shown.length + ' sur ' + rows.length : rows.length + (rows.length > 1 ? ' collectionneurs' : ' collectionneur');
   el.innerHTML = shown.length ? shown.map(function(r){
+    var t = titleOf(r.n, total), bd = badgesOf(r.name);
     return '<a class="cc" href="#collection=' + encodeURIComponent(r.name) + '"><h3>' + esc(r.name) + '</h3>' +
+      '<div class="cti">' + (t ? icoK(t.k) + '<b>' + t.name + '</b>' : 'Pas encore de titre') + '</div>' +
       '<div class="big">' + r.n + ' <small>/ ' + total + ' cartes</small></div>' +
       '<div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div>' +
-      seasons.map(function(x, i){ return '<p><span>' + x.s.label + '</span><b>' + r.per[i] + ' / ' + x.cards.length + '</b></p>'; }).join('') + '</a>';
+      seasons.map(function(x, i){ return '<p><span>' + x.s.label + '</span><b>' + r.per[i] + ' / ' + x.cards.length + '</b></p>'; }).join('') +
+      (bd.length ? '<div class="bdg">' + bd.slice(0, 3).map(function(x){ return '<span title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + (bd.length > 3 ? '<span class="more">+' + (bd.length - 3) + '</span>' : '') + '</div>' : '') + '</a>';
   }).join('') : msg(rows.length ? 'Aucun viewer ne correspond à cette recherche.' : 'Aucun collectionneur pour le moment.');
 }
 document.getElementById('cq').addEventListener('input', renderColl);
+
+// ---- Titres et badges ----
+function openSeasons(){ return SEASONS.filter(function(x){ return x.groups.length; }); }
+function totalCards(){ return openSeasons().reduce(function(n, x){ return n + cardsOf(x).length; }, 0); }
+function countOf(name){ return openSeasons().reduce(function(k, x){ return k + cardsOf(x).filter(function(c){ return owns(name, c.id); }).length; }, 0); }
+function titleOf(n, total){
+  if(!n) return null;
+  if(total && n >= total) return LEGENDE;
+  var t = null;
+  TITRES.forEach(function(x){ if(n >= x.min) t = x; });
+  return t;
+}
+function nextTitle(n, total){
+  for(var i = 0; i < TITRES.length; i++) if(TITRES[i].min > n && TITRES[i].min < total) return {name:TITRES[i].name, need:TITRES[i].min - n};
+  return n < total ? {name:LEGENDE.name, need:total - n} : null;
+}
+function badgesOf(name){
+  var seasons = openSeasons(), out = [], has = function(r){ return seasons.some(function(x){ return cardsOf(x).some(function(c){ return c.r === r && owns(name, c.id); }); }); };
+  seasons.forEach(function(x){
+    var cs = cardsOf(x);
+    if(cs.length && cs.every(function(c){ return owns(name, c.id); })) out.push({label:x.label + ' complète', desc:'Toutes les cartes de la ' + x.label + '.'});
+  });
+  if(seasons.some(function(x){ var rs = cardsOf(x).filter(function(c){ return c.r === 'Rare'; }); return rs.length && rs.every(function(c){ return owns(name, c.id); }); })) out.push({label:'Trio de rares', desc:'Toutes les cartes Rares d\'une saison.'});
+  if(has('Légendaire')) out.push({label:'Légendaire', desc:'Une carte Légendaire débloquée.'});
+  if(has('Spéciale')) out.push({label:'Spéciale', desc:'Une carte Spéciale débloquée.'});
+  if(seasons.length > 1 && seasons.every(function(x){ return cardsOf(x).some(function(c){ return owns(name, c.id); }); })) out.push({label:'Toutes les saisons', desc:'Au moins une carte dans chaque saison.'});
+  return out;
+}
+var BADGE_LIST = [
+  ['Saison complète', 'Toutes les cartes d\'une saison.'], ['Trio de rares', 'Toutes les cartes Rares d\'une saison.'],
+  ['Légendaire', 'Une carte Légendaire débloquée.'], ['Spéciale', 'Une carte Spéciale débloquée.'],
+  ['Toutes les saisons', 'Au moins une carte dans chaque saison.']
+];
+function achHtml(name){
+  if(!COLLECTIONS[name]) return '';
+  var tot = totalCards(), n = countOf(name), t = titleOf(n, tot), nt = nextTitle(n, tot), b = badgesOf(name);
+  return '<div class="ach"><div class="ttl">' + (t ? icoK(t.k) + '<div><strong>' + t.name + '</strong><span>' + n + ' / ' + tot + ' cartes</span></div>'
+      : '<div><strong>Pas encore de titre</strong><span>Débloque ta première carte pour devenir Égaré.</span></div>') + '</div>' +
+    (nt ? '<p class="nx2">Prochain titre : <b>' + nt.name + '</b>, encore ' + nt.need + (nt.need > 1 ? ' cartes' : ' carte') + ' à débloquer.</p>' : '<p class="nx2">Collection complète : tu as atteint le plus haut titre.</p>') +
+    (b.length ? '<div class="bdg">' + b.map(function(x){ return '<span title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+}
+function renderTitres(){
+  var el = document.getElementById('titres'), bl = document.getElementById('badges');
+  if(el) el.innerHTML = TITRES.map(function(x){ return '<div class="tg">' + icoK(x.k) + '<div><strong>' + x.name + '</strong><span>' + x.min + (x.min > 1 ? ' cartes' : ' carte') + '</span></div></div>'; }).join('') +
+    '<div class="tg">' + icoK(LEGENDE.k) + '<div><strong>' + LEGENDE.name + '</strong><span>Toutes les cartes des saisons ouvertes</span></div></div>';
+  if(bl) bl.innerHTML = BADGE_LIST.map(function(x){ return '<li><strong>' + esc(x[0]) + '</strong>' + esc(x[1]) + '</li>'; }).join('');
+}
+renderTitres();
+
 
 // ---- Accueil : communauté en cartes ----
 // Optionnel : onglet « Derniers » de ton tableur (colonnes : viewer, carte, date), publié en CSV.
@@ -857,7 +962,7 @@ function renderHome(){
     var rows = names.map(function(n){ return {name:n, n:count(n)}; }).filter(function(r){ return r.n > 0; })
       .sort(function(a, b){ return b.n - a.n || a.name.localeCompare(b.name, 'fr'); }).slice(0, 3);
     top.innerHTML = rows.length ? rows.map(function(r, i){
-      return '<a class="ht" href="#collection=' + encodeURIComponent(r.name) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + '</span>' +
+      return '<a class="ht" href="#collection=' + encodeURIComponent(r.name) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + (titleOf(r.n, total) ? '<small>' + titleOf(r.n, total).name + '</small>' : '') + '</span>' +
         '<span class="sc"><b>' + r.n + '</b> / ' + total + '</span><div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div></a>';
     }).join('') : note('Le classement apparaîtra dès les premières cartes.');
   }
@@ -868,7 +973,7 @@ function renderHome(){
     var cards = cardsOf(x), k = names.filter(function(n){ return cards.some(function(c){ return owns(n, c.id); }); }).length;
     return '<a class="hs" href="#collection" data-season="' + x.id + '"><h3>' + x.label + '<small>' + cards.length + ' cartes' +
       (sheetState === 'ok' ? ' · ' + k + (k > 1 ? ' collectionneurs' : ' collectionneur') : '') + '</small></h3>' +
-      '<div class="chips">' + x.groups.map(function(g){ return '<span>' + g[1] + ' ' + g[2] + '</span>'; }).join('') + '</div>' +
+      '<div class="chips">' + x.groups.map(function(g){ return '<span>' + rIco(g[0]) + g[1] + ' ' + g[2] + '</span>'; }).join('') + '</div>' +
       '<span class="more">Voir la collection</span></a>';
   }).join('');
 }
@@ -892,13 +997,13 @@ loadActivity();
 if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce navigateur.');
 
 // ---- Planning ----
-// Une ligne par live : date (AAAA-MM-JJ), heure (heure de Paris), jeu, lien Steam (facultatif), note (facultatif).
-// Pour l'image : mets un fichier dans le dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
-// sinon l'image officielle de Steam est utilisée grâce au lien.
+// Une ligne par live : date (AAAA-MM-JJ), heure (heure de Paris), jeu, lien Steam (facultatif), image (facultatif), note (facultatif).
+// Pour l'image : colle l'adresse d'une image dans img:'...' (sur une page Steam : clic droit sur l'image, "Copier l'adresse de l'image").
+// Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
+// puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-   {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', note:''},
-  {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', note:''},
-  {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', note:''}
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:''}
 ];
 var JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -909,6 +1014,7 @@ function mkDate(str, time){ var a = str.split('-'), t = (time || '00:00').split(
 function hh(t){ var a = t.split(':'); return a[0] + 'h' + a[1]; }
 function planSrcs(e){
   var id = (e.steam || '').match(/\/app\/(\d+)/), a = ['jeux/' + slug(e.game) + '.jpg', 'jeux/' + slug(e.game) + '.png', 'jeux/' + slug(e.game) + '.webp'];
+  if(e.img && /^(https?:\/\/|jeux\/)/.test(e.img)) a.unshift(e.img.replace(/"/g, '%22'));
   if(id) a.push('https://cdn.akamai.steamstatic.com/steam/apps/' + id[1] + '/library_600x900.jpg', 'https://cdn.akamai.steamstatic.com/steam/apps/' + id[1] + '/header.jpg');
   return a;
 }
