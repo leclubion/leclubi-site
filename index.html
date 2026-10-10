@@ -126,11 +126,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .card.open{cursor:zoom-in}
 /* Effet holographique : cartes Rare, Légendaire, Spéciale */
 .hl{--bx:50%;--by:50%;--ha:.5;--h1:rgba(255,255,255,0);--h2:rgba(255,255,255,.9);--h3:rgba(255,255,255,0)}
+.hl[data-r="Commune"],.hl[data-r="Peu commune"]{--ha:.22;--tx:0}
 .hl[data-r="Légendaire"]{--ha:.6;--h1:rgba(255,200,90,0);--h2:rgba(255,205,110,.95);--h3:rgba(255,200,90,0)}
 .hl[data-r="Spéciale"]{--ha:.6;--h1:rgba(90,220,230,.95);--h2:rgba(190,150,255,.95);--h3:rgba(255,150,210,.95)}
 .hl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s ease;mix-blend-mode:hard-light;
   background:linear-gradient(115deg,rgba(255,255,255,0) 20%,var(--h1) 35%,var(--h2) 50%,var(--h3) 65%,rgba(255,255,255,0) 80%),
-             repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 5px,rgba(255,255,255,.14) 5px 6px);
+             repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 5px,rgba(255,255,255,var(--tx,.14)) 5px 6px);
   background-size:300% 300%,100% 100%;background-position:var(--bx) var(--by),0 0}
 .card:hover .hl::after,.card:focus-visible .hl::after,.zh:hover::after{opacity:var(--ha)}
 .zh{position:relative;display:inline-block;border-radius:14px;transition:transform .2s ease;will-change:transform}
@@ -853,7 +854,7 @@ try{
 }catch(e){}
 function saveDraft(){ try{ localStorage.setItem('leclubi-draft', JSON.stringify(COLLECTIONS)); draft = true; }catch(e){} }
 
-function holoOf(r){ return r === 'Rare' || r === 'Légendaire' || r === 'Spéciale'; }
+function holoOf(r){ return !!r; }
 function cardHtml(c, total, newId){
   var got = has(c.id);
   return '<div class="card flip' + (got && c.id !== newId ? ' open' : '') + '" tabindex="0" data-id="' + c.id + '" data-r="' + c.r + '" aria-label="' +
