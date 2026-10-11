@@ -824,7 +824,7 @@ var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8
 // Journal automatique des cartes gagnées (Google Form → Google Sheet publié en CSV). Laisse vide si tu ne l'utilises pas.
 var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRRU0y17JiQD50oajTb1fQYk41ySZNHGtaernsomO-32BPhueEp437OK2dvY1gAU9/pub?gid=1274122633&single=true&output=csv';
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
-var USE_URL = '';
+var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
 var COPIES = {}, NEED = 5;
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
