@@ -977,7 +977,7 @@ function loadSheet(){
   var re = /^[a-z0-9]+-\d+$/, yes = ['x','1','oui','yes','true','vrai','v','\u2713','\u2714'];
   function get(u){
     if(!u) return Promise.resolve(null);
-    return fetch(u).then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(parseCsv).catch(function(){ return undefined; });
+    return fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(parseCsv).catch(function(){ return undefined; });
   }
   Promise.all([get(SHEET_URL), get(LOG_URL), get(USE_URL)]).then(function(res){
     var manual = res[0], log = res[1], used = res[2];
