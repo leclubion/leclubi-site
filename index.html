@@ -158,6 +158,30 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .opt:disabled{color:var(--text);cursor:default}
 .opt:disabled:hover{border-color:var(--line)}
 .opt.voted:disabled:hover{border-color:var(--accent)}
+.tarotgrid{grid-template-columns:repeat(4,1fr)}
+/* Effet Tarot : lourd et sombre — vignette violette qui s'épaissit, lueur d'or lente, grain de feuille d'or. Pas d'arc-en-ciel. */
+.hl[data-r="Tarot"]{--ha:.95}
+.hl[data-r="Tarot"]::after{
+  mix-blend-mode:normal;transition:opacity .9s ease;
+  background:
+    radial-gradient(ellipse 55% 42% at var(--bx) var(--by),rgba(255,214,140,.7) 0,rgba(214,170,255,.28) 45%,rgba(255,255,255,0) 100%),
+    radial-gradient(ellipse 85% 75% at var(--bx) var(--by),rgba(0,0,0,0) 30%,rgba(18,4,36,.45) 78%,rgba(0,0,0,.68) 100%),
+    repeating-linear-gradient(122deg,rgba(255,225,160,0) 0 7px,rgba(255,225,160,.07) 7px 8px,rgba(255,225,160,0) 8px 15px);
+  background-size:100% 100%;background-position:0 0}
+.card.tarot.tilt{transition:transform .45s cubic-bezier(.2,.7,.2,1),border-color .35s ease,box-shadow .6s ease;transform:translateY(-3px) rotateX(calc(var(--rx,0deg) * .5)) rotateY(calc(var(--ry,0deg) * .5));box-shadow:0 18px 40px rgba(10,0,24,.55)}
+@keyframes tarot-breathe{from{opacity:.35}to{opacity:.85}}
+@media (hover:none){.card.open .hl[data-r="Tarot"]::after{animation:tarot-breathe 7s ease-in-out infinite alternate}}
+.card.tarot{aspect-ratio:7/12}
+.tw{display:flex;flex-direction:column;gap:10px}
+.tn{margin:0;text-align:center;font-size:13px;color:var(--muted)}
+.tn b{display:block;color:var(--text);font-weight:600;font-size:14px}
+.tn em{font-style:normal;color:var(--accent)}
+.tab.tarot{border-style:dashed}
+.card.tarot .face.front{padding:0}
+.card.tarot .face.front img{object-fit:cover}
+.card.tarot .face::before{display:none}
+@media (max-width:860px){.tarotgrid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.tarotgrid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:860px){.rcards{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:560px){.rcards{grid-template-columns:repeat(2,1fr);gap:14px}}
 @media (max-width:860px){
@@ -837,6 +861,28 @@ var SEASONS = [
 ];
 var current = 's1', who = '', draft = false;
 
+// ---- Tarot « Les Dieux Oubliés » (à part des saisons : ne compte ni dans les 16/16, ni dans les titres, ni dans les badges) ----
+// Pour ajouter un dieu : ajoute une ligne {n:3, nom:'...'} et mets les images cartes/tarot-3-effacee.png et cartes/tarot-3-ravivee.png
+var TAROT = {
+  intro:'Des cartes à part, qui n\'appartiennent à aucune saison. Un dieu est d\'abord effacé : tire-le une deuxième fois pour le raviver.',
+  cartes:[{n:1, nom:'Velhaïa'}, {n:8, nom:"L'Innommé"}]
+};
+function tarotId(n){ return 'tarot-' + n; }
+function tarotCount(name){ return ((COLLECTIONS[name] || {}).tarot || []).length; }
+function tarotRavive(id){ return !!who && copies(who, id) >= 2; }
+function tarotImg(id){ return 'cartes/' + id + '-' + (tarotRavive(id) ? 'ravivee' : 'effacee') + '.png'; }
+function tarotOwned(){ return TAROT.cartes.filter(function(c){ return has(tarotId(c.n)); }).map(function(c){ return {id:tarotId(c.n), n:c.n, nom:c.nom}; }); }
+function tarotCardHtml(c){
+  var id = tarotId(c.n), got = has(id), rav = got && tarotRavive(id);
+  return '<div class="tw"><div class="card flip tarot' + (got ? ' open' : '') + '" tabindex="0" data-id="' + id + '" data-r="Tarot" aria-label="' + (got ? 'Tarot : ' + esc(c.nom) + (rav ? ', ravivée' : ', effacée') : 'Tarot, face cachée') + '">' +
+    '<div class="inner"><div class="face back"><b>?</b></div>' +
+    '<div class="face front' + (rav ? ' hl" data-r="Tarot' : '') + '"><img src="' + tarotImg(id) + '" alt="" onerror="this.remove()"></div></div></div>' +
+    '<p class="tn">' + (got ? '<b>' + esc(c.nom) + '</b><em>' + (rav ? 'Ravivée' : 'Effacée') + '</em>' : '<b>???</b>Pas encore découvert') + '</p></div>';
+}
+function tarotPanel(){
+  return '<h2>Tarot : Les Dieux Oubliés</h2><p class="lead">' + TAROT.intro + '</p><div class="rcards tarotgrid">' + TAROT.cartes.map(tarotCardHtml).join('') + '</div>';
+}
+
 // Icônes des raretés (dossier "rangs") et titres des collectionneurs
 var RSLUG = {'Commune':'commune', 'Peu commune':'peu-commune', 'Rare':'rare', 'Légendaire':'legendaire', 'Spéciale':'speciale'};
 var TITRES = [
@@ -903,23 +949,26 @@ function groupsHtml(s, cards, newId){
   }).join('');
 }
 function render(newId){
-  var s = SEASONS.filter(function(x){ return x.id === current; })[0], cards = cardsOf(s);
+  if(current === 'tarot' && !(who && tarotCount(who))) current = 's1';
+  var tarotMode = current === 'tarot';
+  var s = SEASONS.filter(function(x){ return x.id === (tarotMode ? 's1' : current); })[0], cards = cardsOf(s);
   var got = cards.filter(function(c){ return has(c.id); }).length, names = Object.keys(COLLECTIONS);
 
   document.getElementById('acct').innerHTML =
     '<label>Collection de <select class="sel" id="who"><option value="">Aucun viewer (cartes cachées)</option>' +
     names.map(function(n, i){ return '<option value="' + i + '"' + (n === who ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') +
     '</select></label>' +
-    '<p>' + (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '') + '</p>' +
+    '<p>' + (tarotMode ? esc(who) + ' : ' + tarotOwned().length + ' / ' + TAROT.cartes.length + ' cartes de Tarot' : (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '')) + '</p>' +
     (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
 
   document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() : '';
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
-  }).join('');
+  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot">Tarot</button>' : '');
 
-  document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
+  if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
+  else document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
     ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId) + seasonReward(s, cards)
     : '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>');
 
@@ -1071,10 +1120,34 @@ function loadSheet(){
 // ---- Zoom ----
 var zoomEl = document.getElementById('zoom'), zbody = document.getElementById('zbody'), zid = null;
 function ownedList(){
+  if(current === 'tarot') return tarotOwned();
   var s = SEASONS.filter(function(x){ return x.id === current; })[0];
   return cardsOf(s).filter(function(c){ return has(c.id); });
 }
+function openTarotZoom(id){
+  var list = ownedList(), c = list.filter(function(x){ return x.id === id; })[0];
+  if(!c) return;
+  zid = id;
+  var rav = tarotRavive(id), img = new Image();
+  img.alt = 'Tarot : ' + c.nom;
+  img.onerror = function(){ var d = document.createElement('div'); d.className = 'zfb'; d.innerHTML = '<em>Tarot</em><strong>' + esc(c.nom) + '</strong>'; img.replaceWith(d); };
+  img.src = tarotImg(id);
+  var cap = document.createElement('p');
+  cap.textContent = 'Tarot : ' + c.nom + ' · ' + (rav ? 'Ravivée' : 'Effacée');
+  zbody.innerHTML = '';
+  var zh = document.createElement('div');
+  zh.className = 'zh' + (rav ? ' hl' : '');
+  zh.setAttribute('data-r', rav ? 'Tarot' : 'Spéciale');
+  zh.appendChild(img);
+  zbody.appendChild(zh);
+  zbody.appendChild(cap);
+  zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
+  zoomEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  zoomEl.querySelector('.zc').focus();
+}
 function openZoom(id){
+  if(id.indexOf('tarot-') === 0) return openTarotZoom(id);
   var list = ownedList(), c = list.filter(function(x){ return x.id === id; })[0];
   if(!c) return;
   zid = id;
