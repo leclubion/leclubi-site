@@ -391,6 +391,19 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .cti b{color:var(--text);font-weight:500}
 .bdg{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .bdg span{padding:3px 9px;border:1px solid color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:999px;font-size:11.5px;color:var(--text)}
+.bdg span.tb{border-color:#8f63e0;color:var(--text);background:rgba(120,70,210,.14)}
+.tt{margin:-6px 0 12px;font-size:13px;color:color-mix(in srgb,#7b4fd0 62%,var(--text));font-weight:600}
+.ach .tt{margin:0}
+.tjal{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:0 0 14px}
+.tjal span{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:13.5px}
+.tjal span b{display:block;color:var(--text);font-weight:600;margin-bottom:2px}
+.tjal span.ok{border-color:#8f63e0;background:rgba(120,70,210,.12);color:var(--text)}
+.prem{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 14px;margin:0 0 20px}
+.prem p{margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.prem p b{font-weight:600}
+.prem p span{color:color-mix(in srgb,#7b4fd0 62%,var(--text))}
+.prem p span.no{color:var(--muted)}
+.th{margin:26px 0 12px}
 .bdg span.more{border-color:var(--line);color:var(--muted)}
 .ach{display:grid;gap:14px;margin:0 0 28px;padding:20px 22px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .ach .ttl{display:flex;align-items:center;gap:16px}
@@ -727,6 +740,12 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
       <div class="tgrid" id="titres"></div>
       <h3>Les badges</h3>
       <ul class="rar" id="badges"></ul>
+      <h3>Tarot : titres et récompenses</h3>
+      <p class="lead">Une fois ravivé, un dieu te donne un titre à côté de ton pseudo : « Élu de Kaar », et « Premier éveillé de Kaar » pour le premier viewer de la chaîne à l'avoir ravivé. Ravive les huit pour devenir « Éveilleur des Dieux ».</p>
+      <ul class="rar"><li><strong>Dieu ravivé</strong>400 ClubiGold la première fois, puis 200 pour chaque exemplaire en plus</li><li><strong>3 dieux</strong>un booster offert</li><li><strong>5 dieux</strong>une roue gratuite</li><li><strong>8 dieux</strong>ton nom dans les crédits du jeu de LeClubi</li></ul>
+      <p class="note">Tape <b>!tarot</b> dans le chat pour récupérer tes récompenses.</p>
+      <h3>Les premiers éveillés</h3>
+      <div id="premiers"></div>
 
       <h2>Après une ligne complète</h2>
       <p class="lead">Compléter une ligne de cartes, ou toute une saison, te donne droit à une récompense. Elle s'applique à chaque saison.</p>
@@ -849,6 +868,7 @@ var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8
 var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRRU0y17JiQD50oajTb1fQYk41ySZNHGtaernsomO-32BPhueEp437OK2dvY1gAU9/pub?gid=1274122633&single=true&output=csv';
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
 var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
+var TCLAIM = {}, TFIRST = {}, TEV = {};   // Tarot : récompenses déjà réclamées, premiers éveillés, ordre des ravivées
 var COPIES = {}, NEED = 5, USED_LINES = {};   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
@@ -879,8 +899,71 @@ function tarotCardHtml(c){
     '<div class="face front' + (rav ? ' hl" data-r="Tarot' : '') + '"><img src="' + tarotImg(id) + '" alt="" onerror="this.remove()"></div></div></div>' +
     '<p class="tn">' + (got ? '<b>' + esc(c.nom) + '</b><em>' + (rav ? 'Ravivée' : 'Effacée') + '</em>' : '<b>???</b>Pas encore découvert') + '</p></div>';
 }
+// Récompenses : réclamées dans le chat avec !tarot (voir le script Streamer.bot)
+var TAROT_GAIN = {premiere:400, suivante:200};
+var TAROT_JALONS = [{n:3, txt:'un booster offert'}, {n:5, txt:'une roue gratuite'}, {n:8, txt:'ton nom dans les crédits du jeu'}];
+function tarotStats(name){
+  var k = String(name).toLowerCase(), o = [], r = [];
+  TAROT.cartes.forEach(function(c){
+    var id = tarotId(c.n), n = ((COPIES[name] || {})[id]) || 0;
+    if(n >= 1) o.push(c);
+    if(n >= 2) r.push({c:c, n:n, ev:TEV[k + '|' + id]});
+  });
+  return {owned:o, rav:r};
+}
+function tarotBadges(name){
+  var s = tarotStats(name), t = TAROT.cartes.length, out = [];
+  if(s.rav.length >= t) out.push({tb:1, label:'Panthéon ravivé', desc:'Les ' + t + ' Dieux Oubliés ravivés.'});
+  if(s.owned.length >= t) out.push({tb:1, label:'Panthéon', desc:'Les ' + t + ' Dieux Oubliés trouvés.'});
+  if(s.owned.length >= 4) out.push({tb:1, label:'Oracle', desc:'4 Dieux Oubliés différents.'});
+  if(s.rav.length >= 1) out.push({tb:1, label:'Ravivé', desc:'Un Dieu Oublié ravivé.'});
+  if(s.owned.length >= 1) out.push({tb:1, label:'Éveillé', desc:'Un Dieu Oublié trouvé.'});
+  return out;
+}
+function tarotTitle(name){
+  var s = tarotStats(name);
+  if(!s.rav.length) return '';
+  if(s.rav.length >= TAROT.cartes.length) return 'Éveilleur des Dieux';
+  var best = null, e = null;
+  s.rav.forEach(function(x){
+    var f = TFIRST[tarotId(x.c.n)];
+    if(f && f.name === name && (!best || f.ev < best.ev)) best = {c:x.c, ev:f.ev};
+    if(x.ev != null && (!e || x.ev < e.ev)) e = x;
+  });
+  if(best) return 'Premier éveillé de ' + best.c.nom;
+  return 'Élu de ' + (e || s.rav[0]).c.nom;
+}
+function tarotDue(name){
+  var cl = TCLAIM[String(name).toLowerCase()] || {}, s = tarotStats(name), gold = 0, jal = [];
+  s.rav.forEach(function(x){
+    var due = TAROT_GAIN.premiere + TAROT_GAIN.suivante * (x.n - 2), paid = (cl['tg-' + x.c.n + '-1'] ? TAROT_GAIN.premiere : 0) + (cl['tg-' + x.c.n + '-x'] || 0) * TAROT_GAIN.suivante;
+    if(due > paid) gold += due - paid;
+  });
+  TAROT_JALONS.forEach(function(j){ if(s.owned.length >= j.n && !cl['jalon-n' + j.n]) jal.push(j); });
+  return {gold:gold, jal:jal};
+}
+function tarotRewardHtml(){
+  if(!who || !tarotCount(who)) return '';
+  var d = tarotDue(who);
+  if(!d.gold && !d.jal.length) return '';
+  return '<div class="rws on dupnote"><div><strong>Récompenses Tarot disponibles !</strong>' +
+    (d.gold ? '<span>' + d.gold + ' ClubiGold pour tes dieux ravivés.</span>' : '') +
+    d.jal.map(function(j){ return '<span>Jalon des ' + j.n + ' dieux : ' + esc(j.txt) + '.</span>'; }).join('') +
+    '<span>Tape <b>!tarot</b> dans le chat pour les récupérer.</span></div></div>';
+}
+function premiersHtml(){
+  return '<div class="prem">' + TAROT.cartes.map(function(c){
+    var f = TFIRST[tarotId(c.n)];
+    return '<p><b>' + esc(c.nom) + '</b><span' + (f ? '' : ' class="no"') + '>' + (f ? esc(f.name) : 'Personne pour l\'instant') + '</span></p>';
+  }).join('') + '</div>';
+}
+function renderPremiers(){ var el = document.getElementById('premiers'); if(el) el.innerHTML = sheetState === 'ok' ? premiersHtml() : ''; }
 function tarotPanel(){
-  return '<h2>Tarot : Les Dieux Oubliés</h2><p class="lead">' + TAROT.intro + '</p><div class="rcards tarotgrid">' + TAROT.cartes.map(tarotCardHtml).join('') + '</div>';
+  var n = tarotOwned().length;
+  return '<h2>Tarot : Les Dieux Oubliés</h2><p class="lead">' + TAROT.intro + '</p><div class="rcards tarotgrid">' + TAROT.cartes.map(tarotCardHtml).join('') + '</div>' +
+    '<h3 class="th">Jalons et récompenses</h3><div class="tjal">' + TAROT_JALONS.map(function(j){ return '<span class="' + (n >= j.n ? 'ok' : '') + '"><b>' + j.n + ' dieux</b>' + esc(j.txt) + '</span>'; }).join('') + '</div>' +
+    '<p class="note">Chaque dieu ravivé rapporte ' + TAROT_GAIN.premiere + ' ClubiGold, puis ' + TAROT_GAIN.suivante + ' pour chaque exemplaire en plus. Récupère tout avec <b>!tarot</b> dans le chat.</p>' +
+    '<h3 class="th">Les premiers éveillés</h3>' + premiersHtml();
 }
 
 // Icônes des raretés (dossier "rangs") et titres des collectionneurs
@@ -961,7 +1044,7 @@ function render(newId){
     '<p>' + (tarotMode ? esc(who) + ' : ' + tarotOwned().length + ' / ' + TAROT.cartes.length + ' cartes de Tarot' : (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '')) + '</p>' +
     (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
 
-  document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() : '';
+  document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() + tarotRewardHtml() : '';
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
@@ -1033,7 +1116,7 @@ function loadSheet(){
     var cfg = (SHEET_URL ? 1 : 0) + (LOG_URL ? 1 : 0), fails = (SHEET_URL && manual === undefined ? 1 : 0) + (LOG_URL && log === undefined ? 1 : 0);
     if(fails === cfg) throw new Error('sheet');
     var data = {}, names = {}, cp = {};
-    USED_LINES = {};
+    USED_LINES = {}; TCLAIM = {}; TFIRST = {}; TEV = {};
     function cnt(name, id, n){ var k = name.toLowerCase(); cp[k] = cp[k] || {}; cp[k][id] = (cp[k][id] || 0) + n; }
     function slot(name){ var k = name.toLowerCase(); if(!names[k]){ names[k] = name; data[name] = {}; } return data[names[k]]; }
     function add(o, id){ var l = (o[sid(id)] = o[sid(id)] || []); if(l.indexOf(id) < 0) l.push(id); }
@@ -1056,9 +1139,16 @@ function loadSheet(){
       lh.forEach(function(h, i){ if(ip < 0 && h.indexOf('pseudo') > -1) ip = i; if(ic < 0 && h.indexOf('carte') > -1) ic = i; });
       if(ip < 0) ip = 1;
       if(ic < 0) ic = 2;
-      log.slice(1).forEach(function(r){
+      var tc = {};
+      log.slice(1).forEach(function(r, ri){
         var name = (r[ip] || '').trim(), id = (r[ic] || '').trim().toLowerCase();
-        if(name && re.test(id)){ add(slot(name), id); cnt(name, id, 1); }
+        if(name && re.test(id)){
+          add(slot(name), id); cnt(name, id, 1);
+          if(id.indexOf('tarot-') === 0){   // 2e exemplaire d'un dieu = ravivée ; le plus ancien de la chaîne est le « premier éveillé »
+            var tk = name.toLowerCase() + '|' + id; tc[tk] = (tc[tk] || 0) + 1;
+            if(tc[tk] === 2){ TEV[tk] = ri; if(!TFIRST[id] || ri < TFIRST[id].ev) TFIRST[id] = {name:names[name.toLowerCase()], ev:ri}; }
+          }
+        }
       });
     }
     // 3) Utilisations de 5 exemplaires (roue ou ClubiGold) : chacune détruit 5 exemplaires
@@ -1070,6 +1160,7 @@ function loadSheet(){
       if(uc < 0) uc = 2;
       used.slice(1).forEach(function(r){
         var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase(), lm = id.match(/^ligne-([a-z0-9]+)-rare$/);
+        if(name && /^(tg-\d+-[1x]|jalon-n\d+)$/.test(id)){ var nk = name.toLowerCase(); TCLAIM[nk] = TCLAIM[nk] || {}; TCLAIM[nk][id] = (TCLAIM[nk][id] || 0) + 1; return; }   // récompenses Tarot déjà réclamées
         if(name && lm){ USED_LINES[name.toLowerCase() + '|' + lm[1]] = 1; return; }
         if(name && re.test(id)) cnt(name, id, -NEED);
       });
@@ -1079,7 +1170,7 @@ function loadSheet(){
       var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
       Object.keys(c).forEach(function(id){ COPIES[n][id] = Math.max(0, c[id]); });
     });
-    COLLECTIONS = data; sheetState = 'ok';
+    COLLECTIONS = data; sheetState = 'ok'; renderPremiers();
     if(who && !COLLECTIONS[who]) who = '';
     applyHash(); render(); renderColl();
   }).catch(function(){ sheetState = 'error'; renderColl(); });
@@ -1234,11 +1325,11 @@ function renderColl(){
   el.innerHTML = shown.length ? shown.map(function(r){
     var t = titleOf(r.n, total), bd = badgesOf(r.name);
     return '<a class="cc" href="#collection=' + encodeURIComponent(r.name) + '"><h3>' + esc(r.name) + '</h3>' +
-      '<div class="cti">' + (t ? icoK(t.k) + '<b>' + t.name + '</b>' : 'Pas encore de titre') + '</div>' +
+      '<div class="cti">' + (t ? icoK(t.k) + '<b>' + t.name + '</b>' : 'Pas encore de titre') + '</div>' + (tarotTitle(r.name) ? '<div class="tt">✦ ' + esc(tarotTitle(r.name)) + '</div>' : '') +
       '<div class="big">' + r.n + ' <small>/ ' + total + ' cartes</small></div>' +
       '<div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div>' +
       seasons.map(function(x, i){ return '<p><span>' + x.s.label + '</span><b>' + r.per[i] + ' / ' + x.cards.length + '</b></p>'; }).join('') +
-      (bd.length ? '<div class="bdg">' + bd.slice(0, 3).map(function(x){ return '<span title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + (bd.length > 3 ? '<span class="more">+' + (bd.length - 3) + '</span>' : '') + '</div>' : '') + '</a>';
+      (bd.length ? '<div class="bdg">' + bd.slice(0, 3).map(function(x){ return '<span' + (x.tb ? ' class="tb"' : '') + ' title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + (bd.length > 3 ? '<span class="more">+' + (bd.length - 3) + '</span>' : '') + '</div>' : '') + '</a>';
   }).join('') : msg(rows.length ? 'Aucun viewer ne correspond à cette recherche.' : 'Aucun collectionneur pour le moment.');
 }
 document.getElementById('cq').addEventListener('input', renderColl);
@@ -1259,7 +1350,7 @@ function nextTitle(n, total){
   return n < total ? {name:LEGENDE.name, need:total - n} : null;
 }
 function badgesOf(name){
-  var seasons = openSeasons(), out = [], has = function(r){ return seasons.some(function(x){ return cardsOf(x).some(function(c){ return c.r === r && owns(name, c.id); }); }); };
+  var seasons = openSeasons(), out = tarotBadges(name), has = function(r){ return seasons.some(function(x){ return cardsOf(x).some(function(c){ return c.r === r && owns(name, c.id); }); }); };
   seasons.forEach(function(x){
     var cs = cardsOf(x);
     if(cs.length && cs.every(function(c){ return owns(name, c.id); })) out.push({label:x.label + ' complète', desc:'Toutes les cartes de la ' + x.label + '.'});
@@ -1280,14 +1371,15 @@ function achHtml(name){
   var tot = totalCards(), n = countOf(name), t = titleOf(n, tot), nt = nextTitle(n, tot), b = badgesOf(name);
   return '<div class="ach"><div class="ttl">' + (t ? icoK(t.k) + '<div><strong>' + t.name + '</strong><span>' + n + ' / ' + tot + ' cartes</span></div>'
       : '<div><strong>Pas encore de titre</strong><span>Débloque ta première carte pour devenir Égaré.</span></div>') + '</div>' +
+    (tarotTitle(name) ? '<p class="tt">✦ ' + esc(tarotTitle(name)) + '</p>' : '') +
     (nt ? '<p class="nx2">Prochain titre : <b>' + nt.name + '</b>, encore ' + nt.need + (nt.need > 1 ? ' cartes' : ' carte') + ' à débloquer.</p>' : '<p class="nx2">Collection complète : tu as atteint le plus haut titre.</p>') +
-    (b.length ? '<div class="bdg">' + b.map(function(x){ return '<span title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+    (b.length ? '<div class="bdg">' + b.map(function(x){ return '<span' + (x.tb ? ' class="tb"' : '') + ' title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + '</div>' : '') + '</div>';
 }
 function renderTitres(){
   var el = document.getElementById('titres'), bl = document.getElementById('badges');
   if(el) el.innerHTML = TITRES.map(function(x){ return '<div class="tg">' + icoK(x.k) + '<div><strong>' + x.name + '</strong><span>' + x.min + (x.min > 1 ? ' cartes' : ' carte') + '</span></div></div>'; }).join('') +
     '<div class="tg">' + icoK(LEGENDE.k) + '<div><strong>' + LEGENDE.name + '</strong><span>Toutes les cartes des saisons ouvertes</span></div></div>';
-  if(bl) bl.innerHTML = BADGE_LIST.map(function(x){ return '<li><strong>' + esc(x[0]) + '</strong>' + esc(x[1]) + '</li>'; }).join('');
+  if(bl) bl.innerHTML = BADGE_LIST.concat([['Éveillé', 'Un Dieu Oublié trouvé.'], ['Ravivé', 'Un Dieu Oublié ravivé.'], ['Oracle', '4 Dieux Oubliés différents.'], ['Panthéon', 'Les ' + TAROT.cartes.length + ' Dieux Oubliés trouvés.'], ['Panthéon ravivé', 'Les ' + TAROT.cartes.length + ' Dieux Oubliés ravivés.']]).map(function(x){ return '<li><strong>' + esc(x[0]) + '</strong>' + esc(x[1]) + '</li>'; }).join('');
 }
 renderTitres();
 
@@ -1449,7 +1541,7 @@ function renderHome(){
     var rows = names.map(function(n){ return {name:n, n:count(n)}; }).filter(function(r){ return r.n > 0; })
       .sort(function(a, b){ return b.n - a.n || a.name.localeCompare(b.name, 'fr'); }).slice(0, 3);
     top.innerHTML = rows.length ? rows.map(function(r, i){
-      return '<a class="ht" href="#collection=' + encodeURIComponent(r.name) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + (titleOf(r.n, total) ? '<small>' + titleOf(r.n, total).name + '</small>' : '') + '</span>' +
+      return '<a class="ht" href="#collection=' + encodeURIComponent(r.name) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + (titleOf(r.n, total) ? '<small>' + titleOf(r.n, total).name + (tarotTitle(r.name) ? ' · ✦ ' + esc(tarotTitle(r.name)) : '') + '</small>' : '') + '</span>' +
         '<span class="sc"><b>' + r.n + '</b> / ' + total + '</span><div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div></a>';
     }).join('') : note('Le classement apparaîtra dès les premières cartes.');
   }
@@ -1489,7 +1581,7 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:''},
   {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
