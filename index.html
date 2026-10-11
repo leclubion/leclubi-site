@@ -865,7 +865,7 @@ var current = 's1', who = '', draft = false;
 // Pour ajouter un dieu : ajoute une ligne {n:3, nom:'...'} et mets les images cartes/tarot-3-effacee.png et cartes/tarot-3-ravivee.png
 var TAROT = {
   intro:'Des cartes à part, qui n\'appartiennent à aucune saison. Un dieu est d\'abord effacé : tire-le une deuxième fois pour le raviver.',
-  cartes:[{n:1, nom:'Velhaïa'}, {n:8, nom:"L'Innommé"}]
+  cartes:[{n:1, nom:'Velhaïa'}, {n:2, nom:'Ourm'}, {n:3, nom:'Saëlith'}, {n:4, nom:'Kaar'}, {n:5, nom:'Ysmène'}, {n:6, nom:'Le Soleil Aveugle'}, {n:7, nom:'Morrhan'}, {n:8, nom:"L'Innommé"}]
 };
 function tarotId(n){ return 'tarot-' + n; }
 function tarotCount(name){ return ((COLLECTIONS[name] || {}).tarot || []).length; }
@@ -1489,7 +1489,7 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:''},
   {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
