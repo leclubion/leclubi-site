@@ -402,6 +402,11 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .rw{margin-left:auto;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)}
 .rwb{margin-left:auto;padding:5px 13px;border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:var(--accent-ink);font:500 13px Inter,sans-serif;letter-spacing:0;text-transform:none;cursor:pointer;transition:opacity .2s}
 .rwb:hover{opacity:.88}
+.card{position:relative}
+.dup{position:absolute;top:-7px;right:-7px;z-index:5;min-width:28px;padding:3px 8px;border-radius:999px;background:var(--bg,#1d1f22);border:1px solid var(--accent);color:var(--accent);font:600 12px Inter,sans-serif;text-align:center;pointer-events:none;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.dup.ok{background:var(--accent);color:var(--accent-ink)}
+.dupnote span{display:block;margin-top:4px}
+.dupnote{margin-bottom:18px}
 .rwb.done{background:transparent;color:var(--accent);cursor:default;opacity:1}
 .rws{margin:8px 0 0;padding:14px 18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
 .rws.on{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--accent);background:var(--panel);color:var(--text)}
@@ -818,6 +823,10 @@ var sheetState = 'local';
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
 // Journal automatique des cartes gagnées (Google Form → Google Sheet publié en CSV). Laisse vide si tu ne l'utilises pas.
 var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRRU0y17JiQD50oajTb1fQYk41ySZNHGtaernsomO-32BPhueEp437OK2dvY1gAU9/pub?gid=1274122633&single=true&output=csv';
+// Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
+var USE_URL = '';
+var COPIES = {}, NEED = 5;
+function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
   {id:'s1', label:'Saison 1', intro:'Est-ce que tu pourras toutes les collectionner ?',
@@ -864,8 +873,24 @@ function cardHtml(c, total, newId){
     (got ? 'Carte ' + pad(c.n) + ', ' + c.r : 'Carte ' + c.n + ', face cachée') + '">' +
     '<div class="inner"><div class="face back">' + rIco(c.r, 'rb') + '<b>?</b></div>' +
     '<div class="face front' + (holoOf(c.r) ? ' hl" data-r="' + c.r : '') + '"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>N° ' + pad(c.n) + ' / ' + total + '</small>' +
-    '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div></div>';
+    '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div>' + dupHtml(c.id, got) + '</div>';
 }
+function dupHtml(id, got){
+  var n = got && who ? copies(who, id) : 0;
+  if(n < 2) return '';
+  return '<span class="dup' + (n >= NEED ? ' ok' : '') + '" title="' + n + ' exemplaires (' + NEED + ' = roue ou ' + GOLD + ' ClubiGold)">×' + n + '</span>';
+}
+var GOLD = 50;
+function readyHtml(){
+  if(!who) return '';
+  var out = [];
+  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= NEED) out.push({c:c, n:n}); }); });
+  if(!out.length) return '';
+  return '<div class="rws on dupnote"><div><strong>' + (out.length > 1 ? 'Récompenses disponibles !' : 'Récompense disponible !') + '</strong>' +
+    out.map(function(o){ return '<span>' + o.n + ' exemplaires de la Carte ' + pad(o.c.n) + ' (' + esc(o.c.r) + ', ' + esc(sidLabel(o.c.id)) + ') : tape <b>!roue</b> ou <b>!gold</b> dans le chat.</span>'; }).join('') +
+    '<span>!roue = une roue gratuite · !gold = ' + GOLD + ' ClubiGold. Cinq exemplaires sont utilisés.</span></div></div>';
+}
+function sidLabel(id){ var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0]; return s ? s.label : sid(id); }
 
 function groupsHtml(s, cards, newId){
   var idx = 0;
@@ -888,7 +913,7 @@ function render(newId){
     '<p>' + (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '') + '</p>' +
     (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
 
-  document.getElementById('ach').innerHTML = who ? achHtml(who) : '';
+  document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() : '';
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
@@ -954,11 +979,12 @@ function loadSheet(){
     if(!u) return Promise.resolve(null);
     return fetch(u).then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(parseCsv).catch(function(){ return undefined; });
   }
-  Promise.all([get(SHEET_URL), get(LOG_URL)]).then(function(res){
-    var manual = res[0], log = res[1];
+  Promise.all([get(SHEET_URL), get(LOG_URL), get(USE_URL)]).then(function(res){
+    var manual = res[0], log = res[1], used = res[2];
     var cfg = (SHEET_URL ? 1 : 0) + (LOG_URL ? 1 : 0), fails = (SHEET_URL && manual === undefined ? 1 : 0) + (LOG_URL && log === undefined ? 1 : 0);
     if(fails === cfg) throw new Error('sheet');
-    var data = {}, names = {};
+    var data = {}, names = {}, cp = {};
+    function cnt(name, id, n){ var k = name.toLowerCase(); cp[k] = cp[k] || {}; cp[k][id] = (cp[k][id] || 0) + n; }
     function slot(name){ var k = name.toLowerCase(); if(!names[k]){ names[k] = name; data[name] = {}; } return data[names[k]]; }
     function add(o, id){ var l = (o[sid(id)] = o[sid(id)] || []); if(l.indexOf(id) < 0) l.push(id); }
     // 1) Ta feuille remplie à la main (une ligne par viewer)
@@ -969,8 +995,8 @@ function loadSheet(){
         var name = (r[0] || '').trim();
         if(!name) return;
         var o = slot(name);
-        if(matrix) head.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((r[i] || '').trim().toLowerCase()) > -1) add(o, id); });
-        else (r[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)) add(o, id); });
+        if(matrix) head.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((r[i] || '').trim().toLowerCase()) > -1){ add(o, id); cnt(name, id, 1); } });
+        else (r[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)){ add(o, id); cnt(name, id, 1); } });
       });
     }
     // 2) Journal automatique (une ligne par carte gagnée : Horodateur, Pseudo, Carte)
@@ -982,9 +1008,26 @@ function loadSheet(){
       if(ic < 0) ic = 2;
       log.slice(1).forEach(function(r){
         var name = (r[ip] || '').trim(), id = (r[ic] || '').trim().toLowerCase();
-        if(name && re.test(id)) add(slot(name), id);
+        if(name && re.test(id)){ add(slot(name), id); cnt(name, id, 1); }
       });
     }
+    // 3) Utilisations de 5 exemplaires (roue ou ClubiGold) : chacune détruit 5 exemplaires
+    if(used && used.length){
+      var uh = (used[0] || []).map(function(h){ return (h || '').trim().toLowerCase(); });
+      var up = -1, uc = -1;
+      uh.forEach(function(h, i){ if(up < 0 && h.indexOf('pseudo') > -1) up = i; if(uc < 0 && h.indexOf('carte') > -1) uc = i; });
+      if(up < 0) up = 1;
+      if(uc < 0) uc = 2;
+      used.slice(1).forEach(function(r){
+        var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase();
+        if(name && re.test(id)) cnt(name, id, -NEED);
+      });
+    }
+    COPIES = {};
+    Object.keys(data).forEach(function(n){
+      var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
+      Object.keys(c).forEach(function(id){ COPIES[n][id] = Math.max(0, c[id]); });
+    });
     COLLECTIONS = data; sheetState = 'ok';
     if(who && !COLLECTIONS[who]) who = '';
     applyHash(); render(); renderColl();
