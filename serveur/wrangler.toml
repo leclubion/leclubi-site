@@ -14,7 +14,7 @@ new_sqlite_classes = ["Hub"]
 
 [vars]
 # ⬇️ À REMPLIR : le "Client ID" de ton application Twitch (dev.twitch.tv/console)
-TWITCH_CLIENT_ID = "COLLE_ICI_TON_CLIENT_ID_TWITCH"
+TWITCH_CLIENT_ID = "pni8o966uqya6ibpyr49pai34ai6ce"
 # Sites autorisés à utiliser le serveur (séparés par des virgules)
 ORIGINES = "https://leclubion.github.io"
 # Récompense et limites anti-triche
