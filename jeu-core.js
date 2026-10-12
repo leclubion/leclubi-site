@@ -57,7 +57,7 @@
 
   // ---------- Réglages par défaut ----------
   function reglages(o){
-    var d = {destroy:'all', triple:{type:'add', value:10}, hand:3, seconds:30, tolerance:3, pile:'a'};
+    var d = {destroy:'all', triple:{type:'add', value:10}, hand:3, seconds:30, tolerance:3, pile:'a', startMax:6};
     o = o || {};
     for(var k in o) d[k] = o[k];
     return d;
@@ -89,8 +89,18 @@
       turn: 0, tours: [0, 0], over: false, winner: null, scores: [0, 0], rng: rng
     };
     S.turn = S.first;
-    for(var i = 0; i < opts.hand; i++){ piocher(S, S.first); piocher(S, 1 - S.first); }
+    for(var i = 0; i < opts.hand; i++){ piocherDepart(S, S.first); piocherDepart(S, 1 - S.first); }
     return S;
+  }
+  // Cartes de départ : aucune carte plus forte que startMax (les cartes écartées retournent dans la pioche, à une place au hasard)
+  function piocherDepart(S, p){
+    var ecartees = [], c;
+    while(S.pioche.length){
+      c = S.pioche.pop();
+      if(!S.opts.startMax || c.power <= S.opts.startMax){ S.hands[p].push(c); break; }
+      ecartees.push(c);
+    }
+    ecartees.forEach(function(x){ S.pioche.splice(Math.floor(S.rng() * (S.pioche.length + 1)), 0, x); });
   }
   function piocher(S, p){
     if(!S.pioche.length && S.defausse.length){ S.pioche = melanger(S.defausse, S.rng); S.defausse = []; }
