@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bataille de colonnes — LeClubi (prototype)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --ink:#17181a;
+  --sh:clamp(46px,calc((100vh - 290px) / 7.3),112px);   /* hauteur d'une carte : tout le jeu tient dans l'écran */
+  --sw:calc(var(--sh) * .72);              /* largeur d'une carte */
+  --commune:#d8d4ca; --peu:#9fd19a; --rare:#e0675c; --legendaire:#f0b95a; --speciale:#5fd6d8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.top h1{font-size:16px;margin:0;font-weight:600;flex:1}
+.top .btn{padding:7px 14px;border:1px solid var(--line);background:transparent;border-radius:6px;font-size:14px;text-decoration:none}
+.top .btn:hover{border-color:var(--accent)}
+.stats{font-size:13px;color:var(--muted)}
+.wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 12px 16px}
+.status{display:flex;align-items:center;gap:12px;width:min(100%,640px);font-size:14px}
+.status b{font-weight:600}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transition:width .1s linear}
+.bar.low i{background:#e0675c}
+.secs{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+
+/* table de jeu */
+.table{display:flex;gap:14px;align-items:stretch;padding:14px 16px;border-radius:18px;background:radial-gradient(120% 120% at 50% 40%,#1f6b45 0%,#17513a 55%,#0f3a29 100%);border:1px solid #0c2b1f;box-shadow:inset 0 0 60px rgba(0,0,0,.35)}
+.boards{display:flex;flex-direction:column;align-items:center}
+.board{display:grid;grid-template-columns:repeat(3,var(--sw));gap:8px}
+.col{display:flex;gap:6px;border-radius:8px;padding:3px;transition:background .15s}
+.col.opp{flex-direction:column-reverse}
+.col.me{flex-direction:column}
+.col.me.can{cursor:pointer;background:rgba(255,255,255,.07)}
+.col.me.can:hover,.col.me.can:focus-visible{background:rgba(199,154,75,.28);outline:none}
+.col.me.full{opacity:.9}
+.slot{width:var(--sw);height:var(--sh);border-radius:6px;border:1px dashed rgba(255,255,255,.22);background:rgba(0,0,0,.14)}
+.col.me.can .slot:first-of-type{border-color:rgba(199,154,75,.0)}
+.slot.next{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
+.mid{width:100%;display:grid;grid-template-columns:repeat(3,var(--sw));gap:8px;padding:0 3px}
+.mid .sc{text-align:center;font-weight:600;font-size:13px;color:#e9f4ec;min-height:20px;line-height:20px;font-variant-numeric:tabular-nums}
+.mid .sc.tri{color:#ffe08a}
+.mid .sc small{font-size:10px;opacity:.85}
+.line{height:2px;background:rgba(255,255,255,.55);width:calc(100% + 12px);margin:1px 0;border-radius:2px}
+.ohand{display:flex;gap:4px;height:22px;align-items:center;justify-content:center;margin-bottom:6px;font-size:12px;color:#cfe5d6}
+.ohand i{display:block;width:14px;height:20px;border-radius:3px;background:linear-gradient(135deg,#e0675c,#8c2a24);border:1px solid rgba(255,255,255,.4)}
+
+.side{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:10px;min-width:92px;padding:6px 0}
+.tot{text-align:center;font-size:12px;color:#d4eadb;line-height:1.2}
+.tot b{display:block;font-size:26px;color:#fff;font-variant-numeric:tabular-nums}
+.pioche{position:relative;width:var(--sw);height:var(--sh);border-radius:6px;border:1px solid rgba(255,255,255,.5);background:linear-gradient(135deg,#1d5d44,#0e3a2a);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#e9f4ec}
+.pioche::before,.pioche::after{content:"";position:absolute;inset:0;border-radius:6px;border:1px solid rgba(255,255,255,.3);transform:translate(3px,-3px);z-index:-1}
+.pioche small{position:absolute;bottom:-18px;font-size:11px;font-weight:500;color:#cfe5d6}
+
+/* cartes */
+.gc{position:relative;width:var(--sw);height:var(--sh);border-radius:6px;overflow:hidden;border:2px solid var(--rk,#888);background:linear-gradient(160deg,#2c2e33,#17181b);box-shadow:0 3px 8px rgba(0,0,0,.45);flex:none;transition:transform .2s,opacity .3s,filter .3s}
+.gc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gc .pw{position:absolute;left:3px;top:3px;min-width:calc(var(--sh) * .28);height:calc(var(--sh) * .28);border-radius:99px;display:flex;align-items:center;justify-content:center;background:rgba(15,16,18,.82);border:2px solid var(--rk,#888);color:#fff;font-weight:800;font-size:calc(var(--sh) * .2);line-height:1}
+.gc .ar{display:none;position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:calc(var(--sh) * .12);color:#cfcbc2}
+.gc.noimg .ar{display:block}
+.gc.r-commune{--rk:var(--commune)} .gc.r-peu{--rk:var(--peu)} .gc.r-rare{--rk:var(--rare)} .gc.r-legendaire{--rk:var(--legendaire)} .gc.r-speciale{--rk:var(--speciale)}
+.gc.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.6) translateY(-18px);opacity:0}100%{transform:none;opacity:1}}
+.gc.dying{animation:die .4s ease-in forwards}
+@keyframes die{0%{transform:none;filter:none}40%{filter:brightness(2) saturate(2);transform:scale(1.08)}100%{transform:scale(.4) rotate(10deg);opacity:0}}
+.gc.target{outline:3px solid #ff5a4f;outline-offset:1px;filter:saturate(1.4)}
+
+.hand{display:flex;gap:12px;justify-content:center;min-height:calc(var(--sh) * 1.15);align-items:flex-end}
+.hand .gc{width:calc(var(--sw) * 1.15);height:calc(var(--sh) * 1.15);cursor:pointer}
+.hand .gc:hover{transform:translateY(-6px)}
+.hand .gc.sel{transform:translateY(-14px);box-shadow:0 0 0 3px var(--accent),0 8px 18px rgba(0,0,0,.55)}
+.hand .gc.off{cursor:default;filter:grayscale(.5) brightness(.7)}
+.hand .gc.off:hover{transform:none}
+.hint{font-size:13px;color:var(--muted);text-align:center;min-height:18px}
+
+/* fenêtres */
+.veil{position:fixed;inset:0;background:rgba(10,11,12,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.veil[hidden]{display:none}
+.box{width:min(100%,520px);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.box h2{margin:0 0 12px;font-size:20px}
+.box h3{margin:16px 0 6px;font-size:14px;color:var(--accent)}
+.box p,.box li{font-size:14px;line-height:1.5;color:#d8d4ca}
+.box ul,.box ol{padding-left:20px;margin:6px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;font-size:14px}
+select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 10px;font:inherit}
+.go{display:inline-block;margin-top:14px;padding:10px 22px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--ink);font-weight:600}
+.go.ghost{background:transparent;color:var(--text);border-color:var(--line);margin-left:8px}
+.res{text-align:center}
+.res .big{font-size:34px;font-weight:800;margin:4px 0}
+.res .big.win{color:#ffe08a}.res .big.lose{color:#e0675c}
+.res .pts{font-size:18px;color:#d8d4ca}
+.res .gain{margin-top:10px;font-size:13px;color:var(--muted)}
+@media (max-width:640px){
+  :root{--sh:clamp(44px,calc((100vh - 335px) / 7.3),96px)}
+  .top{flex-wrap:wrap;gap:8px;padding:8px 12px}
+  .top h1 small{display:none}
+  .table{padding:10px;gap:8px}
+  .side{min-width:64px}
+  .board,.mid{gap:5px}
+  .tot b{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){.gc,.gc.pop,.gc.dying{animation:none;transition:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="btn" href="index.html">&larr; Site</a>
+  <h1>Bataille de colonnes <small style="color:var(--muted);font-weight:400">· prototype</small></h1>
+  <span class="stats" id="stats"></span>
+  <button class="btn" id="bRegles" type="button">Règles</button>
+  <button class="btn" id="bReglages" type="button">Réglages</button>
+</div>
+
+<div class="wrap">
+  <div class="status"><b id="who">…</b><div class="bar" id="bar"><i></i></div><span class="secs" id="secs"></span></div>
+
+  <div class="table" id="table">
+    <div class="boards">
+      <div class="ohand" id="ohand"></div>
+      <div class="board" id="boardOpp"></div>
+      <div class="mid" id="midOpp"></div>
+      <div class="line"></div>
+      <div class="mid" id="midMe"></div>
+      <div class="board" id="boardMe"></div>
+    </div>
+    <div class="side">
+      <div class="tot">Adversaire<b id="totOpp">0</b></div>
+      <div class="pioche" id="pioche">0<small>Pioche</small></div>
+      <div class="tot"><b id="totMe">0</b>Toi</div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint"></div>
+  <div class="hand" id="hand"></div>
+</div>
+
+<div class="veil" id="vRegles" hidden><div class="box">
+  <h2>Les règles</h2>
+  <ol>
+    <li>Chacun a 3 colonnes de 3 cases. Les colonnes se font face.</li>
+    <li>Tu as 2 cartes en main. À ton tour (20 secondes), choisis une carte puis une colonne : elle se place sur la première case libre en partant du centre.</li>
+    <li>Si l'adversaire a des cartes de <b>même puissance</b> dans la colonne d'en face, elles sont <b>détruites</b>. Les cartes derrière avancent. Ta carte, elle, reste.</li>
+    <li>Tu repioches pour retrouver 2 cartes.</li>
+    <li>La partie s'arrête dès qu'un plateau est plein. Le score est la somme de toutes les colonnes. Trois cartes identiques dans une colonne donnent un bonus.</li>
+    <li>Le plus haut score gagne. En vrai : 10 ClubiGold pour le gagnant (5 victoires récompensées par jour).</li>
+  </ol>
+  <h3>Puissance des cartes</h3>
+  <p>Commune 1-2 · Peu commune 3-4 · Rare 5-6 · Légendaire 7-8 · Spéciale 9. La pioche est commune à tous : 52 cartes.</p>
+  <button class="go" type="button" data-close>Compris</button>
+</div></div>
+
+<div class="veil" id="vReglages" hidden><div class="box">
+  <h2>Réglages de test</h2>
+  <p>Ils servent à tester l'équilibre. Ils s'appliquent à la prochaine partie.</p>
+  <div class="row"><label for="sLevel">Adversaire</label><select id="sLevel"><option value="facile">Facile (au hasard)</option><option value="normal">Normal</option><option value="difficile">Difficile</option></select></div>
+  <div class="row"><label for="sDestroy">Destruction</label><select id="sDestroy"><option value="all">Toutes les cartes de même puissance</option><option value="one">Une seule carte</option></select></div>
+  <div class="row"><label for="sTriple">Bonus de trois cartes identiques</label><select id="sTriple"><option value="0">Aucun</option><option value="10">+10</option><option value="20">+20</option><option value="x2">Colonne × 2</option></select></div>
+  <div class="row"><label for="sHand">Cartes en main</label><select id="sHand"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+  <div class="row"><label for="sSecs">Temps par tour</label><select id="sSecs"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="0">Sans limite</option></select></div>
+  <div class="row"><label for="sFirst">Qui commence</label><select id="sFirst"><option value="rand">Au hasard</option><option value="me">Moi</option><option value="bot">L'adversaire</option></select></div>
+  <button class="go" type="button" id="bNew">Nouvelle partie</button><button class="go ghost" type="button" data-close>Fermer</button>
+</div></div>
+
+<div class="veil" id="vFin" hidden><div class="box res">
+  <div class="big" id="finTitre"></div>
+  <div class="pts" id="finPts"></div>
+  <div class="gain" id="finGain"></div>
+  <button class="go" type="button" id="bRejouer">Rejouer</button>
+</div></div>
+
+<script src="jeu-core.js"></script>
+<script>
+(function(){
+  'use strict';
+  var J = window.LeClubiJeu, ME = 0, BOT = 1;
+  var S = {level:'normal', destroy:'all', triple:'10', hand:'2', secs:'20', first:'rand'};
+  try{ var sv = JSON.parse(localStorage.getItem('leclubi-jeu') || 'null'); if(sv) for(var k in sv) if(k in S) S[k] = sv[k]; }catch(e){}
+  var G = null, sel = -1, busy = false, tLeft = 0, tTimer = null, botTimer = null, timeouts = 0, stats = {w:0, l:0, n:0}, pop = null;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function options(){
+    var t = S.triple === 'x2' ? {type:'mul', value:2} : {type:'add', value:+S.triple};
+    return J.reglages({destroy:S.destroy, triple:t, hand:+S.hand, seconds:+S.secs});
+  }
+  function etiquette(c){ return c.art.replace('halloween', 'H').replace('s1', 'S1').replace('-', '·'); }
+  function carte(c, cls){
+    return '<div class="gc r-' + c.r + (cls ? ' ' + cls : '') + '" data-id="' + c.id + '"><img src="cartes/' + c.art + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()"><b class="pw">' + c.power + '</b><span class="ar">' + etiquette(c) + '</span></div>';
+  }
+  function colHtml(p, ci){
+    var col = G.board[p][ci], h = '';
+    for(var r = 0; r < 3; r++){
+      if(col[r]) h += carte(col[r], pop && pop.p === p && pop.ci === ci && pop.r === r ? 'pop' : '');
+      else h += '<div class="slot' + (r === col.length ? ' next' : '') + '"></div>';
+    }
+    return h;
+  }
+  function render(){
+    var humanTurn = G.turn === ME && !G.over;
+    $('boardOpp').innerHTML = [0, 1, 2].map(function(ci){ return '<div class="col opp" data-ci="' + ci + '">' + colHtml(BOT, ci) + '</div>'; }).join('');
+    $('boardMe').innerHTML = [0, 1, 2].map(function(ci){
+      var full = G.board[ME][ci].length >= 3, can = humanTurn && sel >= 0 && !full && !busy;
+      return '<div class="col me' + (can ? ' can' : '') + (full ? ' full' : '') + '" data-ci="' + ci + '" role="button" tabindex="' + (can ? 0 : -1) + '" aria-label="Colonne ' + (ci + 1) + (full ? ', pleine' : '') + '">' + colHtml(ME, ci) + '</div>';
+    }).join('');
+    [['midOpp', BOT], ['midMe', ME]].forEach(function(m){
+      $(m[0]).innerHTML = [0, 1, 2].map(function(ci){
+        var r = J.scoreColonne(G.board[m[1]][ci], G.opts);
+        return '<div class="sc' + (r.triple ? ' tri' : '') + '">' + r.score + (r.triple ? ' <small>★</small>' : '') + '</div>';
+      }).join('');
+    });
+    $('totOpp').textContent = G.scores[BOT];
+    $('totMe').textContent = G.scores[ME];
+    $('pioche').firstChild.nodeValue = G.pioche.length;
+    $('ohand').innerHTML = G.hands[BOT].map(function(){ return '<i></i>'; }).join('');
+    $('hand').innerHTML = G.hands[ME].map(function(c, i){ return carte(c, (i === sel ? 'sel' : '') + (humanTurn ? '' : ' off')).replace('data-id', 'data-h="' + i + '" data-id'); }).join('');
+    $('who').textContent = G.over ? 'Partie terminée' : humanTurn ? 'À toi de jouer' : 'L\'adversaire réfléchit…';
+    $('hint').textContent = humanTurn ? (sel < 0 ? 'Choisis une carte dans ta main.' : 'Choisis une colonne.') : '';
+    pop = null;
+    majStats();
+  }
+  function majStats(){ $('stats').textContent = stats.w + ' V · ' + stats.l + ' D · ' + stats.n + ' N'; }
+
+  // ----- minuteur -----
+  function stopTimer(){ clearInterval(tTimer); tTimer = null; }
+  function startTimer(){
+    stopTimer();
+    var total = +S.secs;
+    var bar = $('bar'), fill = bar.firstElementChild;
+    if(!total){ fill.style.width = '100%'; bar.classList.remove('low'); $('secs').textContent = ''; return; }
+    tLeft = total * 1000;
+    tTimer = setInterval(function(){
+      tLeft -= 100;
+      var f = Math.max(0, tLeft / (total * 1000));
+      fill.style.width = (f * 100) + '%'; bar.classList.toggle('low', f < .3);
+      $('secs').textContent = Math.ceil(Math.max(0, tLeft) / 1000) + ' s';
+      if(tLeft <= 0){ stopTimer(); tempsEcoule(); }
+    }, 100);
+  }
+  function tempsEcoule(){
+    if(!G || G.over || G.turn !== ME || busy) return;
+    timeouts++;
+    if(timeouts >= G.opts.tolerance){ J.abandon(G, ME); fin(); return; }
+    var m = J.BOTS.facile(G, ME);
+    $('hint').textContent = 'Temps écoulé : une carte est jouée au hasard.';
+    jouerCoup(ME, m.h, m.ci);
+  }
+
+  // ----- tours -----
+  function debutTour(){
+    if(G.over){ fin(); return; }
+    render();
+    if(G.turn === ME){ startTimer(); }
+    else {
+      stopTimer(); $('secs').textContent = ''; $('bar').firstElementChild.style.width = '100%';
+      botTimer = setTimeout(function(){
+        var m = J.BOTS[S.level](G, BOT);
+        if(!m){ J.abandon(G, BOT); fin(); return; }
+        jouerCoup(BOT, m.h, m.ci);
+      }, 900 + Math.random() * 900);
+    }
+  }
+  function jouerCoup(p, h, ci){
+    if(busy || G.over) return;
+    busy = true; stopTimer(); sel = -1;
+    var idx = J.apercu(G, p, h, ci), opp = 1 - p;
+    // on montre d'abord les cartes détruites, puis on applique le coup
+    var cols = document.querySelectorAll(opp === ME ? '#boardMe .col' : '#boardOpp .col');
+    var ce = cols[ci];
+    idx.forEach(function(r){ var el = ce && ce.children[r]; if(el && el.classList.contains('gc')) el.classList.add('dying'); });
+    setTimeout(function(){
+      var r = J.jouer(G, p, h, ci);
+      pop = {p:p, ci:ci, r:G.board[p][ci].length - 1};
+      busy = false;
+      if(r && r.fin){ render(); fin(); return; }
+      debutTour();
+    }, idx.length ? 450 : 120);
+  }
+  function fin(){
+    stopTimer(); clearTimeout(botTimer); render();
+    var w = G.winner, a = G.scores[ME], b = G.scores[BOT];
+    if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++;
+    majStats();
+    var t = $('finTitre');
+    t.textContent = w === ME ? 'Victoire !' : w === BOT ? 'Défaite' : 'Égalité';
+    t.className = 'big ' + (w === ME ? 'win' : w === BOT ? 'lose' : '');
+    $('finPts').textContent = G.forfait != null ? (G.forfait === ME ? 'Trop de tours sans jouer : forfait.' : 'L\'adversaire a abandonné.') : 'Toi ' + a + ' — ' + b + ' Adversaire';
+    $('finGain').textContent = w === ME ? 'Dans le vrai jeu : +10 ClubiGold (5 victoires récompensées par jour).' : '';
+    setTimeout(function(){ $('vFin').hidden = false; }, 600);
+  }
+  function nouvelle(){
+    clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; pop = null;
+    $('vFin').hidden = true; $('vReglages').hidden = true;
+    var first = S.first === 'me' ? ME : S.first === 'bot' ? BOT : null;
+    G = J.nouvellePartie(options(), Math.random, first);
+    debutTour();
+  }
+
+  // ----- actions du joueur -----
+  document.addEventListener('click', function(e){
+    var c = e.target.closest('#hand .gc');
+    if(c && G && G.turn === ME && !busy && !G.over){ var i = +c.dataset.h; sel = sel === i ? -1 : i; render(); return; }
+    var col = e.target.closest('#boardMe .col');
+    if(col && G && G.turn === ME && !busy && !G.over){
+      var ci = +col.dataset.ci;
+      if(sel < 0){ $('hint').textContent = 'Choisis d\'abord une carte dans ta main.'; return; }
+      if(G.board[ME][ci].length >= 3){ $('hint').textContent = 'Cette colonne est pleine.'; return; }
+      jouerCoup(ME, sel, ci);
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var col = e.target.closest && e.target.closest('#boardMe .col.can'); if(col){ e.preventDefault(); col.click(); }
+  });
+  // aperçu : au survol d'une colonne, les cartes qui seraient détruites s'allument en rouge
+  function clearTarget(){ Array.prototype.forEach.call(document.querySelectorAll('.gc.target'), function(x){ x.classList.remove('target'); }); }
+  document.addEventListener('mouseover', function(e){
+    clearTarget();
+    var col = e.target.closest('#boardMe .col.can');
+    if(!col || sel < 0 || !G) return;
+    var ci = +col.dataset.ci, idx = J.apercu(G, ME, sel, ci), oc = $('boardOpp').children[ci];
+    idx.forEach(function(r){ var el = oc && oc.children[r]; if(el) el.classList.add('target'); });
+  });
+  document.addEventListener('mouseout', function(e){ if(!e.relatedTarget) clearTarget(); });
+
+  // ----- fenêtres -----
+  function ouvrir(id){ $(id).hidden = false; }
+  $('bRegles').onclick = function(){ ouvrir('vRegles'); };
+  $('bReglages').onclick = function(){
+    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); $('s' + a[0]).value = S[a[1]]; });
+    ouvrir('vReglages');
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function(b){ b.onclick = function(){ b.closest('.veil').hidden = true; }; });
+  $('bNew').onclick = function(){
+    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); S[a[1]] = $('s' + a[0]).value; });
+    try{ localStorage.setItem('leclubi-jeu', JSON.stringify(S)); }catch(e){}
+    nouvelle();
+  };
+  $('bRejouer').onclick = nouvelle;
+
+  window.__jeu = {get G(){ return G; }, nouvelle: nouvelle, S: S};   // pour les tests
+  nouvelle();
+  if(!sessionStorage.getItem('leclubi-jeu-regles')){ try{ sessionStorage.setItem('leclubi-jeu-regles', '1'); }catch(e){} ouvrir('vRegles'); }
+})();
+</script>
+</body>
+</html>
