@@ -869,7 +869,7 @@ var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRR
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
 var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
 var TCLAIM = {}, TFIRST = {}, TEV = {};   // Tarot : récompenses déjà réclamées, premiers éveillés, ordre des ravivées
-var COPIES = {}, NEED = 5, USED_LINES = {};   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
+var COPIES = {}, ORD = {}, NEED = 5, USED_LINES = {};   // ORD : ordre d'arrivée du prochain lot de 5 exemplaires de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
@@ -1013,11 +1013,12 @@ var GOLD = 50;
 function readyHtml(){
   if(!who) return '';
   var out = [];
-  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= NEED) out.push({c:c, n:n}); }); });
+  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= NEED) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
   if(!out.length) return '';
+  out.sort(function(a, b){ return (a.o == null ? 1e9 : a.o) - (b.o == null ? 1e9 : b.o); });
   return '<div class="rws on dupnote"><div><strong>' + (out.length > 1 ? 'Récompenses disponibles !' : 'Récompense disponible !') + '</strong>' +
-    out.map(function(o){ return '<span>' + o.n + ' exemplaires de la Carte ' + pad(o.c.n) + ' (' + esc(o.c.r) + ', ' + esc(sidLabel(o.c.id)) + ') : tape <b>!roue</b> ou <b>!gold</b> dans le chat.</span>'; }).join('') +
-    '<span>!roue = une roue gratuite · !gold = ' + GOLD + ' ClubiGold. Cinq exemplaires sont utilisés.</span></div></div>';
+    out.map(function(o, i){ return '<span>' + (i === 0 ? '<b>Prochaine utilisée</b> : ' : '') + o.n + ' exemplaires de la Carte ' + pad(o.c.n) + ' (' + esc(o.c.r) + ', ' + esc(sidLabel(o.c.id)) + ')' + (i === 0 ? '.' : ' : tape <b>!roue ' + o.c.id + '</b> ou <b>!gold ' + o.c.id + '</b> pour utiliser celle-ci.') + '</span>'; }).join('') +
+    '<span>Tape <b>!roue</b> ou <b>!gold</b> dans le chat : la carte qui a atteint 5 exemplaires en premier est utilisée en premier. Roue de la saison de la carte utilisée. !roue = une roue gratuite · !gold = ' + GOLD + ' ClubiGold. Cinq exemplaires sont utilisés.</span></div></div>';
 }
 function sidLabel(id){ var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0]; return s ? s.label : sid(id); }
 
@@ -1118,6 +1119,8 @@ function loadSheet(){
     var data = {}, names = {}, cp = {};
     USED_LINES = {}; TCLAIM = {}; TFIRST = {}; TEV = {};
     function cnt(name, id, n){ var k = name.toLowerCase(); cp[k] = cp[k] || {}; cp[k][id] = (cp[k][id] || 0) + n; }
+    var sq = {}, ud = {};
+    function seqPush(name, id, v){ var k = name.toLowerCase(); sq[k] = sq[k] || {}; (sq[k][id] = sq[k][id] || []).push(v); }
     function slot(name){ var k = name.toLowerCase(); if(!names[k]){ names[k] = name; data[name] = {}; } return data[names[k]]; }
     function add(o, id){ var l = (o[sid(id)] = o[sid(id)] || []); if(l.indexOf(id) < 0) l.push(id); }
     // 1) Ta feuille remplie à la main (une ligne par viewer)
@@ -1128,8 +1131,8 @@ function loadSheet(){
         var name = (r[0] || '').trim();
         if(!name) return;
         var o = slot(name);
-        if(matrix) head.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((r[i] || '').trim().toLowerCase()) > -1){ add(o, id); cnt(name, id, 1); } });
-        else (r[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)){ add(o, id); cnt(name, id, 1); } });
+        if(matrix) head.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((r[i] || '').trim().toLowerCase()) > -1){ add(o, id); cnt(name, id, 1); seqPush(name, id, -1); } });
+        else (r[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)){ add(o, id); cnt(name, id, 1); seqPush(name, id, -1); } });
       });
     }
     // 2) Journal automatique (une ligne par carte gagnée : Horodateur, Pseudo, Carte)
@@ -1143,7 +1146,7 @@ function loadSheet(){
       log.slice(1).forEach(function(r, ri){
         var name = (r[ip] || '').trim(), id = (r[ic] || '').trim().toLowerCase();
         if(name && re.test(id)){
-          add(slot(name), id); cnt(name, id, 1);
+          add(slot(name), id); cnt(name, id, 1); seqPush(name, id, ri);
           if(id.indexOf('tarot-') === 0){   // 2e exemplaire d'un dieu = ravivée ; le plus ancien de la chaîne est le « premier éveillé »
             var tk = name.toLowerCase() + '|' + id; tc[tk] = (tc[tk] || 0) + 1;
             if(tc[tk] === 2){ TEV[tk] = ri; if(!TFIRST[id] || ri < TFIRST[id].ev) TFIRST[id] = {name:names[name.toLowerCase()], ev:ri}; }
@@ -1162,13 +1165,17 @@ function loadSheet(){
         var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase(), lm = id.match(/^ligne-([a-z0-9]+)-rare$/);
         if(name && /^(tg-\d+-[1x]|jalon-n\d+)$/.test(id)){ var nk = name.toLowerCase(); TCLAIM[nk] = TCLAIM[nk] || {}; TCLAIM[nk][id] = (TCLAIM[nk][id] || 0) + 1; return; }   // récompenses Tarot déjà réclamées
         if(name && lm){ USED_LINES[name.toLowerCase() + '|' + lm[1]] = 1; return; }
-        if(name && re.test(id)) cnt(name, id, -NEED);
+        if(name && re.test(id)){ cnt(name, id, -NEED); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + 1; }
       });
     }
-    COPIES = {};
+    COPIES = {}; ORD = {};
     Object.keys(data).forEach(function(n){
       var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
-      Object.keys(c).forEach(function(id){ COPIES[n][id] = Math.max(0, c[id]); });
+      Object.keys(c).forEach(function(id){
+        COPIES[n][id] = Math.max(0, c[id]);
+        var q = ((sq[n.toLowerCase()] || {})[id]) || [], need = NEED * ((((ud[n.toLowerCase()] || {})[id]) || 0) + 1);
+        (ORD[n] = ORD[n] || {})[id] = q.length >= need ? q[need - 1] : 1e9;
+      });
     });
     COLLECTIONS = data; sheetState = 'ok'; renderPremiers();
     if(who && !COLLECTIONS[who]) who = '';
@@ -1581,8 +1588,7 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
-  {date:'2026-10-12', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-10', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:''},
   {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
