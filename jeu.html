@@ -12,6 +12,7 @@
   --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --ink:#17181a;
   --sh:clamp(46px,calc((100vh - 320px) / 7.3),104px);   /* hauteur d'une carte (écran en hauteur) */
   --sw:calc(var(--sh) * .72);
+  --tilt:perspective(520px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
   --commune:#d8d4ca; --peu:#9fd19a; --rare:#e0675c; --legendaire:#f0b95a; --speciale:#5fd6d8;
 }
 /* grand écran : la main reste en bas, les cartes grandissent avec la hauteur de la fenêtre */
@@ -78,8 +79,8 @@ a{color:inherit}
 
 .hand{display:flex;gap:12px;justify-content:center;align-items:flex-end;flex-basis:100%;min-height:calc(var(--sh) * 1.15)}
 .hand .gc{width:calc(var(--sw) * 1.15);height:calc(var(--sh) * 1.15);cursor:pointer}
-.hand .gc:hover{transform:translateY(-6px)}
-.hand .gc.sel{transform:translateY(-14px);box-shadow:0 0 0 3px var(--accent),0 8px 18px rgba(0,0,0,.55)}
+.hand .gc:hover{transform:translateY(-8px) var(--tilt)}
+.hand .gc.sel{transform:translateY(-16px) var(--tilt);box-shadow:0 0 0 3px var(--accent),0 8px 18px rgba(0,0,0,.55)}
 .hand .gc.off{cursor:default;filter:grayscale(.5) brightness(.7)}
 .hand .gc.off:hover{transform:none}
 
@@ -119,6 +120,54 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   .status .hint{display:none}
   .bar{width:auto;flex:1}
 }
+
+/* ---- reflet, aura et inclinaison au survol ---- */
+.gc.r-commune{--au:216,212,202} .gc.r-peu{--au:159,209,154} .gc.r-rare{--au:224,103,92} .gc.r-legendaire{--au:240,185,90} .gc.r-speciale{--au:95,214,216}
+.gc .pw,.gc .ar{z-index:2}
+.gc::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transform:translateX(-110%);background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.65) 47%,rgba(255,255,255,.15) 53%,transparent 68%)}
+@keyframes shine{0%{opacity:1;transform:translateX(-110%)}100%{opacity:1;transform:translateX(110%)}}
+@media (hover:hover){
+  .gc:not(.off):not(.dying):hover{transition:transform .06s linear,opacity .3s,filter .3s;box-shadow:0 0 0 1px rgba(var(--au),.9),0 0 12px 3px rgba(var(--au),.65),0 0 30px 8px rgba(var(--au),.32),0 6px 14px rgba(0,0,0,.5);z-index:4}
+  .gc:not(.off):not(.dying):hover::after{animation:shine .8s ease-out}
+  .col .gc:not(.off):not(.dying):hover{transform:var(--tilt) scale(1.07)}
+}
+.gc.sel{box-shadow:0 0 0 3px var(--accent),0 0 22px 6px rgba(var(--au),.5),0 8px 18px rgba(0,0,0,.55)}
+/* cartes légendaires et spéciales : léger éclat holographique en continu */
+.gc.r-legendaire::before,.gc.r-speciale::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;background:linear-gradient(115deg,transparent 42%,rgba(255,238,180,.30) 50%,transparent 58%);background-size:260% 100%;animation:holo 3.8s linear infinite}
+.gc.r-speciale::before{background-image:linear-gradient(115deg,transparent 42%,rgba(170,255,255,.30) 50%,transparent 58%)}
+@keyframes holo{from{background-position:130% 0}to{background-position:-130% 0}}
+/* colonne triple : halo doré qui reste */
+.col.tri{background:rgba(255,224,138,.10);box-shadow:0 0 0 2px rgba(255,224,138,.6),0 0 22px rgba(255,200,80,.4)}
+/* effets */
+#fx,#fx2{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#fx{z-index:18} #fx2{z-index:40}
+.ft{position:absolute;font-weight:900;white-space:nowrap;letter-spacing:.02em;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 12px rgba(0,0,0,.5)}
+.ft.plus{color:#9cf0b0;font-size:22px} .ft.moins{color:#ff8a80;font-size:20px}
+.ft.combo{color:#ff9d7a;font-size:30px} .ft.triple{color:#ffe08a;font-size:34px}
+.pop{animation:pop .4s ease-out} @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.35);color:#ffe08a}100%{transform:scale(1)}}
+.land{animation:none}
+/* écran "Jouer" */
+.lobby{text-align:center;width:min(100%,460px)}
+.duel{display:flex;align-items:center;justify-content:space-around;gap:10px;margin:20px 0 8px}
+.pl{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pl b{font-size:15px}
+.pl .av{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;background:#2a2c30;border:3px solid var(--line);transition:border-color .3s,box-shadow .3s}
+.pl.ok .av{border-color:#6fd08c;box-shadow:0 0 0 5px rgba(111,208,140,.18),0 0 26px rgba(111,208,140,.45)}
+.pl .etat{font-size:13px;color:var(--muted)} .pl.ok .etat{color:#8fe3a8;font-weight:600}
+.vs{font-weight:900;color:var(--accent);font-size:22px}
+.go.big{font-size:20px;padding:14px 56px;margin-top:16px}
+.go.wait{background:transparent;color:var(--accent)}
+.go.pulse{animation:pulse 1s ease-in-out infinite}
+.go:disabled{opacity:.55;cursor:default}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(199,154,75,.25);transform:scale(1.04)}}
+.lhint{min-height:20px;font-size:13px;color:var(--muted);margin-top:12px}
+.cnt{height:66px;font-size:56px;font-weight:900;color:var(--accent);margin-top:6px;line-height:66px}
+.cnt.t{animation:cnt .7s ease-out}
+@keyframes cnt{0%{transform:scale(2.2);opacity:0}30%{opacity:1}100%{transform:scale(1)}}
+.res .big{animation:cnt .6s ease-out}
+.mini{padding:5px 10px;font-size:13px}
+input[type=range]{accent-color:var(--accent);width:55%}
+@media (prefers-reduced-motion:reduce){.gc::before{animation:none}}
 @media (prefers-reduced-motion:reduce){.gc,.gc.dying{animation:none;transition:none}}
 </style>
 </head>
@@ -127,6 +176,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   <a class="btn" href="index.html">&larr; Site</a>
   <h1>Bataille de colonnes <small style="color:var(--muted);font-weight:400">· prototype</small></h1>
   <span class="stats" id="stats"></span>
+  <button class="btn sonBtn" type="button" aria-label="Son" title="Son">🔊</button>
   <button class="btn" id="bRegles" type="button">Règles</button>
   <button class="btn" id="bReglages" type="button">Réglages</button>
 </div>
@@ -150,6 +200,20 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
     <div class="hand" id="hand"></div>
   </div>
 </div>
+
+<div class="veil" id="vLobby" hidden><div class="box lobby">
+  <h2>Bataille de colonnes</h2>
+  <div class="duel">
+    <div class="pl" id="plMe"><div class="av">T</div><b>Toi</b><span class="etat" id="etMe">Pas prêt</span></div>
+    <div class="vs">VS</div>
+    <div class="pl" id="plOpp"><div class="av">?</div><b>Adversaire</b><span class="etat" id="etOpp">En attente…</span></div>
+  </div>
+  <div class="cnt" id="cnt"></div>
+  <button class="go big" type="button" id="bJouer">Jouer</button>
+  <div class="lhint" id="lhint"></div>
+  <button class="go ghost mini" type="button" id="bReglesL">Règles</button><button class="go ghost mini sonBtn" type="button" aria-label="Son">🔊</button>
+  <p style="font-size:12px;color:var(--muted);margin-top:14px">Prototype : l'adversaire est automatique. Dans le vrai jeu, tu verras ici le pseudo de l'autre joueur et s'il est prêt.</p>
+</div></div>
 
 <div class="veil" id="vRegles" hidden><div class="box">
   <h2>Les règles</h2>
@@ -177,12 +241,16 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   <div class="row"><label for="sHand">Cartes en main</label><select id="sHand"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
   <div class="row"><label for="sSecs">Temps par tour</label><select id="sSecs"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="0">Sans limite</option></select></div>
   <div class="row"><label for="sFirst">Qui commence</label><select id="sFirst"><option value="rand">Au hasard</option><option value="me">Moi</option><option value="bot">L'adversaire</option></select></div>
-  <button class="go" type="button" id="bNew">Nouvelle partie</button><button class="go ghost" type="button" data-close>Fermer</button>
+  <h3>Son (s'applique tout de suite)</h3>
+  <div class="row"><label for="sMus">Musique</label><input type="range" id="sMus" min="0" max="100"></div>
+  <div class="row"><label for="sSfx">Effets sonores</label><input type="range" id="sSfx" min="0" max="100"></div>
+  <button class="go" type="button" id="bNew">Appliquer et rejouer</button><button class="go ghost" type="button" data-close>Fermer</button>
 </div></div>
 
 <div class="veil" id="vFin" hidden><div class="box res">
   <div class="big" id="finTitre"></div>
   <div class="pts" id="finPts"></div>
+  <div class="gain" id="finStats"></div>
   <div class="gain" id="finGain"></div>
   <button class="go" type="button" id="bRejouer">Rejouer</button>
 </div></div>
@@ -196,11 +264,202 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   var S = {level:'normal', destroy:'all', triple:'10', hand:'3', secs:'30', first:'rand', pile:'a', start:'6'};
   try{ var sv = JSON.parse(localStorage.getItem('leclubi-jeu3') || 'null'); if(sv) for(var k in sv) if(k in S) S[k] = sv[k]; }catch(e){}
   var G = null, sel = -1, busy = false, tLeft = 0, tTimer = null, botTimer = null, timeouts = 0, stats = {w:0, l:0, n:0};
+  var gs = {dest:0, tri:0}, shown = [0, 0], twk = [0, 0];
   var cache = {};                      // cartes cachées pendant qu'elles sont en vol : id -> true
   var gen = 0;                         // numéro de partie : coupe les animations d'une partie abandonnée
   var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var $ = function(id){ return document.getElementById(id); };
   var wait = function(ms){ return new Promise(function(r){ setTimeout(r, reduce ? 0 : ms); }); };
+  // =====================================================================
+  //  SON — chaque son est cherché dans le dossier  sons/  (mp3, ogg ou wav).
+  //  S'il n'y a pas de fichier, un petit son de remplacement est fabriqué par le navigateur.
+  //  Liste des noms de fichiers : voir sons/LISEZ-MOI.txt
+  // =====================================================================
+  var Son = (function(){
+    var DOSSIER = 'sons/', EXT = ['mp3', 'ogg', 'wav'];
+    var NOMS = ['selection', 'deselection', 'survol', 'pose', 'distribution', 'destruction', 'colonne', 'victoire', 'defaite', 'egalite', 'pret', 'decompte', 'go', 'tour', 'tic', 'erreur'];
+    var VOL = {survol: .5, tic: .7, distribution: .8};      // volume relatif de chaque son (1 = normal)
+    var ctx = null, gFx, gMus, gPad, buf = {}, audio = null, musUrl = null, padT = null, musOn = false;
+    var cfg = {music: .5, sfx: .8, mute: false};
+    try{ var sv = JSON.parse(localStorage.getItem('leclubi-son') || 'null'); if(sv){ if(!isNaN(+sv.music)) cfg.music = +sv.music; if(!isNaN(+sv.sfx)) cfg.sfx = +sv.sfx; cfg.mute = !!sv.mute; } }catch(e){}
+    function sauver(){ try{ localStorage.setItem('leclubi-son', JSON.stringify(cfg)); }catch(e){} }
+    function appliquer(){
+      if(ctx){ gFx.gain.value = cfg.mute ? 0 : cfg.sfx; gMus.gain.value = cfg.mute ? 0 : cfg.music; }
+      if(audio) audio.volume = cfg.mute ? 0 : cfg.music;
+      Array.prototype.forEach.call(document.querySelectorAll('.sonBtn'), function(b){ b.textContent = cfg.mute ? '🔇' : '🔊'; });
+    }
+    function init(){
+      if(ctx){ if(ctx.state === 'suspended') ctx.resume(); return; }
+      var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+      ctx = new AC();
+      gFx = ctx.createGain(); gFx.connect(ctx.destination);
+      gMus = ctx.createGain(); gMus.connect(ctx.destination);
+      gPad = ctx.createGain(); gPad.connect(gMus);
+      appliquer(); charger();
+    }
+    function essayer(nom, i, fin){
+      if(i >= EXT.length){ fin(null); return; }
+      fetch(DOSSIER + nom + '.' + EXT[i]).then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(function(ab){
+        ctx.decodeAudioData(ab, function(b){ fin(b); }, function(){ essayer(nom, i + 1, fin); });
+      }).catch(function(){ essayer(nom, i + 1, fin); });
+    }
+    function charger(){
+      NOMS.forEach(function(n){ essayer(n, 0, function(b){ if(b) buf[n] = b; }); });
+      (function sonde(i){ if(i >= EXT.length) return; var u = DOSSIER + 'musique.' + EXT[i];
+        fetch(u, {method: 'HEAD'}).then(function(r){ if(r.ok) musUrl = u; else sonde(i + 1); }).catch(function(){ sonde(i + 1); }); })(0);
+    }
+    // ---- petits sons de remplacement ----
+    var bruit = null;
+    function tone(f0, f1, d, type, v, delay){
+      var t = ctx.currentTime + (delay || 0), o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f0, t); if(f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + d);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(gFx); o.start(t); o.stop(t + d + .05);
+    }
+    function souffle(d, v, type, f0, f1, delay){
+      if(!bruit){ bruit = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); var a = bruit.getChannelData(0); for(var i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1; }
+      var t = ctx.currentTime + (delay || 0), s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = bruit; f.type = type; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + d); f.Q.value = 1.2;
+      g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      s.connect(f); f.connect(g); g.connect(gFx); s.start(t, Math.random() * .5); s.stop(t + d + .02);
+    }
+    var SYN = {
+      selection:    function(r){ tone(520 * r, 800 * r, .09, 'triangle', .28); },
+      deselection:  function(r){ tone(520 * r, 360 * r, .08, 'triangle', .22); },
+      survol:       function(r){ tone(1100 * r, 1100 * r, .03, 'sine', .08); },
+      pose:         function(r){ tone(150 * r, 55 * r, .16, 'sine', .65); souffle(.09, .35, 'lowpass', 1600, 300); },
+      distribution: function(r){ souffle(.07, .32, 'highpass', 2600 * r, 1400 * r); },
+      destruction:  function(r){ souffle(.38, .5, 'bandpass', 2600 * r, 260, 0); tone(220 * r, 45, .28, 'sawtooth', .22); },
+      colonne:      function(r){ [523, 659, 784, 1047, 1319].forEach(function(f, i){ tone(f * r, f * r, .35, 'triangle', .26, i * .075); tone(f * 2 * r, f * 2 * r, .25, 'sine', .08, i * .075); }); },
+      victoire:     function(){ [523, 659, 784, 1047, 784, 1047, 1319].forEach(function(f, i){ tone(f, f, .32, 'triangle', .3, i * .13); tone(f / 2, f / 2, .3, 'sine', .15, i * .13); }); },
+      defaite:      function(){ [392, 349, 311, 262].forEach(function(f, i){ tone(f, f * .97, .45, 'sawtooth', .13, i * .22); }); },
+      egalite:      function(){ tone(440, 440, .3, 'triangle', .25); tone(440, 440, .4, 'triangle', .25, .25); },
+      pret:         function(r){ tone(660 * r, 660 * r, .07, 'square', .12); tone(990 * r, 990 * r, .12, 'square', .12, .07); },
+      decompte:     function(){ tone(440, 440, .14, 'square', .16); },
+      go:           function(){ tone(880, 880, .12, 'square', .16); tone(1320, 1320, .3, 'square', .16, .1); },
+      tour:         function(){ tone(660, 660, .08, 'sine', .22); tone(880, 880, .14, 'sine', .22, .08); },
+      tic:          function(r){ tone(1000 * r, 1000 * r, .04, 'square', .1); },
+      erreur:       function(){ tone(170, 130, .14, 'square', .16); }
+    };
+    function play(nom, o){
+      if(!ctx || cfg.mute || cfg.sfx <= 0) return; o = o || {};
+      if(ctx.state === 'suspended') ctx.resume();
+      var b = buf[nom], r = o.rate || 1;
+      if(b){
+        var s = ctx.createBufferSource(), g = ctx.createGain();
+        s.buffer = b; s.playbackRate.value = r * (1 + (Math.random() - .5) * .08);
+        g.gain.value = (VOL[nom] || 1) * (o.vol || 1); s.connect(g); g.connect(gFx); s.start();
+      } else if(SYN[nom]) SYN[nom](r * (1 + (Math.random() - .5) * .05), o.vol || 1);
+    }
+    // ---- musique : le fichier sons/musique.* en boucle, sinon une petite nappe douce de remplacement ----
+    var ACC = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]], ia = 0;
+    function accord(){
+      var t = ctx.currentTime, notes = ACC[ia++ % 4];
+      notes.forEach(function(f){ [-5, 5].forEach(function(det){
+        var o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
+        o.type = 'triangle'; o.frequency.value = f; o.detune.value = det; fl.type = 'lowpass'; fl.frequency.value = 800;
+        g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.05, t + 2); g.gain.linearRampToValueAtTime(.0001, t + 7.5);
+        o.connect(fl); fl.connect(g); g.connect(gPad); o.start(t); o.stop(t + 8);
+      }); });
+    }
+    function musiqueOn(){
+      if(!ctx || musOn) return; musOn = true;
+      if(musUrl){
+        if(!audio){ audio = new Audio(musUrl); audio.loop = true; }
+        audio.volume = 0; var p = audio.play(); if(p && p.catch) p.catch(function(){});
+        var v = 0, iv = setInterval(function(){ v += .05; audio.volume = cfg.mute ? 0 : Math.min(cfg.music, v * cfg.music * 2); if(v >= 1) clearInterval(iv); }, 80);
+      } else {
+        gPad.gain.cancelScheduledValues(0); gPad.gain.value = 1; accord(); padT = setInterval(accord, 6000);
+      }
+    }
+    function musiqueOff(){
+      if(!ctx || !musOn) return; musOn = false;
+      if(padT){ clearInterval(padT); padT = null; gPad.gain.setTargetAtTime(0, ctx.currentTime, .4); }
+      if(audio){ var a = audio, iv = setInterval(function(){ a.volume = Math.max(0, a.volume - .04); if(a.volume <= 0){ clearInterval(iv); a.pause(); } }, 60); }
+    }
+    function regler(k, v){ cfg[k] = v; sauver(); appliquer(); }
+    function bascule(){ cfg.mute = !cfg.mute; sauver(); appliquer(); if(!cfg.mute) play('pret'); }
+    document.addEventListener('visibilitychange', function(){ if(!audio) return; if(document.hidden) audio.pause(); else if(musOn) audio.play().catch(function(){}); });
+    return {init: init, play: play, musiqueOn: musiqueOn, musiqueOff: musiqueOff, regler: regler, bascule: bascule, appliquer: appliquer, cfg: cfg};
+  })();
+
+  // =====================================================================
+  //  EFFETS VISUELS — fumée d'impact, éclats, texte volant, confettis, secousse
+  // =====================================================================
+  var FX = (function(){
+    var L1 = document.createElement('div'), L2 = document.createElement('div');
+    L1.id = 'fx'; L2.id = 'fx2'; document.body.appendChild(L1); document.body.appendChild(L2);
+    var COUL = {commune:'216,212,202', peu:'159,209,154', rare:'224,103,92', legendaire:'240,185,90', speciale:'95,214,216'};
+    function R(a, b){ return a + Math.random() * (b - a); }
+    function piece(css, layer){ var e = document.createElement('div'); e.style.cssText = 'position:absolute;' + css; (layer || L1).appendChild(e); return e; }
+    function anime(e, kf, o){
+      if(!e.animate){ e.remove(); return; }
+      var a = e.animate(kf, o); a.onfinish = a.oncancel = function(){ e.remove(); }; return a;
+    }
+    function nb(){ return !reduce; }
+    // légère fumée qui part de la carte quand elle se pose
+    function impact(rect, card){
+      if(!nb() || !rect) return;
+      var haut = card && (card.r === 'legendaire' || card.r === 'speciale'), n = haut ? 9 : 6, tint = COUL[card ? card.r : 'commune'];
+      var cx = rect.left + rect.width / 2;
+      for(var i = 0; i < n; i++){
+        var x = rect.left + rect.width * R(.05, .95), y = rect.top + rect.height * R(.6, 1), size = rect.width * R(.35, .6);
+        var dx = (x - cx) * R(.7, 1.3) + R(-8, 8), dy = -R(8, 26) * rect.height / 90;
+        var col = (haut && i % 3 === 0) ? 'rgba(' + tint + ',.55)' : 'rgba(225,232,228,.5)';
+        var e = piece('left:' + (x - size / 2) + 'px;top:' + (y - size / 2) + 'px;width:' + size + 'px;height:' + size + 'px;border-radius:50%;opacity:0;filter:blur(1.5px);background:radial-gradient(circle,' + col + ' 0%,transparent 70%)');
+        anime(e, [{opacity: 0, transform: 'translate(0,0) scale(.3)'}, {opacity: .6, offset: .25}, {opacity: 0, transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1.7)'}], {duration: R(550, 850), delay: R(0, 60), easing: 'ease-out'});
+      }
+      var ring = piece('left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;border-radius:7px;border:2px solid rgba(' + tint + ',.55)');
+      anime(ring, [{opacity: .7, transform: 'scale(1)'}, {opacity: 0, transform: 'scale(1.3)'}], {duration: 320, easing: 'ease-out'});
+    }
+    // éclats quand une carte est détruite
+    function eclats(rect, rar){
+      if(!nb() || !rect) return;
+      var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2, c = COUL[rar || 'commune'];
+      for(var i = 0; i < 12; i++){
+        var s = R(4, 9), a = R(0, 6.283), d = R(30, 90) * (rect.width / 80), e = piece('left:' + cx + 'px;top:' + cy + 'px;width:' + s + 'px;height:' + s + 'px;background:rgb(' + c + ');border-radius:' + (i % 3 ? 1 : 50) + '%;box-shadow:0 0 6px rgba(' + c + ',.8)');
+        anime(e, [{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: 'translate(' + Math.cos(a) * d + 'px,' + (Math.sin(a) * d + 24) + 'px) rotate(' + R(-300, 300) + 'deg)', opacity: 0}], {duration: R(420, 700), easing: 'cubic-bezier(.2,.7,.4,1)'});
+      }
+    }
+    function texte(x, y, txt, cls){
+      if(!nb()) return;
+      var e = piece('left:' + x + 'px;top:' + y + 'px;'); e.className = 'ft ' + (cls || ''); e.textContent = txt;
+      anime(e, [{transform: 'translate(-50%,-50%) scale(.4)', opacity: 0}, {transform: 'translate(-50%,-80%) scale(1.25)', opacity: 1, offset: .2}, {transform: 'translate(-50%,-190%) scale(1)', opacity: 0}], {duration: 1100, easing: 'ease-out'});
+    }
+    function secousse(amp){
+      var t = document.getElementById('table'); if(!nb() || !t || !t.animate) return;
+      t.animate([{translate: '0 0'}, {translate: amp + 'px ' + (-amp / 2) + 'px'}, {translate: (-amp) + 'px ' + (amp / 2) + 'px'}, {translate: (amp / 2) + 'px 0'}, {translate: '0 0'}], {duration: 280, easing: 'ease-out'});
+    }
+    // colonne de trois cartes identiques : faisceau doré, anneaux, étincelles
+    function triple(colEl, label){
+      if(!nb() || !colEl) return;
+      var r = colEl.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var w = piece('left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;overflow:hidden;border-radius:8px');
+      var b = document.createElement('div'); b.style.cssText = 'position:absolute;left:0;right:0;height:60%;background:linear-gradient(180deg,transparent,rgba(255,230,140,.75),transparent)'; w.appendChild(b);
+      b.animate([{transform: 'translateY(170%)'}, {transform: 'translateY(-110%)'}], {duration: 650, easing: 'ease-in-out'});
+      anime(w, [{opacity: 1}, {opacity: 1, offset: .8}, {opacity: 0}], {duration: 700});
+      [0, 160].forEach(function(dl){
+        var ring = piece('left:' + (r.left - 4) + 'px;top:' + (r.top - 4) + 'px;width:' + (r.width + 8) + 'px;height:' + (r.height + 8) + 'px;border-radius:12px;border:3px solid rgba(255,214,102,.9);box-shadow:0 0 18px rgba(255,200,80,.7)');
+        anime(ring, [{opacity: .9, transform: 'scale(1)'}, {opacity: 0, transform: 'scale(1.45,1.18)'}], {duration: 650, delay: dl, easing: 'ease-out', fill: 'backwards'});
+      });
+      for(var i = 0; i < 18; i++){
+        var a = R(0, 6.283), d = R(50, 130), e = piece('left:' + cx + 'px;top:' + cy + 'px;color:#ffe08a;font-size:' + R(12, 22) + 'px;text-shadow:0 0 8px rgba(255,200,80,.9)'); e.textContent = '✦';
+        anime(e, [{transform: 'translate(-50%,-50%) scale(.2)', opacity: 1}, {transform: 'translate(' + (Math.cos(a) * d - 8) + 'px,' + (Math.sin(a) * d * 1.3) + 'px) scale(1.2) rotate(' + R(-90, 90) + 'deg)', opacity: 0}], {duration: R(600, 1000), delay: R(0, 150), easing: 'ease-out', fill: 'backwards'});
+      }
+      texte(cx, r.top + r.height * .25, label, 'triple');
+      secousse(4);
+    }
+    function confettis(){
+      if(!nb()) return;
+      var cols = ['#ffe08a', '#e0675c', '#5fd6d8', '#9fd19a', '#f0b95a', '#ffffff'], W = window.innerWidth, H = window.innerHeight;
+      for(var i = 0; i < 90; i++){
+        var e = piece('left:' + R(0, W) + 'px;top:-20px;width:' + R(6, 11) + 'px;height:' + R(9, 16) + 'px;background:' + cols[i % cols.length] + ';border-radius:2px', L2);
+        anime(e, [{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: 'translate(' + R(-120, 120) + 'px,' + (H + 40) + 'px) rotate(' + R(-720, 720) + 'deg)', opacity: 1}], {duration: R(1800, 3400), delay: R(0, 700), easing: 'cubic-bezier(.3,.2,.6,1)', fill: 'backwards'});
+      }
+    }
+    return {impact: impact, eclats: eclats, texte: texte, secousse: secousse, triple: triple, confettis: confettis};
+  })();
+
 
   function options(){
     var t = S.triple === 'x2' ? {type:'mul', value:2} : {type:'add', value:+S.triple};
@@ -220,10 +479,11 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   }
   function render(){
     var humanTurn = G.turn === ME && !G.over;
-    $('boardOpp').innerHTML = [0, 1, 2].map(function(ci){ return '<div class="col opp" data-ci="' + ci + '">' + colHtml(BOT, ci) + '</div>'; }).join('');
+    $('boardOpp').innerHTML = [0, 1, 2].map(function(ci){ return '<div class="col opp' + (J.scoreColonne(G.board[BOT][ci], G.opts).triple ? ' tri' : '') + '" data-ci="' + ci + '">' + colHtml(BOT, ci) + '</div>'; }).join('');
     $('boardMe').innerHTML = [0, 1, 2].map(function(ci){
       var full = G.board[ME][ci].length >= 3, can = humanTurn && sel >= 0 && !full && !busy;
-      return '<div class="col me' + (can ? ' can' : '') + '" data-ci="' + ci + '" role="button" tabindex="' + (can ? 0 : -1) + '" aria-label="Colonne ' + (ci + 1) + (full ? ', pleine' : '') + '">' + colHtml(ME, ci) + '</div>';
+      var tri = J.scoreColonne(G.board[ME][ci], G.opts).triple;
+      return '<div class="col me' + (can ? ' can' : '') + (tri ? ' tri' : '') + '" data-ci="' + ci + '" role="button" tabindex="' + (can ? 0 : -1) + '" aria-label="Colonne ' + (ci + 1) + (full ? ', pleine' : '') + '">' + colHtml(ME, ci) + '</div>';
     }).join('');
     [['midOpp', BOT], ['midMe', ME]].forEach(function(m){
       $(m[0]).innerHTML = [0, 1, 2].map(function(ci){
@@ -231,8 +491,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
         return '<div class="sc' + (r.triple ? ' tri' : '') + '">' + r.score + (r.triple ? ' <small>★</small>' : '') + '</div>';
       }).join('');
     });
-    $('totOpp').textContent = G.scores[BOT];
-    $('totMe').textContent = G.scores[ME];
+    total('totOpp', BOT); total('totMe', ME);
     $('pioche').classList.toggle('vide', !G.pioche.length && !G.defausse.length);
     $('ohand').innerHTML = G.hands[BOT].map(function(c){ return '<i data-id="' + c.id + '"' + (cache[c.id] ? ' class="vh"' : '') + '></i>'; }).join('');
     $('hand').innerHTML = G.hands[ME].map(function(c, i){
@@ -241,6 +500,23 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
     $('who').textContent = G.over ? 'Partie terminée' : humanTurn ? 'À toi de jouer' : (busy && G.turn !== BOT ? '' : 'L\'adversaire réfléchit…');
     if(!busy) $('hint').textContent = humanTurn ? (sel < 0 ? 'Choisis une carte dans ta main.' : 'Choisis une colonne.') : '';
     majStats();
+  }
+  // le total compte jusqu'à sa nouvelle valeur, rebondit, et un "+N" s'envole
+  function total(id, p){
+    var el = $(id), to = G.scores[p], from = shown[p];
+    if(from === to){ el.textContent = to; return; }
+    shown[p] = to; var tk = ++twk[p], t0 = performance.now(), d = to - from;
+    (function step(now){
+      if(tk !== twk[p]) return;
+      var k = reduce ? 1 : Math.min(1, ((now || performance.now()) - t0) / 420);
+      el.textContent = Math.round(from + d * k);
+      if(k < 1) requestAnimationFrame(step); else el.textContent = to;
+    })(t0);
+    if(!reduce){
+      el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+      var r = el.getBoundingClientRect();
+      FX.texte(r.left + r.width / 2, r.top, (d > 0 ? '+' : '') + d, d > 0 ? 'plus' : 'moins');
+    }
   }
   function majStats(){ $('stats').textContent = stats.w + ' V · ' + stats.l + ' D · ' + stats.n + ' N'; }
 
@@ -274,6 +550,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   // Une carte quitte la pioche : vers ta main (elle se retourne) ou vers la main de l'adversaire (dos visible)
   function piocheVers(p, c){
     var from = rectOf($('pioche')), to;
+    Son.play('distribution');
     if(p === ME) to = rectOf(document.querySelector('#hand [data-id="' + c.id + '"]'));
     else to = rectOf(document.querySelector('#ohand [data-id="' + c.id + '"]'));
     if(!to) { reveler(c.id); return Promise.resolve(); }
@@ -292,7 +569,9 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
       tLeft -= 100;
       var f = Math.max(0, tLeft / (total * 1000));
       fill.style.width = (f * 100) + '%'; bar.classList.toggle('low', f < .3);
-      $('secs').textContent = Math.ceil(Math.max(0, tLeft) / 1000) + ' s';
+      var sc = Math.ceil(Math.max(0, tLeft) / 1000);
+      if(String(sc) !== $('secs').textContent.replace(' s', '') && sc <= 5 && sc > 0) Son.play('tic', {rate: 1 + (5 - sc) * .06});
+      $('secs').textContent = sc + ' s';
       if(tLeft <= 0){ stopTimer(); tempsEcoule(); }
     }, 100);
   }
@@ -309,7 +588,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   function debutTour(){
     if(G.over){ fin(); return; }
     render();
-    if(G.turn === ME){ startTimer(); }
+    if(G.turn === ME){ Son.play('tour'); startTimer(); }
     else {
       stopTimer(); $('secs').textContent = ''; $('bar').firstElementChild.style.width = '100%';
       var my = gen;
@@ -328,7 +607,8 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
     var from = p === ME ? rectOf(document.querySelector('#hand [data-h="' + h + '"]')) : rectOf(document.querySelector('#ohand [data-id="' + card.id + '"]'));
     var colEl = (p === ME ? $('boardMe') : $('boardOpp')).children[ci];
     var to = rectOf(colEl && colEl.children[G.board[p][ci].length]);
-    var idx = J.apercu(G, p, h, ci);
+    var idx = J.apercu(G, p, h, ci), row = G.board[p][ci].length, wasTri = J.scoreColonne(G.board[p][ci], G.opts).triple;
+    var oppCards = idx.map(function(r){ return G.board[opp][ci][r]; });
     $('hint').textContent = '';
     // 1) la carte vole de la main vers sa colonne
     Array.prototype.forEach.call(document.querySelectorAll(p === ME ? '#hand [data-h="' + h + '"]' : '#ohand [data-id="' + card.id + '"]'), function(e){ e.classList.add('vh'); });
@@ -337,8 +617,17 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
       vol = f;
       if(my !== gen){ f.remove(); return; }
       // 2) les cartes détruites de l'adversaire disparaissent
+      FX.impact(rectOf(f), card);
+      Son.play('pose', {rate: 1.15 - card.power * .035});
+      if(f.animate && !reduce) f.animate([{scale: '1.2'}, {scale: '.94', offset: .5}, {scale: '1'}], {duration: 300, easing: 'ease-out'});
       var oc = (opp === ME ? $('boardMe') : $('boardOpp')).children[ci];
-      idx.forEach(function(r){ var el = oc && oc.children[r]; if(el && el.classList.contains('gc')) el.classList.add('dying'); });
+      idx.forEach(function(r, k){ var el = oc && oc.children[r]; if(el && el.classList.contains('gc')){ el.classList.add('dying'); FX.eclats(rectOf(el), oppCards[k] && oppCards[k].r); } });
+      if(idx.length){
+        Son.play('destruction', {rate: 1 + (idx.length - 1) * .08});
+        FX.secousse(2 + idx.length * 2);
+        if(idx.length > 1){ var cr = rectOf(oc); FX.texte(cr.left + cr.width / 2, cr.top + cr.height / 2, '×' + idx.length, 'combo'); }
+        if(p === ME) gs.dest += idx.length;
+      }
       return wait(idx.length ? 420 : 0);
     }).then(function(){
       if(my !== gen) return;
@@ -346,6 +635,11 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
       if(r && r.pioche){ cache[r.pioche.id] = true; }
       render();
       if(vol && vol.remove) vol.remove();
+      if(r && J.scoreColonne(G.board[p][ci], G.opts).triple && !wasTri){
+        var tt = G.opts.triple, ce = (p === ME ? $('boardMe') : $('boardOpp')).children[ci];
+        FX.triple(ce, 'TRIPLE ' + (tt.type === 'mul' ? '×' + tt.value : '+' + tt.value));
+        Son.play('colonne'); if(p === ME) gs.tri++;
+      }
       if(r && r.fin){ busy = false; fin(); return; }
       // 3) la carte piochée quitte la pioche et rejoint la main
       return (r && r.pioche ? piocheVers(p, r.pioche) : Promise.resolve()).then(function(){
@@ -371,16 +665,25 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
     var w = G.winner, a = G.scores[ME], b = G.scores[BOT];
     if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++;
     majStats();
+    Son.musiqueOff();
     var t = $('finTitre');
     t.textContent = w === ME ? 'Victoire !' : w === BOT ? 'Défaite' : 'Égalité';
     t.className = 'big ' + (w === ME ? 'win' : w === BOT ? 'lose' : '');
     $('finPts').textContent = G.forfait != null ? (G.forfait === ME ? 'Trop de tours sans jouer : forfait.' : 'L\'adversaire a abandonné.') : 'Toi ' + a + ' — ' + b + ' Adversaire';
+    $('finStats').textContent = 'Cartes détruites : ' + gs.dest + ' · Colonnes triples : ' + gs.tri;
     $('finGain').textContent = w === ME ? 'Dans le vrai jeu : +10 ClubiGold (5 victoires récompensées par jour).' : '';
     var my = gen;
-    setTimeout(function(){ if(my === gen) $('vFin').hidden = false; }, 700);
+    setTimeout(function(){
+      if(my !== gen) return;
+      $('vFin').hidden = false;
+      var cl = $('finTitre'); cl.style.animation = 'none'; void cl.offsetWidth; cl.style.animation = '';
+      if(w === ME){ Son.play('victoire'); FX.confettis(); } else if(w === BOT) Son.play('defaite'); else Son.play('egalite');
+    }, 700);
   }
   function nouvelle(){
     gen++; clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; cache = {};
+    lob.my++; clearTimeout(lob.t); $('vLobby').hidden = true; gs = {dest:0, tri:0}; shown = [0, 0]; twk[0]++; twk[1]++;
+    Son.musiqueOn();
     Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
     $('vFin').hidden = true; $('vReglages').hidden = true;
     $('rHand').textContent = S.hand; $('rStart').textContent = +S.start || 'sans limite'; $('rSecs').textContent = +S.secs ? S.secs + ' secondes' : 'sans limite de temps';
@@ -392,12 +695,12 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   // ----- actions du joueur -----
   document.addEventListener('click', function(e){
     var c = e.target.closest('#hand .gc');
-    if(c && G && G.turn === ME && !busy && !G.over){ var i = +c.dataset.h; sel = sel === i ? -1 : i; render(); return; }
+    if(c && G && G.turn === ME && !busy && !G.over){ var i = +c.dataset.h; Son.play(sel === i ? 'deselection' : 'selection', {rate: 1 + c.classList.contains('r-legendaire') * .12}); sel = sel === i ? -1 : i; render(); return; }
     var col = e.target.closest('#boardMe .col');
     if(col && G && G.turn === ME && !busy && !G.over){
       var ci = +col.dataset.ci;
-      if(sel < 0){ $('hint').textContent = 'Choisis d\'abord une carte dans ta main.'; return; }
-      if(G.board[ME][ci].length >= 3){ $('hint').textContent = 'Cette colonne est pleine.'; return; }
+      if(sel < 0){ Son.play('erreur'); $('hint').textContent = 'Choisis d\'abord une carte dans ta main.'; return; }
+      if(G.board[ME][ci].length >= 3){ Son.play('erreur'); $('hint').textContent = 'Cette colonne est pleine.'; return; }
       jouerCoup(ME, sel, ci);
     }
   });
@@ -416,20 +719,75 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   });
   document.addEventListener('mouseout', function(e){ if(!e.relatedTarget) clearTarget(); });
 
+  // survol des cartes : légère inclinaison qui suit la souris + petit son sur la main
+  var lastHov = 0;
+  document.addEventListener('mousemove', function(e){
+    var c = e.target.closest && e.target.closest('.gc'); if(!c || c.classList.contains('off') || c.classList.contains('dying')) return;
+    var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    c.style.setProperty('--ry', ((x - .5) * 16).toFixed(1) + 'deg'); c.style.setProperty('--rx', ((.5 - y) * 16).toFixed(1) + 'deg');
+  });
+  document.addEventListener('mouseover', function(e){
+    var c = e.target.closest && e.target.closest('#hand .gc'); if(!c || c.classList.contains('off')) return;
+    if(e.relatedTarget && c.contains(e.relatedTarget)) return;
+    var n = Date.now(); if(n - lastHov > 90){ lastHov = n; Son.play('survol'); }
+  });
+  document.addEventListener('mouseout', function(e){
+    var c = e.target.closest && e.target.closest('.gc'); if(!c || (e.relatedTarget && c.contains(e.relatedTarget))) return;
+    c.style.removeProperty('--rx'); c.style.removeProperty('--ry');
+  });
+
+  // ----- écran "Jouer" : chacun doit être prêt -----
+  var lob = {me:false, opp:false, cd:false, t:null, my:0};
+  function majLobby(){
+    $('plMe').classList.toggle('ok', lob.me); $('plOpp').classList.toggle('ok', lob.opp);
+    $('etMe').textContent = lob.me ? 'Prêt ✓' : 'Pas prêt';
+    $('etOpp').textContent = lob.opp ? 'Prêt ✓' : 'En attente…';
+    var b = $('bJouer'); b.textContent = lob.cd ? 'C\'est parti…' : lob.me ? 'Annuler' : 'Jouer'; b.disabled = lob.cd;
+    b.classList.toggle('wait', lob.me && !lob.cd); b.classList.toggle('pulse', !lob.me && lob.opp);
+    $('lhint').textContent = lob.cd ? '' : lob.me && !lob.opp ? 'En attente de l\'adversaire…' : !lob.me && lob.opp ? 'L\'adversaire est prêt, à toi !' : lob.me ? '' : 'Clique sur Jouer quand tu es prêt.';
+  }
+  function showLobby(){
+    gen++; clearTimeout(botTimer); stopTimer(); busy = false; Son.musiqueOff();
+    Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
+    $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = false;
+    lob.me = false; lob.opp = false; lob.cd = false; var id = ++lob.my; $('cnt').textContent = '';
+    majLobby(); clearTimeout(lob.t);
+    lob.t = setTimeout(function(){ if(id !== lob.my) return; lob.opp = true; Son.play('pret', {rate: .85}); majLobby(); verifier(); }, 1200 + Math.random() * 3200);
+  }
+  function verifier(){
+    if(!(lob.me && lob.opp) || lob.cd) return;
+    lob.cd = true; majLobby(); var id = lob.my, n = 3, c = $('cnt');
+    (function tick(){
+      if(id !== lob.my) return;
+      c.className = 'cnt'; void c.offsetWidth; c.className = 'cnt t';
+      if(n > 0){ c.textContent = n--; Son.play('decompte'); setTimeout(tick, 750); }
+      else { c.textContent = 'GO !'; Son.play('go'); setTimeout(function(){ if(id === lob.my) nouvelle(); }, 500); }
+    })();
+  }
+  $('bJouer').onclick = function(){
+    Son.init(); if(lob.cd) return;
+    lob.me = !lob.me; Son.play('pret', {rate: lob.me ? 1 : .75}); majLobby(); verifier();
+  };
+  $('bReglesL').onclick = function(){ ouvrir('vRegles'); };
+  Array.prototype.forEach.call(document.querySelectorAll('.sonBtn'), function(b){ b.onclick = function(){ Son.init(); Son.bascule(); }; });
+  ['pointerdown', 'keydown'].forEach(function(ev){ document.addEventListener(ev, function(){ Son.init(); }, {once: true}); });
+  $('sMus').oninput = function(){ Son.regler('music', this.value / 100); };
+  $('sSfx').oninput = function(){ Son.regler('sfx', this.value / 100); };
+
   // ----- fenêtres -----
   function ouvrir(id){ $(id).hidden = false; }
   $('bRegles').onclick = function(){ ouvrir('vRegles'); };
-  $('bReglages').onclick = function(){ KEYS.forEach(function(p){ var a = p.split(':'); $('s' + a[0]).value = S[a[1]]; }); ouvrir('vReglages'); };
+  $('bReglages').onclick = function(){ $('sMus').value = Son.cfg.music * 100; $('sSfx').value = Son.cfg.sfx * 100; KEYS.forEach(function(p){ var a = p.split(':'); $('s' + a[0]).value = S[a[1]]; }); ouvrir('vReglages'); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function(b){ b.onclick = function(){ b.closest('.veil').hidden = true; }; });
   $('bNew').onclick = function(){
     KEYS.forEach(function(p){ var a = p.split(':'); S[a[1]] = $('s' + a[0]).value; });
     try{ localStorage.setItem('leclubi-jeu3', JSON.stringify(S)); }catch(e){}
-    nouvelle();
+    showLobby();
   };
-  $('bRejouer').onclick = nouvelle;
+  $('bRejouer').onclick = showLobby;
 
   window.__jeu = {get G(){ return G; }, nouvelle: nouvelle, S: S, get busy(){ return busy; }};   // pour les tests
-  nouvelle();
+  Son.appliquer(); showLobby();
   if(!sessionStorage.getItem('leclubi-jeu-regles')){ try{ sessionStorage.setItem('leclubi-jeu-regles', '1'); }catch(e){} ouvrir('vRegles'); }
 })();
 </script>
