@@ -141,6 +141,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
 /* effets */
 #fx,#fx2{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 #fx{z-index:18} #fx2{z-index:40}
+#vRegles,#vReglages{z-index:35}
 .ft{position:absolute;font-weight:900;white-space:nowrap;letter-spacing:.02em;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 12px rgba(0,0,0,.5)}
 .ft.plus{color:#9cf0b0;font-size:22px} .ft.moins{color:#ff8a80;font-size:20px}
 .ft.combo{color:#ff9d7a;font-size:30px} .ft.triple{color:#ffe08a;font-size:34px}
@@ -257,14 +258,12 @@ input[type=range]{accent-color:var(--accent);width:55%}
 .bgl .sf2{top:28%;height:58%;opacity:.85;animation:fog2 58s ease-in-out infinite alternate}
 .bgl .sf3{bottom:-18%;height:62%;animation:fog1 73s ease-in-out infinite alternate-reverse}
 .sh-rust{position:absolute;inset:0;opacity:0;transition:opacity 1.6s;mix-blend-mode:multiply;background:repeating-linear-gradient(45deg,rgba(0,0,0,.55) 0 2px,transparent 2px 17px),repeating-linear-gradient(-45deg,rgba(0,0,0,.55) 0 2px,transparent 2px 17px),radial-gradient(circle at 50% 50%,rgba(150,64,22,.55),rgba(40,10,5,.75))}
-.sh-rust.on{opacity:.7}
+.sh-rust.on{opacity:.3}
 .sh-red{position:absolute;inset:0;opacity:0;transition:opacity 1.2s;background:radial-gradient(circle at 50% 50%,transparent 28%,rgba(150,12,12,.6))}
 .sh-grain,.sh-static{position:absolute;inset:-10%;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/></svg>")}
-.sh-grain{opacity:.16;mix-blend-mode:overlay;animation:grain .7s steps(6) infinite}
+.sh-grain{opacity:.1;mix-blend-mode:overlay;animation:grain 2.4s linear infinite}
 .sh-static{opacity:0;mix-blend-mode:screen;animation:grain .12s steps(3) infinite}
 @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
-.th-silent .bgl{animation:shflick 11s steps(1) infinite}
-@keyframes shflick{0%,46%,47.4%,92%,92.6%,100%{filter:none}47%{filter:brightness(.55)}92.3%{filter:brightness(1.6) contrast(1.2)}}
 .vig{position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 50%,transparent 38%,rgba(0,0,0,.6))}
 
 /* ---------- fond "Braise" (From Software) ---------- */
@@ -802,14 +801,12 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
           else this.figure(); }
         s.nSwirl -= dt; if(s.nSwirl <= 0){ s.nSwirl = R(9, 18); var sx = R(0, W), sy = R(0, H);
           for(i = 0; i < parts.length; i++){ var p = parts[i]; if(p.t === 'fog'){ var dx = sx - p.x, dy = sy - p.y, d = Math.hypot(dx, dy) + 1; if(d < 520){ p.ex += (-dy / d + dx / d * .3) * 90; p.ey += (dx / d + dy / d * .3) * 90; } } } }
-        s.nStatic -= dt; if(s.nStatic <= 0){ s.nStatic = R(28, 55) / (1 + heat * .5); s.statT = .3; }
-        if(s.statT > 0){ s.statT -= dt; s.stat.style.opacity = s.statT > 0 && Math.random() < .5 ? R(.06, .17).toFixed(2) : 0; if(s.statT <= 0) s.stat.style.opacity = 0; }
         s.nSiren -= dt; if(s.nSiren <= 0){ s.nSiren = R(80, 130); this.siren(5); }
         if(s.siren > 0){ s.siren -= dt; if(s.siren <= 0){ s.rust.classList.remove('on'); } }
-        s.red.style.opacity = (s.siren > 0 ? .85 : Math.min(.6, heat * .5)).toFixed(2);
+        s.red.style.opacity = (s.siren > 0 ? .5 : Math.min(.4, heat * .35)).toFixed(2);
       },
       figure: function(){ parts.push({t: 'fig', x: R(W * .12, W * .35) + (Math.random() < .5 ? 0 : W * .5), y: H * R(.78, .98), h: H * R(.5, .65), vx: R(-12, 12), age: 0, life: R(11, 16), stut: R(1, 3), bow: R(-1, 1)}); },
-      siren: function(t){ var s = this.st; s.siren = t; s.rust.classList.add('on'); flashes.push({x: W / 2, y: H / 2, c: '255,90,30', a: .45, r: Math.max(W, H) * .6}); },
+      siren: function(t){ var s = this.st; s.siren = t; s.rust.classList.add('on'); },
       update: function(p, dt){
         if(p.t === 'fog'){ p.ex *= (1 - dt * .5); p.ey *= (1 - dt * .5); p.x += (p.bx + p.ex) * dt; p.y += (p.by + p.ey) * dt; if(p.x < -250) p.x = W + 250; if(p.x > W + 250) p.x = -250; if(p.y < -200 || p.y > H + 200) p.by *= -1; p.ph += dt * .35; draw('gray', p.x, p.y, p.s, p.a * (.75 + .25 * Math.sin(p.ph))); }
         else if(p.t === 'ash'){ p.ph += dt * 1.5; p.x += Math.sin(p.ph) * 12 * dt; p.y += p.vy * dt; if(p.y > H + 8){ this.ash(false); return false; } draw('white', p.x, p.y, p.s, p.a * (.6 + .4 * Math.sin(p.ph * 2.1))); }
@@ -827,11 +824,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
           cx.beginPath(); cx.ellipse(p.x - p.dir * p.h * .3, p.y - p.h * .05, p.h * .3, p.h * .05, 0, 0, 6.283); cx.fill(); cx.restore();
         }
       },
-      react: function(k){
-        if(k === 'red') flashes.push({x: W / 2, y: H / 2, c: '200,40,30', a: .4, r: Math.max(W, H) * .5});
-        else if(k === 'gold') flashes.push({x: W / 2, y: H / 2, c: '230,225,200', a: .3, r: Math.max(W, H) * .5});
-        if(k === 'red' && this.st && Math.random() < .1){ this.st.statT = .25; }
-      }
+      react: function(k){ if(k === 'red') flashes.push({x: W / 2, y: H / 2, c: '200,40,30', a: .4, r: Math.max(W, H) * .5}); }
     };
 
     // ---------------------------------------------------------------- BRAISE (univers From Software)
