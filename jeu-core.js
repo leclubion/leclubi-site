@@ -19,6 +19,7 @@
   //  b  = 4 cartes hautes en tout (2 Légendaires + 2 Spéciales)
   //  v1 = première version (6 Légendaires + 6 Spéciales)
   var PIOCHES = {
+    e:  {1:14, 2:14, 3:14, 4:14, 5:5, 6:5, 7:4, 8:4, 9:3},   // 77 cartes (défaut) : Rares+ = 27 % de la pioche, Légendaires+Spéciales = 14 %
     c:  {1:10, 2:10, 3:10, 4:10, 5:6, 6:6, 7:5, 8:5, 9:4},   // 66 cartes : 5 exemplaires de chaque Légendaire (un triple devient possible)
     d:  {1:9, 2:9, 3:9, 4:9, 5:6, 6:6, 7:4, 8:4, 9:4},        // 60 cartes : 4 exemplaires de chaque Légendaire
     a:  {1:8, 2:8, 3:8, 4:8, 5:6, 6:6, 7:2, 8:2, 9:4},
@@ -59,7 +60,7 @@
 
   // ---------- Réglages par défaut ----------
   function reglages(o){
-    var d = {destroy:'all', triple:{type:'add', value:10}, hand:3, seconds:30, tolerance:3, pile:'c', startMax:6};
+    var d = {destroy:'all', triple:{type:'add', value:10}, hand:3, seconds:30, tolerance:3, pile:'e', startMax:6};
     o = o || {};
     for(var k in o) d[k] = o[k];
     return d;
