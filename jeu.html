@@ -17,7 +17,7 @@
 }
 /* grand écran : la main reste en bas, les cartes grandissent avec la hauteur de la fenêtre */
 @media (min-width:820px){
-  :root{--sh:clamp(60px,calc((100vh - 235px) / 7.6),150px)}
+  :root{--sh:clamp(60px,calc((100vh - 238px) / 7.1),172px)}
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -233,30 +233,7 @@ input[type=range]{accent-color:var(--accent);width:55%}
 @keyframes flick{from{transform:scale(1,.78) skewX(-7deg)}to{transform:scale(.9,1.18) skewX(8deg)}}
 .ft.feu{color:#ffb347;font-size:40px;text-shadow:0 0 14px #ff6a1a,0 0 30px #ff3a1a,0 2px 0 rgba(0,0,0,.6)}
 
-/* ---- écran large : 3 voies horizontales (adversaire à gauche, toi à droite), main en bas ---- */
-@media (min-width:820px) and (min-aspect-ratio:5/4){
-  :root{--sh:clamp(40px,min(calc((100vh - 215px) / 4.3),calc((100vw - 560px) / 4.4)),240px)}
-  .wrap{padding:6px 14px 12px}
-  .status{width:min(100%,1100px)}
-  .table{display:grid;grid-template-columns:minmax(150px,1fr) auto minmax(150px,1fr);grid-template-rows:auto auto;column-gap:18px;row-gap:12px;width:100%;max-width:1700px;padding:18px 22px;align-items:center}
-  .side{display:contents}
-  .side>:nth-child(1){grid-column:1;grid-row:1;justify-self:center}
-  .side>:nth-child(2){grid-column:3;grid-row:2;justify-self:center}
-  .side>:nth-child(3){grid-column:3;grid-row:1;justify-self:center}
-  .boards{grid-column:2;grid-row:1;display:grid;grid-template-columns:auto auto 2px auto auto;align-items:center;column-gap:8px}
-  .board{grid-template-columns:none;grid-template-rows:repeat(3,auto);gap:8px}
-  .col{flex-direction:row;gap:6px}
-  .col.me{flex-direction:row}
-  .col.opp{flex-direction:row-reverse}
-  .mid{width:auto;grid-template-columns:none;grid-template-rows:repeat(3,calc(var(--sh) + 8px));gap:8px;padding:0 4px}
-  .mid .sc{display:flex;align-items:center;justify-content:center;min-height:0;height:100%;line-height:1;gap:3px;font-size:calc(var(--sh) * .2);min-width:calc(var(--sh) * .42)}
-  .line{width:3px;height:calc(100% + 14px);align-self:center;margin:0;background:linear-gradient(180deg,transparent,rgba(235,195,110,.95) 15%,rgba(235,195,110,.95) 85%,transparent)}
-  .hand{grid-column:2;grid-row:2;flex-basis:auto;min-height:calc(var(--sh) * 1.2)}
-  .ohand{margin-top:8px}
-  .tot b{font-size:calc(var(--sh) * .4)}
-  .tot b.hot{font-size:calc(var(--sh) * .55)} .tot b.inferno{font-size:calc(var(--sh) * .72)}
-  .pioche small{bottom:calc(var(--sh) * -.2)}
-}
+@media (min-width:641px){.wrap{gap:4px;padding:4px 12px 6px}.table{padding-top:8px;padding-bottom:8px}}
 @media (prefers-reduced-motion:reduce){.gc,.gc.dying{animation:none;transition:none}}
 </style>
 </head>
