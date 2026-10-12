@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Bataille de colonnes — LeClubi (bêta)</title>
+<title>Clash des Piliers — LeClubi (bêta)</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
@@ -41,7 +41,7 @@ a{color:inherit}
 /* table de jeu */
 .table{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;align-items:stretch;padding:14px 18px;border-radius:18px;background:radial-gradient(120% 120% at 50% 40%,#1f6b45 0%,#17513a 55%,#0f3a29 100%);border:1px solid #0c2b1f;box-shadow:inset 0 0 60px rgba(0,0,0,.35)}
 .boards{display:flex;flex-direction:column;align-items:center}
-.board{display:grid;grid-template-columns:repeat(3,var(--sw));gap:8px}
+.board{display:grid;grid-template-columns:repeat(3,calc(var(--sw) + 8px));gap:8px}
 .col{display:flex;gap:6px;border-radius:8px;padding:3px;transition:background .15s}
 .col.opp{flex-direction:column-reverse}
 .col.me{flex-direction:column}
@@ -49,7 +49,7 @@ a{color:inherit}
 .col.me.can:hover,.col.me.can:focus-visible{background:rgba(199,154,75,.28);outline:none}
 .slot{width:var(--sw);height:var(--sh);border-radius:6px;border:1px dashed rgba(255,255,255,.22);background:rgba(0,0,0,.14)}
 .slot.next{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
-.mid{width:100%;display:grid;grid-template-columns:repeat(3,var(--sw));gap:8px;padding:0 3px}
+.mid{width:100%;display:grid;grid-template-columns:repeat(3,calc(var(--sw) + 8px));gap:8px;padding:0}
 .mid .sc{text-align:center;font-weight:600;font-size:calc(var(--sh) * .17);color:#e9f4ec;min-height:22px;line-height:22px;font-variant-numeric:tabular-nums}
 .mid .sc.tri{color:#ffe08a}
 .mid .sc small{font-size:.7em;opacity:.85}
@@ -219,11 +219,11 @@ input[type=range]{accent-color:var(--accent);width:55%}
 /* main en éventail */
 .hand .gc{transition:transform .2s,rotate .2s,translate .2s,opacity .3s,filter .3s}
 .hand .gc:nth-child(1):not(:last-child){rotate:-3deg;translate:0 5px} .hand .gc:nth-child(3){rotate:3deg;translate:0 5px}
-.hand .gc:hover,.hand .gc.sel{rotate:0deg;translate:0 0}
+.hand .gc:hover,.hand .gc.sel,.hand .gc:nth-child(n):not(.x):hover,.hand .gc:nth-child(n):not(.x).sel{rotate:0deg;translate:0 0}
 .gc.hit{filter:brightness(3.2) saturate(.15);transform:scale(1.09);transition:none}
 
 @media (min-width:641px){.wrap{gap:4px;padding:4px 12px 6px}.table{padding-top:8px;padding-bottom:8px}}
-@media (min-width:641px){.board,.mid{column-gap:calc(var(--sw) * .42)}.mid{padding:0 3px}.table{gap:20px 56px}}
+@media (min-width:641px){.board,.mid{column-gap:calc(var(--sw) * .42)}.mid{padding:0}.table{gap:20px 56px}}
 @media (min-width:820px){.table{width:100%;max-width:1360px}.status{width:min(100%,1000px)}}
 
 /* =================== v6 : plateau centré sur l'œil, scores en tension, numéros vivants, 4 fonds de table =================== */
@@ -326,7 +326,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 <body>
 <div class="top">
   <a class="btn" href="index.html">&larr; Site</a>
-  <h1>Bataille de colonnes <small style="color:var(--muted);font-weight:400">· bêta</small></h1>
+  <h1><span class="nomjeu">Clash des Piliers</span> <small style="color:var(--muted);font-weight:400">· bêta</small></h1>
   <span class="stats" id="stats"></span>
   <button class="btn sonBtn" type="button" aria-label="Son" title="Son">🔊</button>
   <button class="btn" id="bQuit" type="button" hidden>Abandonner</button>
@@ -355,7 +355,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 </div>
 
 <div class="veil" id="vLobby" hidden><div class="box lobby">
-  <h2>Bataille de colonnes</h2>
+  <h2 class="nomjeu">Clash des Piliers</h2>
   <div class="duel">
     <div class="pl" id="plMe"><div class="av">T</div><b>Toi</b><span class="etat" id="etMe">Pas prêt</span></div>
     <div class="vs">VS</div>
@@ -413,7 +413,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 
 
 <div class="veil" id="vMenu" hidden><div class="box lobby menu">
-  <h2>Bataille de colonnes</h2>
+  <h2 class="nomjeu">Clash des Piliers</h2>
   <div class="mcompte" id="mCompte" hidden><b id="mPseudo"></b><span id="mStat"></span></div>
   <div class="mpres" id="mPres"></div>
   <div id="mLogin" hidden>
@@ -801,14 +801,14 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
           else this.figure(); }
         s.nSwirl -= dt; if(s.nSwirl <= 0){ s.nSwirl = R(9, 18); var sx = R(0, W), sy = R(0, H);
           for(i = 0; i < parts.length; i++){ var p = parts[i]; if(p.t === 'fog'){ var dx = sx - p.x, dy = sy - p.y, d = Math.hypot(dx, dy) + 1; if(d < 520){ p.ex += (-dy / d + dx / d * .3) * 90; p.ey += (dx / d + dy / d * .3) * 90; } } } }
-        s.nStatic -= dt; if(s.nStatic <= 0){ s.nStatic = R(14, 30) / (1 + heat); s.statT = .45; }
-        if(s.statT > 0){ s.statT -= dt; s.stat.style.opacity = s.statT > 0 && Math.random() < .55 ? R(.25, .6).toFixed(2) : 0; if(s.statT <= 0) s.stat.style.opacity = 0; }
-        s.nSiren -= dt; if(s.nSiren <= 0){ s.nSiren = R(40, 70); this.siren(5); }
+        s.nStatic -= dt; if(s.nStatic <= 0){ s.nStatic = R(28, 55) / (1 + heat * .5); s.statT = .3; }
+        if(s.statT > 0){ s.statT -= dt; s.stat.style.opacity = s.statT > 0 && Math.random() < .5 ? R(.06, .17).toFixed(2) : 0; if(s.statT <= 0) s.stat.style.opacity = 0; }
+        s.nSiren -= dt; if(s.nSiren <= 0){ s.nSiren = R(80, 130); this.siren(5); }
         if(s.siren > 0){ s.siren -= dt; if(s.siren <= 0){ s.rust.classList.remove('on'); } }
         s.red.style.opacity = (s.siren > 0 ? .85 : Math.min(.6, heat * .5)).toFixed(2);
       },
       figure: function(){ parts.push({t: 'fig', x: R(W * .12, W * .35) + (Math.random() < .5 ? 0 : W * .5), y: H * R(.78, .98), h: H * R(.5, .65), vx: R(-12, 12), age: 0, life: R(11, 16), stut: R(1, 3), bow: R(-1, 1)}); },
-      siren: function(t){ var s = this.st; s.siren = t; s.rust.classList.add('on'); flashes.push({x: W / 2, y: H / 2, c: '255,90,30', a: 1, r: Math.max(W, H) * .6}); },
+      siren: function(t){ var s = this.st; s.siren = t; s.rust.classList.add('on'); flashes.push({x: W / 2, y: H / 2, c: '255,90,30', a: .45, r: Math.max(W, H) * .6}); },
       update: function(p, dt){
         if(p.t === 'fog'){ p.ex *= (1 - dt * .5); p.ey *= (1 - dt * .5); p.x += (p.bx + p.ex) * dt; p.y += (p.by + p.ey) * dt; if(p.x < -250) p.x = W + 250; if(p.x > W + 250) p.x = -250; if(p.y < -200 || p.y > H + 200) p.by *= -1; p.ph += dt * .35; draw('gray', p.x, p.y, p.s, p.a * (.75 + .25 * Math.sin(p.ph))); }
         else if(p.t === 'ash'){ p.ph += dt * 1.5; p.x += Math.sin(p.ph) * 12 * dt; p.y += p.vy * dt; if(p.y > H + 8){ this.ash(false); return false; } draw('white', p.x, p.y, p.s, p.a * (.6 + .4 * Math.sin(p.ph * 2.1))); }
@@ -827,9 +827,9 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
         }
       },
       react: function(k){
-        if(k === 'red') flashes.push({x: W / 2, y: H / 2, c: '200,40,30', a: .8, r: Math.max(W, H) * .5});
-        else if(k === 'gold') flashes.push({x: W / 2, y: H / 2, c: '230,225,200', a: .7, r: Math.max(W, H) * .5});
-        if(k === 'red' && this.st && Math.random() < .35){ this.st.statT = .35; }
+        if(k === 'red') flashes.push({x: W / 2, y: H / 2, c: '200,40,30', a: .4, r: Math.max(W, H) * .5});
+        else if(k === 'gold') flashes.push({x: W / 2, y: H / 2, c: '230,225,200', a: .3, r: Math.max(W, H) * .5});
+        if(k === 'red' && this.st && Math.random() < .1){ this.st.statT = .25; }
       }
     };
 
@@ -895,7 +895,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       glitch: function(t){ this.st.gl = Math.max(this.st.gl, t); },
       spawn: function(dt){
         var s = this.st; s.acc += (2 + heat * 6) * dt; while(s.acc >= 1){ s.acc--; if(parts.length < 260) this.px(false); }
-        s.nGl -= dt * (1 + heat * 2); if(s.nGl <= 0){ s.nGl = R(4, 9); this.glitch(R(.25, .45)); }
+        s.nGl -= dt * (1 + heat); if(s.nGl <= 0){ s.nGl = R(11, 22); this.glitch(R(.15, .28)); }
         s.red.style.opacity = Math.min(.35, heat * .3).toFixed(2);
       },
       update: function(p, dt){
@@ -907,14 +907,14 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
         var s = this.st;
         if(s.gl > 0){
           s.gl -= dt; s.stripT -= dt;
-          if(s.stripT <= 0){ s.stripT = .05; s.strips = []; var cols = ['rgba(58,54,48,.3)', 'rgba(236,230,208,.45)', 'rgba(220,50,60,.3)', 'rgba(60,200,220,.3)'];
-            for(var i = 0; i < 9; i++) s.strips.push({x: R(0, W * .5), y: R(0, H), w: R(W * .1, W * .55), h: R(2, 14), c: cols[i % 4]});
-            wrap.style.transform = 'translate(' + R(-6, 6).toFixed(1) + 'px,0)'; }
+          if(s.stripT <= 0){ s.stripT = .05; s.strips = []; var cols = ['rgba(58,54,48,.16)', 'rgba(236,230,208,.25)', 'rgba(220,50,60,.15)', 'rgba(60,200,220,.15)'];
+            for(var i = 0; i < 5; i++) s.strips.push({x: R(0, W * .5), y: R(0, H), w: R(W * .1, W * .55), h: R(2, 14), c: cols[i % 4]});
+            wrap.style.transform = 'translate(' + R(-3, 3).toFixed(1) + 'px,0)'; }
           cx.globalAlpha = 1; s.strips.forEach(function(r){ cx.fillStyle = r.c; cx.fillRect(r.x, r.y, r.w, r.h); });
           if(s.gl <= 0){ wrap.style.transform = ''; s.strips = []; }
         }
       },
-      react: function(k){ this.glitch(k === 'red' ? .35 : .55); flashes.push({x: W / 2, y: H / 2, c: k === 'gold' ? '236,200,110' : '220,50,60', a: .55, r: Math.max(W, H) * .5}); }
+      react: function(k){ this.glitch(k === 'red' ? .2 : .3); flashes.push({x: W / 2, y: H / 2, c: k === 'gold' ? '236,200,110' : '220,50,60', a: .28, r: Math.max(W, H) * .5}); }
     };
 
     // ---------------------------------------------------------------- moteur commun
@@ -1338,7 +1338,8 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   //  MODE EN LIGNE — le serveur arbitre la partie ; ici on affiche et on envoie ses choix.
   //  Deux réglages à remplir pour l'activer (voir le guide de mise en ligne) :
   // =====================================================================
-  var CFG = window.JEU_CONFIG || {};          // réglages dans le fichier config-jeu.js (à côté de jeu.html)
+  var CFG = window.JEU_CONFIG || {};
+  if(CFG.NOM){ Array.prototype.forEach.call(document.querySelectorAll('.nomjeu'), function(e){ e.textContent = CFG.NOM; }); document.title = CFG.NOM + ' — LeClubi (bêta)'; }          // réglages dans le fichier config-jeu.js (à côté de jeu.html)
   var API_URL = String(CFG.API_URL || '').replace(/\/$/, ''), TWITCH_CLIENT_ID = String(CFG.TWITCH_CLIENT_ID || '');
   var EN_LIGNE = !!(API_URL && TWITCH_CLIENT_ID);
   var ONL = {actif:false, mode:'bot', ws:null, ok:false, token:null, moi:null, presence:null, pause:false, q:[], seat:0, pending:null, cur:null, envoi:false,

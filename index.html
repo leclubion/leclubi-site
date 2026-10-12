@@ -533,6 +533,11 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 /* classement du jeu */
 nav a[hidden],.btn[hidden]{display:none}
 nav a{white-space:nowrap}
+header .wrap.bar{max-width:1280px}
+.bar{gap:20px}
+.hlinks{flex-shrink:0;flex-wrap:nowrap}.hlinks .btn{white-space:nowrap}
+nav{min-width:0}
+@media (max-width:1120px) and (min-width:981px){header{position:static}.bar{height:auto;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;gap:6px 16px}.logo{margin-right:auto}.bar nav{order:3;flex:1 0 100%;flex-wrap:wrap}}
 @media (max-width:1240px) and (min-width:900px){nav a{padding:8px 9px;font-size:14px}}
 .ktable-w{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .ktable{width:100%;border-collapse:collapse;font-size:15px}
@@ -585,7 +590,7 @@ nav a{white-space:nowrap}
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
-          <a class="btn ghost" id="hjouer" href="jeu.html" hidden>Jouer à la Bataille de colonnes</a>
+          <a class="btn ghost" id="hjouer" href="jeu.html" hidden>Jouer à <span class="nomjeu">Clash des Piliers</span></a>
         </div>
       </div>
       <div class="player" role="img" aria-label="Emplacement du lecteur Twitch">
@@ -715,7 +720,7 @@ nav a{white-space:nowrap}
 <div class="view" id="v-classement" hidden>
   <section>
     <div class="wrap">
-      <h1>Classement · Bataille de colonnes</h1>
+      <h1>Classement · <span class="nomjeu">Clash des Piliers</span></h1>
       <p class="lead">Les meilleurs joueurs du jeu de cartes de LeClubi. Seules les parties entre joueurs comptent.</p>
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="ktRatio" aria-selected="true" type="button">Ratio de victoires</button>
@@ -724,7 +729,7 @@ nav a{white-space:nowrap}
       <div class="cfilter"><input id="kq" type="search" placeholder="Rechercher un joueur" aria-label="Rechercher un joueur" autocomplete="off"><span id="kinfo"></span></div>
       <div class="ktable-w"><table class="ktable" id="ktable"><thead><tr><th>#</th><th>Pseudo</th><th class="n">Parties jouées</th><th class="n">Parties gagnées</th><th class="n">Ratio</th></tr></thead><tbody id="kbody"></tbody></table></div>
       <p class="note" id="knote"></p>
-      <p><a class="btn" id="kjouer" href="jeu.html" hidden>Jouer à la Bataille de colonnes</a></p>
+      <p><a class="btn" id="kjouer" href="jeu.html" hidden>Jouer à <span class="nomjeu">Clash des Piliers</span></a></p>
     </div>
   </section>
 </div>
@@ -1916,10 +1921,11 @@ playG();
   p.removeAttribute('aria-label');
   p.innerHTML = '<iframe title="Live Twitch de LeClubi" src="https://player.twitch.tv/?channel=leclubi&parent=' + encodeURIComponent(location.hostname) + '&muted=true" allowfullscreen loading="lazy"></iframe>';
 })();
-// ---- Classement du jeu "Bataille de colonnes" ----
+// ---- Classement du jeu ----
 // Les réglages (adresse du serveur, jeu ouvert ou non) sont dans config-jeu.js. Tant que l'adresse est vide, l'onglet Classement reste caché.
 var JEU_API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, '');      // réglages dans le fichier config-jeu.js
 var JEU_OUVERT = !!(window.JEU_CONFIG || {}).OUVERT;
+if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(function(e){ e.textContent = JEU_CONFIG.NOM; });
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10;
   if(JEU_API) document.getElementById('navClass').hidden = false;
