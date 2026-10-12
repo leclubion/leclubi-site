@@ -223,6 +223,47 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 @media (max-width:860px){.pollgrid{grid-template-columns:1fr}}
 .player.live{display:block;position:relative;padding:0;overflow:hidden}
 .player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.player.cbv{display:block;position:relative;padding:0;overflow:hidden;border:1px solid var(--line);background:#120a0c}
+.cb{position:absolute;inset:0;overflow:hidden}
+.cbs{position:absolute;left:0;top:0;width:640px;height:360px;transform-origin:0 0;background:radial-gradient(ellipse at 50% -10%,#5e121b 0%,#2b0c12 48%,#120a0c 100%);color:#f3eee4;text-align:left;font-family:inherit}
+.cbs *{box-sizing:border-box}
+.cb-lbl{position:absolute;left:30px;top:52px;font-size:12px;font-weight:700;letter-spacing:.16em;color:#d7aa5a;text-transform:uppercase;transition:opacity .35s,transform .35s}
+.cb-cap{position:absolute;left:30px;top:76px;width:310px;transition:opacity .35s,transform .35s}
+.cb-cap b{display:block;font-size:25px;line-height:1.22;font-weight:700;letter-spacing:-.01em}
+.cb-cap span{display:block;margin-top:10px;font-size:14px;line-height:1.4;color:#c9bfb0}
+.cb-out{opacity:0!important;transform:translateY(8px)}
+.cb-tot{position:absolute;left:30px;bottom:34px;display:flex;gap:26px;transition:opacity .5s;opacity:0}
+.cb-tot.on{opacity:1}
+.cb-tot div{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a99f90}
+.cb-tot em{display:block;font-style:normal;font-size:38px;line-height:1.05;letter-spacing:0;font-weight:800;color:#f3eee4;margin-top:2px;font-variant-numeric:tabular-nums}
+.cb-tot .me em{color:#e7bd6a}.cb-tot .op em{color:#ff9086}
+.cb-board{position:absolute;left:378px;top:0;width:240px;height:360px;transition:opacity .5s;opacity:0}
+.cb-board.on{opacity:1}
+.cb-zone{position:absolute;width:62px;height:154px;border:1.5px dashed rgba(255,255,255,.2);border-radius:8px}
+.cb-pill{position:absolute;width:62px;height:24px;line-height:24px;text-align:center;font-size:12px;font-weight:800;border-radius:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.14);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cb-pill i{font-style:normal;color:#e7bd6a}.cb-pill u{text-decoration:none;color:#ff9086}.cb-pill s{text-decoration:none;color:#777;margin:0 3px}
+.cb-k{position:absolute;width:62px;height:94px;border-radius:6px;overflow:hidden;border:2px solid var(--rk,#888);background:linear-gradient(160deg,#2c2e33,#17181b);box-shadow:0 4px 10px rgba(0,0,0,.55);transition:transform .55s cubic-bezier(.2,.8,.25,1),opacity .35s}
+.cb-k img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cb-k b{position:absolute;left:3px;top:3px;min-width:22px;height:22px;padding:0 3px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:rgba(15,16,18,.85);border:2px solid var(--rk,#888);font-size:12px;font-weight:800;color:#fff;line-height:1}
+.cb-k.tgt{outline:3px solid #ff5a4f;outline-offset:1px;filter:saturate(1.5)}
+.cb-k.die{animation:cbdie .55s ease-in forwards}
+@keyframes cbdie{0%{transform:scale(1)}30%{transform:scale(1.12) rotate(-4deg);filter:brightness(2.2)}100%{transform:scale(.6) rotate(10deg);opacity:0;filter:brightness(3)}}
+.cb-zone.tri{border-color:#f0b95a;border-style:solid;box-shadow:0 0 18px rgba(240,185,90,.55),inset 0 0 14px rgba(240,185,90,.25)}
+.cb-pop{position:absolute;font-size:15px;font-weight:800;color:#f0b95a;text-shadow:0 2px 8px #000;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .6s;pointer-events:none;white-space:nowrap}
+.cb-pop.on{opacity:1;transform:translateY(-6px)}
+.cb-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;pointer-events:none;transition:opacity .6s;background:radial-gradient(ellipse at 50% 40%,rgba(40,10,16,.96),rgba(14,8,10,.99))}
+.cb-over.on{opacity:1}
+.cb-over h4{margin:0;font-size:46px;line-height:1.05;font-weight:800;letter-spacing:-.02em;color:#f3eee4;text-shadow:0 4px 24px rgba(199,154,75,.45)}
+.cb-over p{margin:12px 0 0;font-size:16px;color:#d4c9b8}
+.cb-over h4.gold{color:#f0b95a}
+.cb-fan{position:relative;width:200px;height:96px;margin-bottom:20px}
+.cb-fan .cb-k{top:0;left:69px;transition:none;animation:cbfan 3s ease-out both}
+.cb-fan .cb-k:nth-child(1){--r:-16deg;--x:-62px}.cb-fan .cb-k:nth-child(2){--r:0deg;--x:0px;z-index:2}.cb-fan .cb-k:nth-child(3){--r:16deg;--x:62px}
+@keyframes cbfan{from{transform:translate(0,12px) rotate(0);opacity:0}to{transform:translate(var(--x),0) rotate(var(--r));opacity:1}}
+.cb-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:#c79a4b;opacity:.9}
+.cb-bar.go{animation:cbbar var(--loop,29s) linear forwards}
+@keyframes cbbar{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.cb-k,.cb-board,.cb-cap,.cb-lbl{transition:none}.cb-k.die{animation:none;opacity:0}.cb-fan .cb-k{animation:none;transform:translate(var(--x),0) rotate(var(--r))}}
 .flinks{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .fl{display:flex;gap:20px}
 .fl a:hover{color:var(--text)}
@@ -1912,14 +1953,166 @@ document.addEventListener('visibilitychange', function(){ if(document.hidden) st
 buildGal();
 playG();
 
-// ---- Lecteur Twitch ----
+// ---- Mini-vidéo animée du jeu (remplace le lecteur Twitch de l'accueil) ----
 (function(){
   var p = document.querySelector('.player');
-  if(!p || !location.hostname) return;
-  p.className = 'player live';
+  if(!p) return;
+  var NOM = (window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle';
+  var LOOP = 29;
+  // illustrations réelles (dossier cartes/) : puissance -> rareté
+  var A = {
+    1:{art:'s1-1', r:'commune'}, 2:{art:'s1-4', r:'commune'}, 3:{art:'s1-7', r:'peu'}, 4:{art:'s1-10', r:'peu'},
+    5:{art:'s1-12', r:'rare'}, 6:{art:'s1-14', r:'rare'}, 7:{art:'s1-15', r:'legendaire'}, 9:{art:'s1-16', r:'speciale'}
+  };
+  var RK = {commune:'#d8d4ca', peu:'#9fd19a', rare:'#e0675c', legendaire:'#f0b95a', speciale:'#5fd6d8'};
+  function carte(pw, alt){
+    var a = A[pw], art = alt === 'b' && pw === 4 ? 's1-11' : a.art;
+    var d = document.createElement('div'); d.className = 'cb-k'; d.style.setProperty('--rk', RK[a.r]);
+    d.innerHTML = '<img src="cartes/' + art + '.png" alt=""><b>' + pw + '</b>'; d.dataset.pw = pw; return d;
+  }
+  p.className = 'player cbv';
   p.removeAttribute('role');
-  p.removeAttribute('aria-label');
-  p.innerHTML = '<iframe title="Live Twitch de LeClubi" src="https://player.twitch.tv/?channel=leclubi&parent=' + encodeURIComponent(location.hostname) + '&muted=true" allowfullscreen loading="lazy"></iframe>';
+  p.setAttribute('aria-label', 'Aperçu animé de ' + NOM + ' : un duel de cartes en 1 contre 1, trois colonnes, les cartes de même puissance en face sont détruites, trois cartes identiques donnent +10, le plus gros total gagne.');
+  p.innerHTML = '<div class="cb"><div class="cbs">' +
+    '<div class="cb-lbl"></div><div class="cb-cap"><b></b><span></span></div>' +
+    '<div class="cb-tot"><div class="me">Toi<em>0</em></div><div class="op">Adversaire<em>0</em></div></div>' +
+    '<div class="cb-board"></div>' +
+    '<div class="cb-over"></div><div class="cb-bar"></div>' +
+    '</div></div>';
+  var stage = p.querySelector('.cbs'), wrap = p.querySelector('.cb');
+  var lbl = stage.querySelector('.cb-lbl'), cap = stage.querySelector('.cb-cap'), tot = stage.querySelector('.cb-tot');
+  var board = stage.querySelector('.cb-board'), over = stage.querySelector('.cb-over'), bar = stage.querySelector('.cb-bar');
+  var totMe = tot.querySelector('.me em'), totOp = tot.querySelector('.op em');
+  stage.style.setProperty('--loop', LOOP + 's'); bar.style.setProperty('--loop', LOOP + 's');
+  function fit(){ stage.style.transform = 'scale(' + (wrap.clientWidth / 640) + ')'; }
+  fit(); if(window.ResizeObserver) new ResizeObserver(fit).observe(wrap); else window.addEventListener('resize', fit);
+
+  // géométrie du plateau
+  var CX = [6, 88, 170], CW = 62, CH = 94, STEP = 30;
+  function slotY(side, i){ return side === 'op' ? 68 - i * STEP : 194 + i * STEP; }   // i = 0 : la plus proche du milieu
+  var S, timers = [], vu = true, enCours = false;
+  function reset(){
+    timers.forEach(clearTimeout); timers = [];
+    S = {me:[[], [], []], op:[[], [], []], zones:[], pills:[]};
+    board.innerHTML = ''; board.classList.remove('on'); tot.classList.remove('on'); over.classList.remove('on'); over.innerHTML = '';
+    for(var c = 0; c < 3; c++){
+      ['op', 'me'].forEach(function(side){
+        var z = document.createElement('div'); z.className = 'cb-zone'; z.style.left = CX[c] + 'px'; z.style.top = (side === 'op' ? 8 : 194) + 'px'; board.appendChild(z); S[side === 'op' ? 'zones' : 'zones'].push(z);
+        S['z' + side + c] = z;
+      });
+      var pl = document.createElement('div'); pl.className = 'cb-pill'; pl.style.left = CX[c] + 'px'; pl.style.top = '165px'; board.appendChild(pl); S.pills.push(pl);
+    }
+    bar.classList.remove('go'); void bar.offsetWidth;
+    totMe.textContent = totOp.textContent = '0'; cap.style.opacity = lbl.style.opacity = 0; refresh();
+  }
+  function colScore(col){ var s = 0, tri = col.length === 3 && col[0].pw === col[1].pw && col[1].pw === col[2].pw; col.forEach(function(k){ s += k.pw; }); return {s: s + (tri ? 10 : 0), tri: tri}; }
+  function refresh(){
+    var tm = 0, to = 0;
+    for(var c = 0; c < 3; c++){
+      var a = colScore(S.me[c]), b = colScore(S.op[c]); tm += a.s; to += b.s;
+      S.pills[c].innerHTML = '<i>' + a.s + '</i><s>·</s><u>' + b.s + '</u>';
+      S['zme' + c].classList.toggle('tri', a.tri); S['zop' + c].classList.toggle('tri', b.tri);
+    }
+    totMe.textContent = tm; totOp.textContent = to;
+  }
+  function jouer(side, c, pw, alt){
+    var el = carte(pw, alt), i = S[side][c].length, y = slotY(side, i);
+    el.style.left = CX[c] + 'px'; el.style.top = y + 'px'; el.style.zIndex = side === 'op' ? 5 - i : 5 + i;
+    el.style.opacity = 0; el.style.transform = 'translateY(' + (side === 'op' ? -170 : 170) + 'px) scale(.9)';
+    board.appendChild(el); void el.offsetWidth; el.style.opacity = 1; el.style.transform = 'none';
+    S[side][c].push({pw: pw, el: el});
+    // destruction : cartes de même puissance dans la colonne d'en face
+    var other = side === 'me' ? 'op' : 'me', cible = S[other][c].filter(function(k){ return k.pw === pw; });
+    if(cible.length){
+      cible.forEach(function(k){ k.el.classList.add('tgt'); });
+      timers.push(setTimeout(function(){
+        cible.forEach(function(k){ k.el.classList.remove('tgt'); k.el.classList.add('die'); });
+        S[other][c] = S[other][c].filter(function(k){ return k.pw !== pw; });
+        // les cartes restantes se tassent
+        S[other][c].forEach(function(k, j){ k.el.style.top = slotY(other, j) + 'px'; k.el.style.zIndex = other === 'op' ? 5 - j : 5 + j; });
+        refresh();
+        timers.push(setTimeout(function(){ cible.forEach(function(k){ k.el.remove(); }); }, 600));
+      }, 750));
+    }
+    refresh();
+  }
+  function pop(c, txt, side){
+    var d = document.createElement('div'); d.className = 'cb-pop'; d.textContent = txt;
+    d.style.left = (CX[c] - 6) + 'px'; d.style.top = (side === 'me' ? 178 : 150) + 'px'; d.style.width = '74px'; d.style.textAlign = 'center';
+    board.appendChild(d); void d.offsetWidth; d.classList.add('on');
+    timers.push(setTimeout(function(){ d.style.opacity = 0; }, 1500)); timers.push(setTimeout(function(){ d.remove(); }, 2000));
+  }
+  function legende(l, t, s){
+    lbl.classList.add('cb-out'); cap.classList.add('cb-out'); lbl.style.opacity = cap.style.opacity = '';
+    timers.push(setTimeout(function(){
+      lbl.textContent = l; cap.querySelector('b').textContent = t; cap.querySelector('span').textContent = s || '';
+      lbl.classList.remove('cb-out'); cap.classList.remove('cb-out');
+    }, 300));
+  }
+  function titre(){
+    over.innerHTML = '<div class="cb-fan"></div><h4></h4><p></p>';
+    var f = over.querySelector('.cb-fan'); [9, 7, 5].forEach(function(n){ f.appendChild(carte(n)); });
+    over.querySelector('h4').textContent = NOM; over.querySelector('p').textContent = 'Le duel de cartes de la chaîne · 1 contre 1';
+    over.classList.add('on');
+  }
+  function fin(){
+    over.classList.remove('on');
+    timers.push(setTimeout(function(){
+      over.innerHTML = '<h4 class="gold">Victoire !</h4><p>Gagne des ClubiGold en jouant en ligne</p>'; over.classList.add('on');
+    }, 650));
+    timers.push(setTimeout(function(){
+      over.classList.remove('on');
+      timers.push(setTimeout(function(){
+        over.innerHTML = '<h4></h4><p>Jouez dès maintenant · c’est gratuit</p>'; over.querySelector('h4').textContent = NOM; over.classList.add('on');
+      }, 650));
+    }, 3300));
+  }
+  function run(){
+    reset(); enCours = true; bar.classList.add('go');
+    var T = [
+      [0.1, titre],
+      [3.4, function(){ over.classList.remove('on'); board.classList.add('on'); tot.classList.add('on'); legende('Le principe', 'Un duel de cartes en 1 contre 1.', '3 colonnes, 3 cartes par colonne.'); }],
+      [5.4, function(){ legende('À chaque tour', 'Pose une carte dans une colonne.', 'Plus la puissance est haute, plus elle rapporte.'); }],
+      [6.0, function(){ jouer('me', 0, 5); }],
+      [7.0, function(){ jouer('op', 1, 6); }],
+      [8.0, function(){ jouer('me', 2, 4); }],
+      [9.0, function(){ jouer('op', 0, 3); }],
+      [10.0, function(){ legende('Destruction', 'Même puissance en face ? La carte adverse est détruite !', ''); }],
+      [10.9, function(){ jouer('me', 1, 6); }],
+      [13.2, function(){ jouer('op', 2, 2); }],
+      [14.0, function(){ jouer('me', 2, 4, 'b'); }],
+      [14.8, function(){ jouer('op', 2, 1); }],
+      [15.6, function(){ legende('Triple', 'Trois cartes identiques dans une colonne : +10 points !', ''); }],
+      [16.3, function(){ jouer('me', 2, 4); }],
+      [16.9, function(){ pop(2, 'TRIPLE +10', 'me'); }],
+      [19.4, function(){ legende('La victoire', 'Plateau plein : le plus gros total gagne.', ''); }],
+      [20.0, function(){ jouer('op', 0, 4); }], [20.4, function(){ jouer('me', 0, 7); }],
+      [20.8, function(){ jouer('op', 1, 5); }], [21.2, function(){ jouer('me', 1, 9); }],
+      [21.6, function(){ jouer('op', 2, 5); }], [22.0, function(){ jouer('me', 0, 2); }],
+      [22.4, function(){ jouer('op', 0, 6); }], [22.8, function(){ jouer('me', 1, 3); }],
+      [24.4, fin],
+      [LOOP - 0.1, function(){ run(); }]
+    ];
+    T.forEach(function(e){ timers.push(setTimeout(e[1], e[0] * 1000)); });
+  }
+  // image prête avant de lancer, pause hors écran / onglet caché
+  var n = 0, lancee = false;
+  function demarrer(){ if(lancee) return; lancee = true; if(vu && !document.hidden) run(); }
+  [1, 2, 3, 4, 5, 6, 7, 9].forEach(function(k){ var im = new Image(); im.onload = im.onerror = function(){ if(++n >= 8) demarrer(); }; im.src = 'cartes/' + A[k].art + '.png'; });
+  ['s1-11'].forEach(function(a){ new Image().src = 'cartes/' + a + '.png'; });
+  setTimeout(demarrer, 2500);
+  function maj(){ var actif = vu && !document.hidden; if(actif && !enCours && lancee) run(); if(!actif && enCours){ timers.forEach(clearTimeout); timers = []; enCours = false; } }
+  if(window.IntersectionObserver) new IntersectionObserver(function(es){ vu = es[0].isIntersecting; maj(); }, {threshold: .25}).observe(p);
+  document.addEventListener('visibilitychange', maj);
+  // mouvement réduit : image fixe de fin de partie, sans boucle
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+    vu = false; lancee = true; reset(); board.classList.add('on'); tot.classList.add('on');
+    [[0,5],[0,7],[0,2],[1,6],[1,9],[1,3]].forEach(function(m){ jouer('me', m[0], m[1]); });
+    [[0,3],[0,4],[0,6],[1,5],[2,2],[2,1],[2,5]].forEach(function(m){ jouer('op', m[0], m[1]); });
+    jouer('me', 2, 4); jouer('me', 2, 4, 'b'); jouer('me', 2, 4);
+    lbl.textContent = 'Le principe'; cap.style.opacity = lbl.style.opacity = 1; cap.querySelector('b').textContent = 'Un duel de cartes en 1 contre 1.'; cap.querySelector('span').textContent = 'Même puissance en face : détruite. Trois identiques : +10. Le plus gros total gagne.';
+    bar.style.display = 'none';
+  }
 })();
 // ---- Classement du jeu ----
 // Les réglages (adresse du serveur, jeu ouvert ou non) sont dans config-jeu.js. Tant que l'adresse est vide, l'onglet Classement reste caché.
