@@ -6,5 +6,6 @@ window.JEU_CONFIG = {
   // "Client ID" de l'application Twitch (dev.twitch.tv/console)
   TWITCH_CLIENT_ID: "pni8o966uqya6ibpyr49pai34ai6ce",
   // false = le jeu est en test (aucun lien sur le site, seul toi connais l'adresse). true = le bouton "Jouer" apparaît sur le site.
-  OUVERT: false
+  OUVERT: false,
+   NOM: "Clubi Card Battle"
 };
