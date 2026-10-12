@@ -18,7 +18,7 @@ TWITCH_CLIENT_ID = "pni8o966uqya6ibpyr49pai34ai6ce"
 # Sites autorisés à utiliser le serveur (séparés par des virgules)
 ORIGINES = "https://leclubion.github.io"
 # Récompense et limites anti-triche
-GOLD_VICTOIRE = "10"        # ClubiGold gagnés par victoire
+GOLD_VICTOIRE = "1"        # ClubiGold gagnés par victoire
 MAX_VICTOIRES_JOUR = "5"    # victoires récompensées par joueur et par jour
 MAX_OR_PAR_ADVERSAIRE = "2" # victoires récompensées par jour contre le même adversaire
 MAX_STATS_PAR_ADVERSAIRE = "6" # parties comptées au classement par jour contre le même adversaire
