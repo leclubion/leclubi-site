@@ -146,9 +146,9 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   <h2>Les règles</h2>
   <ol>
     <li>Chacun a 3 colonnes de 3 cases. Les colonnes se font face.</li>
-    <li>Tu as 2 cartes en main. À ton tour (20 secondes), choisis une carte puis une colonne : elle se place sur la première case libre en partant du centre.</li>
+    <li>Tu as <b id="rHand">3</b> cartes en main. À ton tour (<b id="rSecs">30 secondes</b>), choisis une carte puis une colonne : elle se place sur la première case libre en partant du centre.</li>
     <li>Si l'adversaire a des cartes de <b>même puissance</b> dans la colonne d'en face, elles sont <b>détruites</b>. Les cartes derrière avancent. Ta carte, elle, reste.</li>
-    <li>Tu repioches pour retrouver 2 cartes.</li>
+    <li>Tu repioches pour retrouver tes cartes en main.</li>
     <li>La partie s'arrête dès qu'un plateau est plein. Le score est la somme de toutes les colonnes. Trois cartes identiques dans une colonne donnent un bonus.</li>
     <li>Le plus haut score gagne. En vrai : 10 ClubiGold pour le gagnant (5 victoires récompensées par jour).</li>
   </ol>
@@ -163,6 +163,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   <div class="row"><label for="sLevel">Adversaire</label><select id="sLevel"><option value="facile">Facile (au hasard)</option><option value="normal">Normal</option><option value="difficile">Difficile</option></select></div>
   <div class="row"><label for="sDestroy">Destruction</label><select id="sDestroy"><option value="all">Toutes les cartes de même puissance</option><option value="one">Une seule carte</option></select></div>
   <div class="row"><label for="sTriple">Bonus de trois cartes identiques</label><select id="sTriple"><option value="0">Aucun</option><option value="10">+10</option><option value="20">+20</option><option value="x2">Colonne × 2</option></select></div>
+  <div class="row"><label for="sPile">Pioche (52 cartes)</label><select id="sPile"><option value="a">4 Légendaires + 4 Spéciales</option><option value="b">2 Légendaires + 2 Spéciales</option><option value="v1">6 Légendaires + 6 Spéciales (1re version)</option></select></div>
   <div class="row"><label for="sHand">Cartes en main</label><select id="sHand"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
   <div class="row"><label for="sSecs">Temps par tour</label><select id="sSecs"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="0">Sans limite</option></select></div>
   <div class="row"><label for="sFirst">Qui commence</label><select id="sFirst"><option value="rand">Au hasard</option><option value="me">Moi</option><option value="bot">L'adversaire</option></select></div>
@@ -181,14 +182,14 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
 (function(){
   'use strict';
   var J = window.LeClubiJeu, ME = 0, BOT = 1;
-  var S = {level:'normal', destroy:'all', triple:'10', hand:'2', secs:'20', first:'rand'};
-  try{ var sv = JSON.parse(localStorage.getItem('leclubi-jeu') || 'null'); if(sv) for(var k in sv) if(k in S) S[k] = sv[k]; }catch(e){}
+  var S = {level:'normal', destroy:'all', triple:'10', hand:'3', secs:'30', first:'rand', pile:'a'};
+  try{ var sv = JSON.parse(localStorage.getItem('leclubi-jeu2') || 'null'); if(sv) for(var k in sv) if(k in S) S[k] = sv[k]; }catch(e){}
   var G = null, sel = -1, busy = false, tLeft = 0, tTimer = null, botTimer = null, timeouts = 0, stats = {w:0, l:0, n:0}, pop = null;
   var $ = function(id){ return document.getElementById(id); };
 
   function options(){
     var t = S.triple === 'x2' ? {type:'mul', value:2} : {type:'add', value:+S.triple};
-    return J.reglages({destroy:S.destroy, triple:t, hand:+S.hand, seconds:+S.secs});
+    return J.reglages({destroy:S.destroy, triple:t, hand:+S.hand, seconds:+S.secs, pile:S.pile});
   }
   function etiquette(c){ return c.art.replace('halloween', 'H').replace('s1', 'S1').replace('-', '·'); }
   function carte(c, cls){
@@ -297,6 +298,7 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   function nouvelle(){
     clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; pop = null;
     $('vFin').hidden = true; $('vReglages').hidden = true;
+    $('rHand').textContent = S.hand; $('rSecs').textContent = +S.secs ? S.secs + ' secondes' : 'sans limite de temps';
     var first = S.first === 'me' ? ME : S.first === 'bot' ? BOT : null;
     G = J.nouvellePartie(options(), Math.random, first);
     debutTour();
@@ -333,13 +335,13 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line);borde
   function ouvrir(id){ $(id).hidden = false; }
   $('bRegles').onclick = function(){ ouvrir('vRegles'); };
   $('bReglages').onclick = function(){
-    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); $('s' + a[0]).value = S[a[1]]; });
+    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Pile:pile', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); $('s' + a[0]).value = S[a[1]]; });
     ouvrir('vReglages');
   };
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function(b){ b.onclick = function(){ b.closest('.veil').hidden = true; }; });
   $('bNew').onclick = function(){
-    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); S[a[1]] = $('s' + a[0]).value; });
-    try{ localStorage.setItem('leclubi-jeu', JSON.stringify(S)); }catch(e){}
+    ['Level:level', 'Destroy:destroy', 'Triple:triple', 'Pile:pile', 'Hand:hand', 'Secs:secs', 'First:first'].forEach(function(p){ var a = p.split(':'); S[a[1]] = $('s' + a[0]).value; });
+    try{ localStorage.setItem('leclubi-jeu2', JSON.stringify(S)); }catch(e){}
     nouvelle();
   };
   $('bRejouer').onclick = nouvelle;

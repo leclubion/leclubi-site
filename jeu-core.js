@@ -14,8 +14,15 @@
     s1:        {1:1,2:1,3:1, 4:2,5:2,6:2, 7:3,8:3,9:3, 10:4,11:4, 12:5,13:5, 14:6, 15:7, 16:9},
     halloween: {1:1,2:1,3:1, 4:2,5:2,6:2, 7:3,8:3, 9:4,10:4,11:4, 12:5, 13:6,14:6, 15:8, 16:9,17:9}
   };
-  // Nombre d'exemplaires de chaque puissance dans la pioche (total 52)
-  var EXEMPLAIRES = {1:7, 2:7, 3:7, 4:7, 5:6, 6:6, 7:3, 8:3, 9:6};
+  // Nombre d'exemplaires de chaque puissance dans la pioche (total 52). Plusieurs compositions à comparer :
+  //  a  = 4 Légendaires + 4 Spéciales (par défaut)
+  //  b  = 4 cartes hautes en tout (2 Légendaires + 2 Spéciales)
+  //  v1 = première version (6 Légendaires + 6 Spéciales)
+  var PIOCHES = {
+    a:  {1:8, 2:8, 3:8, 4:8, 5:6, 6:6, 7:2, 8:2, 9:4},
+    b:  {1:9, 2:9, 3:8, 4:8, 5:7, 6:7, 7:1, 8:1, 9:2},
+    v1: {1:7, 2:7, 3:7, 4:7, 5:6, 6:6, 7:3, 8:3, 9:6}
+  };
 
   function rareteDe(saison, n){
     var s = SAISONS[saison];
@@ -33,7 +40,8 @@
     return out;
   }
   // La pioche : chaque puissance est répartie sur ses illustrations pour atteindre EXEMPLAIRES[puissance]
-  function composerPioche(){
+  function composerPioche(nom){
+    var EXEMPLAIRES = PIOCHES[nom] || PIOCHES.a;
     var arts = toutesLesCartes(), pioche = [], uid = 0;
     for(var p = 1; p <= 9; p++){
       var groupe = arts.filter(function(c){ return c.power === p; }), cible = EXEMPLAIRES[p];
@@ -49,7 +57,7 @@
 
   // ---------- Réglages par défaut ----------
   function reglages(o){
-    var d = {destroy:'all', triple:{type:'add', value:10}, hand:2, seconds:20, tolerance:3};
+    var d = {destroy:'all', triple:{type:'add', value:10}, hand:3, seconds:30, tolerance:3, pile:'a'};
     o = o || {};
     for(var k in o) d[k] = o[k];
     return d;
@@ -76,7 +84,7 @@
   function nouvellePartie(opts, rng, premier){
     opts = reglages(opts); rng = rng || Math.random;
     var S = {
-      opts: opts, pioche: melanger(composerPioche(), rng), defausse: [],
+      opts: opts, pioche: melanger(composerPioche(opts.pile), rng), defausse: [],
       board: [[[], [], []], [[], [], []]], hands: [[], []], first: premier == null ? (rng() < 0.5 ? 0 : 1) : premier,
       turn: 0, tours: [0, 0], over: false, winner: null, scores: [0, 0], rng: rng
     };
@@ -189,7 +197,7 @@
   root.LeClubiJeu = {
     reglages: reglages, nouvellePartie: nouvellePartie, coupsPossibles: coupsPossibles, apercu: apercu, jouer: jouer,
     abandon: abandon, scoreColonne: scoreColonne, scoreBoard: scoreBoard, pleine: pleine, BOTS: BOTS,
-    composerPioche: composerPioche, toutesLesCartes: toutesLesCartes
+    composerPioche: composerPioche, toutesLesCartes: toutesLesCartes, PIOCHES: PIOCHES
   };
   if(typeof module !== 'undefined' && module.exports) module.exports = root.LeClubiJeu;
 })(typeof window !== 'undefined' ? window : globalThis);
