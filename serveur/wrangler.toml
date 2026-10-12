@@ -23,3 +23,4 @@ MAX_VICTOIRES_JOUR = "5"    # victoires récompensées par joueur et par jour
 MAX_OR_PAR_ADVERSAIRE = "2" # victoires récompensées par jour contre le même adversaire
 MAX_STATS_PAR_ADVERSAIRE = "6" # parties comptées au classement par jour contre le même adversaire
 DUREE_TOUR = "30"           # secondes par tour
+# ok
