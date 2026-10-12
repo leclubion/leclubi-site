@@ -1,0 +1,25 @@
+# Serveur du jeu "Bataille de colonnes" – LeClubi
+# Hébergé gratuitement chez Cloudflare Workers (1 seul "salon" = 1 Durable Object).
+name = "leclubi-jeu"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "Hub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Hub"]
+
+[vars]
+# ⬇️ À REMPLIR : le "Client ID" de ton application Twitch (dev.twitch.tv/console)
+TWITCH_CLIENT_ID = "COLLE_ICI_TON_CLIENT_ID_TWITCH"
+# Sites autorisés à utiliser le serveur (séparés par des virgules)
+ORIGINES = "https://leclubion.github.io"
+# Récompense et limites anti-triche
+GOLD_VICTOIRE = "10"        # ClubiGold gagnés par victoire
+MAX_VICTOIRES_JOUR = "5"    # victoires récompensées par joueur et par jour
+MAX_OR_PAR_ADVERSAIRE = "2" # victoires récompensées par jour contre le même adversaire
+MAX_STATS_PAR_ADVERSAIRE = "6" # parties comptées au classement par jour contre le même adversaire
+DUREE_TOUR = "30"           # secondes par tour

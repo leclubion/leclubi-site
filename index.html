@@ -6,6 +6,7 @@
 <title>LeClubi — Chaîne Twitch</title>
 <meta name="description" content="LeClubi : lives Twitch, sondage pour choisir les prochains jeux et cartes à collectionner à chaque saison.">
 <meta name="theme-color" content="#17181a">
+<script src="config-jeu.js"></script>
 <script>try{var _t=localStorage.getItem('leclubi-theme');if(_t==='light'||_t==='dark')document.documentElement.setAttribute('data-theme',_t)}catch(e){}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317181a'/%3E%3Cpath d='M22 14v30h22' fill='none' stroke='%23c79a4b' stroke-width='7' stroke-linecap='square'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -529,6 +530,21 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 @media(max-width:820px){.bog{grid-template-columns:1fr;gap:28px}}
 @media(max-width:360px){.bo-in{transform:scale(.88)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* classement du jeu */
+nav a[hidden],.btn[hidden]{display:none}
+nav a{white-space:nowrap}
+@media (max-width:1240px) and (min-width:900px){nav a{padding:8px 9px;font-size:14px}}
+.ktable-w{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.ktable{width:100%;border-collapse:collapse;font-size:15px}
+.ktable th,.ktable td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+.ktable th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ktable .n{text-align:right;font-variant-numeric:tabular-nums}
+.ktable tbody tr:last-child td{border-bottom:0}
+.ktable td:first-child{width:56px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ktable tr.top1 td:first-child,.ktable tr.top2 td:first-child,.ktable tr.top3 td:first-child{color:var(--accent);font-weight:700}
+.ktable tr.top1 td:nth-child(2){font-weight:700}
+.ktable tr.me td{background:rgba(199,154,75,.12)}
+.ktable td.none{text-align:center;color:var(--muted);padding:34px 14px}
 </style>
 </head>
 <body>
@@ -541,6 +557,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
       <a href="#planning" data-nav="planning">Planning</a>
       <a href="#collection" data-nav="collection">Collection de Cartes</a>
       <a href="#collectionneurs" data-nav="collectionneurs">Collectionneurs</a>
+      <a href="#classement" data-nav="classement" id="navClass" hidden>Classement</a>
       <a href="#apropos" data-nav="apropos">À propos</a>
     </nav>
     <div class="hlinks">
@@ -568,6 +585,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
           <a class="btn ghost" href="#collection">Voir la collection</a>
+          <a class="btn ghost" id="hjouer" href="jeu.html" hidden>Jouer à la Bataille de colonnes</a>
         </div>
       </div>
       <div class="player" role="img" aria-label="Emplacement du lecteur Twitch">
@@ -689,6 +707,24 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
       <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
       <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
       <div class="cgrid" id="coll"></div>
+    </div>
+  </section>
+</div>
+
+<!-- CLASSEMENT DU JEU -->
+<div class="view" id="v-classement" hidden>
+  <section>
+    <div class="wrap">
+      <h1>Classement · Bataille de colonnes</h1>
+      <p class="lead">Les meilleurs joueurs du jeu de cartes de LeClubi. Seules les parties entre joueurs comptent.</p>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="ktRatio" aria-selected="true" type="button">Ratio de victoires</button>
+        <button class="tab" role="tab" id="ktVict" aria-selected="false" type="button">Victoires</button>
+      </div>
+      <div class="cfilter"><input id="kq" type="search" placeholder="Rechercher un joueur" aria-label="Rechercher un joueur" autocomplete="off"><span id="kinfo"></span></div>
+      <div class="ktable-w"><table class="ktable" id="ktable"><thead><tr><th>#</th><th>Pseudo</th><th class="n">Parties jouées</th><th class="n">Parties gagnées</th><th class="n">Ratio</th></tr></thead><tbody id="kbody"></tbody></table></div>
+      <p class="note" id="knote"></p>
+      <p><a class="btn" id="kjouer" href="jeu.html" hidden>Jouer à la Bataille de colonnes</a></p>
     </div>
   </section>
 </div>
@@ -849,8 +885,9 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 })();
 // Navigation
 function route(){
-  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'collection', 'collectionneurs', 'apropos'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  if(page === 'classement' && window.chargerClassement) window.chargerClassement();
   document.querySelectorAll('[data-nav]').forEach(function(a){
     if(a.dataset.nav === page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
@@ -1878,6 +1915,43 @@ playG();
   p.removeAttribute('role');
   p.removeAttribute('aria-label');
   p.innerHTML = '<iframe title="Live Twitch de LeClubi" src="https://player.twitch.tv/?channel=leclubi&parent=' + encodeURIComponent(location.hostname) + '&muted=true" allowfullscreen loading="lazy"></iframe>';
+})();
+// ---- Classement du jeu "Bataille de colonnes" ----
+// Les réglages (adresse du serveur, jeu ouvert ou non) sont dans config-jeu.js. Tant que l'adresse est vide, l'onglet Classement reste caché.
+var JEU_API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, '');      // réglages dans le fichier config-jeu.js
+var JEU_OUVERT = !!(window.JEU_CONFIG || {}).OUVERT;
+(function(){
+  var data = null, onglet = 'ratio', charge = 0, MIN = 10;
+  if(JEU_API) document.getElementById('navClass').hidden = false;
+  if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
+  function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
+  function liste(){
+    var l = (data && data.joueurs || []).slice(), q = document.getElementById('kq').value.trim().toLowerCase();
+    if(onglet === 'ratio'){ l = l.filter(function(j){ return j.parties >= MIN; }); l.sort(function(a, b){ return b.ratio - a.ratio || b.victoires - a.victoires || b.parties - a.parties; }); }
+    else l.sort(function(a, b){ return b.victoires - a.victoires || b.ratio - a.ratio || a.parties - b.parties; });
+    l.forEach(function(j, i){ j.rang = i + 1; });
+    return q ? l.filter(function(j){ return j.pseudo.toLowerCase().indexOf(q) >= 0; }) : l;
+  }
+  function dessiner(){
+    var body = document.getElementById('kbody'), me = pseudoMoi(), l = liste();
+    if(!data){ body.innerHTML = '<tr><td class="none" colspan="5">Chargement…</td></tr>'; return; }
+    body.innerHTML = l.length ? l.map(function(j){
+      return '<tr class="' + (j.rang <= 3 ? 'top' + j.rang : '') + (j.pseudo.toLowerCase() === me ? ' me' : '') + '"><td>' + j.rang + '</td><td>' + esc(j.pseudo) + '</td><td class="n">' + j.parties + '</td><td class="n">' + j.victoires + '</td><td class="n">' + String(j.ratio).replace('.', ',') + ' %</td></tr>';
+    }).join('') : '<tr><td class="none" colspan="5">' + (onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.') + '</td></tr>';
+    document.getElementById('knote').textContent = onglet === 'ratio' ? 'Le classement par ratio demande au moins ' + MIN + ' parties jouées, pour éviter les 100 % en une seule partie.' : 'Classé par nombre de victoires.';
+    document.getElementById('kinfo').textContent = l.length + ' joueur' + (l.length > 1 ? 's' : '');
+  }
+  window.chargerClassement = function(){
+    if(!JEU_API || Date.now() - charge < 15000) { dessiner(); return; }
+    charge = Date.now(); dessiner();
+    fetch(JEU_API.replace(/\/$/, '') + '/classement').then(function(r){ return r.json(); }).then(function(d){ data = d; MIN = d.minimumRatio || 10; dessiner(); })
+      .catch(function(){ if(!data){ document.getElementById('kbody').innerHTML = '<tr><td class="none" colspan="5">Le classement n\'est pas disponible pour le moment.</td></tr>'; } });
+  };
+  function choisir(o){ onglet = o; document.getElementById('ktRatio').setAttribute('aria-selected', o === 'ratio'); document.getElementById('ktVict').setAttribute('aria-selected', o === 'vict'); dessiner(); }
+  document.getElementById('ktRatio').onclick = function(){ choisir('ratio'); };
+  document.getElementById('ktVict').onclick = function(){ choisir('vict'); };
+  document.getElementById('kq').addEventListener('input', dessiner);
+  if(location.hash === '#classement') window.chargerClassement();
 })();
 </script>
 </body>

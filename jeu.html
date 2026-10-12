@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Bataille de colonnes — LeClubi (prototype)</title>
+<title>Bataille de colonnes — LeClubi (bêta)</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
@@ -309,14 +309,27 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 .table.th-nier .tot b.warm{color:#c03a30;text-shadow:none}.table.th-nier .tot b.hot,.table.th-nier .tot b.inferno{color:#c01818;text-shadow:0 0 8px rgba(190,30,30,.35)}
 .table.th-nier .ft{text-shadow:0 1px 0 rgba(236,230,208,.7)}
 @media (prefers-reduced-motion:reduce){.gc,.gc.dying{animation:none;transition:none}}
+
+/* ---- menu en ligne ---- */
+.menu .mcompte{display:flex;flex-direction:column;gap:2px;margin:4px 0 6px}.menu .mcompte b{font-size:18px;color:var(--accent)}.menu .mcompte span,.menu .mpres{font-size:13px;color:var(--muted)}
+.menu .go.big{display:block;width:100%;padding:14px 20px}.menu .mdeux{margin-top:2px}.menu .mdeux .go{width:100%;background:transparent;color:var(--text);border-color:var(--accent)}
+.menu .mcode{display:flex;gap:8px;margin-top:14px}.menu .mcode .go{margin:0}.menu input[type=text]{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:9px 10px;font:inherit}
+.menu #iLien{width:100%;margin:6px 0 4px}.minfo{min-height:0;font-size:13px;color:#e8c37a;margin-top:8px}.minfo:empty{display:none}
+.mbas{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:18px}.mbas .go,.mbas a.go{margin:0;text-decoration:none}
+.spin{width:34px;height:34px;margin:14px auto 4px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:60;background:rgba(20,21,23,.94);border:1px solid var(--accent);color:var(--text);padding:9px 16px;border-radius:8px;font-size:14px;max-width:min(92vw,520px);text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#toast[hidden]{display:none}
+.enligne .loc{display:none}.lienc{color:var(--accent);font-size:14px}
+.go[hidden],.btn[hidden]{display:none}
 </style>
 </head>
 <body>
 <div class="top">
   <a class="btn" href="index.html">&larr; Site</a>
-  <h1>Bataille de colonnes <small style="color:var(--muted);font-weight:400">· prototype</small></h1>
+  <h1>Bataille de colonnes <small style="color:var(--muted);font-weight:400">· bêta</small></h1>
   <span class="stats" id="stats"></span>
   <button class="btn sonBtn" type="button" aria-label="Son" title="Son">🔊</button>
+  <button class="btn" id="bQuit" type="button" hidden>Abandonner</button>
   <button class="btn" id="bRegles" type="button">Règles</button>
   <button class="btn" id="bReglages" type="button">Réglages</button>
 </div>
@@ -333,7 +346,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       <div class="board" id="boardMe"></div>
     </div>
     <div class="side">
-      <div><div class="tot">Adversaire<b id="totOpp">0</b></div><div class="ohand" id="ohand"></div></div>
+      <div><div class="tot"><span id="nomOpp">Adversaire</span><b id="totOpp">0</b></div><div class="ohand" id="ohand"></div></div>
       <div class="pioche" id="pioche"><small>Pioche</small></div>
       <div class="tot"><b id="totMe">0</b>Toi</div>
     </div>
@@ -352,7 +365,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   <button class="go big" type="button" id="bJouer">Jouer</button>
   <div class="lhint" id="lhint"></div>
   <button class="go ghost mini" type="button" id="bReglesL">Règles</button><button class="go ghost mini sonBtn" type="button" aria-label="Son">🔊</button>
-  <p style="font-size:12px;color:var(--muted);margin-top:14px">Prototype : l'adversaire est automatique. Dans le vrai jeu, tu verras ici le pseudo de l'autre joueur et s'il est prêt.</p>
+  <p id="lnote" style="font-size:12px;color:var(--muted);margin-top:14px"></p>
 </div></div>
 
 <div class="veil" id="vRegles" hidden><div class="box">
@@ -363,7 +376,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     <li>Si l'adversaire a des cartes de <b>même puissance</b> dans la colonne d'en face, elles sont <b>détruites</b>. Les cartes derrière avancent. Ta carte, elle, reste.</li>
     <li>Tu repioches pour retrouver tes cartes en main.</li>
     <li>La partie s'arrête dès qu'un plateau est plein. Le score est la somme de toutes les colonnes. Trois cartes identiques dans une colonne donnent un bonus.</li>
-    <li>Le plus haut score gagne. En vrai : 10 ClubiGold pour le gagnant (5 victoires récompensées par jour).</li>
+    <li>Le plus haut score gagne. En ligne, le gagnant remporte 10 ClubiGold (5 victoires récompensées par jour, 2 maximum contre le même adversaire). Le Bot du Club ne rapporte rien et ne compte pas au classement.</li>
   </ol>
   <h3>Puissance des cartes</h3>
   <p>Commune 1-2 · Peu commune 3-4 · Rare 5-6 · Légendaire 7-8 · Spéciale 9. La pioche est commune à tous : <b id="rPile">66</b> cartes.</p>
@@ -371,17 +384,17 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 </div></div>
 
 <div class="veil" id="vReglages" hidden><div class="box">
-  <h2>Réglages de test</h2>
-  <p>Ils servent à tester l'équilibre. Ils s'appliquent à la prochaine partie.</p>
-  <div class="row"><label for="sLevel">Adversaire</label><select id="sLevel"><option value="facile">Facile (au hasard)</option><option value="normal">Normal</option><option value="difficile">Difficile</option></select></div>
-  <div class="row"><label for="sDestroy">Destruction</label><select id="sDestroy"><option value="all">Toutes les cartes de même puissance</option><option value="one">Une seule carte</option></select></div>
-  <div class="row"><label for="sTriple">Bonus de trois cartes identiques</label><select id="sTriple"><option value="0">Aucun</option><option value="10">+10</option><option value="20">+20</option><option value="x2">Colonne × 2</option></select></div>
-  <div class="row"><label for="sPile">Pioche</label><select id="sPile"><option value="c">66 cartes · 5 de chaque Légendaire (conseillé)</option><option value="d">60 cartes · 4 de chaque Légendaire</option><option value="a">52 cartes · 2 de chaque Légendaire</option><option value="b">52 cartes · 1 de chaque Légendaire</option><option value="v1">52 cartes · 3 de chaque Légendaire + 6 Spéciales</option></select></div>
-  <div class="row"><label for="sStart">Cartes de départ</label><select id="sStart"><option value="6">Pas plus de 6</option><option value="7">Pas plus de 7</option><option value="0">Aucune limite</option></select></div>
-  <div class="row"><label for="sHand">Cartes en main</label><select id="sHand"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-  <div class="row"><label for="sSecs">Temps par tour</label><select id="sSecs"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="0">Sans limite</option></select></div>
+  <h2>Réglages</h2>
+  <p id="regNote">Ils servent à tester l'équilibre. Ils s'appliquent à la prochaine partie.</p>
+  <div class="row"><label for="sLevel">Niveau du Bot du Club</label><select id="sLevel"><option value="facile">Facile (au hasard)</option><option value="normal">Normal</option><option value="difficile">Difficile</option></select></div>
+  <div class="row loc"><label for="sDestroy">Destruction</label><select id="sDestroy"><option value="all">Toutes les cartes de même puissance</option><option value="one">Une seule carte</option></select></div>
+  <div class="row loc"><label for="sTriple">Bonus de trois cartes identiques</label><select id="sTriple"><option value="0">Aucun</option><option value="10">+10</option><option value="20">+20</option><option value="x2">Colonne × 2</option></select></div>
+  <div class="row loc"><label for="sPile">Pioche</label><select id="sPile"><option value="c">66 cartes · 5 de chaque Légendaire (conseillé)</option><option value="d">60 cartes · 4 de chaque Légendaire</option><option value="a">52 cartes · 2 de chaque Légendaire</option><option value="b">52 cartes · 1 de chaque Légendaire</option><option value="v1">52 cartes · 3 de chaque Légendaire + 6 Spéciales</option></select></div>
+  <div class="row loc"><label for="sStart">Cartes de départ</label><select id="sStart"><option value="6">Pas plus de 6</option><option value="7">Pas plus de 7</option><option value="0">Aucune limite</option></select></div>
+  <div class="row loc"><label for="sHand">Cartes en main</label><select id="sHand"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+  <div class="row loc"><label for="sSecs">Temps par tour</label><select id="sSecs"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="0">Sans limite</option></select></div>
   <div class="row"><label for="sBg">Fond de table</label><select id="sBg"><option value="rand">Au hasard à chaque partie</option><option value="sanctuary">Sanctuaire (base)</option><option value="silent">Brume (Silent Hill)</option><option value="souls">Braise (From Software)</option><option value="nier">Machine (NieR)</option></select></div>
-  <div class="row"><label for="sFirst">Qui commence</label><select id="sFirst"><option value="rand">Au hasard</option><option value="me">Moi</option><option value="bot">L'adversaire</option></select></div>
+  <div class="row loc"><label for="sFirst">Qui commence</label><select id="sFirst"><option value="rand">Au hasard</option><option value="me">Moi</option><option value="bot">L'adversaire</option></select></div>
   <h3>Son (s'applique tout de suite)</h3>
   <div class="row"><label for="sMus">Musique</label><input type="range" id="sMus" min="0" max="100"></div>
   <div class="row"><label for="sSfx">Effets sonores</label><input type="range" id="sSfx" min="0" max="100"></div>
@@ -393,9 +406,38 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   <div class="pts" id="finPts"></div>
   <div class="gain" id="finStats"></div>
   <div class="gain" id="finGain"></div>
-  <button class="go" type="button" id="bRejouer">Rejouer</button>
+  <div class="gain" id="finRang"></div>
+  <button class="go" type="button" id="bRejouer">Rejouer</button><button class="go ghost" type="button" id="bMenu">Menu</button>
+  <div style="margin-top:12px"><a class="lienc" id="lClass" href="index.html#classement" hidden>Voir le classement</a></div>
 </div></div>
 
+
+<div class="veil" id="vMenu" hidden><div class="box lobby menu">
+  <h2>Bataille de colonnes</h2>
+  <div class="mcompte" id="mCompte" hidden><b id="mPseudo"></b><span id="mStat"></span></div>
+  <div class="mpres" id="mPres"></div>
+  <div id="mLogin" hidden>
+    <p>Connecte-toi avec Twitch pour jouer contre d'autres joueurs, gagner des ClubiGold et apparaître au classement. Le site ne reçoit que ton pseudo.</p>
+    <button class="go big" type="button" id="bTwitch">Se connecter avec Twitch</button>
+  </div>
+  <div id="mJeu" hidden>
+    <div id="mChoix">
+      <button class="go big" type="button" id="bRapide">Partie rapide</button>
+      <div class="mdeux"><button class="go" type="button" id="bDefi">Défier un ami</button></div>
+      <div class="mcode"><input id="iCode" type="text" maxlength="60" placeholder="Code ou lien d'un défi" autocomplete="off"><button class="go ghost" type="button" id="bCode">Rejoindre</button></div>
+    </div>
+    <div id="mAttente" hidden>
+      <div id="mAttFile"><div class="spin"></div><p>Recherche d'un adversaire…</p><button class="go ghost" type="button" id="bAnnuler">Annuler</button></div>
+      <div id="defiBox" hidden><p>Envoie ce lien à ton ami. La partie démarre dès qu'il l'ouvre.</p><input id="iLien" type="text" readonly><div><button class="go" type="button" id="bCopier">Copier le lien</button><button class="go ghost" type="button" id="bAnnuler2">Annuler</button></div></div>
+      <div id="mBot" hidden><p>Personne ne joue pour l'instant. Tu peux attendre un peu, ou jouer contre le <b>Bot du Club</b> (sans ClubiGold, hors classement).</p><button class="go" type="button" id="bBot">Jouer contre le Bot du Club</button></div>
+    </div>
+  </div>
+  <div class="minfo" id="mInfo"></div><div class="minfo" id="mConn"></div><div class="minfo" id="mOr"></div>
+  <div class="mbas"><button class="go ghost mini" type="button" id="bEntr">Entraînement (Bot du Club)</button><a class="go ghost mini" href="index.html#classement">Classement</a><button class="go ghost mini" type="button" id="bRegMenu">Règles</button><button class="go ghost mini sonBtn" type="button" aria-label="Son">🔊</button><button class="go ghost mini" type="button" id="bDeco">Se déconnecter</button></div>
+</div></div>
+<div id="toast" hidden></div>
+
+<script src="config-jeu.js"></script>
 <script src="jeu-core.js"></script>
 <script>
 (function(){
@@ -1018,7 +1060,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   setInterval(function(){
     ['totMe', 'totOpp'].forEach(function(id){ var e = $(id); if(e.classList.contains('hot')) FX.etincelles(e.getBoundingClientRect()); });
   }, 170);
-  function majStats(){ $('stats').textContent = stats.w + ' V · ' + stats.l + ' D · ' + stats.n + ' N'; }
+  function majStats(){ $('stats').textContent = EN_LIGNE ? (ONL.moi ? ONL.moi.victoires + ' V · ' + ONL.moi.parties + ' parties' : '') : stats.w + ' V · ' + stats.l + ' D · ' + stats.n + ' N'; }
 
   // ----- cartes en vol -----
   function rectOf(el){ return el ? el.getBoundingClientRect() : null; }
@@ -1079,9 +1121,9 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   function stopTimer(){ clearInterval(tTimer); tTimer = null; $('table').classList.remove('low'); }
   function startTimer(){
     stopTimer();
-    var total = +S.secs, bar = $('bar'), fill = bar.firstElementChild;
+    var total = secsTour(), bar = $('bar'), fill = bar.firstElementChild;
     if(!total){ fill.style.width = '100%'; bar.classList.remove('low'); $('secs').textContent = ''; return; }
-    tLeft = total * 1000;
+    tLeft = ONL.resteMs != null ? Math.max(500, Math.min(ONL.resteMs, total * 1000)) : total * 1000; ONL.resteMs = null;
     fill.style.width = '100%'; bar.classList.remove('low'); $('secs').textContent = total + ' s';
     tTimer = setInterval(function(){
       tLeft -= 100;
@@ -1095,6 +1137,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   }
   function tempsEcoule(){
     if(!G || G.over || G.turn !== ME || busy) return;
+    if(ONL.actif){ $('hint').textContent = 'Temps écoulé…'; return; }      // en ligne, c'est le serveur qui joue une carte au hasard
     timeouts++;
     if(timeouts >= G.opts.tolerance){ J.abandon(G, ME); fin(); return; }
     var m = J.BOTS.facile(G, ME);
@@ -1109,6 +1152,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     if(G.turn === ME){ Son.play('tour'); startTimer(); }
     else {
       stopTimer(); $('secs').textContent = ''; $('bar').firstElementChild.style.width = '100%';
+      if(ONL.actif) return;                                          // en ligne, on attend le coup de l'adversaire
       var my = gen;
       botTimer = setTimeout(function(){
         if(my !== gen) return;
@@ -1133,12 +1177,12 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     var vol = null;
     voler(card, from, to, {flip: p === BOT, faceUp: p === ME, dur: 380, keep: true, onFly: function(f){ if(card.r !== 'commune' && card.r !== 'peu') FX.trainee(f, card.r); }}).then(function(f){
       vol = f;
-      if(my !== gen){ f.remove(); return; }
+      if(my !== gen){ if(f) f.remove(); return; }
       // 2) les cartes détruites de l'adversaire disparaissent
       FX.impact(rectOf(f), card);
       Son.play('pose', {rate: 1.15 - card.power * .035});
-      if(f.animate && !reduce) f.animate([{scale: '1.2'}, {scale: '.94', offset: .5}, {scale: '1'}], {duration: 300, easing: 'ease-out'});
-      var big = card.power >= 7, rc = rectOf(f);
+      if(f && f.animate && !reduce) f.animate([{scale: '1.2'}, {scale: '.94', offset: .5}, {scale: '1'}], {duration: 300, easing: 'ease-out'});
+      var big = card.power >= 7, rc = rectOf(f) || to;
       if(big) Fond.burst(rc.left + rc.width / 2, rc.top + rc.height, 12, card.r === 'speciale' ? 'teal' : 'gold', 200);
       var oc = (opp === ME ? $('boardMe') : $('boardOpp')).children[ci];
       var els = idx.map(function(r){ var e = oc && oc.children[r]; return e && e.classList.contains('gc') ? e : null; });
@@ -1165,7 +1209,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     }).then(function(){
       if(my !== gen) return;
       var avant = snap();
-      var r = J.jouer(G, p, h, ci);
+      var r = ONL.actif ? jouerMiroir(p, h, ci) : J.jouer(G, p, h, ci);
       if(r && r.pioche){ cache[r.pioche.id] = true; }
       render();
       deplacer(avant);
@@ -1197,18 +1241,23 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     chain.then(function(){ if(my !== gen) return; busy = false; debutTour(); });
   }
   function fin(){
+    if(ONL.actif && !ONL.finMsg && ONL.attFin++ < 40){ setTimeout(fin, 100); return; }      // en ligne : on attend le verdict du serveur
     stopTimer(); clearTimeout(botTimer); render();
-    var w = G.winner, a = G.scores[ME], b = G.scores[BOT];
-    if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++;
-    majStats();
+    var w = G.winner, a = G.scores[ME], b = G.scores[BOT], en = ONL.actif && ONL.finMsg, f = ONL.finMsg;
+    if(en){ ONL.moi = f.moi; majStats(); } else if(!EN_LIGNE){ if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++; majStats(); }
     Son.musiqueOff();
     var t = $('finTitre');
     var so = Fond.nom() === 'souls';
     t.textContent = w === ME ? (so ? 'Victoire accomplie' : 'Victoire !') : w === BOT ? (so ? 'Tu as péri' : 'Défaite') : 'Égalité';
     t.className = 'big ' + (w === ME ? 'win' : w === BOT ? 'lose' : '');
-    $('finPts').textContent = G.forfait != null ? (G.forfait === ME ? 'Trop de tours sans jouer : forfait.' : 'L\'adversaire a abandonné.') : 'Toi ' + a + ' — ' + b + ' Adversaire';
+    var pseudoOpp = en ? $('nomOpp').textContent : 'Adversaire';
+    $('finPts').textContent = G.forfait != null ? (G.forfait === ME ? (en && f.raison === 'abandon' ? 'Tu as abandonné la partie.' : 'Trop de tours sans jouer : forfait.') : (en && f.raison === 'abandon' ? pseudoOpp + ' a abandonné.' : pseudoOpp + ' a été absent trop longtemps : forfait.')) : 'Toi ' + a + ' — ' + b + ' ' + pseudoOpp;
     $('finStats').textContent = 'Cartes détruites : ' + gs.dest + ' · Colonnes triples : ' + gs.tri;
-    $('finGain').textContent = w === ME ? 'Dans le vrai jeu : +10 ClubiGold (5 victoires récompensées par jour).' : '';
+    $('finGain').textContent = en ? gainTexte(f, w) : EN_LIGNE ? 'Entraînement : pas de ClubiGold et pas de point au classement.' : (w === ME ? 'Dans le vrai jeu : +10 ClubiGold (5 victoires récompensées par jour).' : '');
+    $('finGain').style.color = en && w === ME && f.or.gain > 0 ? '#ffe08a' : '';
+    $('finRang').textContent = en && f.moi ? 'Classement : ' + f.moi.victoires + ' victoire' + (f.moi.victoires > 1 ? 's' : '') + ' sur ' + f.moi.parties + ' partie' + (f.moi.parties > 1 ? 's' : '') + ' · n°' + f.moi.rang : '';
+    $('lClass').hidden = !en;
+    if(en){ ONL.actif = false; $('bQuit').hidden = true; }
     var my = gen;
     setTimeout(function(){
       if(my !== gen) return;
@@ -1217,15 +1266,19 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       if(w === ME){ Son.play('victoire'); FX.confettis(); } else if(w === BOT) Son.play('defaite'); else Son.play('egalite');
     }, 700);
   }
-  function nouvelle(){
+  function reinit(){
     gen++; clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; cache = {};
     lob.my++; clearTimeout(lob.t); $('vLobby').hidden = true; gs = {dest:0, tri:0}; shown = [0, 0]; twk[0]++; twk[1]++; wasHot = [false, false]; wasWarm = [false, false];
     ['totMe', 'totOpp'].forEach(function(id){ $(id).classList.remove('warm', 'hot', 'inferno'); });
     Fond.theme(choisirFond()); Fond.setHeat(0);
     Son.musiqueOn();
     Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
-    $('vFin').hidden = true; $('vReglages').hidden = true;
+    $('vFin').hidden = true; $('vReglages').hidden = true; $('vMenu').hidden = true; ONL.cur = null;
     $('rPile').textContent = J.composerPioche(S.pile).length; $('rHand').textContent = S.hand; $('rStart').textContent = +S.start || 'sans limite'; $('rSecs').textContent = +S.secs ? S.secs + ' secondes' : 'sans limite de temps';
+  }
+  function nouvelle(){
+    ONL.actif = false; ONL.mode = 'bot'; ONL.pending = null; reinit();
+    $('nomOpp').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('bQuit').hidden = !EN_LIGNE;
     var first = S.first === 'me' ? ME : S.first === 'bot' ? BOT : null;
     G = J.nouvellePartie(options(), Math.random, first);
     distribuer();
@@ -1234,12 +1287,18 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   // ----- actions du joueur -----
   document.addEventListener('click', function(e){
     var c = e.target.closest('#hand .gc');
-    if(c && G && G.turn === ME && !busy && !G.over){ var i = +c.dataset.h; Son.play(sel === i ? 'deselection' : 'selection', {rate: 1 + c.classList.contains('r-legendaire') * .12}); sel = sel === i ? -1 : i; render(); return; }
+    if(c && G && G.turn === ME && !busy && !G.over && !ONL.envoi){ var i = +c.dataset.h; Son.play(sel === i ? 'deselection' : 'selection', {rate: 1 + c.classList.contains('r-legendaire') * .12}); sel = sel === i ? -1 : i; render(); return; }
     var col = e.target.closest('#boardMe .col');
-    if(col && G && G.turn === ME && !busy && !G.over){
+    if(col && G && G.turn === ME && !busy && !G.over && !ONL.envoi){
       var ci = +col.dataset.ci;
       if(sel < 0){ Son.play('erreur'); $('hint').textContent = 'Choisis d\'abord une carte dans ta main.'; return; }
       if(G.board[ME][ci].length >= 3){ Son.play('erreur'); $('hint').textContent = 'Cette colonne est pleine.'; return; }
+      if(ONL.actif){                                              // en ligne : on propose le coup au serveur, il le rejoue chez les deux joueurs
+        ONL.envoi = true; $('hint').textContent = '';
+        envoyer({t:'jouer', id:G.hands[ME][sel].id, ci:ci});
+        clearTimeout(ONL.tEnvoi); ONL.tEnvoi = setTimeout(function(){ if(ONL.envoi){ ONL.envoi = false; envoyer({t:'reprise'}); } }, 5000);
+        return;
+      }
       jouerCoup(ME, sel, ci);
     }
   });
@@ -1275,6 +1334,197 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     c.style.removeProperty('--rx'); c.style.removeProperty('--ry');
   });
 
+  // =====================================================================
+  //  MODE EN LIGNE — le serveur arbitre la partie ; ici on affiche et on envoie ses choix.
+  //  Deux réglages à remplir pour l'activer (voir le guide de mise en ligne) :
+  // =====================================================================
+  var CFG = window.JEU_CONFIG || {};          // réglages dans le fichier config-jeu.js (à côté de jeu.html)
+  var API_URL = String(CFG.API_URL || '').replace(/\/$/, ''), TWITCH_CLIENT_ID = String(CFG.TWITCH_CLIENT_ID || '');
+  var EN_LIGNE = !!(API_URL && TWITCH_CLIENT_ID);
+  var ONL = {actif:false, mode:'bot', ws:null, ok:false, token:null, moi:null, presence:null, pause:false, q:[], seat:0, pending:null, cur:null, envoi:false,
+             finMsg:null, attFin:0, voulu:false, essai:0, ping:null, defi:null, enFile:false, attMode:'', code:'', tAttente:0, resteMs:null};
+  var sI = function(s){ return s === ONL.seat ? ME : BOT; };           // numéro de siège (serveur) -> ME / BOT (ici)
+  var vide = function(n){ var a = []; for(var i = 0; i < n; i++) a.push({id:'p' + i, power:0}); return a; };
+  var masque = function(c){ return {id:c.id, art:'', saison:'', n:0, power:0, r:'commune'}; };
+  function toast(txt, ms){ var t = $('toast'); t.textContent = txt; t.hidden = false; clearTimeout(toast.t); if(ms !== 0) toast.t = setTimeout(function(){ t.hidden = true; }, ms || 3500); }
+  function secsTour(){ return ONL.actif && G ? +G.opts.seconds : +S.secs; }
+
+  // ----- connexion Twitch (le navigateur reçoit un jeton, le serveur le vérifie auprès de Twitch) -----
+  function jeton(){ try{ var j = JSON.parse(localStorage.getItem('leclubi-twitch') || 'null'); return j && j.token || null; }catch(e){ return null; } }
+  function oublierJeton(){ try{ localStorage.removeItem('leclubi-twitch'); }catch(e){} ONL.token = null; ONL.voulu = false; }
+  function connexionTwitch(){
+    var st = Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(12)), function(x){ return ('0' + x.toString(16)).slice(-2); }).join('');
+    try{ sessionStorage.setItem('leclubi-oauth', st); if(ONL.defi) sessionStorage.setItem('leclubi-defi', ONL.defi); }catch(e){}
+    location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(TWITCH_CLIENT_ID) + '&redirect_uri=' + encodeURIComponent(location.origin + location.pathname) +
+      '&response_type=token&scope=&state=' + st;
+  }
+  function lireRetourTwitch(){
+    var h = location.hash.replace(/^#/, ''); if(h.indexOf('access_token=') < 0) return;
+    var p = {}; h.split('&').forEach(function(x){ var a = x.split('='); p[a[0]] = decodeURIComponent(a[1] || ''); });
+    var st = ''; try{ st = sessionStorage.getItem('leclubi-oauth') || ''; sessionStorage.removeItem('leclubi-oauth'); }catch(e){}
+    if(p.access_token && st && p.state === st){ try{ localStorage.setItem('leclubi-twitch', JSON.stringify({token:p.access_token, ts:Date.now()})); }catch(e){} }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+
+  // ----- liaison avec le serveur -----
+  function envoyer(o){ if(ONL.ws && ONL.ws.readyState === 1) ONL.ws.send(JSON.stringify(o)); }
+  function connecter(){
+    if(!EN_LIGNE || !ONL.token || (ONL.ws && ONL.ws.readyState <= 1)) return;
+    var ws = new WebSocket(API_URL.replace(/^http/, 'ws').replace(/\/$/, '') + '/ws'); ONL.ws = ws; ONL.ok = false; ONL.voulu = true;
+    ws.onopen = function(){ ws.send(JSON.stringify({t:'hello', token:ONL.token})); clearInterval(ONL.ping); ONL.ping = setInterval(function(){ envoyer({t:'ping'}); }, 25000); };
+    ws.onmessage = function(ev){ var m; try{ m = JSON.parse(ev.data); }catch(e){ return; } recu(m); };
+    ws.onclose = function(){
+      clearInterval(ONL.ping); if(ONL.ws !== ws) return; ONL.ws = null; ONL.ok = false; ONL.enFile = false; majMenu();
+      if(ONL.voulu){ ONL.essai++; if(ONL.actif) toast('Connexion perdue… on te reconnecte.', 0); setTimeout(connecter, Math.min(15000, 800 * Math.pow(2, ONL.essai - 1))); }
+    };
+    ws.onerror = function(){};
+  }
+  var MSG_ERREUR = {defi_inconnu:'Ce défi n\'existe plus (ou il a déjà commencé).', defi_soi_meme:'Tu ne peux pas te défier toi-même !'};
+  function recu(m){
+    switch(m.t){
+      case 'bienvenue':
+        ONL.ok = true; ONL.essai = 0; ONL.moi = m.moi; try{ localStorage.setItem('leclubi-pseudo', m.moi.pseudo); }catch(e){} ONL.presence = m.presence; ONL.pause = !!m.pause; $('toast').hidden = true; majStats(); majMenu();
+        if(ONL.actif && G && !G.over){ clearTimeout(ONL.tRep); ONL.tRep = setTimeout(function(){ if(ONL.actif && G && !G.over) interrompue(); }, 2500); }
+        else if(ONL.defi){ var c = ONL.defi; ONL.defi = null; try{ sessionStorage.removeItem('leclubi-defi'); }catch(e){} envoyer({t:'rejoindre', code:c}); }
+        break;
+      case 'presence': ONL.presence = m; majMenu(); break;
+      case 'attente': ONL.enFile = true; ONL.attMode = m.mode; ONL.code = m.code || ''; ONL.tAttente = Date.now(); majMenu(); setTimeout(majMenu, 15500); break;
+      case 'annule': ONL.enFile = false; majMenu(); break;
+      case 'debut': ONL.enFile = false; ONL.q = []; ONL.finMsg = null; ONL.attFin = 0; montrerMatch(m); break;
+      case 'reprise': clearTimeout(ONL.tRep); if(ONL.actif && G && !G.over) ONL.q.push(m); else if(!G || G.over || !ONL.actif) demarrerReprise(m); break;
+      case 'coup': ONL.q.push(m); break;
+      case 'fin': ONL.finMsg = m; ONL.q.push(m); break;
+      case 'adv_deco': toast('L\'adversaire s\'est déconnecté… il a quelques secondes pour revenir.', 5000); break;
+      case 'adv_retour': toast('L\'adversaire est de retour.', 2500); break;
+      case 'remplace': ONL.voulu = false; ONL.ok = false; $('mInfo').textContent = 'Tu es connecté dans un autre onglet : cette page est en pause.'; majMenu(); break;
+      case 'erreur':
+        if(m.code === 'auth'){ oublierJeton(); $('mInfo').textContent = 'Ta connexion Twitch a expiré : reconnecte-toi.'; if(ONL.actif) interrompue(); else majMenu(); }
+        else if(m.code === 'banni'){ ONL.voulu = false; $('mInfo').textContent = 'Ce compte n\'a pas accès au jeu.'; majMenu(); }
+        else if(m.code === 'coup_invalide'){ ONL.envoi = false; }
+        else if(MSG_ERREUR[m.code]){ toast(MSG_ERREUR[m.code]); }
+        break;
+    }
+  }
+  function interrompue(){
+    ONL.actif = false; ONL.q = []; $('mInfo').textContent = 'La partie a été interrompue (le serveur a redémarré). Elle n\'est pas comptée.'; $('toast').hidden = true; showMenu();
+  }
+
+  // ----- reconstruire l'état de la partie chez nous (la main de l'adversaire reste cachée) -----
+  function bati(m){
+    ONL.seat = m.siege;
+    var g = {opts:J.reglages(m.regles), pioche:vide(m.pioche), defausse:[], board:[[[], [], []], [[], [], []]], hands:[[], []], first:sI(m.premier), turn:sI(m.premier),
+             tours:[0, 0], over:false, winner:null, scores:[0, 0], rng:Math.random};
+    g.hands[ME] = m.main.slice(); g.hands[BOT] = m.adv.map(masque);
+    if(m.t === 'reprise'){
+      g.board[ME] = m.plateau[m.siege]; g.board[BOT] = m.plateau[1 - m.siege]; g.turn = sI(m.tour);
+      g.scores = [m.scores[m.siege], m.scores[1 - m.siege]]; g.tours = [m.tours[m.siege], m.tours[1 - m.siege]]; ONL.resteMs = m.reste;
+    }
+    return g;
+  }
+  function jouerMiroir(p, h, ci){
+    var m = ONL.cur, d = m && m.pioche;
+    G.pioche = d ? [d.art !== undefined ? d : masque(d)] : []; G.defausse = [];   // la carte piochée nous est indiquée par le serveur
+    var r = J.jouer(G, p, h, ci);
+    G.pioche = vide(m ? m.pioche_n : 0); G.defausse = [];
+    return r;
+  }
+  function traiter(m){
+    if(m.t === 'coup'){
+      var p = sI(m.p), h = -1;
+      G.hands[p].forEach(function(c, i){ if(c.id === m.carte.id) h = i; });
+      if(h < 0){ envoyer({t:'reprise'}); return; }
+      if(p === BOT) G.hands[BOT][h] = m.carte;                       // la carte jouée est révélée à tous
+      if(p === ME){ ONL.envoi = false; clearTimeout(ONL.tEnvoi); }
+      ONL.cur = m;
+      if(m.auto && p === ME) toast('Temps écoulé (' + m.timeouts[ONL.seat] + '/' + G.opts.tolerance + ') : une carte a été jouée au hasard.', 3500);
+      jouerCoup(p, h, m.ci);
+    } else if(m.t === 'fin'){
+      if(G.over) return;
+      G.over = true; G.winner = m.gagnant === -1 ? -1 : sI(m.gagnant); if(m.forfait != null) G.forfait = sI(m.forfait);
+      G.scores = [m.scores[ONL.seat], m.scores[1 - ONL.seat]]; fin();
+    } else if(m.t === 'reprise'){
+      G = bati(m); cache = {}; sel = -1; ONL.envoi = false; shown = [G.scores[0], G.scores[1]];
+      stopTimer(); render(); debutTour();
+    }
+  }
+  setInterval(function(){ if(!ONL.actif || busy || !G || !ONL.q.length) return; traiter(ONL.q.shift()); }, 40);
+
+  function montrerMatch(m){
+    ONL.mode = 'ligne'; ONL.pending = m;
+    $('vMenu').hidden = true; $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = false;
+    $('plMe').querySelector('b').textContent = ONL.moi ? ONL.moi.pseudo : 'Toi'; $('plMe').querySelector('.av').textContent = (ONL.moi ? ONL.moi.pseudo : 'T').charAt(0).toUpperCase();
+    $('plOpp').querySelector('b').textContent = m.adversaire.pseudo; $('plOpp').querySelector('.av').textContent = m.adversaire.pseudo.charAt(0).toUpperCase();
+    $('lnote').textContent = m.mode === 'defi' ? 'Défi entre amis.' : '';
+    lob.me = true; lob.opp = true; lob.cd = false; lob.my++; clearTimeout(lob.t); $('cnt').textContent = '';
+    majLobby(); Son.play('pret'); verifier();
+  }
+  function demarrerEnLigne(){
+    var m = ONL.pending; ONL.pending = null; if(!m) return;
+    ONL.actif = true; ONL.envoi = false; ONL.seat = m.siege;
+    reinit(); G = bati(m); ONL.resteMs = null;
+    $('nomOpp').textContent = m.adversaire.pseudo; $('bQuit').hidden = false;
+    $('rPile').textContent = J.composerPioche(G.opts.pile).length; $('rHand').textContent = G.opts.hand; $('rStart').textContent = +G.opts.startMax || 'sans limite'; $('rSecs').textContent = G.opts.seconds + ' secondes';
+    distribuer();
+  }
+  function demarrerReprise(m){
+    ONL.mode = 'ligne'; ONL.actif = true; ONL.pending = null; ONL.envoi = false; ONL.q = []; ONL.finMsg = null; ONL.attFin = 0;
+    reinit(); G = bati(m); shown = [G.scores[0], G.scores[1]];
+    $('vMenu').hidden = true; $('vLobby').hidden = true; $('nomOpp').textContent = m.adversaire.pseudo; $('bQuit').hidden = false;
+    busy = false; render(); debutTour();
+  }
+
+  // ----- menu en ligne -----
+  function majMenu(){
+    if(!EN_LIGNE) return;
+    var log = !!ONL.token, co = ONL.ok && !!ONL.moi;
+    $('mLogin').hidden = log; $('mJeu').hidden = !log;
+    $('mCompte').hidden = !co;
+    if(co){ $('mPseudo').textContent = ONL.moi.pseudo; $('mStat').textContent = ONL.moi.victoires + ' victoire' + (ONL.moi.victoires > 1 ? 's' : '') + ' · ' + ONL.moi.parties + ' partie' + (ONL.moi.parties > 1 ? 's' : '') + ' · rang n°' + ONL.moi.rang; }
+    var pr = ONL.presence;
+    $('mPres').textContent = pr ? (pr.enLigne + ' joueur' + (pr.enLigne > 1 ? 's' : '') + ' en ligne' + (pr.enFile ? ' · ' + pr.enFile + ' en recherche' : '')) : '';
+    $('mConn').textContent = log && !co && ONL.voulu ? 'Connexion au serveur…' : '';
+    $('mOr').textContent = ONL.pause ? 'Les récompenses sont en pause pour le moment.' : '';
+    $('bRapide').disabled = !co; $('bDefi').disabled = !co; $('bCode').disabled = !co;
+    $('mChoix').hidden = ONL.enFile; $('mAttente').hidden = !ONL.enFile;
+    var defi = ONL.enFile && ONL.attMode === 'defi';
+    $('mAttFile').hidden = defi; $('defiBox').hidden = !defi;
+    if(defi) $('iLien').value = location.origin + location.pathname + '?defi=' + ONL.code;
+    $('mBot').hidden = !(ONL.enFile && ONL.attMode === 'file' && Date.now() - ONL.tAttente > 15000);
+  }
+  function showMenu(){
+    gen++; clearTimeout(botTimer); stopTimer(); busy = false; Son.musiqueOff();
+    Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
+    $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = true; $('bQuit').hidden = true; $('vMenu').hidden = false;
+    $('nomOpp').textContent = 'Adversaire'; ONL.actif = false; ONL.pending = null;
+    majMenu(); connecter();
+  }
+  function gainTexte(f, g){
+    var o = f.or || {}, moi = f.moi || {};
+    if(g === ME && o.gain > 0) return '+' + o.gain + ' ClubiGold ! (' + moi.victoiresOrAujourdhui + '/' + f.orPlafond + ' victoires récompensées aujourd\'hui)';
+    var R = {limite_jour:'Tu as atteint la limite de victoires récompensées pour aujourd\'hui : pas de ClubiGold cette fois.', limite_adversaire:'Tu as déjà gagné des ClubiGold contre ce joueur aujourd\'hui : pas de récompense.',
+             amicale:'Partie amicale : trop de parties contre ce joueur aujourd\'hui, elle ne compte pas au classement.', trop_courte:'Partie trop courte : elle n\'est pas comptée.',
+             pause:'Les récompenses sont en pause pour le moment.', deconnecte:'Pas de récompense (connexion perdue).', nul:''};
+    return g === ME ? (R[o.raison] || '') : (o.raison === 'amicale' || o.raison === 'trop_courte' ? R[o.raison] : '');
+  }
+  function brancherMenu(){
+    $('bTwitch').onclick = function(){ Son.init(); connexionTwitch(); };
+    $('bRapide').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'file'}); };
+    $('bDefi').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'defi'}); };
+    $('bCode').onclick = function(){ var c = $('iCode').value.trim(); if(c.indexOf('defi=') >= 0) c = c.split('defi=')[1]; if(c.length < 4) return; $('mInfo').textContent = ''; envoyer({t:'rejoindre', code:c}); };
+    $('bAnnuler').onclick = function(){ envoyer({t:'annuler'}); };
+    $('bAnnuler2').onclick = function(){ envoyer({t:'annuler'}); };
+    $('bCopier').onclick = function(){ var i = $('iLien'); i.select(); try{ navigator.clipboard.writeText(i.value); }catch(e){ try{ document.execCommand('copy'); }catch(x){} } $('bCopier').textContent = 'Copié ✓'; setTimeout(function(){ $('bCopier').textContent = 'Copier le lien'; }, 1800); };
+    $('bBot').onclick = function(){ envoyer({t:'annuler'}); ONL.enFile = false; $('vMenu').hidden = true; showTraining(true); };
+    $('bEntr').onclick = function(){ Son.init(); $('vMenu').hidden = true; showTraining(false); };
+    $('bRegMenu').onclick = function(){ ouvrir('vRegles'); };
+    $('bDeco').onclick = function(){ oublierJeton(); if(ONL.ws) try{ ONL.ws.close(); }catch(e){} ONL.ok = false; ONL.moi = null; majStats(); majMenu(); };
+    $('bQuit').onclick = function(){
+      if(ONL.actif && ONL.mode === 'ligne' && G && !G.over){ if(!confirm('Abandonner la partie ? Elle comptera comme une défaite.')) return; envoyer({t:'abandon'}); return; }
+      showLobby();
+    };
+    window.addEventListener('beforeunload', function(e){ if(ONL.actif && G && !G.over && ONL.mode === 'ligne'){ e.preventDefault(); e.returnValue = ''; } });
+  }
+
   // ----- écran "Jouer" : chacun doit être prêt -----
   var lob = {me:false, opp:false, cd:false, t:null, my:0};
   function majLobby(){
@@ -1283,16 +1533,24 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     $('etOpp').textContent = lob.opp ? 'Prêt ✓' : 'En attente…';
     var b = $('bJouer'); b.textContent = lob.cd ? 'C\'est parti…' : lob.me ? 'Annuler' : 'Jouer'; b.disabled = lob.cd;
     b.classList.toggle('wait', lob.me && !lob.cd); b.classList.toggle('pulse', !lob.me && lob.opp);
+    if(ONL.pending){ b.hidden = true; $('lhint').textContent = 'Adversaire trouvé !'; return; }
     $('lhint').textContent = lob.cd ? '' : lob.me && !lob.opp ? 'En attente de l\'adversaire…' : !lob.me && lob.opp ? 'L\'adversaire est prêt, à toi !' : lob.me ? '' : 'Clique sur Jouer quand tu es prêt.';
   }
-  function showLobby(){
+  function showTraining(auto){
+    ONL.mode = 'bot'; ONL.actif = false; ONL.pending = null;
     gen++; clearTimeout(botTimer); stopTimer(); busy = false; Son.musiqueOff();
     Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
     $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = false;
     lob.me = false; lob.opp = false; lob.cd = false; var id = ++lob.my; $('cnt').textContent = '';
+    $('bJouer').hidden = false; $('nomOpp').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('bQuit').hidden = !EN_LIGNE;
+    $('plMe').querySelector('b').textContent = ONL.moi ? ONL.moi.pseudo : 'Toi'; $('plMe').querySelector('.av').textContent = (ONL.moi ? ONL.moi.pseudo : 'Toi').charAt(0).toUpperCase();
+    $('plOpp').querySelector('b').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('plOpp').querySelector('.av').textContent = EN_LIGNE ? 'B' : '?';
+    $('lnote').textContent = EN_LIGNE ? 'Entraînement : le Bot du Club ne rapporte pas de ClubiGold et ne compte pas au classement.' : 'Prototype : l\'adversaire est automatique.';
     majLobby(); clearTimeout(lob.t);
+    if(auto){ lob.me = true; majLobby(); }
     lob.t = setTimeout(function(){ if(id !== lob.my) return; lob.opp = true; Son.play('pret', {rate: .85}); majLobby(); verifier(); }, 1200 + Math.random() * 3200);
   }
+  function showLobby(){ if(EN_LIGNE) showMenu(); else showTraining(false); }
   function verifier(){
     if(!(lob.me && lob.opp) || lob.cd) return;
     lob.cd = true; majLobby(); var id = lob.my, n = 3, c = $('cnt');
@@ -1300,7 +1558,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       if(id !== lob.my) return;
       c.className = 'cnt'; void c.offsetWidth; c.className = 'cnt t';
       if(n > 0){ c.textContent = n--; Son.play('decompte'); setTimeout(tick, 750); }
-      else { c.textContent = 'GO !'; Son.play('go'); setTimeout(function(){ if(id === lob.my) nouvelle(); }, 500); }
+      else { c.textContent = 'GO !'; Son.play('go'); setTimeout(function(){ if(id === lob.my){ if(ONL.pending) demarrerEnLigne(); else nouvelle(); } }, 500); }
     })();
   }
   $('bJouer').onclick = function(){
@@ -1321,12 +1579,26 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   $('bNew').onclick = function(){
     KEYS.forEach(function(p){ var a = p.split(':'); S[a[1]] = $('s' + a[0]).value; });
     try{ localStorage.setItem('leclubi-jeu4', JSON.stringify(S)); }catch(e){}
+    if(EN_LIGNE){ $('vReglages').hidden = true; return; }
     showLobby();
   };
-  $('bRejouer').onclick = showLobby;
+  $('bRejouer').onclick = function(){
+    if(EN_LIGNE && ONL.mode === 'ligne'){ showMenu(); if(ONL.ok) envoyer({t:'file'}); }       // nouvelle recherche tout de suite
+    else if(EN_LIGNE) showTraining(true);
+    else showLobby();
+  };
+  $('bMenu').onclick = showLobby;
 
   window.__jeu = {get G(){ return G; }, nouvelle: nouvelle, S: S, get busy(){ return busy; }};
   window.__fond = Fond;   // pour les tests
+  if(EN_LIGNE){
+    document.body.classList.add('enligne'); $('bNew').textContent = 'Appliquer'; $('regNote').textContent = 'Les règles de la partie sont fixées par le serveur. Ces réglages concernent le fond de table et l\'entraînement contre le Bot.';
+    lireRetourTwitch(); brancherMenu();
+    var qd = (new URLSearchParams(location.search).get('defi') || '').toUpperCase(); try{ if(!qd) qd = sessionStorage.getItem('leclubi-defi') || ''; }catch(e){}
+    ONL.defi = qd.replace(/[^A-Z0-9]/g, '').slice(0, 8) || null;
+    ONL.token = jeton(); ONL.voulu = !!ONL.token;
+    if(!ONL.token) fetch(API_URL.replace(/\/$/, '') + '/etat').then(function(r){ return r.json(); }).then(function(e){ ONL.presence = {enLigne:e.enLigne, enFile:e.enFile}; majMenu(); }).catch(function(){});
+  }
   Son.appliquer(); showLobby();
   if(!sessionStorage.getItem('leclubi-jeu-regles')){ try{ sessionStorage.setItem('leclubi-jeu-regles', '1'); }catch(e){} ouvrir('vRegles'); }
 })();

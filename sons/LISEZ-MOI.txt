@@ -1,0 +1,87 @@
+SONS DU JEU — COMMENT LES AJOUTER
+=================================
+
+1. Crée un dossier "sons" à la racine du site (à côté de jeu.html, jeu-core.js et du dossier "cartes").
+2. Mets-y tes fichiers, avec EXACTEMENT les noms ci-dessous (en minuscules, sans accent).
+   Formats acceptés : .mp3, .ogg ou .wav (mp3 recommandé).
+3. Fais Ctrl+F5 sur la page du jeu.
+   Un son dont le fichier est absent est remplacé par un petit son fabriqué par le navigateur :
+   tu peux donc ajouter les fichiers un par un, le jeu marche toujours.
+
+LES 7 SONS DEMANDÉS
+-------------------
+musique.mp3        Musique pendant la partie (boucle, 1 à 3 minutes, qui se répète sans coupure)
+selection.mp3      Quand tu sélectionnes une carte (très court, 0,1 à 0,3 s)
+pose.mp3           Quand la carte se pose sur la case (impact sourd / "toc", 0,2 à 0,5 s)
+distribution.mp3   Quand une carte est distribuée ou piochée (froissement / glissement, 0,1 à 0,3 s)
+                   -> joué à chaque carte, un peu plus aigu ou grave au hasard pour ne pas lasser
+victoire.mp3       Fin de partie gagnée (1 à 4 s)
+defaite.mp3        Fin de partie perdue (1 à 4 s)
+egalite.mp3        Fin de partie égalité (1 à 3 s)
+destruction.mp3    Carte qui se détruit (éclat / explosion légère, 0,3 à 0,8 s)
+colonne.mp3        Colonne remplie de 3 cartes identiques (jingle de récompense, 0,5 à 1,5 s)
+
+SONS EN PLUS (déjà prévus)
+--------------------------
+deselection.mp3    Quand tu reposes une carte sélectionnée
+survol.mp3         Quand la souris passe sur une carte de ta main (TRÈS discret, 0,05 s)
+pret.mp3           Clic sur "Jouer" / adversaire prêt
+decompte.mp3       Chaque chiffre du 3 - 2 - 1
+go.mp3             Au "GO !"
+tour.mp3           Quand c'est à toi de jouer
+tic.mp3            Les 5 dernières secondes de ton tour
+erreur.mp3         Clic impossible (colonne pleine, pas de carte choisie)
+tension.mp3        Quand un score passe 50 points (battement de cœur grave + montée de tension, 1 à 2 s)
+
+VOLUME
+------
+- Bouton haut-parleur en haut de la page : coupe / remet tout le son.
+- Réglages : curseurs "Musique" et "Effets sonores".
+- Pour qu'un son soit plus fort ou plus faible que les autres : modifie son fichier (audio plus ou moins fort),
+  ou dis-le moi et je règle le volume de ce son dans le code.
+
+ATTENTION AUX DROITS (important pour un streamer)
+-------------------------------------------------
+Si le jeu est affiché pendant ton live, la musique est entendue sur Twitch : utilise uniquement
+de la musique et des sons libres de droits (risque de strike / VOD coupée sinon).
+Sources gratuites sûres :
+  - kenney.nl (sons de jeu, licence CC0 : aucune obligation)
+  - pixabay.com/sound-effects et pixabay.com/music (licence Pixabay, usage libre)
+  - freesound.org (filtre "Creative Commons 0")
+  - opengameart.org (regarde la licence de chaque fichier)
+  - sons/musiques générés ou achetés avec licence commerciale (Epidemic Sound, etc. si tu as un abonnement)
+Garde une note de la source et de la licence de chaque fichier.
+
+
+MOTS-CLÉS POUR TROUVER LES SONS (cherche en anglais, c'est beaucoup plus efficace)
+------------------------------------------------------------------------------
+Sur freesound.org, pixabay.com/sound-effects, kenney.nl, opengameart.org.
+Ajoute "game", "UI" ou "fantasy" si les résultats sont trop variés. Cherche "loop" pour la musique.
+
+musique          dark fantasy ambient loop / mystical ambient game music / occult tarot ambience /
+                 eerie fantasy loop / dark atmosphere board game music / witchy ambient
+selection        card pick up / card select UI / card tap / UI select soft / paper tap
+deselection      card put back / UI cancel soft / UI back click
+survol           UI hover / soft tick / UI blip / card hover shimmer
+pose             card slam / card place table / card thud / card flip hit / wooden card place
+distribution     card deal / card shuffle / card slide / card draw / card flick / playing card swish
+destruction      glass shatter / magic break / card burn / paper tear magic / crystal break /
+                 magic dispel / spell explosion small / disintegrate
+colonne          magic reward / treasure chime / level up / power up jingle / magic sparkle win /
+                 success chime / combo reward
+victoire         victory fanfare short / win jingle fantasy / level complete / triumph stinger
+defaite          defeat stinger / game over sad short / lose jingle dark / failure sting
+egalite          draw neutral stinger / tie jingle / neutral chime
+pret             UI ready click / confirm bell / checkmark ping / button confirm
+decompte         countdown beep / UI beep tick / 3 2 1 beep
+go               game start stinger / fight start / round start gong / GO beep
+tour             your turn chime / notification soft ping / turn start bell / UI notification
+tic              clock tick / countdown tick / timer warning tick / tension tick
+erreur           UI error / invalid action buzz / denied soft / error blip
+tension          heartbeat low / dark riser short / tension build / low drone hit / suspense stinger / ominous pulse
+
+ASTUCES
+- Pour les petits sons, prends des fichiers très courts : la réactivité compte plus que la qualité.
+- Pour la musique, une boucle de 1 à 3 minutes, bien "bouclée" (qui se répète sans coupure), style sombre et mystérieux
+  pour coller aux Dieux Oubliés. Évite les musiques avec une mélodie trop marquée : tu l'entendras des centaines de fois.
+- Si un son est trop fort ou trop faible : baisse ou monte son volume dans un éditeur gratuit (Audacity), ou dis-moi lequel.

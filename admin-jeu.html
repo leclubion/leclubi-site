@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin du jeu — LeClubi</title>
+<style>
+:root{--bg:#17181a;--panel:#1f2023;--line:#2e3034;--text:#ece8df;--muted:#9a978f;--accent:#c79a4b;--ink:#17181a;--bad:#e0675c;--ok:#8fe3a8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Arial,sans-serif;padding:20px 16px 60px}
+main{max-width:980px;margin:0 auto}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;color:var(--accent)}p{color:var(--muted);margin:4px 0 12px}
+button{font:inherit;cursor:pointer;padding:8px 14px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--ink);font-weight:600}
+button.g{background:transparent;color:var(--text);border-color:var(--line)}button.s{padding:4px 10px;font-size:13px}
+input{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:220px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.w{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Admin du jeu</h1>
+  <p>Réservé à LeClubi. Entre ta clé admin (celle que tu as mise dans Cloudflare sous le nom <b>ADMIN_KEY</b>) : elle n'est gardée que le temps de cet onglet.</p>
+  <div class="row"><input id="cle" type="password" placeholder="Clé admin" autocomplete="off"><button id="ok" type="button">Se connecter</button></div>
+  <div id="msg"></div>
+  <div id="zone" hidden>
+    <h2>État</h2>
+    <div class="box" id="etat"></div>
+    <div class="row" style="margin-top:10px"><button id="pause" type="button" class="g"></button><button id="relance" type="button" class="g">Relancer les paiements en attente</button><button id="maj" type="button" class="g">Actualiser</button></div>
+    <h2>Joueurs</h2>
+    <div class="w"><table><thead><tr><th>Pseudo</th><th>Parties</th><th>Victoires</th><th>ClubiGold gagnés</th><th>Victoires récompensées aujourd'hui</th><th></th></tr></thead><tbody id="joueurs"></tbody></table></div>
+    <h2>Derniers paiements de ClubiGold</h2>
+    <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Montant</th><th>Statut</th><th>Détail</th></tr></thead><tbody id="paiements"></tbody></table></div>
+  </div>
+</main>
+<script src="config-jeu.js"></script>
+<script>
+(function(){
+  var API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, ''), cle = '', pause = false;
+  var $ = function(i){ return document.getElementById(i); };
+  function esc(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function msg(t){ $('msg').textContent = t || ''; }
+  function appel(chemin, corps){
+    return fetch(API + '/admin/' + chemin, {method: corps ? 'POST' : 'GET', headers: {Authorization: 'Bearer ' + cle, 'Content-Type': 'application/json'}, body: corps ? JSON.stringify(corps) : undefined})
+      .then(function(r){ if(r.status === 401) throw new Error('Clé admin incorrecte.'); return r.json(); });
+  }
+  function charger(){
+    msg('Chargement…');
+    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements')]).then(function(r){
+      var e = r[0]; pause = !e.orActif; msg('');
+      $('zone').hidden = false;
+      $('etat').innerHTML = e.enLigne + ' connecté(s) · ' + e.enFile + ' en recherche · ' + e.parties + ' partie(s) en cours · ' + e.partiesJouees + ' jouée(s) depuis le dernier redémarrage<br>Récompenses : <b class="' + (pause ? 'bad' : 'ok') + '">' + (pause ? 'EN PAUSE' : 'actives') + '</b> (' + e.limites.or + ' ClubiGold par victoire, ' + e.limites.maxJour + ' par jour max)';
+      $('pause').textContent = pause ? 'Réactiver les récompenses' : 'Mettre les récompenses en pause';
+      $('joueurs').innerHTML = r[1].map(function(j){
+        return '<tr><td>' + esc(j.nom) + (j.banni ? ' <span class="bad">(banni)</span>' : '') + '</td><td>' + j.parties + '</td><td>' + j.victoires + '</td><td>' + j.or_total + '</td><td>' + (j.jour === new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'}) ? j.gains_jour : 0) + '</td><td><button class="g s" data-l="' + esc(j.login) + '" data-b="' + (j.banni ? 0 : 1) + '">' + (j.banni ? 'Débannir' : 'Bannir') + '</button></td></tr>';
+      }).join('') || '<tr><td colspan="6">Aucun joueur pour le moment.</td></tr>';
+      $('paiements').innerHTML = r[2].map(function(p){
+        return '<tr><td>' + new Date(p.ts).toLocaleString('fr-FR') + '</td><td>' + esc(p.login) + '</td><td>' + p.montant + '</td><td class="' + (p.statut === 'ok' ? 'ok' : 'bad') + '">' + (p.statut === 'ok' ? 'envoyé' : p.statut === 'attente' ? 'en attente' : 'échec') + '</td><td>' + esc(p.info) + '</td></tr>';
+      }).join('') || '<tr><td colspan="5">Aucun paiement.</td></tr>';
+    }).catch(function(e){ $('zone').hidden = true; msg(e.message === 'Failed to fetch' ? 'Impossible de joindre le serveur.' : e.message); });
+  }
+  $('ok').onclick = function(){ cle = $('cle').value.trim(); if(!API){ msg('L\'adresse du serveur n\'est pas encore renseignée dans config-jeu.js.'); return; } try{ sessionStorage.setItem('leclubi-admin', cle); }catch(e){} charger(); };
+  $('maj').onclick = charger;
+  $('pause').onclick = function(){ appel('pause', {pause: !pause}).then(charger); };
+  $('relance').onclick = function(){ appel('rejouer-paiements', {}).then(function(){ msg('Paiements relancés.'); setTimeout(charger, 1500); }); };
+  $('joueurs').onclick = function(e){
+    var b = e.target.closest('button[data-l]'); if(!b) return;
+    var ban = b.dataset.b === '1'; if(ban && !confirm('Bannir ' + b.dataset.l + ' ? Il ne pourra plus jouer.')) return;
+    appel('bannir', {login: b.dataset.l, banni: ban}).then(charger);
+  };
+  $('cle').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('ok').click(); });
+  try{ var k = sessionStorage.getItem('leclubi-admin'); if(k && API){ $('cle').value = k; cle = k; charger(); } }catch(e){}
+})();
+</script>
+</body>
+</html>
