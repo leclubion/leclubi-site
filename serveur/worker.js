@@ -17,7 +17,7 @@ const parisMs = (jour, fin) => {      // minuit (heure de Paris) du jour donné 
   return base - 3600e3;
 };
 const JOURJ = ts => new Date(ts).toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'});
-const ICONES = ['star', 'layers', 'cards', 'crown', 'trophy', 'gem', 'moon', 'eye', 'flame', 'sword', 'dice', 'bulb', 'spider'], TIERS = ['bronze', 'argent', 'or', 'epique', 'mythique'];
+const ICONES = ['star', 'layers', 'cards', 'crown', 'trophy', 'gem', 'moon', 'eye', 'flame', 'sword', 'dice', 'bulb', 'spider', 'balise'], TIERS = ['bronze', 'argent', 'or', 'epique', 'mythique'];
 const TYPES_DEFI = ['cartes', 'differentes', 'usages', 'parties', 'visites', 'manuel'];
 const jourParis = () => new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'});
 const rid = (n = 5) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, x => x.toString(16).padStart(2, '0')).join(''); };
@@ -82,6 +82,16 @@ export default {
       if (!r) {
         const d = await hub.fetch(new Request('https://hub/journal'));
         r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=15'}});
+        if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
+      }
+      const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+    }
+    if (url.pathname === '/titres') {                    // titres affichés des joueurs au profil public (classement, collectionneurs)
+      const cache = caches.default, cle = new Request(url.origin + '/titres');
+      let r = await cache.match(cle);
+      if (!r) {
+        const d = await hub.fetch(new Request('https://hub/titres'));
+        r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60'}});
         if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
       }
       const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
@@ -169,6 +179,7 @@ export class Hub {
     if (url.pathname === '/etat') return json(this.etat());
     if (url.pathname.startsWith('/admin/')) return this.admin(req, url);
     if (url.pathname === '/journal') return this.journalLire();
+    if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
     if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
@@ -408,7 +419,7 @@ export class Hub {
   }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j),
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j),
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
@@ -419,12 +430,22 @@ export class Hub {
   succesDe(j) {
     const out = [];
     this.sql.exec(`SELECT cle, ts FROM succes WHERE joueur=? AND kind='badge' ORDER BY ts`, j.id).toArray().forEach(r => {
+      if (r.cle === 'balise') { out.push({id: 'balise', nom: 'Gardien de la Balise', desc: 'Tu es revenu sur le site 10 jours différents : la Balise veille sur toi.', ico: 'balise', tier: 'or', cat: 'Fidélité', ts: r.ts}); return; }
       if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
       if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
     });
     return out;
   }
+  titresPublics() {
+    const t = {};
+    this.sql.exec(`SELECT id, login, nom, titre FROM joueurs WHERE titre!='' AND prive=0 AND banni=0 LIMIT 2000`).toArray().forEach(r => {
+      if (!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='titre' AND cle=?`, r.id, r.titre)) return;
+      t[String(r.login).toLowerCase()] = r.titre; t[String(r.nom || '').toLowerCase()] = r.titre;
+    });
+    return json({t});
+  }
+  nbVisites(j) { return this.un('SELECT COUNT(*) AS c FROM visites WHERE joueur=?', j.id).c; }
   visite(j) { try { this.run('INSERT OR IGNORE INTO visites(joueur,jour) VALUES(?,?)', j.id, jourParis()); } catch (e) {} }
   progres(d, j) {
     if (d.type === 'manuel') return 0;
@@ -446,6 +467,7 @@ export class Hub {
   }
   evaluer(j) {       // un défi réussi pendant sa période est validé tout seul, même si le viewer revient plus tard
     const now = Date.now();
+    if (this.nbVisites(j) >= 10) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'balise', now, 'fidelite');
     this.sql.exec('SELECT * FROM defis WHERE actif=1 AND type!=\'manuel\' AND debut<=?', now).toArray().forEach(d => {
       if (this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='defi' AND cle=?`, j.id, String(d.n))) return;
       if (this.progres(d, j) >= d.cible) this.donner(j, d, 'auto');
@@ -498,7 +520,7 @@ export class Hub {
   }
   journalLire() {
     if (!this.jCache) {
-      const c = this.sql.exec('SELECT pseudo,carte FROM journal_cartes ORDER BY n').toArray().map(r => [r.pseudo, r.carte]);
+      const c = this.sql.exec('SELECT pseudo,carte,ts FROM journal_cartes ORDER BY n').toArray().map(r => [r.pseudo, r.carte, r.ts]);
       const u = this.sql.exec('SELECT pseudo,carte,choix FROM journal_usages ORDER BY n').toArray().map(r => [r.pseudo, r.carte, r.choix]);
       this.jCache = JSON.stringify({cartes: c, usages: u, maj: Date.now()});
     }
