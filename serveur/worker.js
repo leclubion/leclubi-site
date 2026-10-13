@@ -32,10 +32,26 @@ function originOk(env, req) {
 }
 const json = (o, h = {}, s = 200) => new Response(JSON.stringify(o), {status: s, headers: {'Content-Type': 'application/json; charset=utf-8', ...h}});
 
+// lecture d'un CSV (guillemets, virgules et retours à la ligne dans les cellules)
+function parseCsv(t) {
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && t[i + 1] === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x !== ''));
+}
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/reglage-profil', '/propositions', '/journal/carte', '/journal/usage']);
+
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url), h = entetes(env, req);
-    if (req.method === 'OPTIONS') return new Response(null, {status: 204, headers: h});
+    if (req.method === 'OPTIONS') return new Response(null, {status: 204, headers: url.pathname.startsWith('/journal/') ? {...h, 'Access-Control-Allow-Origin': '*'} : h});
     const hub = env.HUB.get(env.HUB.idFromName('salon'));
     if (url.pathname === '/ws') {
       if (req.headers.get('Upgrade') !== 'websocket') return json({erreur: 'websocket attendu'}, h, 426);
@@ -52,8 +68,19 @@ export default {
       }
       const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
     }
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/reglage-profil' || url.pathname.startsWith('/profil/')) {
-      if (req.method === 'POST' && !originOk(env, req)) return json({erreur: 'origine refusée'}, h, 403);
+    if (url.pathname === '/journal') {                  // copie du journal des cartes (lecture publique, comme les tableurs publiés)
+      const cache = caches.default, cle = new Request(url.origin + '/journal');
+      let r = await cache.match(cle);
+      if (!r) {
+        const d = await hub.fetch(new Request('https://hub/journal'));
+        r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=15'}});
+        if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
+      }
+      const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+    }
+    if (PROXIES.has(url.pathname) || url.pathname.startsWith('/profil/')) {
+      const ecriture = url.pathname.startsWith('/journal/');
+      if (req.method === 'POST' && !ecriture && !originOk(env, req)) return json({erreur: 'origine refusée'}, h, 403);
       if (url.pathname.startsWith('/profil/')) {       // profil public : petit cache pour ne pas solliciter le salon à chaque visite
         const cache = caches.default, cle = new Request(url.origin + url.pathname);
         let r = await cache.match(cle);
@@ -65,7 +92,7 @@ export default {
         const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
       }
       const d = await hub.fetch(new Request('https://hub' + url.pathname, {method: req.method, headers: {Authorization: req.headers.get('Authorization') || '', 'Content-Type': 'application/json', 'X-Ip': req.headers.get('CF-Connecting-IP') || ''}, body: req.method === 'POST' ? await req.text() : undefined}));
-      const out = new Response(d.body, d); out.headers.set('Cache-Control', 'no-store'); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+      const out = new Response(d.body, d); out.headers.set('Cache-Control', 'no-store'); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); if (ecriture) out.headers.set('Access-Control-Allow-Origin', '*'); return out;
     }
     if (url.pathname.startsWith('/admin/')) {
       const d = await hub.fetch(req);
@@ -90,6 +117,12 @@ export class Hub {
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
      `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`].forEach(a => { try { q(a); } catch (e) {} });
+    q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
+    q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
+    q(`CREATE TABLE IF NOT EXISTS propositions(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, saison TEXT, part TEXT, kind TEXT, texte TEXT, ts INTEGER,
+       statut TEXT DEFAULT 'ouverte', UNIQUE(joueur, saison, part))`);
+    q(`CREATE TABLE IF NOT EXISTS votes(prop INTEGER, joueur TEXT, ts INTEGER, PRIMARY KEY(prop, joueur))`);
+    this.jCache = null;            // journal sérialisé gardé en mémoire (relu seulement après un ajout)
     this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
     this.users = new Map();      // id Twitch -> {id, login, nom, ws, game, defi}
     this.file = [];              // ids en attente d'un adversaire
@@ -122,6 +155,9 @@ export class Hub {
     if (url.pathname === '/classement') return this.classement();
     if (url.pathname === '/etat') return json(this.etat());
     if (url.pathname.startsWith('/admin/')) return this.admin(req, url);
+    if (url.pathname === '/journal') return this.journalLire();
+    if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
+    if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
     if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/reglage-profil' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
@@ -153,6 +189,15 @@ export class Hub {
     if (act === 'remettre' && login) { this.run('UPDATE joueurs SET parties=0, victoires=0, defaites=0, nuls=0 WHERE login=?', login); return json({ok: true}); }
     if (act === 'supprimer' && login) { this.run('DELETE FROM joueurs WHERE login=?', login); return json({ok: true}); }
     if (act === 'rejouer-paiements') { await this.traiterPaiements(true); return json({ok: true}); }
+    if (act === 'importer-journal') return this.importerJournal(b);
+    if (act === 'propositions') return json(this.sql.exec(`SELECT p.n, p.saison, p.part, p.kind, p.texte, p.ts, p.statut, j.nom AS pseudo, j.login, (SELECT COUNT(*) FROM votes v WHERE v.prop=p.n) AS votes
+      FROM propositions p JOIN joueurs j ON j.id=p.joueur ORDER BY p.n DESC LIMIT 300`).toArray());
+    if (act === 'proposition' && Number.isInteger(b.n)) {
+      if (b.supprimer) { this.run('DELETE FROM votes WHERE prop=?', b.n); this.run('DELETE FROM propositions WHERE n=?', b.n); return json({ok: true}); }
+      if (['ouverte', 'retenue', 'refusee', 'masquee'].includes(b.statut)) { this.run('UPDATE propositions SET statut=? WHERE n=?', b.statut, b.n); return json({ok: true}); }
+    }
+    if (act === 'journal-etat') return json({cartes: this.un('SELECT COUNT(*) AS c FROM journal_cartes').c, usages: this.un('SELECT COUNT(*) AS c FROM journal_usages').c,
+      dernieres: this.sql.exec('SELECT ts,pseudo,carte,src FROM journal_cartes ORDER BY n DESC LIMIT 10').toArray()});
     return json({erreur: 'action inconnue'}, {}, 404);
   }
 
@@ -308,6 +353,105 @@ export class Hub {
     return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), prive: !!j.prive,
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
+  }
+
+  // ----- journal des cartes : COPIE du Google Sheet (le site continue de lire le tableur tant que tu ne bascules pas) -----
+  cleJournalOk(req) {
+    const recu = req.headers.get('Authorization') || '';
+    return [this.env.JOURNAL_KEY, this.env.ADMIN_KEY].some(k => {
+      if (!k) return false;
+      const bon = 'Bearer ' + k; let d = bon.length ^ recu.length;
+      for (let i = 0; i < bon.length; i++) d |= bon.charCodeAt(i) ^ (recu.charCodeAt(i) || 0);
+      return d === 0;
+    });
+  }
+  async journalAjout(req, url) {
+    if (req.method !== 'POST') return json({erreur: 'méthode'}, {}, 405);
+    if (!this.cleJournalOk(req)) return json({erreur: 'non autorisé'}, {}, 401);
+    let b = {}; try { b = await req.json(); } catch (e) {}
+    const pseudo = String(b.pseudo || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 60), now = Date.now();
+    if (!pseudo) return json({erreur: 'pseudo'}, {}, 400);
+    if (url.pathname === '/journal/carte') {
+      const l = (Array.isArray(b.cartes) ? b.cartes : [b.carte]).map(x => String(x || '').trim().toLowerCase()).filter(x => /^[a-z0-9]+-\d{1,3}$/.test(x)).slice(0, 10);
+      if (!l.length) return json({erreur: 'carte'}, {}, 400);
+      l.forEach(c => this.run('INSERT INTO journal_cartes(ts,pseudo,carte,src) VALUES(?,?,?,?)', now, pseudo, c, 'live'));
+      this.jCache = null; return json({ok: true, ajoutees: l.length});
+    }
+    if (url.pathname === '/journal/usage') {
+      const c = String(b.carte || '').trim().toLowerCase(), ch = String(b.choix || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 40);
+      if (!/^[a-z0-9][a-z0-9-]{0,40}$/.test(c)) return json({erreur: 'carte'}, {}, 400);
+      this.run('INSERT INTO journal_usages(ts,pseudo,carte,choix) VALUES(?,?,?,?)', now, pseudo, c, ch);
+      this.jCache = null; return json({ok: true});
+    }
+    return json({erreur: 'inconnu'}, {}, 404);
+  }
+  journalLire() {
+    if (!this.jCache) {
+      const c = this.sql.exec('SELECT pseudo,carte FROM journal_cartes ORDER BY n').toArray().map(r => [r.pseudo, r.carte]);
+      const u = this.sql.exec('SELECT pseudo,carte,choix FROM journal_usages ORDER BY n').toArray().map(r => [r.pseudo, r.carte, r.choix]);
+      this.jCache = JSON.stringify({cartes: c, usages: u, maj: Date.now()});
+    }
+    return new Response(this.jCache, {headers: {'Content-Type': 'application/json; charset=utf-8'}});
+  }
+  // Recopie les deux tableaux Google (liens CSV publiés) dans le serveur. remplacer:true efface d'abord la copie.
+  async importerJournal(b) {
+    const ok = u => /^https:\/\/docs\.google\.com\//.test(String(u || '')) || (!!this.env.IMPORT_TEST && String(u || '').startsWith(this.env.IMPORT_TEST));   // IMPORT_TEST : réservé aux essais
+    const lire = async u => { const r = await fetch(u + (u.includes('?') ? '&' : '?') + '_=' + Date.now(), {headers: {'Cache-Control': 'no-cache'}}); if (!r.ok) throw new Error('HTTP ' + r.status); return parseCsv(await r.text()); };
+    const col = (rows, ...mots) => { const h = (rows[0] || []).map(x => String(x || '').trim().toLowerCase()); return mots.map((m, i) => { const k = h.findIndex(x => x.includes(m)); return k < 0 ? i + 1 : k; }); };
+    let cartes = null, usages = null;
+    try {
+      if (ok(b.cartes_url)) cartes = await lire(b.cartes_url);
+      if (ok(b.usages_url)) usages = await lire(b.usages_url);
+    } catch (e) { return json({erreur: 'lecture_impossible', detail: String(e && e.message)}, {}, 502); }
+    if (!cartes && !usages) return json({erreur: 'aucun_lien'}, {}, 400);
+    const res = {cartes: 0, usages: 0};
+    this.state.storage.transactionSync(() => {
+      if (cartes) {
+        if (b.remplacer) this.run("DELETE FROM journal_cartes");
+        const [ip, ic] = col(cartes, 'pseudo', 'carte');
+        cartes.slice(1).forEach(r => {
+          const p = String(r[ip] || '').trim().slice(0, 60), c = String(r[ic] || '').trim().toLowerCase();
+          if (p && /^[a-z0-9]+-\d{1,3}$/.test(c)) { this.run('INSERT INTO journal_cartes(ts,pseudo,carte,src) VALUES(?,?,?,?)', 0, p, c, 'import'); res.cartes++; }
+        });
+      }
+      if (usages) {
+        if (b.remplacer) this.run("DELETE FROM journal_usages");
+        const [ip, ic, ix] = col(usages, 'pseudo', 'carte', 'choix');
+        usages.slice(1).forEach(r => {
+          const p = String(r[ip] || '').trim().slice(0, 60), c = String(r[ic] || '').trim().toLowerCase(), ch = String(r[ix] || '').trim().slice(0, 40);
+          if (p && /^[a-z0-9][a-z0-9-]{0,40}$/.test(c)) { this.run('INSERT INTO journal_usages(ts,pseudo,carte,choix) VALUES(?,?,?,?)', 0, p, c, ch); res.usages++; }
+        });
+      }
+    });
+    this.jCache = null;
+    return json({ok: true, ...res});
+  }
+
+  // ----- propositions et votes (liés au compte Twitch) -----
+  async propositions(req, url) {
+    const p = url.pathname, me = await this.lireSession(req);
+    if (!me) return json({erreur: 'session'}, {}, 401);
+    if (p === '/propositions' && req.method === 'GET') {      // privé : chacun ne voit que ses propres propositions (LeClubi les lit dans la page admin)
+      const miennes = this.sql.exec(`SELECT n, saison, part, kind, texte, ts, statut FROM propositions WHERE joueur=? AND statut!='masquee' ORDER BY ts DESC`, me.id).toArray();
+      return json({miennes});
+    }
+    let b = {}; try { b = await req.json(); } catch (e) {}
+    if (p === '/propositions' && req.method === 'POST') {
+      const saison = String(b.saison || ''), part = String(b.part || ''), kind = String(b.kind || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 50);
+      const texte = String(b.texte || '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, 400);
+      if (!/^(s\d{1,2}|halloween)$/.test(saison) || !/^[a-z-]{2,20}$/.test(part)) return json({erreur: 'invalide'}, {}, 400);
+      if (texte.length < 3) return json({erreur: 'trop_court'}, {}, 400);
+      const ex = this.un('SELECT n, statut FROM propositions WHERE joueur=? AND saison=? AND part=?', me.id, saison, part);
+      if (ex) {
+        if (ex.statut !== 'ouverte') return json({erreur: 'deja_traitee'}, {}, 409);
+        this.run('UPDATE propositions SET texte=?, kind=?, ts=? WHERE n=?', texte, kind, Date.now(), ex.n);
+        return json({ok: true, n: ex.n, modifiee: true});
+      }
+      if (this.un("SELECT COUNT(*) AS c FROM propositions WHERE joueur=? AND statut='ouverte'", me.id).c >= 12) return json({erreur: 'trop_de_propositions'}, {}, 429);
+      this.run('INSERT INTO propositions(joueur,saison,part,kind,texte,ts) VALUES(?,?,?,?,?,?)', me.id, saison, part, kind, texte, Date.now());
+      return json({ok: true, n: this.un('SELECT MAX(n) AS n FROM propositions').n});
+    }
+    return json({erreur: 'inconnu'}, {}, 404);
   }
 
   fiche(id) {
