@@ -570,6 +570,41 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .dupnote span{display:block;margin-top:4px}
 .dupnote{margin-bottom:18px}
 .rwb.done{background:transparent;color:var(--accent);cursor:default;opacity:1}
+/* ---- Badges (style « vitrine de succès ») ---- */
+.bp{margin:0 0 30px}
+.bp-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 4px}
+.bp-h h2{font-size:24px;margin:0}.bp-h b{font-size:22px;color:var(--muted);font-weight:500}
+.bp-sub{margin:0 0 6px;color:var(--muted);font-size:14px}
+.bp-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 4px;font-size:12.5px;color:var(--muted)}
+.bp-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:linear-gradient(145deg,var(--t1),var(--t2))}
+.bp h3{margin:22px 0 10px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.bp h3 small{letter-spacing:0;text-transform:none;font-weight:500;font-size:13px}
+.bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+.bd{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:16px 10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+.bd strong{font-size:14.5px;font-weight:600;line-height:1.25}
+.bd p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35}
+.bd .st{font-size:12px;font-weight:600;color:color-mix(in srgb,var(--t1) 80%,var(--text))}
+.bd .pb{width:80%;height:5px;border-radius:3px;background:rgba(128,128,128,.25);overflow:hidden;margin-top:2px}
+.bd .pb i{display:block;height:100%;background:linear-gradient(90deg,var(--t1),var(--t2))}
+.bd .nb{font-size:11.5px;color:var(--muted)}
+.bm{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(145deg,var(--t1),var(--t2));box-shadow:inset 0 0 0 3px rgba(255,255,255,.38),inset 0 0 0 6px rgba(0,0,0,.14),0 5px 16px color-mix(in srgb,var(--t1) 50%,transparent)}
+.bm svg{width:31px;height:31px;color:#fff;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.bd.lock .bm{filter:grayscale(1) brightness(.62);box-shadow:inset 0 0 0 3px rgba(255,255,255,.12)}
+.bd.lock{border-style:dashed}.bd.lock strong{color:var(--muted)}
+.t-bronze{--t1:#a8642a;--t2:#e6a96b}.t-argent{--t1:#8c99a8;--t2:#e4ecf4}.t-or{--t1:#d29a24;--t2:#ffe08a}.t-epique{--t1:#6a3fc4;--t2:#c8a6ff}.t-mythique{--t1:#e0442f;--t2:#ffd36b}
+.bd.got.t-or,.bd.got.t-epique,.bd.got.t-mythique{border-color:color-mix(in srgb,var(--t1) 70%,var(--line))}
+.bd.got.t-or .bm::after,.bd.got.t-epique .bm::after,.bd.got.t-mythique .bm::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-70%;width:45%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);transform:skewX(-20deg);animation:bdshine 3.2s ease-in-out infinite}
+.bd.got.t-epique .bm::after{animation-duration:2.8s;animation-delay:.6s}
+.bd.got.t-mythique .bm::after{animation-duration:2.2s}
+.bd.got.t-mythique{background:linear-gradient(160deg,color-mix(in srgb,var(--t1) 16%,var(--panel)),var(--panel) 60%);animation:bdglow 3s ease-in-out infinite}
+.bd.got.t-mythique .bm{animation:bdspin 6s linear infinite;background:conic-gradient(from 0deg,#ffd36b,#e0442f,#c8a6ff,#6ad0ff,#ffd36b)}
+.bd.got.t-mythique .bm svg{animation:bdspin 6s linear infinite reverse}
+@keyframes bdshine{0%,30%{left:-70%}70%,100%{left:140%}}
+@keyframes bdglow{0%,100%{box-shadow:0 0 0 rgba(224,68,47,0)}50%{box-shadow:0 0 22px rgba(255,190,90,.45)}}
+@keyframes bdspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bd .bm,.bd .bm::after,.bd .bm svg,.bd{animation:none!important}}
+@media (max-width:520px){.bd-grid{grid-template-columns:repeat(2,1fr)}}
+
 button.rwb[data-prop]{position:relative;overflow:hidden;font-weight:700;padding:7px 17px;box-shadow:0 0 14px color-mix(in srgb,var(--accent) 55%,transparent);animation:rwglow 2.4s ease-in-out infinite}
 button.rwb[data-prop]::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);animation:rwshine 2.8s ease-in-out infinite;pointer-events:none}
 @keyframes rwshine{0%,35%{left:-60%}75%,100%{left:130%}}
@@ -969,6 +1004,7 @@ nav{min-width:0}
       <div class="bar2" id="acct"></div>
       <div id="vit"></div>
       <div id="ach"></div>
+      <div id="bpan"></div>
       <div class="tabs" role="tablist" aria-label="Saisons" id="tabs"></div>
       <p class="msg" id="msg" aria-live="polite"></p>
       <div id="export"></div>
@@ -1228,6 +1264,7 @@ function render(newId){
 
   document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() + tarotRewardHtml() : '';
   if(window.CompteVitrine) window.CompteVitrine();
+  renderBadges();
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
@@ -1573,7 +1610,91 @@ function achHtml(name){
       : '<div><strong>Pas encore de titre</strong><span>Débloque ta première carte pour devenir Égaré.</span></div>') + '</div>' +
     (tarotTitle(name) ? '<p class="tt">✦ ' + esc(tarotTitle(name)) + '</p>' : '') +
     (nt ? '<p class="nx2">Prochain titre : <b>' + nt.name + '</b>, encore ' + nt.need + (nt.need > 1 ? ' cartes' : ' carte') + ' à débloquer.</p>' : '<p class="nx2">Collection complète : tu as atteint le plus haut titre.</p>') +
-    (b.length ? '<div class="bdg">' + b.map(function(x){ return '<span' + (x.tb ? ' class="tb"' : '') + ' title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+    '</div>';
+}
+
+// ---- Badges : catalogue calculé à partir de la collection (et des stats de jeu si le profil est public) ----
+var BD_ICO = {
+  star:'<path d="M12 3l2.7 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17.2 6.4 20.3l1.2-6.3L3 9.6l6.3-.8z"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  cards:'<rect x="4" y="7" width="11" height="14" rx="2"/><path d="M9 4h9a2 2 0 012 2v12"/>',
+  crown:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+  trophy:'<path d="M7 4h10v4a5 5 0 01-10 0z"/><path d="M7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M12 13v4M8 21h8M10 17h4"/>',
+  gem:'<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6"/>',
+  moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  flame:'<path d="M12 2c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
+  sword:'<path d="M14.5 4.5l5 5L9 20l-5 1 1-5z"/><path d="M13 6l5 5"/>',
+  dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>'
+};
+var BD_TIER = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', mythique:'Mythique'};
+function badgeCatalog(name, jeu){
+  if(!COLLECTIONS[name]) return [];
+  var seasons = openSeasons(), tot = totalCards(), n = countOf(name), out = [], cp = function(id){ return copies(name, id); };
+  function add(cat, id, nom, task, tier, ico, cur, max){ out.push({cat:cat, id:id, name:nom, task:task, tier:tier, ico:ico, cur:Math.min(cur, max), max:max, got:cur >= max}); }
+  // collection
+  [[1, 'Premier pas', 'bronze', 'star'], [5, 'Apprenti collectionneur', 'argent', 'cards'], [10, 'Collectionneur', 'argent', 'cards'], [20, 'Grand collectionneur', 'or', 'trophy']].forEach(function(t){
+    if(t[0] < tot) add('Collection', 'col' + t[0], t[1], 'Débloquer ' + t[0] + (t[0] > 1 ? ' cartes' : ' carte') + ' au total.', t[2], t[3], n, t[0]);
+  });
+  add('Collection', 'legende', LEGENDE.name, 'Débloquer toutes les cartes des saisons ouvertes (' + tot + ').', 'mythique', 'crown', n, tot);
+  // lignes
+  function ligne(r){ var best = {cur:0, max:0}; seasons.forEach(function(x){ var cs = cardsOf(x).filter(function(c){ return c.r === r; }), k = cs.filter(function(c){ return owns(name, c.id); }).length; if(cs.length && (!best.max || k / cs.length > best.cur / best.max)) best = {cur:k, max:cs.length}; }); return best; }
+  var lc = ligne('Commune'), lp = ligne('Peu commune'), lr = ligne('Rare'), ll = ligne('Légendaire'), ls = ligne('Spéciale');
+  if(lc.max) add('Lignes et raretés', 'lc', 'Ligne Commune', 'Compléter la ligne des cartes Communes d\'une saison.', 'bronze', 'layers', lc.cur, lc.max);
+  if(lp.max) add('Lignes et raretés', 'lp', 'Ligne Peu commune', 'Compléter la ligne des cartes Peu communes d\'une saison.', 'argent', 'layers', lp.cur, lp.max);
+  if(lr.max) add('Lignes et raretés', 'lr', 'Trio de rares', 'Compléter la ligne des cartes Rares d\'une saison.', 'epique', 'gem', lr.cur, lr.max);
+  if(ll.max) add('Lignes et raretés', 'll', 'Légendaire', 'Débloquer une carte Légendaire.', 'or', 'flame', ll.cur ? 1 : 0, 1);
+  if(ls.max) add('Lignes et raretés', 'ls', 'Spéciale', 'Débloquer une carte Spéciale.', 'or', 'star', ls.cur ? 1 : 0, 1);
+  seasons.forEach(function(x){ var cs = cardsOf(x); if(cs.length) add('Saisons', 'sa-' + x.id, x.label + ' complète', 'Débloquer les ' + cs.length + ' cartes de la ' + x.label + '.', 'or', 'trophy', cs.filter(function(c){ return owns(name, c.id); }).length, cs.length); });
+  if(seasons.length > 1) add('Saisons', 'sa-all', 'Toutes les saisons', 'Avoir au moins une carte dans chaque saison.', 'epique', 'layers', seasons.filter(function(x){ return cardsOf(x).some(function(c){ return owns(name, c.id); }); }).length, seasons.length);
+  // doublons
+  var mx = 0; seasons.forEach(function(x){ cardsOf(x).forEach(function(c){ mx = Math.max(mx, cp(c.id)); }); });
+  add('Doublons', 'd2', 'Doublon', 'Obtenir 2 exemplaires de la même carte.', 'bronze', 'cards', mx, 2);
+  add('Doublons', 'd3', 'Triplé', 'Obtenir 3 exemplaires de la même carte.', 'argent', 'cards', mx, 3);
+  add('Doublons', 'd5', 'Quintette', 'Obtenir 5 exemplaires de la même carte : roue gratuite ou ClubiGold.', 'epique', 'dice', mx, NEED);
+  // tarot
+  var ts = tarotStats(name), tt = TAROT.cartes.length, prem = TAROT.cartes.some(function(c){ var f = TFIRST[tarotId(c.n)]; return f && f.name === name; });
+  add('Dieux Oubliés', 't1', 'Éveillé', 'Trouver un Dieu Oublié.', 'epique', 'eye', ts.owned.length, 1);
+  add('Dieux Oubliés', 't2', 'Ravivé', 'Raviver un Dieu Oublié (le tirer une deuxième fois).', 'epique', 'moon', ts.rav.length, 1);
+  add('Dieux Oubliés', 't3', 'Oracle', 'Trouver 4 Dieux Oubliés différents.', 'or', 'eye', ts.owned.length, 4);
+  add('Dieux Oubliés', 't4', 'Panthéon', 'Trouver les ' + tt + ' Dieux Oubliés.', 'or', 'moon', ts.owned.length, tt);
+  add('Dieux Oubliés', 't5', 'Panthéon ravivé', 'Raviver les ' + tt + ' Dieux Oubliés.', 'mythique', 'moon', ts.rav.length, tt);
+  add('Dieux Oubliés', 't6', 'Premier éveillé', 'Être le premier de toute la chaîne à raviver un Dieu Oublié.', 'mythique', 'flame', prem ? 1 : 0, 1);
+  // jeu (seulement si on connaît les stats : compte du viewer, ou profil public)
+  if(jeu){
+    var pa = jeu.parties || 0, vi = jeu.victoires || 0;
+    add('Jeu de cartes', 'j1', 'Première partie', 'Jouer une partie.', 'bronze', 'sword', pa, 1);
+    add('Jeu de cartes', 'j2', 'Habitué', 'Jouer 10 parties.', 'argent', 'sword', pa, 10);
+    add('Jeu de cartes', 'j3', 'Vétéran', 'Jouer 50 parties.', 'or', 'sword', pa, 50);
+    add('Jeu de cartes', 'j4', 'Première victoire', 'Gagner une partie.', 'bronze', 'trophy', vi, 1);
+    add('Jeu de cartes', 'j5', 'Gagnant', 'Gagner 10 parties.', 'argent', 'trophy', vi, 10);
+    add('Jeu de cartes', 'j6', 'Champion', 'Gagner 50 parties.', 'epique', 'trophy', vi, 50);
+    add('Jeu de cartes', 'j7', 'Légende de l\'arène', 'Gagner 200 parties.', 'mythique', 'crown', vi, 200);
+  }
+  return out;
+}
+function badgesPanelHtml(name, jeu, mineView){
+  var l = badgeCatalog(name, jeu);
+  if(!l.length) return '';
+  var got = l.filter(function(x){ return x.got; }).length, cats = [];
+  l.forEach(function(x){ if(cats.indexOf(x.cat) < 0) cats.push(x.cat); });
+  var h = '<div class="bp"><div class="bp-h"><h2>Badges</h2><b>' + got + ' / ' + l.length + '</b></div>' +
+    '<p class="bp-sub">' + (mineView ? 'Voici ce que tu as débloqué, et ce qu\'il te reste à accomplir. Les badges rares brillent.' : esc(name) + ' a débloqué ' + got + ' badge' + (got > 1 ? 's' : '') + '. Les badges rares brillent.') + '</p>' +
+    '<div class="bp-leg">' + Object.keys(BD_TIER).map(function(k){ return '<span class="t-' + k + '"><i></i>' + BD_TIER[k] + '</span>'; }).join('') + '</div>';
+  cats.forEach(function(c){
+    var items = l.filter(function(x){ return x.cat === c; }), g = items.filter(function(x){ return x.got; }).length;
+    h += '<h3><span>' + esc(c) + '</span><small>' + g + ' / ' + items.length + '</small></h3><div class="bd-grid">' + items.map(function(x){
+      return '<div class="bd t-' + x.tier + (x.got ? ' got' : ' lock') + '" title="' + esc(x.task) + '"><div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div>' +
+        '<strong>' + esc(x.name) + '</strong><p>' + esc(x.task) + '</p>' +
+        (x.got ? '<span class="st">✓ ' + BD_TIER[x.tier] + '</span>' : '<div class="pb"><i style="width:' + Math.round(x.cur / x.max * 100) + '%"></i></div><span class="nb">' + x.cur + ' / ' + x.max + '</span>') + '</div>';
+    }).join('') + '</div>';
+  });
+  return h + '</div>';
+}
+function renderBadges(){
+  var el = document.getElementById('bpan'); if(!el) return;
+  var jeu = window.CompteJeu ? window.CompteJeu(who) : null;
+  el.innerHTML = who ? badgesPanelHtml(who, jeu, typeof mine === 'function' && window.CompteProp && window.CompteProp.ok(who)) : '';
 }
 function renderTitres(){
   var el = document.getElementById('titres'), bl = document.getElementById('badges');
@@ -2414,7 +2535,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
           '</div><div class="row"><button type="button" class="btn" data-act="save"' + (busy ? ' disabled' : '') + '>Enregistrer</button><button type="button" class="btn ghost" data-act="cancel">Annuler</button><button type="button" class="btn ghost" data-act="clear">Vider</button><em>' + (msgPick || pick.length + ' / 3') + '</em></div></div>');
       }
       // titres, badges, récompenses
-      h.push('<div class="cp-h"><h2>Titres et badges</h2></div>' + achHtml(name));
+      h.push('<div class="cp-h"><h2>Mon titre</h2></div>' + achHtml(name));
+      h.push(badgesPanelHtml(name, jeu, true));
       var rw = avecWho(name, function(){ return readyHtml() + tarotRewardHtml(); });
       if(rw) h.push('<div class="cp-h"><h2>Récompenses</h2></div>' + rw);
     }
@@ -2438,7 +2560,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var login = who.toLowerCase(), c = pubCache[login];
     if(c === undefined){
       pubCache[login] = null;
-      appel('/profil/' + encodeURIComponent(login)).then(function(r){ pubCache[login] = r.ok ? r.d : false; vitrinePublique(); }).catch(function(){ pubCache[login] = false; });
+      appel('/profil/' + encodeURIComponent(login)).then(function(r){ pubCache[login] = r.ok ? r.d : false; vitrinePublique(); renderBadges(); }).catch(function(){ pubCache[login] = false; });
       el.innerHTML = ''; return;
     }
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
@@ -2507,8 +2629,16 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   window.addEventListener('hashchange', majNav);
   window.avErr = function(im){ var d = document.createElement(im.classList.contains('cp-av') ? 'div' : 'i'); d.className = im.className; d.textContent = im.getAttribute('data-i') || '?'; im.replaceWith(d); };
   window.rendreCompte = rendreCompte;
-  window.CompteRefresh = function(){ if(!g('v-compte').hidden) rendreCompte(); vitrinePublique(); };
+  window.CompteRefresh = function(){ if(!g('v-compte').hidden) rendreCompte(); vitrinePublique(); renderBadges(); };
   window.CompteVitrine = vitrinePublique;
+  // stats de jeu connues pour ce viewer : les siennes s'il est connecté, sinon celles de son profil public (si public)
+  window.CompteJeu = function(nom){
+    if(!ON || !nom) return null;
+    var l = String(nom).toLowerCase();
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.jeu || null;
+    var c = pubCache[l];
+    return c && !c.prive && c.parties != null ? {parties:c.parties, victoires:c.victoires} : null;
+  };
   demarrer();
   if(location.hash === '#compte') route();
 })();
