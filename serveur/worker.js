@@ -330,11 +330,12 @@ export class Hub {
       if (ligne && ligne.banni) return json({erreur: 'banni'}, {}, 403);
       this.run(`INSERT INTO joueurs(id,login,nom,vu,avatar,cree) VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET login=excluded.login, nom=excluded.nom, vu=excluded.vu, avatar=COALESCE(NULLIF(excluded.avatar,''), avatar)`, info.id, info.login, info.nom, now, info.avatar || '', now);
       const sess = await this.creerSession(info.id);
-      return json({session: sess, moi: this.moi(this.joueur(info.id))});
+      const mj = this.moi(this.joueur(info.id)); mj.solde = await this.solde(mj.login);
+      return json({session: sess, moi: mj});
     }
     const j = await this.lireSession(req);
     if (!j) return json({erreur: 'session'}, {}, 401);
-    if (p === '/moi') return json({moi: this.moi(j)});
+    if (p === '/moi') { const mj = this.moi(j); mj.solde = await this.solde(mj.login); return json({moi: mj}); }
     if (p === '/vitrine-badges' && req.method === 'POST') {     // jusqu'à 5 badges montrés sur le profil (les identifiants sont vérifiés à l'affichage par le site)
       let b = {}; try { b = await req.json(); } catch (x) {}
       const v = (Array.isArray(b.badges) ? b.badges : []).filter(x => typeof x === 'string' && /^[a-z0-9-]{2,24}$/.test(x)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
@@ -633,6 +634,35 @@ export class Hub {
     [0, 1].forEach(s => { const u = this.users.get(g.joueurs[s]); if (u) { u.game = null; if (!u.ws) this.users.delete(u.id); } });
     this.parties.delete(g.id); this.diffuser();
     if (paiement) this.payer(paiement).catch(e => console.log('paiement', e && e.message));
+  }
+
+  // ----- solde ClubiGold (lu chez WizeBot ; facultatif : tant que WIZEBOT_SOLDE_URL n'est pas renseignée, le site n'affiche que les ClubiGold gagnés au jeu) -----
+  async solde(login) {
+    const tpl = String(this.env.WIZEBOT_SOLDE_URL || '').trim();
+    let cle = String(this.env.WIZEBOT_KEY || '').trim(); const mc = cle.match(/(?:custom-alerts|currency)\/([^\/\s]+)/); if (mc) cle = mc[1];
+    if (!tpl || !cle) return null;
+    this.soldes = this.soldes || new Map();
+    const c = this.soldes.get(login); if (c && Date.now() - c.t < 60000) return c.v;
+    let v = null;
+    try {
+      const r = await fetch(tpl.replace('{cle}', encodeURIComponent(cle)).replace('{login}', encodeURIComponent(login)), {signal: AbortSignal.timeout(4000)});
+      if (r.ok) {
+        const txt = (await r.text()).trim();
+        const cherche = (o, d) => {
+          if (typeof o === 'number') return o;
+          if (typeof o === 'string' && /^-?\d+(\.\d+)?$/.test(o.trim())) return Number(o);
+          if (!o || typeof o !== 'object' || d > 3) return null;
+          for (const k of ['amount', 'balance', 'value', 'points', 'currency', 'total', 'quantity', 'count', 'data', 'result']) if (k in o) { const x = cherche(o[k], d + 1); if (x != null) return x; }
+          for (const k of Object.keys(o)) { const x = cherche(o[k], d + 1); if (x != null) return x; }
+          return null;
+        };
+        let j = null; try { j = JSON.parse(txt); } catch (e) { j = txt; }
+        const n = cherche(j, 0); if (n != null && isFinite(n) && n >= 0) v = Math.floor(n);
+      }
+    } catch (e) {}
+    if (this.soldes.size > 500) this.soldes.clear();
+    this.soldes.set(login, {v, t: Date.now()});
+    return v;
   }
 
   // ----- paiements WizeBot -----
