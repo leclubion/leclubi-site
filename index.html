@@ -867,6 +867,16 @@ nav{min-width:0}
 .ktable tr.top1 td:nth-child(2){font-weight:700}
 .ktable tr.me td{background:rgba(199,154,75,.12)}
 .ktable td.none{text-align:center;color:var(--muted);padding:34px 14px}
+
+.bvide{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
+.bvide img{height:84px;width:auto;opacity:.92;filter:drop-shadow(0 6px 14px color-mix(in srgb,var(--accent) 35%,transparent))}
+.bchg{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px 0;color:var(--muted);font-size:14px}
+.bchg img{height:36px;width:auto;animation:bglow 1.8s ease-in-out infinite}
+@keyframes bglow{0%,100%{opacity:.6;filter:drop-shadow(0 0 0 transparent)}50%{opacity:1;filter:drop-shadow(0 0 10px var(--accent))}}
+footer{position:relative}
+.fbal{position:absolute;right:clamp(16px,7vw,110px);top:-47px;height:48px;width:auto;pointer-events:none;filter:drop-shadow(0 -4px 14px color-mix(in srgb,var(--accent) 45%,transparent))}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;background:radial-gradient(ellipse 55% 100% at 50% 0,color-mix(in srgb,var(--accent) 8%,transparent),transparent 72%);pointer-events:none;z-index:-1}
+@media (prefers-reduced-motion:reduce){.bchg img{animation:none}}
 </style>
 </head>
 <body>
@@ -1259,7 +1269,7 @@ nav{min-width:0}
   <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
 </div>
 
-<footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
+<footer><img class="fbal" src="images-site/balise-mini.png" alt="" onerror="this.remove()"><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
 // Thème clair / sombre : suit l'appareil tant que le visiteur n'a rien choisi, puis garde son choix
@@ -1446,6 +1456,8 @@ function relT(t){
 function canon(p){ var l = String(p).toLowerCase(), k = Object.keys(COLLECTIONS).filter(function(n){ return n.toLowerCase() === l; })[0]; return k || p; }
 function titreDe(p){ p = String(p || '').toLowerCase(); return (window.CompteTitre && window.CompteTitre(p)) || TJ[p] || ''; }
 function ttag(p){ var t = titreDe(p); return t ? ' <span class="ttl-d s">' + esc(t) + '</span>' : ''; }
+function balVide(t){ return '<div class="bvide"><img src="images-site/balise.png" alt="" onerror="this.remove()"><span>' + t + '</span></div>'; }
+function balChg(t){ return '<div class="bchg"><img src="images-site/balise-mini.png" alt="" onerror="this.remove()"><span>' + t + '</span></div>'; }
 function ficheCarteHtml(id){
   var info = cardInfo(id); if(!info || sheetState !== 'ok') return '';
   var names = Object.keys(COLLECTIONS), hs = names.filter(function(n){ return owns(n, id); }), tot = names.length, first = null;
@@ -1890,9 +1902,9 @@ function renderColl(){
   var q = (document.getElementById('cq').value || '').trim().toLowerCase();
   var seasons = SEASONS.filter(function(x){ return x.groups.length; }).map(function(x){ return {s:x, cards:cardsOf(x)}; });
   var total = seasons.reduce(function(n, x){ return n + x.cards.length; }, 0);
-  var msg = function(t){ return '<p class="soon" style="grid-column:1/-1">' + t + '</p>'; };
-  if(sheetState === 'loading'){ cnt.textContent = ''; el.innerHTML = msg('Chargement des collections…'); return; }
-  if(sheetState === 'error'){ cnt.textContent = ''; el.innerHTML = msg('Impossible de charger les collections pour le moment. Réessaie dans un instant.'); return; }
+  var msg = function(t, k){ return '<div class="soon" style="grid-column:1/-1">' + (k === 'c' ? balChg(t) : k === 'v' ? balVide(t) : t) + '</div>'; };
+  if(sheetState === 'loading'){ cnt.textContent = ''; el.innerHTML = msg('Chargement des collections…', 'c'); return; }
+  if(sheetState === 'error'){ cnt.textContent = ''; el.innerHTML = msg('Impossible de charger les collections pour le moment. Réessaie dans un instant.', 'v'); return; }
   var rows = Object.keys(COLLECTIONS).map(function(name){
     var per = seasons.map(function(x){ return x.cards.filter(function(c){ return owns(name, c.id); }).length; });
     return {name:name, per:per, n:per.reduce(function(a, b){ return a + b; }, 0)};
@@ -1907,7 +1919,7 @@ function renderColl(){
       '<div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div>' +
       seasons.map(function(x, i){ return '<p><span>' + x.s.label + '</span><b>' + r.per[i] + ' / ' + x.cards.length + '</b></p>'; }).join('') +
       (bd.length ? '<div class="bdg">' + bd.slice(0, 3).map(function(x){ return '<span' + (x.tb ? ' class="tb"' : '') + ' title="' + esc(x.desc) + '">' + esc(x.label) + '</span>'; }).join('') + (bd.length > 3 ? '<span class="more">+' + (bd.length - 3) + '</span>' : '') + '</div>' : '') + '</a>';
-  }).join('') : msg(rows.length ? 'Aucun viewer ne correspond à cette recherche.' : 'Aucun collectionneur pour le moment.');
+  }).join('') : msg(rows.length ? 'Aucun viewer ne correspond à cette recherche.' : 'Aucun collectionneur pour le moment.', 'v');
 }
 document.getElementById('cq').addEventListener('input', renderColl);
 
@@ -2189,8 +2201,8 @@ function renderHome(){
   var last = document.getElementById('hlast');
   if(!last) return;
   var top = document.getElementById('htop'), seas = document.getElementById('hseas'), lt = document.getElementById('hlt');
-  var note = function(t){ return '<p class="hnote">' + t + '</p>'; };
-  if(sheetState === 'loading'){ last.innerHTML = top.innerHTML = note('Chargement…'); return; }
+  var note = function(t, k){ return k === 'c' ? balChg(t) : k === 'v' ? balVide(t) : '<p class="hnote">' + t + '</p>'; };
+  if(sheetState === 'loading'){ last.innerHTML = top.innerHTML = note('Chargement…', 'c'); return; }
   if(sheetState === 'error'){ last.innerHTML = top.innerHTML = note('Les collections sont momentanément indisponibles.'); }
   var names = Object.keys(COLLECTIONS), seasons = SEASONS.filter(function(x){ return x.groups.length; });
   var total = seasons.reduce(function(n, x){ return n + cardsOf(x).length; }, 0);
@@ -2218,7 +2230,7 @@ function renderHome(){
     }
     last.innerHTML = items.length ? items.map(function(i){
       return '<a class="hl" href="' + i.href + '">' + thumb(i.id) + '<p><b>' + esc(i.who) + '</b>' + i.sub + '</p></a>';
-    }).join('') : note('Aucune carte débloquée pour le moment.');
+    }).join('') : note('Aucune carte débloquée pour le moment.', 'v');
 
     // Top 3
     var rows = names.map(function(n){ return {name:n, n:count(n)}; }).filter(function(r){ return r.n > 0; })
@@ -2721,10 +2733,10 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   }
   function dessiner(){
     var body = document.getElementById('kbody'), me = pseudoMoi(), l = liste();
-    if(!data){ body.innerHTML = '<tr><td class="none" colspan="5">Chargement…</td></tr>'; return; }
+    if(!data){ body.innerHTML = '<tr><td class="none" colspan="5">' + balChg('Chargement…') + '</td></tr>'; return; }
     body.innerHTML = l.length ? l.map(function(j){
       return '<tr class="' + (j.rang <= 3 ? 'top' + j.rang : '') + (j.pseudo.toLowerCase() === me ? ' me' : '') + '"><td>' + j.rang + '</td><td>' + esc(j.pseudo) + ttag(j.pseudo) + '</td><td class="n">' + j.parties + '</td><td class="n">' + j.victoires + '</td><td class="n">' + String(j.ratio).replace('.', ',') + ' %</td></tr>';
-    }).join('') : '<tr><td class="none" colspan="5">' + (onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.') + '</td></tr>';
+    }).join('') : '<tr><td class="none" colspan="5">' + balVide(onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.') + '</td></tr>';
     document.getElementById('knote').textContent = onglet === 'ratio' ? 'Le classement par ratio demande au moins ' + MIN + ' parties jouées, pour éviter les 100 % en une seule partie.' : 'Classé par nombre de victoires.';
     document.getElementById('kinfo').textContent = l.length + ' joueur' + (l.length > 1 ? 's' : '');
   }
@@ -2848,7 +2860,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   function rendreCompte(){
     var el = g('cp'); if(!el) return;
     if(!ON){ el.innerHTML = '<div class="cp-out"><h1>Mon compte</h1><p class="cp-note">Les comptes ne sont pas encore ouverts.</p></div>'; return; }
-    if(etat === 'init'){ el.innerHTML = '<p class="cp-note" style="text-align:center;padding:40px 0">Chargement…</p>'; return; }
+    if(etat === 'init'){ el.innerHTML = '<div style="padding:30px 0">' + balChg('Chargement…') + '</div>'; return; }
     if(etat === 'banni'){ el.innerHTML = landing('Ce compte n\'a pas accès au site.').replace(/<button[^>]*data-act="login"[\s\S]*?<\/button>/, ''); return; }
     if(etat !== 'in' || !moi){ el.innerHTML = landing(etat === 'erreur' ? 'Impossible de joindre le serveur pour le moment. Réessaie dans un instant.' : ''); return; }
 
