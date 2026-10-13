@@ -1,4 +1,4 @@
-/* Serveur du jeu "Bataille de colonnes" – LeClubi
+/* Serveur du jeu "Clash des Piliers" – LeClubi
    Cloudflare Worker + un seul Durable Object ("Hub") qui garde en mémoire les joueurs connectés, la file d'attente
    et les parties en cours, et en base (SQLite) le classement, les limites du jour et les paiements ClubiGold.
    Le serveur est l'ARBITRE : il applique les règles (jeu-core.js), il tire les cartes, il garde les mains secrètes
@@ -387,14 +387,15 @@ export class Hub {
   // ----- paiements WizeBot -----
   async payer(n) {
     const p = this.un('SELECT * FROM paiements WHERE n=?', n); if (!p || p.statut === 'ok') return;
-    const cle = this.env.WIZEBOT_KEY; let ok = false, info = '';
+    let cle = String(this.env.WIZEBOT_KEY || '').trim(); const mc = cle.match(/(?:custom-alerts|currency)\/([^\/\s]+)/); if (mc) cle = mc[1];   // tolère un lien collé en entier ou des espaces autour de la clé
+    let ok = false, info = '';
     if (!cle) info = 'clé WizeBot absente';
     else {
       try {
         const base = this.env.WIZEBOT_URL || 'https://wapi.wizebot.tv/api/currency';
         const r = await fetch(`${base}/${encodeURIComponent(cle)}/action/add/${encodeURIComponent(p.login)}/${p.montant}`, {method: 'POST'});
         const txt = (await r.text()).slice(0, 200);
-        ok = r.ok && !/"success"\s*:\s*false|"error"/i.test(txt); info = ok ? '' : 'HTTP ' + r.status;
+        ok = r.ok && !/"success"\s*:\s*false|"error"/i.test(txt); info = (ok ? 'réponse WizeBot : ' : 'HTTP ' + r.status + ' : ') + txt.replace(/\s+/g, ' ').slice(0, 120);
       } catch (e) { info = 'réseau'; }
     }
     const essais = p.essais + 1;
