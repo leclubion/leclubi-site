@@ -321,6 +321,23 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 .enligne .loc{display:none}.lienc{color:var(--accent);font-size:14px}
 .go[hidden],.btn[hidden]{display:none}
 </style>
+<script>
+// Retour de connexion Twitch lancée depuis le site (page « Mon compte ») : on garde le jeton puis on repart sur le site.
+(function(){
+  try{
+    var r = sessionStorage.getItem('leclubi-retour');
+    if(!r || !/^index\.html(#[A-Za-z0-9_=%-]*)?$/.test(r)) return;
+    var h = location.hash.replace(/^#/, ''), q = location.search;
+    if(h.indexOf('access_token=') < 0 && h.indexOf('error=') < 0 && q.indexOf('error=') < 0) return;
+    var p = {}; h.split('&').forEach(function(x){ var a = x.split('='); p[a[0]] = decodeURIComponent(a[1] || ''); });
+    var st = sessionStorage.getItem('leclubi-oauth') || '';
+    if(p.access_token && st && p.state === st) localStorage.setItem('leclubi-twitch', JSON.stringify({token:p.access_token, ts:Date.now()}));
+    sessionStorage.removeItem('leclubi-oauth'); sessionStorage.removeItem('leclubi-retour');
+    document.documentElement.style.visibility = 'hidden';
+    location.replace(r);
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 <div class="top">
