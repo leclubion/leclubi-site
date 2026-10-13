@@ -341,6 +341,11 @@ button.vc.vide{cursor:pointer}button.vc.vide:hover{border-color:var(--accent);co
 .cb-bar.go{animation:cbbar var(--loop,29s) linear forwards}
 @keyframes cbbar{to{width:100%}}
 @media (prefers-reduced-motion:reduce){.cb-k,.cb-board,.cb-cap,.cb-lbl{transition:none}.cb-k.die{animation:none;opacity:0}.cb-fan .cb-k{animation:none;transform:translate(var(--x),0) rotate(var(--r))}}
+.legal h2{font-size:22px;margin:36px 0 10px}
+.legal p,.legal li{color:var(--muted,inherit);line-height:1.65;max-width:78ch}
+.legal ul{padding-left:22px;margin:8px 0}
+.legal .maj{font-size:13px;opacity:.7}
+.legal a{text-decoration:underline}
 .flinks{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .fl{display:flex;gap:20px}
 .fl a:hover{color:var(--text)}
@@ -1057,6 +1062,67 @@ nav{min-width:0}
   </form>
 </div>
 
+
+<!-- MENTIONS LEGALES -->
+<div class="view" id="v-mentions" hidden>
+  <section>
+    <div class="wrap ab legal">
+      <h1>Mentions légales</h1>
+      <p class="maj">Dernière mise à jour : octobre 2026</p>
+      <h2>Éditeur du site</h2>
+      <p>Ce site est un site personnel, non commercial, édité par <strong>LeClubi</strong>, streamer sur <a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">twitch.tv/leclubi</a>. Il est gratuit et ne vend rien.</p>
+      <p>Contact : <span class="lcontact">sur le <a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a> (message privé ou salon) ou via la messagerie de la chaîne <a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a><span class="lmail"></span></span>.</p>
+      <h2>Hébergement</h2>
+      <ul>
+        <li>Pages du site : GitHub Pages, GitHub, Inc., 88 Colin P. Kelly Jr Street, San Francisco, CA 94107, États-Unis.</li>
+        <li>Serveur du jeu et des comptes : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis.</li>
+      </ul>
+      <h2>Contenus et droits</h2>
+      <p>Les noms de jeux, personnages et images qui apparaissent sur les cartes appartiennent à leurs propriétaires respectifs. Ils sont utilisés ici dans un cadre non commercial, pour animer la communauté de la chaîne. Ce site n'est ni affilié, ni approuvé par Twitch ou par les éditeurs de ces jeux.</p>
+      <p>Si tu es titulaire de droits et que tu souhaites qu'un contenu soit retiré, écris-moi (voir contact) : je le retirerai rapidement.</p>
+      <h2>Cartes et ClubiGold</h2>
+      <p>Les cartes, badges et ClubiGold sont purement virtuels et ludiques. Ils n'ont aucune valeur monétaire, ne s'échangent pas contre de l'argent et ne sont pas remboursables.</p>
+      <h2>Responsabilité</h2>
+      <p>Le site est proposé tel quel, sans garantie de disponibilité. Des erreurs ou interruptions peuvent survenir, notamment pendant les mises à jour.</p>
+      <h2>Données personnelles</h2>
+      <p>Voir la <a href="#confidentialite">politique de confidentialité</a>.</p>
+    </div>
+  </section>
+</div>
+
+<!-- CONFIDENTIALITE -->
+<div class="view" id="v-confidentialite" hidden>
+  <section>
+    <div class="wrap ab legal">
+      <h1>Politique de confidentialité</h1>
+      <p class="maj">Dernière mise à jour : octobre 2026</p>
+      <p>Le site fonctionne sans compte. Un compte n'est créé que si tu te connectes avec Twitch pour jouer, voir ton profil, tes badges ou proposer une carte.</p>
+      <h2>Ce que le site reçoit de Twitch</h2>
+      <ul>
+        <li>Ton identifiant Twitch, ton pseudo et ton avatar. Rien d'autre : ni mot de passe, ni e-mail.</li>
+        <li>Si tu cliques sur « Autoriser l'envoi dans le chat » : l'autorisation d'écrire dans le chat à ta place, uniquement quand tu cliques sur une commande. Tu peux la retirer à tout moment dans les réglages de ta connexion Twitch.</li>
+      </ul>
+      <h2>Ce que le site enregistre</h2>
+      <ul>
+        <li>Tes statistiques du jeu, tes ClubiGold gagnés, ta vitrine, tes badges choisis, et ton réglage de profil public ou privé.</li>
+        <li>Les cartes que tu as obtenues, dans un tableau tenu par la chaîne.</li>
+        <li>Les cartes que tu proposes : elles ne sont visibles que par LeClubi.</li>
+        <li>Ton solde de ClubiGold, lu auprès de WizeBot pour l'afficher sur ton profil.</li>
+      </ul>
+      <h2>Ce qui est visible par les autres</h2>
+      <p>Ton pseudo, ton avatar et ta collection de cartes sont visibles par les visiteurs. Tes statistiques et ta vitrine ne le sont que si ton profil est public : tu peux le passer en privé dans « Mon compte ».</p>
+      <h2>Cookies et traceurs</h2>
+      <p>Aucun cookie publicitaire, aucune statistique de visite, aucun suivi. Ton navigateur garde seulement sur ton appareil ta connexion, ton thème clair ou sombre et quelques préférences d'affichage. L'adresse IP est lue brièvement par le serveur pour limiter les abus, et n'est pas conservée.</p>
+      <h2>Qui intervient</h2>
+      <p>GitHub (pages du site), Cloudflare (serveur), Google (tableurs et formulaires de la chaîne), Twitch (connexion), WizeBot et Streamer.bot (outils du stream). Certains sont situés aux États-Unis, ce qui implique un transfert de données hors de l'Union européenne.</p>
+      <h2>Durée de conservation</h2>
+      <p>Tant que tu utilises le site. Les données de compte sont effacées sur simple demande.</p>
+      <h2>Tes droits</h2>
+      <p>Tu peux demander à voir, corriger ou supprimer tes données, ou t'opposer à leur utilisation. Écris-moi <span class="lcontact">sur le <a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a> (message privé ou salon) ou via la messagerie de la chaîne <a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a><span class="lmail"></span></span>. Supprimer tes données du site ne supprime <strong>pas</strong> ton compte Twitch, qui reste le tien. Les cartes déjà gagnées et ton solde de ClubiGold appartiennent à l'historique de la chaîne : ils peuvent aussi être effacés sur demande. Tu peux enfin saisir la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
+    </div>
+  </section>
+</div>
+
 <div id="zoom" role="dialog" aria-modal="true" aria-label="Carte en grand" hidden>
   <button class="zb zc" data-z="close" aria-label="Fermer">&times;</button>
   <button class="zb zp" data-z="prev" aria-label="Carte précédente">&lsaquo;</button>
@@ -1064,7 +1130,7 @@ nav{min-width:0}
   <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
 </div>
 
-<footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés.</span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
+<footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
 // Thème clair / sombre : suit l'appareil tant que le visiteur n'a rien choisi, puis garde son choix
@@ -1090,8 +1156,8 @@ nav{min-width:0}
 // Navigation
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
-  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos', 'compte'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement' && window.chargerClassement) window.chargerClassement();
   if(page === 'compte' && window.rendreCompte) window.rendreCompte();
   document.querySelectorAll('[data-nav]').forEach(function(a){
@@ -1100,6 +1166,8 @@ function route(){
   document.body.classList.toggle('planw', page === 'planning');
   window.scrollTo(0,0);
 }
+(function(){ var m = String((window.JEU_CONFIG || {}).CONTACT_EMAIL || '').trim();
+  if(/^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i.test(m)) document.querySelectorAll('.lmail').forEach(function(e){ e.textContent = ' ou par e-mail : ' + m; }); })();
 window.addEventListener('hashchange', route);
 route();
 
