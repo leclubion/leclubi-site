@@ -599,6 +599,22 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .bd.got.t-mythique{background:linear-gradient(160deg,color-mix(in srgb,var(--t1) 16%,var(--panel)),var(--panel) 60%);animation:bdglow 3s ease-in-out infinite}
 .bd.got.t-mythique .bm{animation:bdspin 6s linear infinite;background:conic-gradient(from 0deg,#ffd36b,#e0442f,#c8a6ff,#6ad0ff,#ffd36b)}
 .bd.got.t-mythique .bm svg{animation:bdspin 6s linear infinite reverse}
+.bd.vb{border:0;background:none;padding:0;overflow:visible;width:72px;height:72px;gap:0;animation:none!important;box-shadow:none}
+.bd.vb .bm{width:72px;height:72px}.bd.vb .bm svg{width:34px;height:34px}
+.bd.vb.got.t-mythique{background:none}
+.vbrow{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 0 22px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.vbrow h3{margin:0 8px 0 0;font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;width:100%}
+.vbrow .vide{width:72px;height:72px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:22px;background:none;cursor:pointer;font:inherit}
+.vbrow .vide.off{cursor:default;opacity:.55}
+.cp-tabs{display:flex;gap:8px;margin:22px 0 4px;border-bottom:1px solid var(--line)}
+.cp-tabs button{font:inherit;font-size:15px;font-weight:600;padding:10px 18px;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.cp-tabs button[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent)}
+.bd.pk{cursor:pointer;font:inherit;color:inherit;width:100%}
+.bd.pk.sel{outline:3px solid var(--accent);outline-offset:-3px}
+.bd.pk .nn{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;display:grid;place-items:center}
+.bp-ed{margin:18px 0 6px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.bp-ed p{margin:0 0 12px;color:var(--muted);font-size:14px}
+.bp-ed .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}.bp-ed .row em{color:var(--muted);font-style:normal;font-size:13px}
 @keyframes bdshine{0%,30%{left:-70%}70%,100%{left:140%}}
 @keyframes bdglow{0%,100%{box-shadow:0 0 0 rgba(224,68,47,0)}50%{box-shadow:0 0 22px rgba(255,190,90,.45)}}
 @keyframes bdspin{to{transform:rotate(360deg)}}
@@ -1673,7 +1689,8 @@ function badgeCatalog(name, jeu){
   }
   return out;
 }
-function badgesPanelHtml(name, jeu, mineView){
+function vbHtml(x){ return '<div class="bd vb got t-' + x.tier + '" title="' + esc(x.name + ' : ' + x.task) + '"><div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div></div>'; }
+function badgesPanelHtml(name, jeu, mineView, sel){
   var l = badgeCatalog(name, jeu);
   if(!l.length) return '';
   var got = l.filter(function(x){ return x.got; }).length, cats = [];
@@ -1684,17 +1701,24 @@ function badgesPanelHtml(name, jeu, mineView){
   cats.forEach(function(c){
     var items = l.filter(function(x){ return x.cat === c; }), g = items.filter(function(x){ return x.got; }).length;
     h += '<h3><span>' + esc(c) + '</span><small>' + g + ' / ' + items.length + '</small></h3><div class="bd-grid">' + items.map(function(x){
-      return '<div class="bd t-' + x.tier + (x.got ? ' got' : ' lock') + '" title="' + esc(x.task) + '"><div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div>' +
+      var pk = sel && x.got, ix = sel ? sel.indexOf(x.id) : -1, tg = pk ? 'button type="button" data-bid="' + x.id + '"' : 'div';
+      return '<' + tg + ' class="bd t-' + x.tier + (x.got ? ' got' : ' lock') + (pk ? ' pk' + (ix > -1 ? ' sel' : '') : '') + '" title="' + esc(x.task) + '">' + (ix > -1 ? '<b class="nn">' + (ix + 1) + '</b>' : '') + '<div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div>' +
         '<strong>' + esc(x.name) + '</strong><p>' + esc(x.task) + '</p>' +
-        (x.got ? '<span class="st">✓ ' + BD_TIER[x.tier] + '</span>' : '<div class="pb"><i style="width:' + Math.round(x.cur / x.max * 100) + '%"></i></div><span class="nb">' + x.cur + ' / ' + x.max + '</span>') + '</div>';
+        (x.got ? '<span class="st">✓ ' + BD_TIER[x.tier] + '</span>' : '<div class="pb"><i style="width:' + Math.round(x.cur / x.max * 100) + '%"></i></div><span class="nb">' + x.cur + ' / ' + x.max + '</span>') + '</' + (pk ? 'button' : 'div') + '>';
     }).join('') + '</div>';
   });
   return h + '</div>';
 }
+function badgesChoisis(name, jeu, ids){
+  var cat = badgeCatalog(name, jeu), out = [];
+  (ids || []).forEach(function(id){ var x = cat.filter(function(z){ return z.id === id && z.got; })[0]; if(x) out.push(x); });
+  return out.slice(0, 5);
+}
 function renderBadges(){
   var el = document.getElementById('bpan'); if(!el) return;
-  var jeu = window.CompteJeu ? window.CompteJeu(who) : null;
-  el.innerHTML = who ? badgesPanelHtml(who, jeu, typeof mine === 'function' && window.CompteProp && window.CompteProp.ok(who)) : '';
+  if(!who){ el.innerHTML = ''; return; }
+  var jeu = window.CompteJeu ? window.CompteJeu(who) : null, l = badgesChoisis(who, jeu, window.CompteBadges ? window.CompteBadges(who) : []);
+  el.innerHTML = l.length ? '<div class="vbrow"><h3>Badges de ' + esc(who) + '</h3>' + l.map(vbHtml).join('') + '</div>' : '';
 }
 function renderTitres(){
   var el = document.getElementById('titres'), bl = document.getElementById('badges');
@@ -2393,7 +2417,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   var API = JEU_API, CID = String((window.JEU_CONFIG || {}).TWITCH_CLIENT_ID || ''), ON = !!(API && CID);
   var KS = 'leclubi-session', KT = 'leclubi-twitch';
   var g = function(i){ return document.getElementById(i); };
-  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '';
+  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '', cpTab = 'profil', bsel = null, msgB = '';
   function lire(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function ecrire(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   function suppr(k){ try{ localStorage.removeItem(k); }catch(e){} }
@@ -2501,6 +2525,22 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       '<div class="cp-acts">' + (name ? '<a class="btn ghost" href="#collection=' + encodeURIComponent(name) + '">Voir ma collection</a><button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') +
       (JEU_OUVERT ? '<a class="btn" href="jeu.html">Jouer à <span class="nomjeu">' + esc((window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle') + '</span></a>' : '') + '</div></div></div>');
 
+    // onglets Profil / Badges
+    if(!name) cpTab = 'profil';
+    var tabs = name ? '<div class="cp-tabs" role="tablist"><button type="button" role="tab" data-tab="profil" aria-selected="' + (cpTab === 'profil') + '">Profil</button><button type="button" role="tab" data-tab="badges" aria-selected="' + (cpTab === 'badges') + '">Badges</button></div>' : '';
+    if(cpTab === 'badges' && name){
+      if(!bsel) bsel = badgesChoisis(name, jeu, moi.badges).map(function(x){ return x.id; });
+      var slots = [];
+      for(var bi = 0; bi < 5; bi++){ var bx = bsel[bi] && badgeCatalog(name, jeu).filter(function(z){ return z.id === bsel[bi]; })[0]; slots.push(bx ? vbHtml(bx) : '<div class="vide off">+</div>'); }
+      h.push(tabs);
+      h.push('<div class="bp-ed"><div class="vbrow" style="border:0;padding:0;margin:0;background:none"><h3>Ma vitrine de badges (5 maximum)</h3>' + slots.join('') + '</div>' +
+        '<p style="margin-top:12px">Clique sur un badge obtenu ci-dessous pour l\'ajouter ou le retirer. L\'ordre du choix est l\'ordre d\'affichage. Ils apparaissent sur ta collection et ton profil public.</p>' +
+        '<div class="row"><button type="button" class="btn" data-act="savebadges"' + (busy ? ' disabled' : '') + '>Enregistrer</button><button type="button" class="btn ghost" data-act="clearbadges">Vider</button><em>' + (msgB || bsel.length + ' / 5') + '</em></div></div>');
+      h.push(badgesPanelHtml(name, jeu, true, bsel));
+      el.innerHTML = h.join('');
+      return;
+    }
+    h.push(tabs);
     // chiffres clés
     var rg = jeu.rang || {}, ratio = jeu.ratio, p = jeu.parties || 0;
     var sRatio = !p ? 'Joue ta première partie pour apparaître ici.' : rg.ratio ? 'N°' + rg.ratio + ' au classement par ratio' : 'Encore ' + Math.max(0, (jeu.minimumRatio || 10) - p) + ' partie' + ((jeu.minimumRatio || 10) - p > 1 ? 's' : '') + ' pour entrer au classement par ratio';
@@ -2536,7 +2576,9 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       }
       // titres, badges, récompenses
       h.push('<div class="cp-h"><h2>Mon titre</h2></div>' + achHtml(name));
-      h.push(badgesPanelHtml(name, jeu, true));
+      var vb = badgesChoisis(name, jeu, moi.badges), allb = badgeCatalog(name, jeu);
+      h.push('<div class="cp-h"><h2>Mes badges</h2><small>' + allb.filter(function(z){ return z.got; }).length + ' / ' + allb.length + ' obtenus</small></div><div class="vbrow">' +
+        (vb.length ? vb.map(vbHtml).join('') : '<p class="cp-note" style="margin:0;text-align:left">Aucun badge en vitrine pour le moment.</p>') + '<button type="button" class="btn ghost" data-tab="badges" style="margin-left:auto;padding:8px 16px;font-size:14px">' + (vb.length ? 'Modifier' : 'Choisir mes badges') + '</button></div>');
       var rw = avecWho(name, function(){ return readyHtml() + tarotRewardHtml(); });
       if(rw) h.push('<div class="cp-h"><h2>Récompenses</h2></div>' + rw);
     }
@@ -2599,6 +2641,17 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       rendreCompte();
     }).catch(function(){ busy = false; msgPick = 'Enregistrement impossible, réessaie.'; rendreCompte(); });
   }
+  function envoyerBadges(){
+    if(busy || !bsel) return;
+    busy = true; msgB = 'Enregistrement…'; rendreCompte();
+    appel('/vitrine-badges', {session:sess(), body:{badges:bsel}}).then(function(r){
+      busy = false;
+      if(r.status === 401){ suppr(KS); etat = 'out'; moi = null; ui(); return; }
+      if(r.ok){ moi.badges = r.d.badges; delete pubCache[moi.login]; msgB = 'Enregistré ✓'; }
+      else msgB = 'Enregistrement impossible, réessaie.';
+      rendreCompte();
+    }).catch(function(){ busy = false; msgB = 'Enregistrement impossible, réessaie.'; rendreCompte(); });
+  }
   var cpEl = g('cp');
   cpEl.addEventListener('click', function(e){
     var pk = e.target.closest('[data-pk]');
@@ -2606,6 +2659,15 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       var id = pk.dataset.id, i = pick.indexOf(id);
       if(i > -1) pick.splice(i, 1); else if(pick.length < 3) pick.push(id); else { msgPick = '3 cartes maximum : retire-en une d\'abord.'; rendreCompte(); return; }
       msgPick = ''; rendreCompte(); return;
+    }
+    var tb = e.target.closest('[data-tab]');
+    if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
+    var bb = e.target.closest('[data-bid]');
+    if(bb && bsel){
+      var bid = bb.dataset.bid, bj = bsel.indexOf(bid);
+      msgB = '';
+      if(bj > -1) bsel.splice(bj, 1); else if(bsel.length < 5) bsel.push(bid); else msgB = '5 badges maximum : retires-en un d\'abord.';
+      var sy = window.scrollY; rendreCompte(); window.scrollTo(0, sy); return;
     }
     var b = e.target.closest('[data-act]'); if(!b) return;
     var a = b.dataset.act;
@@ -2615,6 +2677,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     else if(a === 'cancel'){ pick = null; msgPick = ''; rendreCompte(); }
     else if(a === 'clear'){ pick = []; msgPick = ''; rendreCompte(); }
     else if(a === 'save') envoyerVitrine();
+    else if(a === 'clearbadges'){ bsel = []; msgB = ''; rendreCompte(); }
+    else if(a === 'savebadges') envoyerBadges();
     else if(a === 'copy'){
       var url = location.origin + location.pathname + '#collection=' + encodeURIComponent(maCollection() || moi.pseudo), done = function(){ b.textContent = 'Lien copié ✓'; setTimeout(function(){ b.textContent = 'Copier le lien de mon profil'; }, 1800); };
       if(navigator.clipboard) navigator.clipboard.writeText(url).then(done, function(){ b.textContent = 'Copie impossible'; }); else b.textContent = 'Copie impossible';
@@ -2632,6 +2696,13 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   window.CompteRefresh = function(){ if(!g('v-compte').hidden) rendreCompte(); vitrinePublique(); renderBadges(); };
   window.CompteVitrine = vitrinePublique;
   // stats de jeu connues pour ce viewer : les siennes s'il est connecté, sinon celles de son profil public (si public)
+  window.CompteBadges = function(nom){
+    if(!ON || !nom) return [];
+    var l = String(nom).toLowerCase();
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.badges || [];
+    var c = pubCache[l];
+    return c && !c.prive && c.badges ? c.badges : [];
+  };
   window.CompteJeu = function(nom){
     if(!ON || !nom) return null;
     var l = String(nom).toLowerCase();
