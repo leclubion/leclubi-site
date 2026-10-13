@@ -606,7 +606,22 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .vbrow h3{margin:0 8px 0 0;font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;width:100%}
 .vbrow .vide{width:72px;height:72px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:22px;background:none;cursor:pointer;font:inherit}
 .vbrow .vide.off{cursor:default;opacity:.55}
-.cp-tabs{display:flex;gap:8px;margin:22px 0 4px;border-bottom:1px solid var(--line)}
+.cpemb{max-width:none!important;padding:0!important;margin:0!important}
+.cpemb>h1,.cpemb #acct,.cpemb #vit,.cpemb #ach,.cpemb #bpan{display:none!important}
+.cp-tabs button{white-space:nowrap}
+.cm-note{margin:16px 0;padding:12px 16px;border-radius:10px;background:rgba(128,128,128,.1);font-size:14px}
+.cm-note.live{background:color-mix(in srgb,#2fa84f 18%,transparent)}
+.cm-note .btn{margin-top:8px}
+.cm-list{display:grid;gap:10px;margin-top:6px}
+.cm{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.cm code{font:600 16px ui-monospace,Menlo,monospace;color:var(--accent);min-width:92px}
+.cm span{flex:1;min-width:200px;color:var(--muted);font-size:14px}
+.cm .cmb{display:flex;gap:8px;margin-left:auto}
+.cm .cmb button{font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer;border:1px solid var(--line);background:none;color:var(--text)}
+.cm .cmb button.go{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.cm .cmb button:disabled{opacity:.45;cursor:not-allowed}
+.cm .cmb button.cf{background:#c0392b;border-color:#c0392b;color:#fff}
+.cp-tabs{overflow-x:auto;scrollbar-width:none;display:flex;gap:8px;margin:22px 0 4px;border-bottom:1px solid var(--line)}
 .cp-tabs button{font:inherit;font-size:15px;font-weight:600;padding:10px 18px;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;margin-bottom:-1px}
 .cp-tabs button[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent)}
 .bd.pk{cursor:pointer;font:inherit;color:inherit;width:100%}
@@ -1074,6 +1089,7 @@ nav{min-width:0}
 })();
 // Navigation
 function route(){
+  if(window.CompteParkColl) window.CompteParkColl();
   var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
   ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos', 'compte'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement' && window.chargerClassement) window.chargerClassement();
@@ -2451,11 +2467,12 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       else { suppr(KS); viaJeton(); }
     }).catch(function(){ etat = 'erreur'; ui(); });
   }
-  function connexion(){
+  try{ var ong = sessionStorage.getItem('leclubi-onglet'); if(ong){ cpTab = ong; sessionStorage.removeItem('leclubi-onglet'); } }catch(e){}
+  function connexion(retour, scope, onglet){
     var st = Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(12)), function(x){ return ('0' + x.toString(16)).slice(-2); }).join('');
-    try{ sessionStorage.setItem('leclubi-oauth', st); sessionStorage.setItem('leclubi-retour', 'index.html#compte'); }catch(e){}
+    try{ sessionStorage.setItem('leclubi-oauth', st); sessionStorage.setItem('leclubi-retour', 'index.html#compte'); if(onglet) sessionStorage.setItem('leclubi-onglet', onglet); }catch(e){}
     var redir = new URL('jeu.html', location.href); redir.hash = ''; redir.search = '';
-    location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(CID) + '&redirect_uri=' + encodeURIComponent(redir.href) + '&response_type=token&scope=&state=' + st;
+    location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(CID) + '&redirect_uri=' + encodeURIComponent(redir.href) + '&response_type=token&scope=' + encodeURIComponent(scope || '') + '&state=' + st;
   }
   function deconnexion(){ suppr(KS); suppr(KT); moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
 
@@ -2525,12 +2542,27 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     // en-tête du profil
     h.push('<div class="cp-hero">' + (moi.avatar ? '<img class="cp-av" src="' + esc(moi.avatar) + '" alt="" data-i="' + esc(moi.pseudo.charAt(0).toUpperCase()) + '" onerror="avErr(this)">' : '<div class="cp-av">' + esc(moi.pseudo.charAt(0).toUpperCase()) + '</div>') +
       '<div><h1>' + esc(moi.pseudo) + '</h1><p class="cp-sub"><span>@' + esc(moi.login) + '</span>' + (t ? '<b>' + icoK(t.k) + t.name + '</b>' : '') + (name && tarotTitle(name) ? '<b>✦ ' + esc(tarotTitle(name)) + '</b>' : '') + '</p>' +
-      '<div class="cp-acts">' + (name ? '<a class="btn ghost" href="#collection=' + encodeURIComponent(name) + '">Voir ma collection</a><button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') +
+      '<div class="cp-acts">' + (name ? '<button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') +
       (JEU_OUVERT ? '<a class="btn" href="jeu.html">Jouer à <span class="nomjeu">' + esc((window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle') + '</span></a>' : '') + '</div></div></div>');
 
-    // onglets Profil / Badges
-    if(!name) cpTab = 'profil';
-    var tabs = name ? '<div class="cp-tabs" role="tablist"><button type="button" role="tab" data-tab="profil" aria-selected="' + (cpTab === 'profil') + '">Profil</button><button type="button" role="tab" data-tab="badges" aria-selected="' + (cpTab === 'badges') + '">Badges</button></div>' : '';
+    // onglets Profil / Collection / Badges / Commandes
+    parkColl();
+    if(!name && (cpTab === 'badges' || cpTab === 'collection')) cpTab = 'profil';
+    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges']] : []).concat([['commandes', 'Commandes']]);
+    var tabs = '<div class="cp-tabs" role="tablist">' + TB.map(function(t){ return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (cpTab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    if(cpTab === 'collection' && name){
+      h.push(tabs); h.push('<div id="cpcoll" style="margin-top:20px"></div>');
+      el.innerHTML = h.join('');
+      var wr = document.querySelector('#v-collection .wrap'), host = g('cpcoll');
+      if(wr && host){ host.appendChild(wr); wr.classList.add('cpemb'); who = name; render(); }
+      return;
+    }
+    if(cpTab === 'commandes'){
+      h.push(tabs); h.push(commandesHtml(name));
+      el.innerHTML = h.join('');
+      verifCmd(false);
+      return;
+    }
     if(cpTab === 'badges' && name){
       if(!bsel) bsel = badgesChoisis(name, jeu, moi.badges).map(function(x){ return x.id; });
       var slots = [];
@@ -2552,7 +2584,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
         '<p>' + (sheetState === 'loading' ? 'Chargement de ta collection…' : sheetState === 'error' ? 'Collection indisponible pour le moment.' : name ? (nextTitle(n, tot) ? 'Prochain titre : ' + nextTitle(n, tot).name + ' (encore ' + nextTitle(n, tot).need + ')' : 'Collection complète !') : 'Aucune carte pour l\'instant.') + '</p></div>' +
       '<div class="cp-t"><span>Parties jouées</span><b>' + p + '</b><p>' + (p ? (jeu.victoires || 0) + ' victoire' + ((jeu.victoires || 0) > 1 ? 's' : '') + ' · ' + (jeu.defaites || 0) + ' défaite' + ((jeu.defaites || 0) > 1 ? 's' : '') + ((jeu.nuls || 0) ? ' · ' + jeu.nuls + ' nul' + (jeu.nuls > 1 ? 's' : '') : '') : 'Pas encore de partie.') + '</p></div>' +
       '<div class="cp-t"><span>Ratio de victoires</span><b>' + (ratio == null ? '–' : ratio + ' <small>%</small>') + '</b><p>' + sRatio + '</p></div>' +
-      '<div class="cp-t"><span>ClubiGold gagnés au jeu</span><b>' + (jeu.orTotal || 0) + '</b><p>Victoires récompensées aujourd\'hui : ' + (jeu.victoiresOrAujourdhui || 0) + ' / ' + (jeu.maxJour || 5) + '</p></div></div>');
+      '<div class="cp-t"><span>' + (moi.solde != null ? 'ClubiGold' : 'ClubiGold gagnés au jeu') + '</span><b>' + (moi.solde != null ? moi.solde : (jeu.orTotal || 0)) + '</b><p>' + (moi.solde != null ? 'Gagnés au jeu : ' + (jeu.orTotal || 0) + ' · ' : '') + 'Victoires récompensées aujourd\'hui : ' + (jeu.victoiresOrAujourdhui || 0) + ' / ' + (jeu.maxJour || 5) + '</p></div></div>');
 
     if(sheetState === 'ok' && !name){
       h.push('<div class="cp-h"><h2>Ma collection</h2></div><div class="cp-t"><p style="margin:0;font-size:15px;color:var(--text)">Tu n\'as pas encore de carte. Elles apparaîtront ici dès ton premier tirage avec les Power-ups ou la boutique de la chaîne, sous le pseudo <b>' + esc(moi.pseudo) + '</b>.</p></div>');
@@ -2644,6 +2676,82 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       rendreCompte();
     }).catch(function(){ busy = false; msgPick = 'Enregistrement impossible, réessaie.'; rendreCompte(); });
   }
+  // ----- la collection s'affiche dans le profil : on déplace le bloc de la page Collection puis on le remet -----
+  function parkColl(){
+    var wr = document.querySelector('.cpemb');
+    if(!wr) return;
+    wr.classList.remove('cpemb');
+    var sec = document.querySelector('#v-collection section'); if(sec) sec.appendChild(wr);
+  }
+  window.CompteParkColl = parkColl;
+
+  // ----- commandes du chat (envoi en un clic seulement quand la chaîne est en live) -----
+  var CHAINE = 'leclubi', SCOPE_CHAT = 'user:write:chat';
+  var COMMANDES = [
+    {c:'!roue', conf:1, t:'Utilise 5 exemplaires d\'une même carte (la première prête) pour une roue gratuite de sa saison.'},
+    {c:'!gold', conf:1, t:'Utilise 5 exemplaires d\'une même carte pour ' + GOLD + ' ClubiGold.'},
+    {c:'!ligne', conf:1, t:'Roue gratuite offerte quand tu as complété une ligne Rare.'},
+    {c:'!tarot', conf:1, t:'Récupère les récompenses de tes Dieux Oubliés (ClubiGold et jalons).'},
+    {c:'!account', t:'Affiche ton solde de ClubiGold dans le chat.'}
+  ];
+  var cmd = {scope:null, live:null, uid:'', bid:'', msg:'', busy:false, conf:'', timer:null, vu:0};
+  function jeton(){ var t = lire(KT); return t && t.token || ''; }
+  function helix(chemin, init){
+    init = init || {}; init.headers = Object.assign({Authorization:'Bearer ' + jeton(), 'Client-Id':CID}, init.headers || {});
+    return fetch('https://api.twitch.tv/helix' + chemin, init);
+  }
+  function verifCmd(force){
+    if(!force && Date.now() - cmd.vu < 20000) return;
+    cmd.vu = Date.now();
+    var tok = jeton();
+    if(!tok){ cmd.scope = false; cmd.live = null; return; }
+    fetch('https://id.twitch.tv/oauth2/validate', {headers:{Authorization:'OAuth ' + tok}}).then(function(r){ return r.ok ? r.json() : null; }).then(function(v){
+      cmd.scope = !!v && (v.scopes || []).indexOf(SCOPE_CHAT) > -1; cmd.uid = v && v.user_id || '';
+      return helix('/streams?user_login=' + CHAINE).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ cmd.live = d ? !!(d.data && d.data.length) : null; });
+    }).catch(function(){ cmd.live = null; }).then(function(){
+      if(cpTab === 'commandes' && !g('v-compte').hidden){ rendreCompte(); clearTimeout(cmd.timer); cmd.timer = setTimeout(function(){ if(cpTab === 'commandes') verifCmd(true); }, 60000); }
+    });
+  }
+  function prets(name){
+    var out = [];
+    if(!name) return out;
+    openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(name, c.id); if(owns(name, c.id) && n >= NEED) out.push({id:c.id, n:n, nom:'Carte ' + pad(c.n) + ' (' + c.r + ', ' + x.label + ')'}); }); });
+    return out;
+  }
+  function boutonCmd(txt, conf, lib){
+    var ok = cmd.scope && cmd.live === true && !cmd.busy, att = cmd.conf === txt;
+    return (lib ? '' : '<button type="button" data-cp="' + esc(txt) + '">Copier</button>') + '<button type="button" class="go' + (att ? ' cf' : '') + '" data-send="' + esc(txt) + '"' + (conf ? ' data-conf="1"' : '') + (ok ? '' : ' disabled') + '>' + (att ? 'Confirmer ?' : (lib || 'Envoyer')) + '</button>';
+  }
+  function commandesHtml(name){
+    var h = '<div class="cp-h"><h2>Commandes du chat</h2><small>Tape-les dans le chat de la chaîne, ou envoie-les d\'un clic quand LeClubi est en live</small></div>';
+    if(cmd.live === true) h += '<div class="cm-note live">🔴 <b>LeClubi est en live</b>' + (cmd.scope ? ' : tu peux envoyer les commandes directement d\'ici.' : '.') + '</div>';
+    else if(cmd.live === false) h += '<div class="cm-note">LeClubi n\'est pas en live pour le moment : l\'envoi en un clic est disponible seulement pendant le stream. Tu peux déjà copier les commandes.</div>';
+    else h += '<div class="cm-note">Vérification du live en cours…</div>';
+    if(cmd.scope === false) h += '<div class="cm-note">Pour envoyer une commande en un clic, autorise ce site à écrire dans le chat à ta place. Twitch te demandera ton accord ; rien n\'est envoyé sans que tu cliques sur un bouton.<br><button type="button" class="btn" data-act="authchat">Autoriser l\'envoi dans le chat</button></div>';
+    if(cmd.msg) h += '<div class="cm-note" role="status">' + esc(cmd.msg) + '</div>';
+    h += '<div class="cm-list">' + COMMANDES.map(function(x){ return '<div class="cm"><code>' + esc(x.c) + '</code><span>' + esc(x.t) + '</span><div class="cmb">' + boutonCmd(x.c, x.conf) + '</div></div>'; }).join('') + '</div>';
+    var pr = prets(name);
+    if(pr.length){
+      h += '<div class="cp-h"><h2>Tes cartes prêtes</h2><small>5 exemplaires ou plus</small></div><div class="cm-list">' + pr.map(function(c){
+        return '<div class="cm"><code>' + esc(c.id) + '</code><span>' + esc(c.nom) + ' : ' + c.n + ' exemplaires</span><div class="cmb">' + boutonCmd('!roue ' + c.id, 1, 'Envoyer !roue') + boutonCmd('!gold ' + c.id, 1, 'Envoyer !gold') + '</div></div>';
+      }).join('') + '</div>';
+    }
+    return h;
+  }
+  function envoyerCmd(txt){
+    if(cmd.busy || !cmd.scope || cmd.live !== true) return;
+    cmd.busy = true; cmd.msg = 'Envoi de ' + txt + '…'; rendreCompte();
+    var avoirBid = cmd.bid ? Promise.resolve(cmd.bid) : helix('/users?login=' + CHAINE).then(function(r){ return r.json(); }).then(function(d){ cmd.bid = d.data && d.data[0] && d.data[0].id || ''; return cmd.bid; });
+    avoirBid.then(function(bid){
+      if(!bid) throw new Error('chaine');
+      return helix('/chat/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({broadcaster_id:bid, sender_id:cmd.uid, message:txt})});
+    }).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok:r.ok, d:d, status:r.status}; }); }).then(function(r){
+      var m = r.d && r.d.data && r.d.data[0];
+      if(r.ok && m && m.is_sent) cmd.msg = '✓ ' + txt + ' envoyé dans le chat de ' + CHAINE + '.';
+      else if(r.status === 401){ cmd.scope = false; cmd.msg = 'L\'autorisation a expiré : autorise à nouveau l\'envoi.'; }
+      else cmd.msg = 'Message non envoyé' + (m && m.drop_reason && m.drop_reason.message ? ' : ' + m.drop_reason.message : (r.d && r.d.message ? ' : ' + r.d.message : '.'));
+    }).catch(function(){ cmd.msg = 'Message non envoyé. Tape la commande directement dans le chat.'; }).then(function(){ cmd.busy = false; cmd.conf = ''; rendreCompte(); });
+  }
   function envoyerBadges(){
     if(busy || !bsel) return;
     busy = true; msgB = 'Enregistrement…'; rendreCompte();
@@ -2663,8 +2771,16 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       if(i > -1) pick.splice(i, 1); else if(pick.length < 3) pick.push(id); else { msgPick = '3 cartes maximum : retire-en une d\'abord.'; rendreCompte(); return; }
       msgPick = ''; rendreCompte(); return;
     }
+    var cs = e.target.closest('[data-send]');
+    if(cs){
+      var tx = cs.dataset.send;
+      if(cs.dataset.conf && cmd.conf !== tx){ cmd.conf = tx; rendreCompte(); setTimeout(function(){ if(cmd.conf === tx){ cmd.conf = ''; if(cpTab === 'commandes') rendreCompte(); } }, 5000); return; }
+      envoyerCmd(tx); return;
+    }
+    var cc = e.target.closest('[data-cp]');
+    if(cc){ var t0 = cc.dataset.cp; (navigator.clipboard ? navigator.clipboard.writeText(t0) : Promise.reject()).then(function(){ cc.textContent = 'Copié ✓'; setTimeout(function(){ cc.textContent = 'Copier'; }, 1500); }, function(){ cc.textContent = 'Copie impossible'; }); return; }
     var tb = e.target.closest('[data-tab]');
-    if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
+    if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; cmd.conf = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
     var bb = e.target.closest('[data-bid]');
     if(bb && bsel){
       var bid = bb.dataset.bid, bj = bsel.indexOf(bid);
@@ -2680,6 +2796,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     else if(a === 'cancel'){ pick = null; msgPick = ''; rendreCompte(); }
     else if(a === 'clear'){ pick = []; msgPick = ''; rendreCompte(); }
     else if(a === 'save') envoyerVitrine();
+    else if(a === 'authchat') connexion('compte', SCOPE_CHAT, 'commandes');
     else if(a === 'clearbadges'){ bsel = []; msgB = ''; rendreCompte(); }
     else if(a === 'savebadges') envoyerBadges();
     else if(a === 'copy'){
