@@ -52,6 +52,21 @@ export default {
       }
       const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
     }
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/reglage-profil' || url.pathname.startsWith('/profil/')) {
+      if (req.method === 'POST' && !originOk(env, req)) return json({erreur: 'origine refusée'}, h, 403);
+      if (url.pathname.startsWith('/profil/')) {       // profil public : petit cache pour ne pas solliciter le salon à chaque visite
+        const cache = caches.default, cle = new Request(url.origin + url.pathname);
+        let r = await cache.match(cle);
+        if (!r) {
+          const d = await hub.fetch(new Request('https://hub' + url.pathname));
+          r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=20'}});
+          if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
+        }
+        const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+      }
+      const d = await hub.fetch(new Request('https://hub' + url.pathname, {method: req.method, headers: {Authorization: req.headers.get('Authorization') || '', 'Content-Type': 'application/json', 'X-Ip': req.headers.get('CF-Connecting-IP') || ''}, body: req.method === 'POST' ? await req.text() : undefined}));
+      const out = new Response(d.body, d); out.headers.set('Cache-Control', 'no-store'); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+    }
     if (url.pathname.startsWith('/admin/')) {
       const d = await hub.fetch(req);
       const out = new Response(d.body, d); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
@@ -72,6 +87,10 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS paiements(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, jour TEXT, id TEXT, login TEXT, montant INTEGER,
        statut TEXT, essais INTEGER DEFAULT 0, info TEXT DEFAULT '')`);
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
+    // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
+    [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`].forEach(a => { try { q(a); } catch (e) {} });
+    this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
     this.users = new Map();      // id Twitch -> {id, login, nom, ws, game, defi}
     this.file = [];              // ids en attente d'un adversaire
     this.defis = new Map();      // code -> {id, exp}
@@ -103,6 +122,7 @@ export class Hub {
     if (url.pathname === '/classement') return this.classement();
     if (url.pathname === '/etat') return json(this.etat());
     if (url.pathname.startsWith('/admin/')) return this.admin(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/reglage-profil' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -163,12 +183,12 @@ export class Hub {
     if (!r.ok) throw new Error('jeton refusé');
     const v = await r.json();
     if (!v.user_id || !v.login || v.client_id !== this.env.TWITCH_CLIENT_ID) throw new Error('mauvaise application');
-    let nom = v.login;
+    let nom = v.login, avatar = '';
     try {
       const u = await fetch(this.env.TWITCH_USERS_URL || 'https://api.twitch.tv/helix/users', {headers: {Authorization: 'Bearer ' + tok, 'Client-Id': this.env.TWITCH_CLIENT_ID}});
-      if (u.ok) { const j = await u.json(); if (j.data && j.data[0] && j.data[0].display_name) nom = String(j.data[0].display_name).slice(0, 40); }
+      if (u.ok) { const j = await u.json(); if (j.data && j.data[0]) { if (j.data[0].display_name) nom = String(j.data[0].display_name).slice(0, 40); if (/^https:\/\//.test(j.data[0].profile_image_url || '')) avatar = String(j.data[0].profile_image_url).slice(0, 300); } }
     } catch (e) {}
-    return {id: String(v.user_id), login: String(v.login).toLowerCase(), nom};
+    return {id: String(v.user_id), login: String(v.login).toLowerCase(), nom, avatar};
   }
 
   async message(ws, m) {
@@ -193,7 +213,7 @@ export class Hub {
     catch (e) { this.envoyer(ws, {t: 'erreur', code: 'auth'}); try { ws.close(1008, 'auth'); } catch (x) {} return; }
     let ligne = this.joueur(info.id);
     if (ligne && ligne.banni) { this.envoyer(ws, {t: 'erreur', code: 'banni'}); try { ws.close(1008, 'banni'); } catch (x) {} return; }
-    this.run(`INSERT INTO joueurs(id,login,nom,vu) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET login=excluded.login, nom=excluded.nom, vu=excluded.vu`, info.id, info.login, info.nom, Date.now());
+    this.run(`INSERT INTO joueurs(id,login,nom,vu,avatar,cree) VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET login=excluded.login, nom=excluded.nom, vu=excluded.vu, avatar=COALESCE(NULLIF(excluded.avatar,''), avatar)`, info.id, info.login, info.nom, Date.now(), info.avatar || '', Date.now());
     let u = this.users.get(info.id);
     if (u) {                                     // même joueur sur un autre onglet : l'ancien est remplacé
       if (u.ws && u.ws !== ws) { u.ws.u = null; this.envoyer(u.ws, {t: 'remplace'}); try { u.ws.close(1000, 'remplace'); } catch (x) {} }
@@ -208,6 +228,86 @@ export class Hub {
       this.envoyer(this.users.get(g.joueurs[1 - s])?.ws, {t: 'adv_retour'});
     }
     this.diffuser();
+  }
+
+  // ----- compte du site : session signée, profil, vitrine -----
+  async cleSession() {
+    let k = this.reglage('cle_session', '');
+    if (!k) { k = rid(32); this.setReglage('cle_session', k); }
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(k), {name: 'HMAC', hash: 'SHA-256'}, false, ['sign', 'verify']);
+  }
+  b64(buf) { let s = ''; new Uint8Array(buf).forEach(x => s += String.fromCharCode(x)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  deb64(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  async creerSession(id) {
+    const p = this.b64(new TextEncoder().encode(JSON.stringify({i: id, e: Date.now() + 30 * 86400000})));
+    const sig = await crypto.subtle.sign('HMAC', await this.cleSession(), new TextEncoder().encode(p));
+    return p + '.' + this.b64(sig);
+  }
+  async lireSession(req) {
+    const t = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim(), [p, sig] = t.split('.');
+    if (!p || !sig || t.length > 400) return null;
+    try {
+      const ok = await crypto.subtle.verify('HMAC', await this.cleSession(), this.deb64(sig), new TextEncoder().encode(p));
+      if (!ok) return null;
+      const d = JSON.parse(new TextDecoder().decode(this.deb64(p)));
+      if (!d.i || d.e < Date.now()) return null;
+      const j = this.joueur(String(d.i)); return j && !j.banni ? j : null;
+    } catch (e) { return null; }
+  }
+  vitrineDe(j) { try { const v = JSON.parse(j.vitrine || '[]'); return Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 3) : []; } catch (e) { return []; } }
+  rangs(j) {
+    const rv = this.un('SELECT COUNT(*)+1 AS r FROM joueurs WHERE victoires>? AND banni=0 AND parties>0', j.victoires).r;
+    let rr = null;
+    if (j.parties >= 10) rr = this.un('SELECT COUNT(*)+1 AS r FROM joueurs WHERE parties>=10 AND banni=0 AND (victoires*1.0/parties)>?', j.victoires / j.parties).r;
+    return {victoires: j.parties > 0 ? rv : null, ratio: rr};
+  }
+  profilPublic(j) {
+    const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
+    if (j.prive) return base;
+    return {...base, vitrine: this.vitrineDe(j), parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+  }
+  async compte(req, url) {
+    const p = url.pathname;
+    if (p.startsWith('/profil/')) {
+      const login = decodeURIComponent(p.slice(8)).toLowerCase().slice(0, 40);
+      const j = this.un('SELECT * FROM joueurs WHERE login=? AND banni=0', login);
+      return j ? json(this.profilPublic(j)) : json({erreur: 'inconnu'}, {}, 404);
+    }
+    if (p === '/auth' && req.method === 'POST') {
+      const ip = req.headers.get('X-Ip') || '?', now = Date.now(), e = this.essaisAuth.get(ip) || {n: 0, t: now};
+      if (now - e.t > 60000) { e.n = 0; e.t = now; }
+      if (++e.n > 20) return json({erreur: 'trop_de_demandes'}, {}, 429);
+      this.essaisAuth.set(ip, e); if (this.essaisAuth.size > 500) this.essaisAuth.clear();
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      let info; try { info = await this.twitch(String(b.token || '').slice(0, 300)); } catch (x) { return json({erreur: 'auth'}, {}, 401); }
+      const ligne = this.joueur(info.id);
+      if (ligne && ligne.banni) return json({erreur: 'banni'}, {}, 403);
+      this.run(`INSERT INTO joueurs(id,login,nom,vu,avatar,cree) VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET login=excluded.login, nom=excluded.nom, vu=excluded.vu, avatar=COALESCE(NULLIF(excluded.avatar,''), avatar)`, info.id, info.login, info.nom, now, info.avatar || '', now);
+      const sess = await this.creerSession(info.id);
+      return json({session: sess, moi: this.moi(this.joueur(info.id))});
+    }
+    const j = await this.lireSession(req);
+    if (!j) return json({erreur: 'session'}, {}, 401);
+    if (p === '/moi') return json({moi: this.moi(j)});
+    if (p === '/vitrine' && req.method === 'POST') {
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      const ok = /^(s\d+|halloween)-\d{1,3}$|^tarot-\d{1,2}$/;
+      const v = (Array.isArray(b.cartes) ? b.cartes : []).filter(x => typeof x === 'string' && ok.test(x)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
+      this.run('UPDATE joueurs SET vitrine=? WHERE id=?', JSON.stringify(v), j.id);
+      return json({ok: true, vitrine: v});
+    }
+    if (p === '/reglage-profil' && req.method === 'POST') {
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      this.run('UPDATE joueurs SET prive=? WHERE id=?', b.prive ? 1 : 0, j.id);
+      return json({ok: true, prive: !!b.prive});
+    }
+    return json({erreur: 'inconnu'}, {}, 404);
+  }
+  moi(j) {
+    const jour = jourParis();
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), prive: !!j.prive,
+      jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
+        ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
 
   fiche(id) {
