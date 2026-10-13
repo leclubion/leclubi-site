@@ -14,7 +14,7 @@ button.g{background:transparent;color:var(--text);border-color:var(--line)}butto
 input{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:220px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.w{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.wrapc{white-space:normal!important;min-width:220px;max-width:420px;overflow-wrap:anywhere}.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}select{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px}.wrapc{white-space:normal!important;min-width:220px;max-width:420px;overflow-wrap:anywhere}.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
 </style>
 </head>
 <body>
@@ -34,6 +34,26 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
     <h2>Propositions des viewers</h2>
     <p>Les propositions envoyées depuis le site avec un compte Twitch. Elles sont secrètes : seul toi les vois (le viewer retrouve la sienne dans « Mon compte »). « Retenue » = tu prépares la carte ; « Masquée » = elle disparaît aussi chez le viewer.</p>
     <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Pour</th><th>Proposition</th><th>Statut</th><th></th></tr></thead><tbody id="props"></tbody></table></div>
+    <h2>Défis de la semaine</h2>
+    <div class="box" id="dhelp"><b>Comment ça marche</b><br>1. Choisis un modèle (ou remplis le formulaire), règle les dates, enregistre : le défi apparaît tout de suite dans l'onglet « Défis » du profil de chaque viewer.<br>
+      2. Le serveur compte tout seul ce que fait chaque viewer <u>pendant les dates du défi</u>. Quand le but est atteint, le titre et le badge sont donnés automatiquement, même si le viewer revient sur le site plus tard.<br>
+      3. Pour que les défis « cartes » et « utilisations » fonctionnent, la copie du journal doit se remplir en direct (WizeBot et Streamer.bot branchés au serveur). Ci-dessous, « cartes reçues en direct sur 7 jours » doit être supérieur à 0 si tu as eu des tirages.</div>
+    <div class="box" id="dflux" style="margin-top:8px"></div>
+    <div class="w" style="margin-top:10px"><table><thead><tr><th>Défi</th><th>Période</th><th>But</th><th>Récompense</th><th>Réussis</th><th></th></tr></thead><tbody id="defis"></tbody></table></div>
+    <h3 id="dft" style="font-size:15px;margin:20px 0 8px">Nouveau défi</h3>
+    <div class="box" id="dform">
+      <div class="row" style="margin-bottom:8px"><select id="dmod"></select><span style="color:var(--muted);font-size:13px">Un modèle remplit le formulaire : tu peux ensuite tout changer.</span></div>
+      <div class="row" style="margin-bottom:8px"><label class="f">Nom du défi<input id="dtitre" maxlength="60" placeholder="Chasseur de cartes"></label><label class="f">Explication affichée<input id="ddescr" maxlength="200" placeholder="Obtiens 3 cartes cette semaine"></label></div>
+      <div class="row" style="margin-bottom:8px"><label class="f">Ce que le viewer doit faire<select id="dtype"></select></label><label class="f">Combien<input id="dcible" type="number" min="1" max="1000" value="3" style="min-width:90px;width:90px"></label><label class="f">Saison (facultatif, pour les cartes)<input id="dsaison" placeholder="halloween ou s1" style="min-width:150px;width:150px"></label></div>
+      <div class="row" style="margin-bottom:8px"><label class="f">Du<input id="ddebut" type="date" style="min-width:150px"></label><label class="f">Jusqu'au (inclus)<input id="dfin" type="date" style="min-width:150px"></label></div>
+      <div class="row" style="margin-bottom:8px"><label class="f">Titre gagné (facultatif)<input id="drt" maxlength="40" placeholder="Chasseur"></label><label class="f">Badge gagné : nom (facultatif)<input id="dbn" maxlength="30" placeholder="Chasseur de la semaine"></label>
+        <label class="f">Icône<select id="dbi"></select></label><label class="f">Rareté<select id="dbt"></select></label></div>
+      <div class="row"><label style="display:flex;gap:6px;align-items:center"><input id="dsecret" type="checkbox" style="min-width:0"> Défi surprise (caché tant qu'il n'est pas réussi)</label></div>
+      <div class="row" style="margin-top:12px"><button id="dsave" type="button">Enregistrer le défi</button><button id="dcancel" type="button" class="g" hidden>Annuler la modification</button><span id="dmsg"></span></div>
+    </div>
+    <h3 style="font-size:15px;margin:20px 0 8px">Donner à la main</h3>
+    <p style="margin-top:0">Pour un défi « Tu valides toi-même », un cadeau ou un événement. Écris le pseudo Twitch (en minuscules) du viewer, qui doit s'être déjà connecté au moins une fois sur le site.</p>
+    <div class="row"><input id="glogin" placeholder="pseudo twitch" style="min-width:160px"><select id="gtype"><option value="titre">Un titre libre</option><option value="defi">Les récompenses d'un défi</option></select><input id="gval" placeholder="Titre à donner" style="min-width:200px"><button id="give" type="button" class="g">Donner</button><span id="gmsg"></span></div>
     <h2>Journal des cartes (copie sur le serveur)</h2>
     <div class="box" id="jetat"></div>
     <div class="row" style="margin-top:10px"><button id="jimport" type="button" class="g">Importer depuis Google Sheets</button><button id="jcomp" type="button" class="g">Comparer avec le tableur</button></div>
@@ -57,7 +77,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
   }
   function charger(){
     msg('Chargement…');
-    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat')]).then(function(r){
+    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat'), appel('defis')]).then(function(r){
       var e = r[0]; pause = !e.orActif; msg('');
       $('zone').hidden = false;
       $('etat').innerHTML = e.enLigne + ' connecté(s) · ' + e.enFile + ' en recherche · ' + e.parties + ' partie(s) en cours · ' + e.partiesJouees + ' jouée(s) depuis le dernier redémarrage<br>Récompenses : <b class="' + (pause ? 'bad' : 'ok') + '">' + (pause ? 'EN PAUSE' : 'actives') + '</b> (' + e.limites.or + ' ClubiGold par victoire, ' + e.limites.maxJour + ' par jour max)';
@@ -73,6 +93,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
         return '<tr><td>' + new Date(p.ts).toLocaleDateString('fr-FR') + '</td><td>' + esc(p.pseudo) + '</td><td>' + esc(p.kind) + ' · ' + esc(p.saison) + '</td><td class="wrapc">' + esc(p.texte) + '</td><td class="' + (p.statut === 'retenue' ? 'ok' : p.statut === 'ouverte' ? '' : 'bad') + '">' + STATUTS[p.statut] + '</td><td>' +
           b('retenue', 'Retenir') + b('ouverte', 'Rouvrir') + b('refusee', 'Refuser') + b('masquee', 'Masquer') + '<button type="button" class="g s" data-pn="' + p.n + '" data-del="1">Supprimer</button></td></tr>';
       }).join('') || '<tr><td colspan="7">Aucune proposition pour le moment.</td></tr>';
+      rendreDefis(r[5]);
       var j = r[4];
       $('jetat').innerHTML = '<b>' + j.cartes + '</b> carte(s) et <b>' + j.usages + '</b> utilisation(s) copiées sur le serveur.' + (j.dernieres.length ? '<br>Dernières cartes reçues : ' + j.dernieres.map(function(c){ return esc(c.pseudo) + ' (' + esc(c.carte) + ')'; }).join(', ') : '');
     }).catch(function(e){ $('zone').hidden = true; msg(e.message === 'Failed to fetch' ? 'Impossible de joindre le serveur.' : e.message); });
@@ -123,6 +144,83 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
         (diff.length ? '</div><div class="w" style="margin-top:8px"><table><thead><tr><th>Pseudo</th><th>Cartes dans le tableur</th><th>Cartes sur le serveur</th></tr></thead><tbody>' + diff.slice(0, 40).map(function(k){ return '<tr><td>' + esc(k) + '</td><td>' + (T[k] || 0) + '</td><td>' + (S[k] || 0) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '</div>');
     }).catch(function(e){ msg('Comparaison impossible : ' + e.message); });
   };
+
+  // ----- défis -----
+  var TYPES = {cartes:'Obtenir des cartes (doublons compris)', differentes:'Obtenir des cartes différentes', usages:'Utiliser !roue ou !gold', parties:'Jouer des parties au jeu', visites:'Venir sur le site (jours différents)', manuel:'Tu valides toi-même (bouton « Donner »)'};
+  var UNITE = {cartes:'carte(s)', differentes:'carte(s) différente(s)', usages:'utilisation(s)', parties:'partie(s)', visites:'jour(s) de visite', manuel:''};
+  var ICONES = {star:'Étoile', trophy:'Trophée', crown:'Couronne', gem:'Gemme', flame:'Flamme', moon:'Lune', eye:'Œil', sword:'Épée', cards:'Cartes', layers:'Pile', dice:'Dé', bulb:'Ampoule (Balise)', spider:'Araignée'};
+  var RARETES = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', mythique:'Mythique'};
+  var MODELES = [
+    ['Modèles de défis…', null],
+    ['Chasseur de cartes : 3 cartes dans la semaine', {titre:'Chasseur de cartes', descr:'Obtiens 3 cartes cette semaine.', type:'cartes', cible:3, rt:'Chasseur', jours:7}],
+    ['Curieux : 3 cartes différentes', {titre:'Collectionneur curieux', descr:'Obtiens 3 cartes différentes cette semaine.', type:'differentes', cible:3, rt:'Curieux', jours:7}],
+    ['Roue de la semaine : utiliser une roue ou !gold', {titre:'Tourne la roue', descr:'Utilise !roue ou !gold une fois cette semaine.', type:'usages', cible:1, rt:'Tourneur de roue', jours:7}],
+    ['Assidu : venir 4 jours sur le site', {titre:'Assidu', descr:'Viens sur le site 4 jours différents cette semaine.', type:'visites', cible:4, rt:'Assidu', jours:7}],
+    ['Duelliste : 5 parties au jeu', {titre:'Duelliste de la semaine', descr:'Joue 5 parties de ' + ((window.JEU_CONFIG || {}).NOM || 'Clash des Piliers') + ' cette semaine.', type:'parties', cible:5, rt:'Duelliste', jours:7}],
+    ['Veilleur de la Balise : 7 jours de visite (badge)', {titre:'Veilleur de la Balise', descr:'Viens sur le site 7 jours différents pendant 2 semaines.', type:'visites', cible:7, rt:'Veilleur', bn:'Veilleur', bi:'bulb', bt:'or', jours:14}],
+    ['Saison Halloween : 3 cartes Halloween (badge limité)', {titre:'Nuit d\'Halloween', descr:'Obtiens 3 cartes de la saison Halloween avant la fin de l\'événement.', type:'cartes', cible:3, saison:'halloween', rt:'Fêtard d\'Halloween', bn:'Halloween 2026', bi:'moon', bt:'epique', jours:21}],
+    ['Événement du live (tu valides toi-même)', {titre:'Présent au grand live', descr:'Être là pendant le live spécial.', type:'manuel', cible:1, rt:'Présent au grand live', bn:'Grand live', bi:'star', bt:'or', jours:1}]
+  ];
+  var dEdit = null, dData = [];
+  function jourStr(ms){ return new Date(ms).toLocaleDateString('sv-SE', {timeZone:'Europe/Paris'}); }
+  function opts(o, sel){ return Object.keys(o).map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + o[k] + '</option>'; }).join(''); }
+  $('dtype').innerHTML = opts(TYPES, 'cartes'); $('dbi').innerHTML = opts(ICONES, 'star'); $('dbt').innerHTML = opts(RARETES, 'argent');
+  $('dmod').innerHTML = MODELES.map(function(m, i){ return '<option value="' + i + '">' + m[0] + '</option>'; }).join('');
+  function formVide(){
+    dEdit = null; $('dft').textContent = 'Nouveau défi'; $('dcancel').hidden = true; $('dmsg').textContent = '';
+    ['dtitre','ddescr','dsaison','drt','dbn'].forEach(function(i){ $(i).value = ''; });
+    $('dtype').value = 'cartes'; $('dcible').value = 3; $('dbi').value = 'star'; $('dbt').value = 'argent'; $('dsecret').checked = false;
+    var t = new Date(); $('ddebut').value = jourStr(+t); $('dfin').value = jourStr(+t + 6 * 864e5);
+  }
+  $('dmod').onchange = function(){
+    var m = MODELES[+this.value][1]; if(!m) return; formVide();
+    $('dtitre').value = m.titre; $('ddescr').value = m.descr; $('dtype').value = m.type; $('dcible').value = m.cible; $('dsaison').value = m.saison || '';
+    $('drt').value = m.rt || ''; $('dbn').value = m.bn || ''; if(m.bi) $('dbi').value = m.bi; if(m.bt) $('dbt').value = m.bt;
+    $('dfin').value = jourStr(Date.now() + (m.jours - 1) * 864e5); this.value = 0;
+  };
+  function rendreDefis(d){
+    dData = d.defis || [];
+    $('dflux').innerHTML = 'Cartes reçues en direct ces 7 derniers jours : <b class="' + (d.cartesLive7j ? 'ok' : 'bad') + '">' + d.cartesLive7j + '</b> · utilisations : <b>' + d.usagesLive7j + '</b>' + (d.cartesLive7j ? '' : '<br><span class="bad">Rien reçu en direct : les défis « cartes » et « utilisations » ne pourront pas avancer tant que WizeBot et Streamer.bot ne sont pas branchés sur le serveur.</span>');
+    var now = Date.now();
+    $('defis').innerHTML = dData.map(function(x){
+      var etat = !x.actif ? 'désactivé' : now < x.debut ? 'à venir' : now >= x.fin ? 'terminé' : 'en cours';
+      var rec = [x.rec_titre ? 'titre « ' + esc(x.rec_titre) + ' »' : '', x.b_nom ? 'badge « ' + esc(x.b_nom) + ' »' : ''].filter(Boolean).join(' + ') || '–';
+      return '<tr><td class="wrapc"><b>' + esc(x.titre) + '</b>' + (x.secret ? ' <small>(surprise)</small>' : '') + '<br><small>' + esc(x.descr) + '</small></td><td>' + jourStr(x.debut) + ' → ' + jourStr(x.fin - 1) + '<br><small class="' + (etat === 'en cours' ? 'ok' : '') + '">' + etat + '</small></td><td>' + (x.type === 'manuel' ? 'Tu valides' : x.cible + ' ' + UNITE[x.type] + (x.saison ? ' (' + esc(x.saison) + ')' : '')) + '</td><td class="wrapc">' + rec + '</td><td>' + x.reussis + '</td><td>' +
+        '<button type="button" class="g s" data-dn="' + x.n + '" data-da="edit">Modifier</button> <button type="button" class="g s" data-dn="' + x.n + '" data-da="onoff">' + (x.actif ? 'Désactiver' : 'Réactiver') + '</button> <button type="button" class="g s" data-dn="' + x.n + '" data-da="del">Supprimer</button></td></tr>';
+    }).join('') || '<tr><td colspan="6">Aucun défi pour le moment : choisis un modèle ci-dessous.</td></tr>';
+  }
+  $('defis').onclick = function(e){
+    var b = e.target.closest('button[data-dn]'); if(!b) return;
+    var n = +b.dataset.dn, x = dData.filter(function(z){ return z.n === n; })[0]; if(!x) return;
+    if(b.dataset.da === 'del'){ if(!confirm('Supprimer ce défi ? Les titres et badges déjà gagnés grâce à lui sont retirés aux viewers. (Pour seulement le cacher, utilise « Désactiver ».)')) return; appel('defi', {n:n, supprimer:true}).then(charger); return; }
+    if(b.dataset.da === 'onoff'){ envoyerDefi(x, {actif:!x.actif}); return; }
+    dEdit = x; $('dft').textContent = 'Modifier le défi n°' + n; $('dcancel').hidden = false;
+    $('dtitre').value = x.titre; $('ddescr').value = x.descr; $('dtype').value = x.type; $('dcible').value = x.cible; $('dsaison').value = x.saison; $('ddebut').value = jourStr(x.debut); $('dfin').value = jourStr(x.fin - 1);
+    $('drt').value = x.rec_titre; $('dbn').value = x.b_nom; $('dbi').value = x.b_ico; $('dbt').value = x.b_tier; $('dsecret').checked = !!x.secret;
+    $('dform').scrollIntoView({behavior:'smooth', block:'center'});
+  };
+  function envoyerDefi(x, ch){
+    var o = {n:x.n, titre:x.titre, descr:x.descr, type:x.type, cible:x.cible, saison:x.saison, debut_jour:jourStr(x.debut), fin_jour:jourStr(x.fin - 1), rec_titre:x.rec_titre, b_nom:x.b_nom, b_ico:x.b_ico, b_tier:x.b_tier, secret:!!x.secret, actif:!!x.actif};
+    for(var k in ch) o[k] = ch[k];
+    return appel('defi', o).then(charger);
+  }
+  $('dcancel').onclick = formVide;
+  $('dsave').onclick = function(){
+    var o = {titre:$('dtitre').value, descr:$('ddescr').value, type:$('dtype').value, cible:+$('dcible').value, saison:$('dsaison').value, debut_jour:$('ddebut').value, fin_jour:$('dfin').value, rec_titre:$('drt').value, b_nom:$('dbn').value, b_ico:$('dbi').value, b_tier:$('dbt').value, secret:$('dsecret').checked, actif:dEdit ? !!dEdit.actif : true};
+    if(dEdit) o.n = dEdit.n;
+    if(!o.titre.trim()){ $('dmsg').textContent = ' Donne un nom au défi.'; return; }
+    if(!o.debut_jour || !o.fin_jour || o.fin_jour < o.debut_jour){ $('dmsg').textContent = ' Vérifie les dates : la fin doit être après le début.'; return; }
+    $('dmsg').textContent = ' Enregistrement…';
+    appel('defi', o).then(function(r){ if(r.erreur){ $('dmsg').textContent = ' Impossible : vérifie les champs.'; return; } formVide(); $('dmsg').textContent = ' Défi enregistré ✓'; return charger(); }).catch(function(e){ $('dmsg').textContent = ' ' + e.message; });
+  };
+  $('gtype').onchange = function(){ $('gval').placeholder = this.value === 'defi' ? 'Numéro du défi (colonne de gauche de la liste : voir plus bas)' : 'Titre à donner'; $('gval').placeholder = this.value === 'defi' ? 'Nom exact du défi' : 'Titre à donner'; };
+  $('give').onclick = function(){
+    var l = $('glogin').value.trim().toLowerCase().replace(/^@/, ''), v = $('gval').value.trim(), m = $('gmsg'); if(!l || !v){ m.textContent = ' Remplis le pseudo et la valeur.'; return; }
+    var body = {login:l};
+    if($('gtype').value === 'defi'){ var x = dData.filter(function(z){ return z.titre.toLowerCase() === v.toLowerCase(); })[0]; if(!x){ m.textContent = ' Aucun défi avec ce nom exact.'; return; } body.defi = x.n; } else body.titre = v;
+    appel('donner', body).then(function(r){ m.textContent = r.ok ? ' Donné ✓' : r.erreur === 'inconnu' ? ' Ce viewer ne s\'est jamais connecté au site.' : ' Impossible.'; }).catch(function(e){ m.textContent = ' ' + e.message; });
+  };
+  formVide();
   $('cle').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('ok').click(); });
   try{ var k = sessionStorage.getItem('leclubi-admin'); if(k && API){ $('cle').value = k; cle = k; charger(); } }catch(e){}
 })();
