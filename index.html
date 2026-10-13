@@ -1102,7 +1102,8 @@ var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRR
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
 var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
 var TCLAIM = {}, TFIRST = {}, TEV = {};   // Tarot : récompenses déjà réclamées, premiers éveillés, ordre des ravivées
-var COPIES = {}, ORD = {}, NEED = 5, USED_LINES = {};   // ORD : ordre d'arrivée du prochain lot de 5 exemplaires de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
+var COPIES = {}, RAW = {}, ORD = {}, NEED = 5, USED_LINES = {};   // RAW : exemplaires déjà obtenus au total, même ceux utilisés ensuite (sert aux badges : un badge obtenu ne se perd jamais)
+   // ORD : ordre d'arrivée du prochain lot de 5 exemplaires de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
@@ -1364,7 +1365,8 @@ function loadSheet(){
     if(fails === cfg) throw new Error('sheet');
     var data = {}, names = {}, cp = {};
     USED_LINES = {}; TCLAIM = {}; TFIRST = {}; TEV = {};
-    function cnt(name, id, n){ var k = name.toLowerCase(); cp[k] = cp[k] || {}; cp[k][id] = (cp[k][id] || 0) + n; }
+    var rw = {};
+    function cnt(name, id, n){ var k = name.toLowerCase(); cp[k] = cp[k] || {}; cp[k][id] = (cp[k][id] || 0) + n; if(n > 0){ rw[k] = rw[k] || {}; rw[k][id] = (rw[k][id] || 0) + n; } }
     var sq = {}, ud = {};
     function seqPush(name, id, v){ var k = name.toLowerCase(); sq[k] = sq[k] || {}; (sq[k][id] = sq[k][id] || []).push(v); }
     function slot(name){ var k = name.toLowerCase(); if(!names[k]){ names[k] = name; data[name] = {}; } return data[names[k]]; }
@@ -1414,8 +1416,9 @@ function loadSheet(){
         if(name && re.test(id)){ cnt(name, id, -NEED); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + 1; }
       });
     }
-    COPIES = {}; ORD = {};
+    COPIES = {}; ORD = {}; RAW = {};
     Object.keys(data).forEach(function(n){
+      RAW[n] = rw[n.toLowerCase()] || {};
       var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
       Object.keys(c).forEach(function(id){
         COPIES[n][id] = Math.max(0, c[id]);
@@ -1646,7 +1649,7 @@ var BD_ICO = {
 var BD_TIER = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', mythique:'Mythique'};
 function badgeCatalog(name, jeu){
   if(!COLLECTIONS[name]) return [];
-  var seasons = openSeasons(), tot = totalCards(), n = countOf(name), out = [], cp = function(id){ return copies(name, id); };
+  var seasons = openSeasons(), tot = totalCards(), n = countOf(name), out = [], cp = function(id){ return ((RAW[name] || {})[id]) || 0; };
   function add(cat, id, nom, task, tier, ico, cur, max){ out.push({cat:cat, id:id, name:nom, task:task, tier:tier, ico:ico, cur:Math.min(cur, max), max:max, got:cur >= max}); }
   // collection
   [[1, 'Premier pas', 'bronze', 'star'], [5, 'Apprenti collectionneur', 'argent', 'cards'], [10, 'Collectionneur', 'argent', 'cards'], [20, 'Grand collectionneur', 'or', 'trophy']].forEach(function(t){
