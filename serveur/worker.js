@@ -54,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/journal/carte', '/journal/usage']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/fiche', '/journal/carte', '/journal/usage']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -134,7 +134,7 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
-     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`].forEach(a => { try { q(a); } catch (e) {} });
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS propositions(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, saison TEXT, part TEXT, kind TEXT, texte TEXT, ts INTEGER,
@@ -182,7 +182,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/fiche' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -242,6 +242,8 @@ export class Hub {
       if (!rt) return json({erreur: 'champs'}, {}, 400);
       this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'titre', rt, Date.now(), 'admin'); return json({ok: true});
     }
+    if (act === 'fiches') return json(this.sql.exec(`SELECT login, nom, fiche FROM joueurs WHERE fiche!='{}' ORDER BY vu DESC LIMIT 300`).toArray().map(r => ({login: r.login, pseudo: r.nom, ...this.ficheDe(r)})).filter(f => f.jeu || f.devise));
+    if (act === 'fiche-effacer' && login) { this.run(`UPDATE joueurs SET fiche=json_set(COALESCE(NULLIF(fiche,''),'{}'),'$.jeu','','$.devise','') WHERE login=?`, login); return json({ok: true}); }
     if (act === 'journal-etat') return json({cartes: this.un('SELECT COUNT(*) AS c FROM journal_cartes').c, usages: this.un('SELECT COUNT(*) AS c FROM journal_usages').c,
       dernieres: this.sql.exec('SELECT ts,pseudo,carte,src FROM journal_cartes ORDER BY n DESC LIMIT 10').toArray()});
     return json({erreur: 'action inconnue'}, {}, 404);
@@ -356,7 +358,7 @@ export class Hub {
   profilPublic(j) {
     const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
     if (j.prive) return base;
-    const bj = this.badgesDe(j); return {...base, titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
   }
   async compte(req, url) {
     const p = url.pathname;
@@ -397,6 +399,12 @@ export class Hub {
       if (!deja) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'araignee', Date.now(), 'secret');
       return json({ok: true, nouveau: !deja});
     }
+    if (p === '/fiche' && req.method === 'POST') {       // fiche de collectionneur : carte, jeu et badge favoris, devise, couleur du cadre
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      const f = this.ficheDe({fiche: JSON.stringify(b)});
+      this.run('UPDATE joueurs SET fiche=? WHERE id=?', JSON.stringify(f), j.id);
+      return json({ok: true, fiche: f});
+    }
     if (p === '/vitrine-badges' && req.method === 'POST') {     // jusqu'à 5 badges montrés sur le profil (les identifiants sont vérifiés à l'affichage par le site)
       let b = {}; try { b = await req.json(); } catch (x) {}
       const v = (Array.isArray(b.badges) ? b.badges : []).filter(x => typeof x === 'string' && /^[a-z0-9-]{2,24}$/.test(x)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
@@ -419,12 +427,18 @@ export class Hub {
   }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j),
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j),
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
 
   // ----- défis, titres, badges spéciaux -----
+  ficheDe(j) {
+    let f = {}; try { f = JSON.parse(j.fiche || '{}') || {}; } catch (e) {}
+    const txt = (v, n) => String(v || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n);
+    return {carte: /^((s\d+|halloween)-\d{1,3}|tarot-\d{1,2})$/.test(f.carte || '') ? f.carte : '', jeu: txt(f.jeu, 40), badge: /^[a-z0-9-]{2,24}$/.test(f.badge || '') ? f.badge : '',
+      devise: txt(f.devise, 60), cadre: ['or', 'rouge', 'bleu', 'argent'].includes(f.cadre) ? f.cadre : 'or'};
+  }
   titresDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='titre' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   titreDe(j) { return j.titre && this.titresDe(j).includes(j.titre) ? j.titre : ''; }
   succesDe(j) {
