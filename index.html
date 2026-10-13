@@ -105,7 +105,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .card.open .inner{transform:rotateY(180deg)}
 .face{--accent:#c79a4b;position:absolute;inset:0;border-radius:10px;border:1px solid var(--line);background:linear-gradient(160deg,var(--card-a),var(--card-b));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .face::before{content:"";position:absolute;inset:9px;border:1px solid rgba(199,154,75,.35);border-radius:6px}
-.face.front{transform:rotateY(180deg);color:#ece8df;text-align:center;padding:16px}
+.face.front{transform:rotateY(180deg);color:#ece8df;text-align:center;padding:16px;overflow:hidden}
 .face.front strong{font-size:17px;font-weight:600}
 .face.front em{font-style:normal;font-size:13px;color:var(--accent)}
 .face.front small{font-size:12px;color:#9a978f}
@@ -146,7 +146,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 #zoom{position:fixed;inset:0;z-index:20;background:rgba(10,10,12,.88);display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom))}
 #zoom[hidden]{display:none}
 #zbody{text-align:center;color:#ece8df}
-#zbody img{display:block;margin:0 auto;max-width:min(92vw,560px);max-height:min(66vh,640px);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+#zbody .zh>img{display:block;margin:0 auto;max-width:min(92vw,560px);max-height:min(66vh,640px);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
 #zbody p{margin:14px 0 0;font-size:14px;color:#b9b6ad}
 .zfb{width:min(80vw,340px);aspect-ratio:2/3;border:1px solid rgba(199,154,75,.6);border-radius:14px;background:linear-gradient(160deg,#26272b,#18191b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 .zfb em{font-style:normal;color:#c79a4b}
@@ -1819,6 +1819,12 @@ function ownedList(){
   var s = SEASONS.filter(function(x){ return x.id === current; })[0];
   return cardsOf(s).filter(function(c){ return has(c.id); });
 }
+// Le cadre de l'effet holographique doit épouser exactement l'image (sinon un rectangle coloré dépasse autour de la carte)
+function fitZh(zh, img){
+  var f = function(){ zh.style.width = ''; var w = img.offsetWidth; if(w) zh.style.width = w + 'px'; };
+  zh._fit = f; img.addEventListener('load', f); if(img.complete) f();
+}
+window.addEventListener('resize', function(){ var z = document.querySelector('#zbody .zh'); if(z && z._fit) z._fit(); });
 function openTarotZoom(id){
   var list = ownedList(), c = list.filter(function(x){ return x.id === id; })[0];
   if(!c) return;
@@ -1835,6 +1841,7 @@ function openTarotZoom(id){
   zh.setAttribute('data-r', rav ? 'Tarot' : 'Spéciale');
   zh.appendChild(img);
   zbody.appendChild(zh);
+  fitZh(zh, img);
   zbody.appendChild(cap);
   zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
   zoomEl.hidden = false;
@@ -1864,6 +1871,7 @@ function openZoom(id){
   zh.setAttribute('data-r', c.r);
   zh.appendChild(img);
   zbody.appendChild(zh);
+  fitZh(zh, img);
   zbody.appendChild(cap);
   zbody.insertAdjacentHTML('beforeend', ficheCarteHtml(id));
   zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
@@ -3096,7 +3104,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 
   // ----- les 6 Balises cachées : les retrouver toutes donne le badge secret « Cache-Cache » -----
   var CCP = ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos'], CCK = 'leclubi-cache', ccSync = false;
-  var CCPOS = {accueil:['#v-accueil section:last-of-type .wrap', 'right:5%;bottom:14px'], planning:['#v-planning .wrap', 'left:41%;bottom:-40px'], collection:['#v-collection .wrap', 'right:8%;top:34px;rotate:8deg'],
+  var CCPOS = {accueil:['#v-accueil section:last-of-type .wrap', 'right:5%;bottom:14px'], planning:['#v-planning .wrap', 'left:41%;bottom:-40px'], collection:['#v-collection section', 'right:12%;top:34px;rotate:8deg'],
     collectionneurs:['#v-collectionneurs .wrap', 'right:16%;bottom:10px;rotate:-6deg'], classement:['#v-classement .wrap', 'right:3%;bottom:70px'], apropos:['#v-apropos .wrap', 'left:9%;bottom:18px;rotate:5deg']};
   function ccLire(){ try{ var a = JSON.parse(localStorage.getItem(CCK) || '[]'); return Array.isArray(a) ? a.filter(function(x, i){ return CCP.indexOf(x) > -1 && a.indexOf(x) === i; }) : []; }catch(e){ return []; } }
   function ccEcrire(a){ try{ localStorage.setItem(CCK, JSON.stringify(a)); }catch(e){} }
