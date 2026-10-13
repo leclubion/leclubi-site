@@ -11,6 +11,14 @@ const cfg = env => ({
   maxStatsPaire: num(env.MAX_STATS_PAR_ADVERSAIRE, 6), tour: num(env.DUREE_TOUR, 30), grace: num(env.GRACE_TOUR, 3),
   maxCo: num(env.MAX_CONNEXIONS, 400)
 });
+const parisMs = (jour, fin) => {      // minuit (heure de Paris) du jour donné ; fin=true : minuit du lendemain
+  const [y, m, d] = jour.split('-').map(Number), base = Date.UTC(y, m - 1, d + (fin ? 1 : 0)), iso = new Date(base).toISOString().slice(0, 10);
+  for (const off of [2, 1]) { const t = base - off * 3600e3, x = new Date(t).toLocaleString('sv-SE', {timeZone: 'Europe/Paris'}); if (x.slice(0, 10) === iso && x.slice(11, 13) === '00') return t; }
+  return base - 3600e3;
+};
+const JOURJ = ts => new Date(ts).toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'});
+const ICONES = ['star', 'layers', 'cards', 'crown', 'trophy', 'gem', 'moon', 'eye', 'flame', 'sword', 'dice', 'bulb', 'spider'], TIERS = ['bronze', 'argent', 'or', 'epique', 'mythique'];
+const TYPES_DEFI = ['cartes', 'differentes', 'usages', 'parties', 'visites', 'manuel'];
 const jourParis = () => new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'});
 const rid = (n = 5) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, x => x.toString(16).padStart(2, '0')).join(''); };
 const rng = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
@@ -46,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/journal/carte', '/journal/usage']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/journal/carte', '/journal/usage']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -116,12 +124,17 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
-     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`].forEach(a => { try { q(a); } catch (e) {} });
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS propositions(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, saison TEXT, part TEXT, kind TEXT, texte TEXT, ts INTEGER,
        statut TEXT DEFAULT 'ouverte', UNIQUE(joueur, saison, part))`);
     q(`CREATE TABLE IF NOT EXISTS votes(prop INTEGER, joueur TEXT, ts INTEGER, PRIMARY KEY(prop, joueur))`);
+    // défis, titres et badges spéciaux
+    q(`CREATE TABLE IF NOT EXISTS defis(n INTEGER PRIMARY KEY AUTOINCREMENT, titre TEXT, descr TEXT DEFAULT '', type TEXT, cible INTEGER DEFAULT 1, saison TEXT DEFAULT '',
+       debut INTEGER, fin INTEGER, rec_titre TEXT DEFAULT '', b_nom TEXT DEFAULT '', b_ico TEXT DEFAULT 'star', b_tier TEXT DEFAULT 'argent', secret INTEGER DEFAULT 0, actif INTEGER DEFAULT 1)`);
+    q(`CREATE TABLE IF NOT EXISTS succes(joueur TEXT, kind TEXT, cle TEXT, ts INTEGER, src TEXT DEFAULT '', PRIMARY KEY(joueur, kind, cle))`);
+    q(`CREATE TABLE IF NOT EXISTS visites(joueur TEXT, jour TEXT, PRIMARY KEY(joueur, jour))`);
     this.jCache = null;            // journal sérialisé gardé en mémoire (relu seulement après un ajout)
     this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
     this.users = new Map();      // id Twitch -> {id, login, nom, ws, game, defi}
@@ -158,7 +171,7 @@ export class Hub {
     if (url.pathname === '/journal') return this.journalLire();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -195,6 +208,28 @@ export class Hub {
     if (act === 'proposition' && Number.isInteger(b.n)) {
       if (b.supprimer) { this.run('DELETE FROM votes WHERE prop=?', b.n); this.run('DELETE FROM propositions WHERE n=?', b.n); return json({ok: true}); }
       if (['ouverte', 'retenue', 'refusee', 'masquee'].includes(b.statut)) { this.run('UPDATE propositions SET statut=? WHERE n=?', b.statut, b.n); return json({ok: true}); }
+    }
+    if (act === 'defis') return json({defis: this.sql.exec(`SELECT d.*, (SELECT COUNT(*) FROM succes s WHERE s.kind='defi' AND s.cle=CAST(d.n AS TEXT)) AS reussis FROM defis d ORDER BY d.debut DESC, d.n DESC LIMIT 100`).toArray(),
+      cartesLive7j: this.un('SELECT COUNT(*) AS c FROM journal_cartes WHERE ts>?', Date.now() - 7 * 86400e3).c, usagesLive7j: this.un('SELECT COUNT(*) AS c FROM journal_usages WHERE ts>?', Date.now() - 7 * 86400e3).c});
+    if (act === 'defi') {
+      if (Number.isInteger(b.n) && b.supprimer) { this.run('DELETE FROM defis WHERE n=?', b.n); this.run(`DELETE FROM succes WHERE (kind='defi' AND cle=?) OR (kind='badge' AND cle=?)`, String(b.n), 'defi-' + b.n); return json({ok: true}); }
+      const t = String(b.titre || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 60), ty = String(b.type || '');
+      const dj = /^\d{4}-\d{2}-\d{2}$/.test(b.debut_jour || '') && parisMs(b.debut_jour), fj = /^\d{4}-\d{2}-\d{2}$/.test(b.fin_jour || '') && parisMs(b.fin_jour, true);
+      if (!t || !TYPES_DEFI.includes(ty) || !dj || !fj || fj <= dj) return json({erreur: 'champs'}, {}, 400);
+      const c = Math.max(1, Math.min(1000, parseInt(b.cible, 10) || 1)), sa = String(b.saison || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+      const rt = String(b.rec_titre || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 40), bn = String(b.b_nom || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 30);
+      const bi = ICONES.includes(b.b_ico) ? b.b_ico : 'star', bt = TIERS.includes(b.b_tier) ? b.b_tier : 'argent', de = String(b.descr || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 200);
+      if (Number.isInteger(b.n)) this.run('UPDATE defis SET titre=?,descr=?,type=?,cible=?,saison=?,debut=?,fin=?,rec_titre=?,b_nom=?,b_ico=?,b_tier=?,secret=?,actif=? WHERE n=?', t, de, ty, c, sa, dj, fj, rt, bn, bi, bt, b.secret ? 1 : 0, b.actif === false ? 0 : 1, b.n);
+      else this.run('INSERT INTO defis(titre,descr,type,cible,saison,debut,fin,rec_titre,b_nom,b_ico,b_tier,secret,actif) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)', t, de, ty, c, sa, dj, fj, rt, bn, bi, bt, b.secret ? 1 : 0, b.actif === false ? 0 : 1);
+      return json({ok: true});
+    }
+    if (act === 'donner' && login) {        // remet à la main un titre ou les récompenses d'un défi (défis « manuel », cadeaux, événements)
+      const j = this.un('SELECT * FROM joueurs WHERE login=?', login);
+      if (!j) return json({erreur: 'inconnu'}, {}, 404);
+      if (Number.isInteger(b.defi)) { const d = this.un('SELECT * FROM defis WHERE n=?', b.defi); if (!d) return json({erreur: 'defi'}, {}, 404); this.donner(j, d, 'admin'); return json({ok: true}); }
+      const rt = String(b.titre || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 40);
+      if (!rt) return json({erreur: 'champs'}, {}, 400);
+      this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'titre', rt, Date.now(), 'admin'); return json({ok: true});
     }
     if (act === 'journal-etat') return json({cartes: this.un('SELECT COUNT(*) AS c FROM journal_cartes').c, usages: this.un('SELECT COUNT(*) AS c FROM journal_usages').c,
       dernieres: this.sql.exec('SELECT ts,pseudo,carte,src FROM journal_cartes ORDER BY n DESC LIMIT 10').toArray()});
@@ -310,7 +345,7 @@ export class Hub {
   profilPublic(j) {
     const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
     if (j.prive) return base;
-    return {...base, vitrine: this.vitrineDe(j), badges: this.badgesDe(j), parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+    const bj = this.badgesDe(j); return {...base, titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
   }
   async compte(req, url) {
     const p = url.pathname;
@@ -330,12 +365,27 @@ export class Hub {
       if (ligne && ligne.banni) return json({erreur: 'banni'}, {}, 403);
       this.run(`INSERT INTO joueurs(id,login,nom,vu,avatar,cree) VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET login=excluded.login, nom=excluded.nom, vu=excluded.vu, avatar=COALESCE(NULLIF(excluded.avatar,''), avatar)`, info.id, info.login, info.nom, now, info.avatar || '', now);
       const sess = await this.creerSession(info.id);
+      const j2 = this.joueur(info.id); this.visite(j2); this.evaluer(j2);
       const mj = this.moi(this.joueur(info.id)); mj.solde = await this.solde(mj.login);
       return json({session: sess, moi: mj});
     }
     const j = await this.lireSession(req);
     if (!j) return json({erreur: 'session'}, {}, 401);
-    if (p === '/moi') { const mj = this.moi(j); mj.solde = await this.solde(mj.login); return json({moi: mj}); }
+    this.visite(j);
+    if (p === '/moi') { this.evaluer(j); const mj = this.moi(j); mj.solde = await this.solde(mj.login); return json({moi: mj}); }
+    if (p === '/defis') { this.evaluer(j); return json(this.defisPour(j)); }
+    if (p === '/titre' && req.method === 'POST') {
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      const t = String(b.titre || '').slice(0, 40);
+      if (t && !this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='titre' AND cle=?`, j.id, t)) return json({erreur: 'titre'}, {}, 400);
+      this.run('UPDATE joueurs SET titre=? WHERE id=?', t, j.id);
+      return json({ok: true, titre: t});
+    }
+    if (p === '/araignee' && req.method === 'POST') {        // badge secret : l'araignée écrasée sur le site
+      const deja = !!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='badge' AND cle='araignee'`, j.id);
+      if (!deja) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'araignee', Date.now(), 'secret');
+      return json({ok: true, nouveau: !deja});
+    }
     if (p === '/vitrine-badges' && req.method === 'POST') {     // jusqu'à 5 badges montrés sur le profil (les identifiants sont vérifiés à l'affichage par le site)
       let b = {}; try { b = await req.json(); } catch (x) {}
       const v = (Array.isArray(b.badges) ? b.badges : []).filter(x => typeof x === 'string' && /^[a-z0-9-]{2,24}$/.test(x)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
@@ -358,9 +408,62 @@ export class Hub {
   }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive,
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j),
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
+  }
+
+  // ----- défis, titres, badges spéciaux -----
+  titresDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='titre' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
+  titreDe(j) { return j.titre && this.titresDe(j).includes(j.titre) ? j.titre : ''; }
+  succesDe(j) {
+    const out = [];
+    this.sql.exec(`SELECT cle, ts FROM succes WHERE joueur=? AND kind='badge' ORDER BY ts`, j.id).toArray().forEach(r => {
+      if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
+      const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
+      if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
+    });
+    return out;
+  }
+  visite(j) { try { this.run('INSERT OR IGNORE INTO visites(joueur,jour) VALUES(?,?)', j.id, jourParis()); } catch (e) {} }
+  progres(d, j) {
+    if (d.type === 'manuel') return 0;
+    const a = j.login, b = String(j.nom || '').toLowerCase(), t0 = d.debut, t1 = d.fin;
+    const w = `ts>0 AND ts>=? AND ts<? AND lower(pseudo) IN (?,?)`;
+    const s = d.saison ? ` AND carte LIKE ?` : '', args = d.saison ? [t0, t1, a, b, d.saison + '-%'] : [t0, t1, a, b];
+    if (d.type === 'cartes') return this.un(`SELECT COUNT(*) AS c FROM journal_cartes WHERE ${w}${s}`, ...args).c;
+    if (d.type === 'differentes') return this.un(`SELECT COUNT(DISTINCT carte) AS c FROM journal_cartes WHERE ${w}${s}`, ...args).c;
+    if (d.type === 'usages') return this.un(`SELECT COUNT(*) AS c FROM journal_usages WHERE ts>0 AND ts>=? AND ts<? AND lower(pseudo) IN (?,?)`, t0, t1, a, b).c;
+    if (d.type === 'visites') return this.un(`SELECT COUNT(*) AS c FROM visites WHERE joueur=? AND jour>=? AND jour<=?`, j.id, JOURJ(t0), JOURJ(t1 - 1)).c;
+    if (d.type === 'parties') return this.un(`SELECT COALESCE(SUM(parties),0) AS c FROM paires WHERE (a=? OR b=?) AND jour>=? AND jour<=?`, j.id, j.id, JOURJ(t0), JOURJ(t1 - 1)).c;
+    return 0;
+  }
+  donner(j, d, src) {        // remet les récompenses d'un défi (une seule fois)
+    const now = Date.now();
+    this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'defi', String(d.n), now, src || 'auto');
+    if (d.rec_titre) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'titre', d.rec_titre, now, 'defi-' + d.n);
+    if (d.b_nom) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'defi-' + d.n, now, 'defi-' + d.n);
+  }
+  evaluer(j) {       // un défi réussi pendant sa période est validé tout seul, même si le viewer revient plus tard
+    const now = Date.now();
+    this.sql.exec('SELECT * FROM defis WHERE actif=1 AND type!=\'manuel\' AND debut<=?', now).toArray().forEach(d => {
+      if (this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='defi' AND cle=?`, j.id, String(d.n))) return;
+      if (this.progres(d, j) >= d.cible) this.donner(j, d, 'auto');
+    });
+  }
+  defisPour(j) {
+    const now = Date.now(), out = [];
+    this.sql.exec('SELECT * FROM defis WHERE actif=1 ORDER BY debut DESC, n DESC LIMIT 60').toArray().forEach(d => {
+      const fait = !!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='defi' AND cle=?`, j.id, String(d.n));
+      const etat = now < d.debut ? 'a_venir' : now >= d.fin ? 'termine' : 'en_cours';
+      if (d.secret && !fait) return;
+      if (etat === 'termine' && !fait && now - d.fin > 14 * 86400e3) return;
+      if (etat === 'a_venir' && d.debut - now > 7 * 86400e3) return;
+      out.push({n: d.n, titre: d.titre, descr: d.descr, type: d.type, cible: d.cible, saison: d.saison, debut: d.debut, fin: d.fin, etat, fait,
+        progres: etat === 'a_venir' ? 0 : fait ? d.cible : Math.min(d.cible, this.progres(d, j)), rec_titre: d.rec_titre,
+        badge: d.b_nom ? {nom: d.b_nom, ico: d.b_ico, tier: d.b_tier} : null});
+    });
+    return {defis: out, titres: this.titresDe(j), titre: this.titreDe(j), maintenant: now};
   }
 
   // ----- journal des cartes : COPIE du Google Sheet (le site continue de lire le tableur tant que tu ne bascules pas) -----
