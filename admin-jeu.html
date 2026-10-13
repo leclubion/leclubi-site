@@ -14,13 +14,13 @@ button.g{background:transparent;color:var(--text);border-color:var(--line)}butto
 input{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:220px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.w{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
+.wrapc{white-space:normal!important;min-width:220px;max-width:420px;overflow-wrap:anywhere}.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
 </style>
 </head>
 <body>
 <main>
   <h1>Admin du jeu</h1>
-  <p>Réservé à LeClubi. Entre ta clé admin (celle que tu as mise dans Cloudflare sous le nom <b>JenesuispasKinneas77130.</b>) : elle n'est gardée que le temps de cet onglet.</p>
+  <p>Réservé à LeClubi. Entre ta clé admin (celle que tu as mise dans Cloudflare sous le nom <b>ADMIN_KEY</b>) : elle n'est gardée que le temps de cet onglet.</p>
   <div class="row"><input id="cle" type="password" placeholder="Clé admin" autocomplete="off"><button id="ok" type="button">Se connecter</button></div>
   <div id="msg"></div>
   <div id="zone" hidden>
@@ -31,12 +31,23 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
     <div class="w"><table><thead><tr><th>Pseudo</th><th>Parties</th><th>Victoires</th><th>ClubiGold gagnés</th><th>Victoires récompensées aujourd'hui</th><th></th></tr></thead><tbody id="joueurs"></tbody></table></div>
     <h2>Derniers paiements de ClubiGold</h2>
     <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Montant</th><th>Statut</th><th>Détail</th></tr></thead><tbody id="paiements"></tbody></table></div>
+    <h2>Propositions des viewers</h2>
+    <p>Les propositions envoyées depuis le site avec un compte Twitch. Elles sont secrètes : seul toi les vois (le viewer retrouve la sienne dans « Mon compte »). « Retenue » = tu prépares la carte ; « Masquée » = elle disparaît aussi chez le viewer.</p>
+    <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Pour</th><th>Proposition</th><th>Statut</th><th></th></tr></thead><tbody id="props"></tbody></table></div>
+    <h2>Journal des cartes (copie sur le serveur)</h2>
+    <div class="box" id="jetat"></div>
+    <div class="row" style="margin-top:10px"><button id="jimport" type="button" class="g">Importer depuis Google Sheets</button><button id="jcomp" type="button" class="g">Comparer avec le tableur</button></div>
+    <div id="jres" style="margin-top:12px"></div>
   </div>
 </main>
 <script src="config-jeu.js"></script>
 <script>
 (function(){
   var API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, ''), cle = '', pause = false;
+  // Les deux tableaux Google du journal (mêmes liens que LOG_URL et USE_URL dans index.html)
+  var LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRRU0y17JiQD50oajTb1fQYk41ySZNHGtaernsomO-32BPhueEp437OK2dvY1gAU9/pub?gid=1274122633&single=true&output=csv';
+  var USE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
+  var STATUTS = {ouverte:'ouverte', retenue:'retenue', refusee:'refusée', masquee:'masquée'};
   var $ = function(i){ return document.getElementById(i); };
   function esc(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
   function msg(t){ $('msg').textContent = t || ''; }
@@ -46,7 +57,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
   }
   function charger(){
     msg('Chargement…');
-    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements')]).then(function(r){
+    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat')]).then(function(r){
       var e = r[0]; pause = !e.orActif; msg('');
       $('zone').hidden = false;
       $('etat').innerHTML = e.enLigne + ' connecté(s) · ' + e.enFile + ' en recherche · ' + e.parties + ' partie(s) en cours · ' + e.partiesJouees + ' jouée(s) depuis le dernier redémarrage<br>Récompenses : <b class="' + (pause ? 'bad' : 'ok') + '">' + (pause ? 'EN PAUSE' : 'actives') + '</b> (' + e.limites.or + ' ClubiGold par victoire, ' + e.limites.maxJour + ' par jour max)';
@@ -57,6 +68,13 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
       $('paiements').innerHTML = r[2].map(function(p){
         return '<tr><td>' + new Date(p.ts).toLocaleString('fr-FR') + '</td><td>' + esc(p.login) + '</td><td>' + p.montant + '</td><td class="' + (p.statut === 'ok' ? 'ok' : 'bad') + '">' + (p.statut === 'ok' ? 'envoyé' : p.statut === 'attente' ? 'en attente' : 'échec') + '</td><td>' + esc(p.info) + '</td></tr>';
       }).join('') || '<tr><td colspan="5">Aucun paiement.</td></tr>';
+      $('props').innerHTML = r[3].map(function(p){
+        var b = function(st, txt){ return p.statut === st ? '' : '<button type="button" class="g s" data-pn="' + p.n + '" data-st="' + st + '">' + txt + '</button> '; };
+        return '<tr><td>' + new Date(p.ts).toLocaleDateString('fr-FR') + '</td><td>' + esc(p.pseudo) + '</td><td>' + esc(p.kind) + ' · ' + esc(p.saison) + '</td><td class="wrapc">' + esc(p.texte) + '</td><td class="' + (p.statut === 'retenue' ? 'ok' : p.statut === 'ouverte' ? '' : 'bad') + '">' + STATUTS[p.statut] + '</td><td>' +
+          b('retenue', 'Retenir') + b('ouverte', 'Rouvrir') + b('refusee', 'Refuser') + b('masquee', 'Masquer') + '<button type="button" class="g s" data-pn="' + p.n + '" data-del="1">Supprimer</button></td></tr>';
+      }).join('') || '<tr><td colspan="7">Aucune proposition pour le moment.</td></tr>';
+      var j = r[4];
+      $('jetat').innerHTML = '<b>' + j.cartes + '</b> carte(s) et <b>' + j.usages + '</b> utilisation(s) copiées sur le serveur.' + (j.dernieres.length ? '<br>Dernières cartes reçues : ' + j.dernieres.map(function(c){ return esc(c.pseudo) + ' (' + esc(c.carte) + ')'; }).join(', ') : '');
     }).catch(function(e){ $('zone').hidden = true; msg(e.message === 'Failed to fetch' ? 'Impossible de joindre le serveur.' : e.message); });
   }
   $('ok').onclick = function(){ cle = $('cle').value.trim(); if(!API){ msg('L\'adresse du serveur n\'est pas encore renseignée dans config-jeu.js.'); return; } try{ sessionStorage.setItem('leclubi-admin', cle); }catch(e){} charger(); };
@@ -67,6 +85,43 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;
     var b = e.target.closest('button[data-l]'); if(!b) return;
     var ban = b.dataset.b === '1'; if(ban && !confirm('Bannir ' + b.dataset.l + ' ? Il ne pourra plus jouer.')) return;
     appel('bannir', {login: b.dataset.l, banni: ban}).then(charger);
+  };
+  $('props').onclick = function(e){
+    var b = e.target.closest('button[data-pn]'); if(!b) return;
+    if(b.dataset.del){ if(!confirm('Supprimer définitivement cette proposition ?')) return; appel('proposition', {n: +b.dataset.pn, supprimer: true}).then(charger); return; }
+    appel('proposition', {n: +b.dataset.pn, statut: b.dataset.st}).then(charger);
+  };
+  $('jimport').onclick = function(){
+    if(!confirm('Remplacer la copie du serveur par le contenu actuel des tableaux Google ? (à faire avant la première comparaison, ou pour tout resynchroniser)')) return;
+    msg('Import en cours…');
+    appel('importer-journal', {cartes_url: LOG_CSV, usages_url: USE_CSV, remplacer: true}).then(function(r){
+      msg(r.ok ? 'Import terminé : ' + r.cartes + ' carte(s) et ' + r.usages + ' utilisation(s) copiées.' : 'Import impossible (' + (r.erreur || 'erreur') + (r.detail ? ' : ' + r.detail : '') + ').'); charger();
+    }).catch(function(e){ msg(e.message); });
+  };
+  function csv(t){
+    var rows = [], row = [], f = '', q = false;
+    for(var i = 0; i < t.length; i++){ var c = t[i];
+      if(q){ if(c === '"'){ if(t[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+      else if(c === '"') q = true; else if(c === ','){ row.push(f); f = ''; }
+      else if(c === '\n' || c === '\r'){ if(c === '\r' && t[i + 1] === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; } else f += c; }
+    if(f !== '' || row.length){ row.push(f); rows.push(row); }
+    return rows.filter(function(r){ return r.some(function(x){ return x !== ''; }); });
+  }
+  function lire(u){ return fetch(u + '&_=' + Date.now(), {cache: 'no-store'}).then(function(r){ if(!r.ok) throw new Error('tableur illisible'); return r.text(); }).then(csv); }
+  $('jcomp').onclick = function(){
+    msg('Comparaison en cours…');
+    Promise.all([fetch(API + '/journal?_=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.json(); }), lire(LOG_CSV), lire(USE_CSV)]).then(function(r){
+      var srv = r[0], re = /^[a-z0-9]+-\d+$/, T = {}, S = {}, ligne = 0;
+      var h = (r[1][0] || []).map(function(x){ return x.trim().toLowerCase(); }), ip = h.findIndex(function(x){ return x.indexOf('pseudo') > -1; }), ic = h.findIndex(function(x){ return x.indexOf('carte') > -1; });
+      if(ip < 0) ip = 1; if(ic < 0) ic = 2;
+      r[1].slice(1).forEach(function(x){ var p = (x[ip] || '').trim().toLowerCase(), c = (x[ic] || '').trim().toLowerCase(); if(p && re.test(c)){ T[p] = (T[p] || 0) + 1; ligne++; } });
+      srv.cartes.forEach(function(x){ var p = x[0].trim().toLowerCase(); S[p] = (S[p] || 0) + 1; });
+      var noms = Object.keys(T).concat(Object.keys(S).filter(function(k){ return !(k in T); })), diff = noms.filter(function(k){ return (T[k] || 0) !== (S[k] || 0); });
+      var uT = Math.max(0, r[2].length - 1), uS = srv.usages.length, ok = !diff.length && uT === uS;
+      msg('');
+      $('jres').innerHTML = '<div class="box"><b class="' + (ok ? 'ok' : 'bad') + '">' + (ok ? 'Identique : le serveur a exactement les mêmes données que le tableur.' : 'Différences trouvées.') + '</b><br>Cartes : tableur ' + ligne + ' · serveur ' + srv.cartes.length + '<br>Utilisations : tableur ' + uT + ' · serveur ' + uS +
+        (diff.length ? '</div><div class="w" style="margin-top:8px"><table><thead><tr><th>Pseudo</th><th>Cartes dans le tableur</th><th>Cartes sur le serveur</th></tr></thead><tbody>' + diff.slice(0, 40).map(function(k){ return '<tr><td>' + esc(k) + '</td><td>' + (T[k] || 0) + '</td><td>' + (S[k] || 0) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '</div>');
+    }).catch(function(e){ msg('Comparaison impossible : ' + e.message); });
   };
   $('cle').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('ok').click(); });
   try{ var k = sessionStorage.getItem('leclubi-admin'); if(k && API){ $('cle').value = k; cle = k; charger(); } }catch(e){}

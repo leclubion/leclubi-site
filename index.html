@@ -234,6 +234,11 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .btn.me[aria-current="page"]{border-color:var(--accent)}
 @media (max-width:1320px){.btn.me span{display:none}.btn.me{padding:5px 7px}}
 .cp-wrap{max-width:900px}
+.mp-l{display:grid;gap:8px}
+.mp{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(128,128,128,.3));font-size:14.5px}
+.mp small{display:block;color:var(--muted);font-size:12.5px}
+.mp b{white-space:nowrap}
+
 .cp-hero{display:flex;gap:22px;align-items:center;margin-bottom:28px;flex-wrap:wrap}
 .cp-av{width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--panel);flex:none;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:600}
 .cp-hero h1{margin:0 0 4px;font-size:clamp(28px,4vw,40px);overflow-wrap:anywhere}
@@ -1284,7 +1289,18 @@ function loadSheet(){
     if(!u) return Promise.resolve(null);
     return fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(parseCsv).catch(function(){ return undefined; });
   }
-  Promise.all([get(SHEET_URL), get(LOG_URL), get(USE_URL)]).then(function(res){
+  // Option : lire le journal des cartes depuis le serveur (CARTES_SOURCE: "serveur" dans config-jeu.js). Par défaut, ou si le serveur est vide / injoignable : tableurs Google comme avant.
+  var cfgJ = window.JEU_CONFIG || {}, apiJ = String(cfgJ.API_URL || '').replace(/\/$/, '');
+  var srv = cfgJ.CARTES_SOURCE === 'serveur' && apiJ ? fetch(apiJ + '/journal').then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(d){
+    if(!d || !Array.isArray(d.cartes) || !d.cartes.length) return null;
+    return {
+      log: [['Horodateur', 'Pseudo', 'Carte']].concat(d.cartes.map(function(r){ return ['', r[0], r[1]]; })),
+      use: [['Horodateur', 'Pseudo', 'Carte', 'Choix']].concat((d.usages || []).map(function(r){ return ['', r[0], r[1], r[2]]; }))
+    };
+  }).catch(function(){ return null; }) : Promise.resolve(null);
+  srv.then(function(j){
+    return Promise.all([get(SHEET_URL), j ? j.log : get(LOG_URL), j ? j.use : get(USE_URL)]);
+  }).then(function(res){
     var manual = res[0], log = res[1], used = res[2];
     var cfg = (SHEET_URL ? 1 : 0) + (LOG_URL ? 1 : 0), fails = (SHEET_URL && manual === undefined ? 1 : 0) + (LOG_URL && log === undefined ? 1 : 0);
     if(fails === cfg) throw new Error('sheet');
@@ -1603,7 +1619,7 @@ function openProp(val){
     'Propose un jeu, un personnage, un objet d\'un jeu ou une référence à un live.';
   document.getElementById('prop-n').value = who;
   document.getElementById('prop-x').value = '';
-  document.getElementById('prop-m').textContent = '';
+  document.getElementById('prop-m').textContent = window.CompteProp && !window.CompteProp.ok(who) && window.CompteProp.dispo() ? 'Astuce : connecte-toi avec Twitch pour retrouver ta proposition dans Mon compte. Elle reste secrète : seul LeClubi la lit.' : '';
   var sb = document.getElementById('prop-s');
   sb.disabled = false;
   sb.textContent = REWARD_FORM.formUrl && REWARD_FORM.entry ? 'Envoyer' : 'Copier et ouvrir le Discord';
@@ -1629,9 +1645,10 @@ document.getElementById('pform').addEventListener('submit', function(e){
     var body = new URLSearchParams();
     body.append(REWARD_FORM.entry, msg);
     fetch(REWARD_FORM.formUrl, {method:'POST', mode:'no-cors', body: body}).catch(function(){});
+    if(window.CompteProp) window.CompteProp(ctx, pseudo, txt);   // copie sur le serveur si le viewer est connecté avec Twitch
     try{ localStorage.setItem(propKey(ctx.sid, ctx.part), '1'); }catch(err){}
     sb.disabled = true;
-    note.textContent = 'Merci ! Ta proposition est envoyée à LeClubi.';
+    note.textContent = 'Merci ! Ta proposition est envoyée à LeClubi : elle reste secrète, tu la découvriras en jeu.';
     setTimeout(function(){ closeProp(); render(); }, 1500);
   } else {
     if(navigator.clipboard) navigator.clipboard.writeText(msg).catch(function(){});
@@ -2242,7 +2259,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   var API = JEU_API, CID = String((window.JEU_CONFIG || {}).TWITCH_CLIENT_ID || ''), ON = !!(API && CID);
   var KS = 'leclubi-session', KT = 'leclubi-twitch';
   var g = function(i){ return document.getElementById(i); };
-  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '';
+  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '';
   function lire(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function ecrire(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   function suppr(k){ try{ localStorage.removeItem(k); }catch(e){} }
@@ -2279,7 +2296,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var redir = new URL('jeu.html', location.href); redir.hash = ''; redir.search = '';
     location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(CID) + '&redirect_uri=' + encodeURIComponent(redir.href) + '&response_type=token&scope=&state=' + st;
   }
-  function deconnexion(){ suppr(KS); suppr(KT); moi = null; etat = 'out'; pick = null; ui(); location.hash = ''; }
+  function deconnexion(){ suppr(KS); suppr(KT); moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
 
   // ----- en-tête -----
   function ui(){
@@ -2291,6 +2308,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       p.title = 'Mon compte';
     } else { b.hidden = etat === 'init'; p.hidden = true; }
     majNav();
+    if(etat === 'in' && propsEtat === '') chargerProps();
     if(!g('v-compte').hidden) rendreCompte();
     vitrinePublique();
   }
@@ -2386,6 +2404,13 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       var rw = avecWho(name, function(){ return readyHtml() + tarotRewardHtml(); });
       if(rw) h.push('<div class="cp-h"><h2>Récompenses</h2></div>' + rw);
     }
+    // mes propositions
+    if(props && props.miennes && props.miennes.length){
+      var ST = {ouverte:'Envoyée ✓', retenue:'Envoyée ✓', refusee:'Envoyée ✓'};
+      h.push('<div class="cp-h"><h2>Mes propositions</h2><small>Visibles par toi et LeClubi uniquement</small></div><div class="mp-l">' + props.miennes.map(function(m){
+        return '<div class="mp"><span>' + esc(m.texte) + '<small>' + esc(m.kind) + ' · ' + esc(saisonLabel(m.saison)) + '</small></span><b>' + (ST[m.statut] || '') + '</b></div>';
+      }).join('') + '</div>');
+    }
     // réglages
     h.push('<div class="cp-h"><h2>Mon profil</h2></div><div class="cp-set"><label><input type="checkbox" data-act="pub"' + (moi.prive ? '' : ' checked') + '><span>Profil public<small>Ta vitrine et tes stats de jeu sont visibles par les autres. Ta collection reste visible dans l\'onglet Collectionneurs, comme avant.</small></span></label>' +
       '<div><button type="button" class="btn ghost" data-act="logout" style="padding:8px 16px;font-size:14px">Se déconnecter</button></div></div>');
@@ -2405,6 +2430,25 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
     el.innerHTML = ids.length ? '<div class="cp-vp"><h3>' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="" onerror="this.remove()">' : '') + 'Vitrine de ' + esc(c.pseudo) + '</h3><div class="cp-vit">' + ids.map(function(id){ return vcHtml(id, who); }).join('') + '</div></div>' : '';
   }
+
+  // ----- propositions (privées : lues seulement par LeClubi) -----
+  function saisonLabel(id){ var x = SEASONS.filter(function(z){ return z.id === id; })[0]; return x ? x.label : id; }
+  function chargerProps(){
+    if(!ON || etat !== 'in') return Promise.resolve();
+    propsEtat = 'charge';
+    return appel('/propositions', {session:sess()}).then(function(r){
+      propsEtat = r.ok ? 'ok' : 'erreur'; if(r.ok) props = r.d;
+      if(!g('v-compte').hidden) rendreCompte();
+    }).catch(function(){ propsEtat = 'erreur'; });
+  }
+  // copie d'une proposition sur le serveur (en plus du formulaire Google), seulement si le viewer est connecté avec son propre pseudo
+  function proprio(nom){ return etat === 'in' && !!moi && !!nom && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === String(nom).toLowerCase(); }); }
+  window.CompteProp = function(ctx, pseudo, txt){
+    if(!proprio(pseudo)) return;
+    appel('/propositions', {session:sess(), body:{saison:ctx.sid, part:ctx.part, kind:ctx.kind, texte:txt}}).then(function(){ chargerProps(); }).catch(function(){});
+  };
+  window.CompteProp.ok = proprio;
+  window.CompteProp.dispo = function(){ return ON && etat !== 'banni'; };
 
   // ----- actions -----
   function envoyerVitrine(){
@@ -2444,7 +2488,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var prive = !e.target.checked;
     appel('/reglage-profil', {session:sess(), body:{prive:prive}}).then(function(r){ if(r.ok){ moi.prive = prive; delete pubCache[moi.login]; } else e.target.checked = !prive; }).catch(function(){ e.target.checked = !prive; });
   });
-  g('login').addEventListener('click', connexion);
+  g('login').addEventListener('click', function(){ connexion(); });
   window.addEventListener('hashchange', majNav);
   window.avErr = function(im){ var d = document.createElement(im.classList.contains('cp-av') ? 'div' : 'i'); d.className = im.className; d.textContent = im.getAttribute('data-i') || '?'; im.replaceWith(d); };
   window.rendreCompte = rendreCompte;
