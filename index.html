@@ -24,17 +24,17 @@
 <meta name="twitter:description" content="Jouez. Choisissez. Collectionnez. Lives Twitch, sondage des prochains jeux et cartes à collectionner.">
 <meta name="twitter:image" content="https://leclubion.github.io/leclubi-site/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Archivo+Black&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --accent-ink:#17181a;
-  --card-a:#26272b; --card-b:#18191b; --yt:#e0473f; --dc:#6b76f5; --tw:#9d6bff;
+  --red:#e0243b; --blue:#4d86ff; --display:'Archivo Black','Arial Black',Impact,sans-serif; --card-a:#26272b; --card-b:#18191b; --yt:#e0473f; --dc:#6b76f5; --tw:#9d6bff;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--card-a:#2b2c30;--card-b:#1b1c1f;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
+  :root:not([data-theme="dark"]){--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--red:#c4132a;--blue:#1f56d6;--card-a:#2b2c30;--card-b:#1b1c1f;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
 }
-:root[data-theme="light"]{--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
+:root[data-theme="light"]{--red:#c4132a;--blue:#1f56d6;--bg:#f1efe9;--panel:#fff;--line:#d9d5ca;--text:#1d1e20;--muted:#6a675f;--accent:#8a6320;--accent-ink:#fff;--yt:#c2352d;--dc:#4752c4;--tw:#7b3fe4}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 Inter,Roboto,"Helvetica Neue",Arial,sans-serif}
@@ -346,6 +346,51 @@ button.vc.vide{cursor:pointer}button.vc.vide:hover{border-color:var(--accent);co
 .legal ul{padding-left:22px;margin:8px 0}
 .legal .maj{font-size:13px;opacity:.7}
 .legal a{text-decoration:underline}
+
+/* ---- identité : titres en grandes capitales (comme le logo), rouge LeClubi en accent, ambre pour la lumière ---- */
+header{border-top:3px solid var(--red)}
+.logo{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.03em;text-transform:uppercase}
+.logo span{color:var(--red);font-size:.5em;margin-right:3px;vertical-align:.7em;letter-spacing:.06em}
+h1{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.005em;font-size:clamp(30px,4.6vw,46px)}
+.cp-hero h1{font-size:clamp(26px,3.6vw,36px)}
+.legal h1,.ab h1{position:relative;padding-bottom:14px}
+.legal h1::after,.ab h1::after{content:"";position:absolute;left:0;bottom:0;width:56px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--accent))}
+footer{border-top:3px solid var(--red)}
+.bal{display:block;margin:0 auto 14px;height:120px;width:auto;filter:drop-shadow(0 8px 18px color-mix(in srgb,var(--accent) 40%,transparent))}
+.bal.s{height:76px;margin:0}
+/* ---- défis et titres ---- */
+.ttl-d{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--red) 55%,var(--line));background:color-mix(in srgb,var(--red) 12%,transparent);font-size:12px;font-weight:600;color:var(--text);letter-spacing:.02em}
+.dfg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:12px 0 4px}
+.df{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);display:flex;flex-direction:column;gap:8px}
+.df.fait{border-color:color-mix(in srgb,var(--accent) 60%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 10%,var(--panel)),var(--panel) 65%)}
+.df.avenir{opacity:.8;border-style:dashed}
+.df .dh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.df strong{font-size:16px;line-height:1.3}
+.df p{margin:0;color:var(--muted);font-size:14px}
+.df .st{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.df .st.on{color:var(--accent);border-color:var(--accent)}.df .st.ok{color:#fff;background:var(--accent);border-color:var(--accent)}.df .st.av{color:var(--blue);border-color:var(--blue)}
+.dpb{height:6px;border-radius:3px;background:rgba(128,128,128,.25);overflow:hidden}
+.dpb i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--accent))}
+.df small{color:var(--muted);font-size:12.5px}
+.dfr{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
+.dfr b{padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--text);font-weight:600}
+.tchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tchips button{font:inherit;font-size:14px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer}
+.tchips button.sel{border-color:var(--red);background:color-mix(in srgb,var(--red) 14%,var(--panel))}
+.dvide{text-align:center;padding:26px 10px;color:var(--muted)}
+/* ---- araignée secrète ---- */
+.spider{position:fixed;left:0;top:0;z-index:40;width:42px;height:42px;margin:-21px 0 0 -21px;filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 3px rgba(255,255,255,.55));padding:0;background:none;border:0;cursor:pointer;will-change:transform;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.spider::before{content:"";position:absolute;inset:-14px}
+.spider svg{width:100%;height:100%;overflow:visible;display:block;pointer-events:none}
+.spider .la,.spider .lb{transform-box:fill-box;transform-origin:center;animation:spl .2s ease-in-out infinite alternate}
+.spider .lb{animation-direction:alternate-reverse}
+@keyframes spl{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+.spider.splat{cursor:default;animation:splatin .25s ease-out}
+@keyframes splatin{from{opacity:.2}to{opacity:1}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:10px 18px 10px 12px;border-radius:12px;border:1px solid var(--accent);background:var(--panel);color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,.45);animation:toastin .35s ease-out}
+.toast img{height:52px;width:auto;flex:none}.toast b{display:block;color:var(--accent);font-size:13px;letter-spacing:.04em;text-transform:uppercase}.toast span{font-size:14px}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.spider .la,.spider .lb{animation:none}.toast{animation:none}}
 .flinks{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .fl{display:flex;gap:20px}
 .fl a:hover{color:var(--text)}
@@ -750,7 +795,7 @@ nav{min-width:0}
 
 <header>
   <div class="wrap bar">
-    <a class="logo" href="#accueil">LeClubi</a>
+    <a class="logo" href="#accueil" aria-label="LeClubi, accueil"><span aria-hidden="true">LE</span>CLUBI</a>
     <nav aria-label="Navigation principale">
       <a href="#accueil" data-nav="accueil">Accueil</a>
       <a href="#planning" data-nav="planning">Planning</a>
@@ -1728,7 +1773,9 @@ var BD_ICO = {
   eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   flame:'<path d="M12 2c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
   sword:'<path d="M14.5 4.5l5 5L9 20l-5 1 1-5z"/><path d="M13 6l5 5"/>',
-  dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>'
+  dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>',
+  bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/>',
+  spider:'<ellipse cx="12" cy="13.5" rx="3" ry="4"/><circle cx="12" cy="8.5" r="2"/><path d="M9.5 11L4 7M9 13.5L3 13M9.3 16L4 20M10 18l-2 3M14.5 11L20 7M15 13.5l6-.5M14.7 16L20 20M14 18l2 3"/>'
 };
 var BD_TIER = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', mythique:'Mythique'};
 function badgeCatalog(name, jeu){
@@ -1774,9 +1821,10 @@ function badgeCatalog(name, jeu){
     add('Jeu de cartes', 'j6', 'Champion', 'Gagner 50 parties.', 'epique', 'trophy', vi, 50);
     add('Jeu de cartes', 'j7', 'Légende de l\'arène', 'Gagner 200 parties.', 'mythique', 'crown', vi, 200);
   }
+  if(window.CompteSucces) out = out.concat(window.CompteSucces(name));   // badges donnés par le serveur : défis, événements, secrets
   return out;
 }
-function vbHtml(x){ return '<div class="bd vb got t-' + x.tier + '" title="' + esc(x.name + ' : ' + x.task) + '"><div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div></div>'; }
+function vbHtml(x){ return '<div class="bd vb got t-' + x.tier + '" title="' + esc(x.name + ' : ' + x.task) + '"><div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg></div></div>'; }
 function badgesPanelHtml(name, jeu, mineView, sel){
   var l = badgeCatalog(name, jeu);
   if(!l.length) return '';
@@ -1789,9 +1837,9 @@ function badgesPanelHtml(name, jeu, mineView, sel){
     var items = l.filter(function(x){ return x.cat === c; }), g = items.filter(function(x){ return x.got; }).length;
     h += '<h3><span>' + esc(c) + '</span><small>' + g + ' / ' + items.length + '</small></h3><div class="bd-grid">' + items.map(function(x){
       var pk = sel && x.got, ix = sel ? sel.indexOf(x.id) : -1, tg = pk ? 'button type="button" data-bid="' + x.id + '"' : 'div';
-      return '<' + tg + ' class="bd t-' + x.tier + (x.got ? ' got' : ' lock') + (pk ? ' pk' + (ix > -1 ? ' sel' : '') : '') + '" title="' + esc(x.task) + '">' + (ix > -1 ? '<b class="nn">' + (ix + 1) + '</b>' : '') + '<div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + BD_ICO[x.ico] + '</svg></div>' +
+      return '<' + tg + ' class="bd t-' + x.tier + (x.got ? ' got' : ' lock') + (pk ? ' pk' + (ix > -1 ? ' sel' : '') : '') + '" title="' + esc(x.task) + '">' + (ix > -1 ? '<b class="nn">' + (ix + 1) + '</b>' : '') + '<div class="bm"><svg viewBox="0 0 24 24" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg></div>' +
         '<strong>' + esc(x.name) + '</strong><p>' + esc(x.task) + '</p>' +
-        (x.got ? '<span class="st">✓ ' + BD_TIER[x.tier] + '</span>' : '<div class="pb"><i style="width:' + Math.round(x.cur / x.max * 100) + '%"></i></div><span class="nb">' + x.cur + ' / ' + x.max + '</span>') + '</' + (pk ? 'button' : 'div') + '>';
+        (x.got ? '<span class="st">✓ ' + BD_TIER[x.tier] + '</span>' : x.secret ? '<span class="nb">Secret</span>' : '<div class="pb"><i style="width:' + Math.round(x.cur / x.max * 100) + '%"></i></div><span class="nb">' + x.cur + ' / ' + x.max + '</span>') + '</' + (pk ? 'button' : 'div') + '>';
     }).join('') + '</div>';
   });
   return h + '</div>';
@@ -1805,7 +1853,8 @@ function renderBadges(){
   var el = document.getElementById('bpan'); if(!el) return;
   if(!who){ el.innerHTML = ''; return; }
   var jeu = window.CompteJeu ? window.CompteJeu(who) : null, l = badgesChoisis(who, jeu, window.CompteBadges ? window.CompteBadges(who) : []);
-  el.innerHTML = l.length ? '<div class="vbrow"><h3>Badges de ' + esc(who) + '</h3>' + l.map(vbHtml).join('') + '</div>' : '';
+  var tt = window.CompteTitre ? window.CompteTitre(who) : '';
+  el.innerHTML = l.length || tt ? '<div class="vbrow">' + (l.length ? '<h3>Badges de ' + esc(who) + '</h3>' + l.map(vbHtml).join('') : '') + (tt ? '<span class="ttl-d" style="margin-left:auto">' + esc(tt) + '</span>' : '') + '</div>' : '';
 }
 function renderTitres(){
   var el = document.getElementById('titres'), bl = document.getElementById('badges');
@@ -2504,7 +2553,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   var API = JEU_API, CID = String((window.JEU_CONFIG || {}).TWITCH_CLIENT_ID || ''), ON = !!(API && CID);
   var KS = 'leclubi-session', KT = 'leclubi-twitch';
   var g = function(i){ return document.getElementById(i); };
-  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '', cpTab = 'profil', bsel = null, msgB = '';
+  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '', cpTab = 'profil', bsel = null, msgB = '', dfData = null, dfEtat = '', spT = null, spOn = false, spPlanned = false;
   function lire(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function ecrire(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   function suppr(k){ try{ localStorage.removeItem(k); }catch(e){} }
@@ -2542,11 +2591,13 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var redir = new URL('jeu.html', location.href); redir.hash = ''; redir.search = '';
     location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(CID) + '&redirect_uri=' + encodeURIComponent(redir.href) + '&response_type=token&scope=' + encodeURIComponent(scope || '') + '&state=' + st;
   }
-  function deconnexion(){ suppr(KS); suppr(KT); moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
+  function deconnexion(){ suppr(KS); suppr(KT); clearTimeout(spT); spPlanned = false; dfData = null; dfEtat = ''; moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
 
   // ----- en-tête -----
   function ui(){
     var b = g('login'), p = g('moi');
+    if(etat === 'in' && dfEtat === '') chargerDefis();
+    if(etat === 'in' && !spPlanned){ spPlanned = true; planSpider(true); }
     if(!ON){ b.hidden = true; p.hidden = true; }
     else if(etat === 'in' && moi){
       b.hidden = true; p.hidden = false;
@@ -2590,10 +2641,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 
   // ----- page « Mon compte » -----
   function landing(msg){
-    return '<div class="cp-out"><h1>Mon compte</h1><p class="lead">Connecte-toi avec ton compte Twitch pour retrouver tout ce qui te concerne au même endroit.</p>' +
+    return '<div class="cp-out"><img class="bal" src="images-site/balise.png" alt=""><h1>Mon compte</h1><p class="lead">Connecte-toi avec ton compte Twitch pour retrouver tout ce qui te concerne au même endroit.</p>' +
       '<ul><li><span><b>Ta collection</b> de cartes, ta progression et tes récompenses à débloquer.</span></li>' +
       '<li><span><b>Ta vitrine</b> : choisis 3 cartes à montrer sur ton profil public.</span></li>' +
-      '<li><span><b>Tes stats de jeu</b> : parties, victoires, classement et ClubiGold gagnés.</span></li></ul>' +
+      '<li><span><b>Tes stats de jeu</b> : parties, victoires, classement et ClubiGold gagnés.</span></li>' +
+      '<li><span><b>Les défis de la semaine</b> : des titres et des badges à gagner.</span></li></ul>' +
       (msg ? '<p class="msg" style="min-height:0;margin-bottom:14px">' + msg + '</p>' : '') +
       '<button type="button" class="btn login big" data-act="login">Se connecter avec Twitch</button>' +
       '<p class="cp-note">Le site reçoit seulement ton pseudo et ton avatar Twitch : aucune permission, aucun mot de passe.</p></div>';
@@ -2609,20 +2661,25 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var h = [];
     // en-tête du profil
     h.push('<div class="cp-hero">' + (moi.avatar ? '<img class="cp-av" src="' + esc(moi.avatar) + '" alt="" data-i="' + esc(moi.pseudo.charAt(0).toUpperCase()) + '" onerror="avErr(this)">' : '<div class="cp-av">' + esc(moi.pseudo.charAt(0).toUpperCase()) + '</div>') +
-      '<div><h1>' + esc(moi.pseudo) + '</h1><p class="cp-sub"><span>@' + esc(moi.login) + '</span>' + (t ? '<b>' + icoK(t.k) + t.name + '</b>' : '') + (name && tarotTitle(name) ? '<b>✦ ' + esc(tarotTitle(name)) + '</b>' : '') + '</p>' +
+      '<div><h1>' + esc(moi.pseudo) + '</h1><p class="cp-sub"><span>@' + esc(moi.login) + '</span>' + (moi.titre ? '<b class="ttl-d">' + esc(moi.titre) + '</b>' : '') + (t ? '<b>' + icoK(t.k) + t.name + '</b>' : '') + (name && tarotTitle(name) ? '<b>✦ ' + esc(tarotTitle(name)) + '</b>' : '') + '</p>' +
       '<div class="cp-acts">' + (name ? '<button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') +
       (JEU_OUVERT ? '<a class="btn" href="jeu.html">Jouer à <span class="nomjeu">' + esc((window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle') + '</span></a>' : '') + '</div></div></div>');
 
     // onglets Profil / Collection / Badges / Commandes
     parkColl();
     if(!name && (cpTab === 'badges' || cpTab === 'collection')) cpTab = 'profil';
-    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges']] : []).concat([['commandes', 'Commandes']]);
+    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges']] : []).concat([['defis', 'Défis'], ['commandes', 'Commandes']]);
     var tabs = '<div class="cp-tabs" role="tablist">' + TB.map(function(t){ return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (cpTab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if(cpTab === 'collection' && name){
       h.push(tabs); h.push('<div id="cpcoll" style="margin-top:20px"></div>');
       el.innerHTML = h.join('');
       var wr = document.querySelector('#v-collection .wrap'), host = g('cpcoll');
       if(wr && host){ host.appendChild(wr); wr.classList.add('cpemb'); who = name; render(); }
+      return;
+    }
+    if(cpTab === 'defis'){
+      h.push(tabs); h.push(defisHtml());
+      el.innerHTML = h.join('');
       return;
     }
     if(cpTab === 'commandes'){
@@ -2710,6 +2767,128 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
     el.innerHTML = ids.length ? '<div class="cp-vp"><h3>' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="" onerror="this.remove()">' : '') + 'Vitrine de ' + esc(c.pseudo) + '</h3><div class="cp-vit">' + ids.map(function(id){ return vcHtml(id, who); }).join('') + '</div></div>' : '';
+  }
+
+
+  // ----- défis de la semaine, titres -----
+  function chargerDefis(){
+    if(!ON || etat !== 'in') return;
+    dfEtat = 'charge';
+    appel('/defis', {session:sess()}).then(function(r){
+      if(r.ok){ dfEtat = 'ok'; dfData = r.d; if(moi){ moi.titres = r.d.titres; moi.titre = r.d.titre; } }
+      else dfEtat = 'erreur';
+      if(!g('v-compte').hidden) rendreCompte(); renderBadges();
+    }).catch(function(){ dfEtat = 'erreur'; });
+  }
+  var UNITES = {cartes:'carte', differentes:'carte différente', usages:'utilisation', parties:'partie', visites:'jour de visite'};
+  function jourCourt(ms){ return new Date(ms).toLocaleDateString('fr-FR', {day:'numeric', month:'short', timeZone:'Europe/Paris'}); }
+  function resteTxt(fin){ var j = Math.ceil((fin - Date.now()) / 864e5); return j <= 1 ? 'dernier jour' : 'encore ' + j + ' jours'; }
+  function defiCarte(d){
+    var cls = 'df' + (d.fait ? ' fait' : '') + (d.etat === 'a_venir' ? ' avenir' : '');
+    var st = d.fait ? '<span class="st ok">Réussi ✓</span>' : d.etat === 'a_venir' ? '<span class="st av">Bientôt</span>' : d.etat === 'termine' ? '<span class="st">Terminé</span>' : '<span class="st on">' + resteTxt(d.fin) + '</span>';
+    var rec = (d.rec_titre ? '<b>Titre : ' + esc(d.rec_titre) + '</b>' : '') + (d.badge ? '<b>Badge : ' + esc(d.badge.nom) + '</b>' : '');
+    var man = d.type === 'manuel', pct = man ? 0 : Math.round(100 * Math.min(d.progres, d.cible) / d.cible);
+    var u = UNITES[d.type] || '', pl = d.cible > 1 && u ? (u.slice(-1) === 'e' || u === 'utilisation' || u === 'partie' ? u + 's' : u) : u;
+    return '<div class="' + cls + '"><div class="dh"><strong>' + esc(d.titre) + '</strong>' + st + '</div>' + (d.descr ? '<p>' + esc(d.descr) + '</p>' : '') +
+      (man ? '<small>' + (d.fait ? 'Validé par LeClubi.' : 'LeClubi valide ce défi lui-même.') + '</small>' :
+        '<div class="dpb"><i style="width:' + pct + '%"></i></div><small>' + Math.min(d.progres, d.cible) + ' / ' + d.cible + (pl ? ' ' + pl : '') + (d.saison ? ' (' + esc(saisonLabel(d.saison)) + ')' : '') + ' · du ' + jourCourt(d.debut) + ' au ' + jourCourt(d.fin - 1) + '</small>') +
+      (rec ? '<div class="dfr">À gagner :' + rec + '</div>' : '') + '</div>';
+  }
+  function defisHtml(){
+    if(dfEtat === 'charge' || (dfEtat === '' && !dfData)) return '<p class="cp-note" style="text-align:center;padding:30px 0">Chargement des défis…</p>';
+    if(!dfData) return '<p class="cp-note" style="text-align:center;padding:30px 0">Impossible de charger les défis pour le moment. <button type="button" class="btn ghost" data-act="defis" style="padding:6px 14px;font-size:14px;margin-left:8px">Réessayer</button></p>';
+    var l = dfData.defis, cours = l.filter(function(d){ return d.etat === 'en_cours' && !d.fait; }), faits = l.filter(function(d){ return d.fait; }), avenir = l.filter(function(d){ return d.etat === 'a_venir'; }), finis = l.filter(function(d){ return d.etat === 'termine' && !d.fait; });
+    var h = '<div class="cp-h"><h2>Défis en cours</h2><small>Réussis-les avant la fin pour gagner titres et badges</small></div>';
+    h += cours.length ? '<div class="dfg">' + cours.map(defiCarte).join('') + '</div>' : '<div class="dvide"><img class="bal s" src="images-site/balise.png" alt="" style="margin:0 auto 10px"><p style="margin:0">Pas de défi en ce moment.<br>La Balise veille : reviens bientôt !</p></div>';
+    if(avenir.length) h += '<div class="cp-h"><h2>Bientôt</h2></div><div class="dfg">' + avenir.map(defiCarte).join('') + '</div>';
+    if(faits.length) h += '<div class="cp-h"><h2>Réussis</h2><small>' + faits.length + '</small></div><div class="dfg">' + faits.map(defiCarte).join('') + '</div>';
+    if(finis.length) h += '<div class="cp-h"><h2>Manqués</h2></div><div class="dfg">' + finis.map(defiCarte).join('') + '</div>';
+    var ts = dfData.titres || [];
+    h += '<div class="cp-h"><h2>Mes titres</h2><small>Le titre choisi s\'affiche à côté de ton pseudo</small></div>';
+    h += ts.length ? '<div class="tchips"><button type="button" data-titre=""' + (!dfData.titre ? ' class="sel"' : '') + '>Aucun</button>' + ts.map(function(t){ return '<button type="button" data-titre="' + esc(t) + '"' + (dfData.titre === t ? ' class="sel"' : '') + '>' + esc(t) + '</button>'; }).join('') + '</div>' :
+      '<p class="cp-note" style="text-align:left">Réussis un défi pour gagner ton premier titre.</p>';
+    return h;
+  }
+  function choisirTitre(t){
+    appel('/titre', {session:sess(), body:{titre:t}}).then(function(r){
+      if(r.ok){ dfData.titre = r.d.titre; moi.titre = r.d.titre; delete pubCache[moi.login]; rendreCompte(); renderBadges(); }
+    }).catch(function(){});
+  }
+  window.CompteTitre = function(nom){
+    if(!ON || !nom) return '';
+    var l = String(nom).toLowerCase();
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.titre || '';
+    var c = pubCache[l];
+    return c && !c.prive && c.titre ? c.titre : '';
+  };
+  // badges venus du serveur (défis, événements, secrets) pour le catalogue de badges
+  window.CompteSucces = function(nom){
+    if(!ON || !nom) return [];
+    var l = String(nom).toLowerCase(), out = [];
+    var item = function(x){ return {cat:x.cat, id:x.id, name:x.nom, task:x.desc, tier:x.tier, ico:x.ico, cur:1, max:1, got:true}; };
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })){
+      var sc = moi.succes || [];
+      sc.forEach(function(x){ out.push(item(x)); });
+      if(dfData) dfData.defis.forEach(function(d){
+        if(d.badge && !d.fait && d.etat !== 'termine') out.push({cat:d.fin - d.debut > 20 * 864e5 ? 'Événements' : 'Défis', id:'defi-' + d.n, name:d.badge.nom, task:d.descr || d.titre, tier:d.badge.tier, ico:d.badge.ico, cur:d.progres, max:d.cible, got:false});
+      });
+      if(!sc.some(function(x){ return x.id === 'araignee'; })) out.push({cat:'Secrets', id:'araignee', name:'???', task:'Un secret se cache quelque part sur le site…', tier:'epique', ico:'spider', cur:0, max:1, got:false, secret:true});
+    } else {
+      var c = pubCache[l];
+      if(c && !c.prive && c.badgesInfo) c.badgesInfo.forEach(function(x){ out.push(item(x)); });
+    }
+    return out;
+  };
+
+  // ----- l'araignée secrète : elle traverse parfois l'écran, l'écraser donne un badge -----
+  var SPIDER_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="#241713" stroke-width="1.9" stroke-linecap="round">' +
+    '<g class="la"><path d="M16 18Q8 12 4 8"/><path d="M15.5 24Q7 27 3 31"/><path d="M24 18Q32 12 36 8"/><path d="M24.5 24Q33 27 37 31"/></g>' +
+    '<g class="lb"><path d="M15.5 21Q7 20 2 18"/><path d="M17 27Q11 33 8 38"/><path d="M24.5 21Q33 20 38 18"/><path d="M23 27Q29 33 32 38"/></g></g>' +
+    '<ellipse cx="20" cy="22" rx="5.5" ry="7.5" fill="#241713"/><circle cx="20" cy="12.5" r="3.8" fill="#241713"/><circle cx="18.4" cy="11.4" r="1.1" fill="#e0243b"/><circle cx="21.6" cy="11.4" r="1.1" fill="#e0243b"/></svg>';
+  var SPLAT_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="#241713"><path d="M20 9c4 1 5 4 9 4 3 1 4 4 2 6 3 2 3 6-1 7 1 4-2 7-6 6-3 3-8 2-9-2-4 0-6-4-3-7-3-3-1-7 3-7 0-4 2-8 5-7z"/><circle cx="6" cy="10" r="2"/><circle cx="34" cy="31" r="2.2"/><circle cx="31" cy="6" r="1.5"/><circle cx="9" cy="33" r="1.6"/></g><g stroke="#241713" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M12 15l-5-4M11 23l-6 2M29 22l7 1M27 30l5 5"/></g><circle cx="17" cy="19" r="1.3" fill="#e0243b"/><circle cx="23" cy="19" r="1.3" fill="#e0243b"/></svg>';
+  function aAraignee(){ return !!moi && (moi.succes || []).some(function(x){ return x.id === 'araignee'; }); }
+  function spiderKey(){ return 'leclubi-spider-' + (moi ? moi.id : ''); }
+  function planSpider(premiere){
+    clearTimeout(spT);
+    if(!ON || etat !== 'in' || !moi || aAraignee()) return;
+    try{ if(localStorage.getItem(spiderKey()) === '1') return; }catch(e){}
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    spT = setTimeout(montrerAraignee, premiere ? 25000 + Math.random() * 50000 : 120000 + Math.random() * 180000);
+  }
+  function toast(titre, txt){
+    var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
+    t.innerHTML = '<img src="images-site/balise-mini.png" alt=""><div><b>' + esc(titre) + '</b><span>' + esc(txt) + '</span></div>';
+    document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 6500);
+  }
+  function montrerAraignee(){
+    if(document.hidden || spOn || etat !== 'in' || aAraignee()){ planSpider(false); return; }
+    spOn = true;
+    var el = document.createElement('button'); el.type = 'button'; el.className = 'spider'; el.tabIndex = -1; el.setAttribute('aria-hidden', 'true'); el.innerHTML = SPIDER_SVG;
+    document.body.appendChild(el);
+    var W = window.innerWidth, H = window.innerHeight, dir = Math.random() < .5 ? 1 : -1, y0 = H * (.3 + Math.random() * .55), speed = 80 + Math.random() * 50, amp = 10 + Math.random() * 18, t0 = performance.now(), fini = false;
+    function retirer(){ fini = true; el.remove(); spOn = false; }
+    function pas(t){
+      if(fini) return;
+      var dt = (t - t0) / 1000, x = (dir > 0 ? -40 : W + 40) + dir * speed * dt, y = y0 + Math.sin(dt * 1.7) * amp, dy = Math.cos(dt * 1.7) * 1.7 * amp, ang = Math.atan2(dy, dir * speed) * 180 / Math.PI + 90 + (dir < 0 ? 180 : 0);
+      el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + ang + 'deg)';
+      if(dir > 0 ? x > W + 50 : x < -50){ retirer(); planSpider(false); return; }
+      requestAnimationFrame(pas);
+    }
+    requestAnimationFrame(pas);
+    el.addEventListener('pointerdown', function(e){
+      if(fini) return; e.preventDefault(); fini = true;
+      var m = el.style.transform.replace(/rotate\([^)]*\)/, '');
+      el.style.transform = m; el.classList.add('splat'); el.innerHTML = SPLAT_SVG;
+      appel('/araignee', {session:sess(), body:{}}).then(function(r){
+        if(r.ok){
+          try{ localStorage.setItem(spiderKey(), '1'); }catch(x){}
+          if(!aAraignee()){ moi.succes = (moi.succes || []).concat([{id:'araignee', nom:'Arachnophobe', desc:'Tu as écrasé l\'araignée qui rôdait sur le site.', ico:'spider', tier:'epique', cat:'Secrets', ts:Date.now()}]); }
+          toast('Badge secret débloqué !', 'Arachnophobe : tu as écrasé l\'araignée. Retrouve-le dans l\'onglet Badges.');
+          if(!g('v-compte').hidden) rendreCompte(); renderBadges();
+          setTimeout(function(){ el.remove(); spOn = false; }, 1400);
+        } else { el.remove(); spOn = false; planSpider(false); }
+      }).catch(function(){ el.remove(); spOn = false; planSpider(false); });
+    });
   }
 
   // ----- propositions (privées : lues seulement par LeClubi) -----
@@ -2847,6 +3026,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }
     var cc = e.target.closest('[data-cp]');
     if(cc){ var t0 = cc.dataset.cp; (navigator.clipboard ? navigator.clipboard.writeText(t0) : Promise.reject()).then(function(){ cc.textContent = 'Copié ✓'; setTimeout(function(){ cc.textContent = 'Copier'; }, 1500); }, function(){ cc.textContent = 'Copie impossible'; }); return; }
+    var tt = e.target.closest('[data-titre]');
+    if(tt){ choisirTitre(tt.dataset.titre); return; }
     var tb = e.target.closest('[data-tab]');
     if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; cmd.conf = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
     var bb = e.target.closest('[data-bid]');
@@ -2864,6 +3045,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     else if(a === 'cancel'){ pick = null; msgPick = ''; rendreCompte(); }
     else if(a === 'clear'){ pick = []; msgPick = ''; rendreCompte(); }
     else if(a === 'save') envoyerVitrine();
+    else if(a === 'defis'){ dfEtat = ''; chargerDefis(); rendreCompte(); }
     else if(a === 'authchat') connexion('compte', SCOPE_CHAT, 'commandes');
     else if(a === 'clearbadges'){ bsel = []; msgB = ''; rendreCompte(); }
     else if(a === 'savebadges') envoyerBadges();
