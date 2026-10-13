@@ -54,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/fiche', '/journal/carte', '/journal/usage']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/journal/carte', '/journal/usage']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -182,7 +182,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/fiche' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -211,7 +211,7 @@ export class Hub {
       return json({ok: true});
     }
     if (act === 'remettre' && login) { this.run('UPDATE joueurs SET parties=0, victoires=0, defaites=0, nuls=0 WHERE login=?', login); return json({ok: true}); }
-    if (act === 'supprimer' && login) { this.run('DELETE FROM joueurs WHERE login=?', login); return json({ok: true}); }
+    if (act === 'supprimer' && login) { const jj = this.un('SELECT id FROM joueurs WHERE login=?', login); if (jj) { this.run('DELETE FROM succes WHERE joueur=?', jj.id); this.run('DELETE FROM visites WHERE joueur=?', jj.id); } this.run('DELETE FROM joueurs WHERE login=?', login); return json({ok: true}); }
     if (act === 'rejouer-paiements') { await this.traiterPaiements(true); return json({ok: true}); }
     if (act === 'importer-journal') return this.importerJournal(b);
     if (act === 'propositions') return json(this.sql.exec(`SELECT p.n, p.saison, p.part, p.kind, p.texte, p.ts, p.statut, j.nom AS pseudo, j.login, (SELECT COUNT(*) FROM votes v WHERE v.prop=p.n) AS votes
@@ -394,6 +394,15 @@ export class Hub {
       this.run('UPDATE joueurs SET titre=? WHERE id=?', t, j.id);
       return json({ok: true, titre: t});
     }
+    if (p === '/cache' && req.method === 'POST') {          // badge secret « Cache-Cache » : les 6 Balises cachées sur les pages du site
+      let b = {}; try { b = await req.json(); } catch (x) {}
+      const PAGES = ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos'];
+      (Array.isArray(b.pages) ? b.pages : []).filter(x => PAGES.includes(x)).forEach(x => this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'cache', x, Date.now(), 'secret'));
+      const pages = this.cacheDe(j), deja = !!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='badge' AND cle='cachecache'`, j.id);
+      let nouveau = false;
+      if (pages.length >= PAGES.length && !deja) { this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'cachecache', Date.now(), 'secret'); nouveau = true; }
+      return json({ok: true, pages, nouveau, badge: deja || nouveau});
+    }
     if (p === '/araignee' && req.method === 'POST') {        // badge secret : l'araignée écrasée sur le site
       const deja = !!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='badge' AND cle='araignee'`, j.id);
       if (!deja) this.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'araignee', Date.now(), 'secret');
@@ -425,9 +434,10 @@ export class Hub {
     }
     return json({erreur: 'inconnu'}, {}, 404);
   }
+  cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j),
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j),
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
@@ -445,6 +455,7 @@ export class Hub {
     const out = [];
     this.sql.exec(`SELECT cle, ts FROM succes WHERE joueur=? AND kind='badge' ORDER BY ts`, j.id).toArray().forEach(r => {
       if (r.cle === 'balise') { out.push({id: 'balise', nom: 'Gardien de la Balise', desc: 'Tu es revenu sur le site 10 jours différents : la Balise veille sur toi.', ico: 'balise', tier: 'or', cat: 'Fidélité', ts: r.ts}); return; }
+      if (r.cle === 'cachecache') { out.push({id: 'cachecache', nom: 'Cache-Cache', desc: 'Tu as retrouvé les 6 Balises cachées sur les pages du site.', ico: 'balise', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
       if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
