@@ -570,6 +570,11 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .dupnote span{display:block;margin-top:4px}
 .dupnote{margin-bottom:18px}
 .rwb.done{background:transparent;color:var(--accent);cursor:default;opacity:1}
+button.rwb[data-prop]{position:relative;overflow:hidden;font-weight:700;padding:7px 17px;box-shadow:0 0 14px color-mix(in srgb,var(--accent) 55%,transparent);animation:rwglow 2.4s ease-in-out infinite}
+button.rwb[data-prop]::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);animation:rwshine 2.8s ease-in-out infinite;pointer-events:none}
+@keyframes rwshine{0%,35%{left:-60%}75%,100%{left:130%}}
+@keyframes rwglow{0%,100%{box-shadow:0 0 8px color-mix(in srgb,var(--accent) 35%,transparent)}50%{box-shadow:0 0 20px color-mix(in srgb,var(--accent) 80%,transparent)}}
+@media (prefers-reduced-motion:reduce){button.rwb[data-prop],button.rwb[data-prop]::after{animation:none}}
 .rws{margin:8px 0 0;padding:14px 18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
 .rws.on{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--accent);background:var(--panel);color:var(--text)}
 .rws.on strong{display:block;font-weight:600}
@@ -1119,7 +1124,7 @@ function tarotDue(name){
   return {gold:gold, jal:jal};
 }
 function tarotRewardHtml(){
-  if(!who || !tarotCount(who)) return '';
+  if(!who || !tarotCount(who) || !mine()) return '';
   var d = tarotDue(who);
   if(!d.gold && !d.jal.length) return '';
   return '<div class="rws on dupnote"><div><strong>Récompenses Tarot disponibles !</strong>' +
@@ -1187,7 +1192,7 @@ function dupHtml(id, got){
 }
 var GOLD = 50;
 function readyHtml(){
-  if(!who) return '';
+  if(!who || !mine()) return '';
   var out = [];
   openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= NEED) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
   if(!out.length) return '';
@@ -1589,12 +1594,19 @@ var REWARDS = {
   'Rare': {wheel:true, hint:'Ligne complète : roue gratuite'}
 };
 var SEASON_REWARD = {kind:'carte Spéciale', hint:'Saison complète : propose une carte Spéciale pour la prochaine saison.'};
+// Récompenses et propositions : visibles seulement par le viewer connecté, sur sa propre collection (ou si les comptes ne sont pas ouverts, comme avant)
+function mine(){
+  if(typeof streamer === 'function' && streamer()) return true;
+  var c = window.CompteProp;
+  return !!who && (!c || !c.actif() || c.ok(who));
+}
 function propKey(sidv, part){ return 'leclubi-prop-' + who + '-' + sidv + '-' + part; }
 function propSent(sidv, part){ try{ return localStorage.getItem(propKey(sidv, part)) === '1'; }catch(e){ return false; } }
 function lineReward(s, g, done){
   var rw = REWARDS[g[0]];
   if(!rw) return '';
   if(!who || !done) return '<span class="rw">' + rw.hint + '</span>';
+  if(!mine()) return '';
   if(rw.wheel) return USED_LINES[who.toLowerCase() + '|' + s.id] ? '<span class="rwb done">Roue utilisée</span>' : '<span class="rwb done">Roue gratuite : tape !ligne dans le chat</span>';
   var part = RSLUG[g[0]];
   return propSent(s.id, part) ? '<span class="rwb done">Proposition envoyée</span>' :
@@ -1603,13 +1615,14 @@ function lineReward(s, g, done){
 function seasonReward(s, cards){
   if(!cards.length) return '';
   if(!who || !cards.every(function(c){ return has(c.id); })) return '<p class="rws">' + SEASON_REWARD.hint + '</p>';
+  if(!mine()) return '';
   return '<div class="rws on"><div><strong>Saison complète !</strong><span>Tu peux proposer une carte Spéciale pour la prochaine saison.</span></div>' +
     (propSent(s.id, 'saison') ? '<span class="rwb done">Proposition envoyée</span>' : '<button type="button" class="rwb" data-prop="' + s.id + '|saison">Proposer une carte Spéciale</button>') + '</div>';
 }
 var propEl = document.getElementById('prop'), propCtx = null;
 function openProp(val){
   var a = val.split('|'), s = SEASONS.filter(function(x){ return x.id === a[0]; })[0];
-  if(!s || !who) return;
+  if(!s || !who || !mine()) return;
   var season = a[1] === 'saison', g = s.groups.filter(function(x){ return RSLUG[x[0]] === a[1]; })[0];
   if(!season && !g) return;
   var kind = season ? SEASON_REWARD.kind : REWARDS[g[0]].kind;
@@ -2309,6 +2322,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     } else { b.hidden = etat === 'init'; p.hidden = true; }
     majNav();
     if(etat === 'in' && propsEtat === '') chargerProps();
+    if(who && !g('v-collection').hidden && typeof render === 'function') render();
     if(!g('v-compte').hidden) rendreCompte();
     vitrinePublique();
   }
@@ -2449,6 +2463,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   };
   window.CompteProp.ok = proprio;
   window.CompteProp.dispo = function(){ return ON && etat !== 'banni'; };
+  window.CompteProp.actif = function(){ return ON; };
 
   // ----- actions -----
   function envoyerVitrine(){
