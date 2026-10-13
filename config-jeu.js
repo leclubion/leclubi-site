@@ -8,4 +8,5 @@ window.JEU_CONFIG = {
   // false = le jeu est en test (aucun lien sur le site, seul toi connais l'adresse). true = le bouton "Jouer" apparaît sur le site.
   OUVERT: true,
    NOM: "Clubi Card Battle"
+   CARTES_SOURCE: "tableur"
 };
