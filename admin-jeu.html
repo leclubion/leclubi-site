@@ -54,6 +54,9 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
     <h3 style="font-size:15px;margin:20px 0 8px">Donner à la main</h3>
     <p style="margin-top:0">Pour un défi « Tu valides toi-même », un cadeau ou un événement. Écris le pseudo Twitch (en minuscules) du viewer, qui doit s'être déjà connecté au moins une fois sur le site.</p>
     <div class="row"><input id="glogin" placeholder="pseudo twitch" style="min-width:160px"><select id="gtype"><option value="titre">Un titre libre</option><option value="defi">Les récompenses d'un défi</option></select><input id="gval" placeholder="Titre à donner" style="min-width:200px"><button id="give" type="button" class="g">Donner</button><span id="gmsg"></span></div>
+    <h2>Fiches des viewers (jeu favori et devise)</h2>
+    <p>Les textes que les viewers écrivent sur leur fiche de collectionneur sont publics. Si un texte est déplacé, clique sur « Effacer » : le jeu favori et la devise de ce viewer sont vidés (il peut en écrire d'autres).</p>
+    <div class="w"><table><thead><tr><th>Viewer</th><th>Jeu favori</th><th>Devise</th><th></th></tr></thead><tbody id="fiches"></tbody></table></div>
     <h2>Journal des cartes (copie sur le serveur)</h2>
     <div class="box" id="jetat"></div>
     <div class="row" style="margin-top:10px"><button id="jimport" type="button" class="g">Importer depuis Google Sheets</button><button id="jcomp" type="button" class="g">Comparer avec le tableur</button></div>
@@ -77,7 +80,7 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
   }
   function charger(){
     msg('Chargement…');
-    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat'), appel('defis')]).then(function(r){
+    return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat'), appel('defis'), appel('fiches')]).then(function(r){
       var e = r[0]; pause = !e.orActif; msg('');
       $('zone').hidden = false;
       $('etat').innerHTML = e.enLigne + ' connecté(s) · ' + e.enFile + ' en recherche · ' + e.parties + ' partie(s) en cours · ' + e.partiesJouees + ' jouée(s) depuis le dernier redémarrage<br>Récompenses : <b class="' + (pause ? 'bad' : 'ok') + '">' + (pause ? 'EN PAUSE' : 'actives') + '</b> (' + e.limites.or + ' ClubiGold par victoire, ' + e.limites.maxJour + ' par jour max)';
@@ -94,6 +97,7 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
           b('retenue', 'Retenir') + b('ouverte', 'Rouvrir') + b('refusee', 'Refuser') + b('masquee', 'Masquer') + '<button type="button" class="g s" data-pn="' + p.n + '" data-del="1">Supprimer</button></td></tr>';
       }).join('') || '<tr><td colspan="7">Aucune proposition pour le moment.</td></tr>';
       rendreDefis(r[5]);
+      $('fiches').innerHTML = (r[6] || []).map(function(f){ return '<tr><td>' + esc(f.pseudo) + '</td><td class="wrapc">' + esc(f.jeu) + '</td><td class="wrapc">' + esc(f.devise) + '</td><td><button type="button" class="g s" data-fl="' + esc(f.login) + '">Effacer</button></td></tr>'; }).join('') || '<tr><td colspan="4">Aucune fiche remplie pour le moment.</td></tr>';
       var j = r[4];
       $('jetat').innerHTML = '<b>' + j.cartes + '</b> carte(s) et <b>' + j.usages + '</b> utilisation(s) copiées sur le serveur.' + (j.dernieres.length ? '<br>Dernières cartes reçues : ' + j.dernieres.map(function(c){ return esc(c.pseudo) + ' (' + esc(c.carte) + ')'; }).join(', ') : '');
     }).catch(function(e){ $('zone').hidden = true; msg(e.message === 'Failed to fetch' ? 'Impossible de joindre le serveur.' : e.message); });
@@ -112,6 +116,7 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
     if(b.dataset.del){ if(!confirm('Supprimer définitivement cette proposition ?')) return; appel('proposition', {n: +b.dataset.pn, supprimer: true}).then(charger); return; }
     appel('proposition', {n: +b.dataset.pn, statut: b.dataset.st}).then(charger);
   };
+  $('fiches').onclick = function(e){ var b = e.target.closest('button[data-fl]'); if(!b) return; if(!confirm('Effacer le jeu favori et la devise de ' + b.dataset.fl + ' ?')) return; appel('fiche-effacer', {login: b.dataset.fl}).then(charger); };
   $('jimport').onclick = function(){
     if(!confirm('Remplacer la copie du serveur par le contenu actuel des tableaux Google ? (à faire avant la première comparaison, ou pour tout resynchroniser)')) return;
     msg('Import en cours…');

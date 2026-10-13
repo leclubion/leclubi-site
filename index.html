@@ -348,14 +348,12 @@ button.vc.vide{cursor:pointer}button.vc.vide:hover{border-color:var(--accent);co
 .legal a{text-decoration:underline}
 
 /* ---- identité : titres en grandes capitales (comme le logo), rouge LeClubi en accent, ambre pour la lumière ---- */
-header{border-top:3px solid var(--red)}
 .logo{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.03em;text-transform:uppercase}
 .logo span{color:var(--red);font-size:.5em;margin-right:3px;vertical-align:.7em;letter-spacing:.06em}
 h1{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.005em;font-size:clamp(30px,4.6vw,46px)}
 .cp-hero h1{font-size:clamp(26px,3.6vw,36px)}
 .legal h1,.ab h1{position:relative;padding-bottom:14px}
 .legal h1::after,.ab h1::after{content:"";position:absolute;left:0;bottom:0;width:56px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--accent))}
-footer{border-top:3px solid var(--red)}
 .bal{display:block;margin:0 auto 14px;height:120px;width:auto;filter:drop-shadow(0 8px 18px color-mix(in srgb,var(--accent) 40%,transparent))}
 .bal.s{height:76px;margin:0}
 /* ---- défis et titres ---- */
@@ -422,6 +420,55 @@ nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--red)}
 .cp-tabs button[aria-selected=true]{border-bottom-color:var(--red)}
 ::selection{background:color-mix(in srgb,var(--red) 38%,transparent)}
 .cpemb #fiche{display:none!important}
+
+/* ---- fiche collectionneur au format carte ---- */
+#fichem{position:fixed;inset:0;z-index:70;background:rgba(6,6,8,.9);display:grid;place-items:center;overflow:auto;padding:18px}
+#fichem[hidden]{display:none}
+.fk-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.fk{width:min(340px,88vw);height:min(560px,calc(100vh - 140px));min-height:440px;perspective:1400px;--k1:#f3c969;--k2:#8a5a1c}
+.fk.c-rouge{--k1:#ff5468;--k2:#7a0f1d}.fk.c-bleu{--k1:#78b0ff;--k2:#14357a}.fk.c-argent{--k1:#eef3f9;--k2:#6c7683}
+.fk-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+.fk.flip .fk-in{transform:rotateY(180deg)}
+.fk-face{position:absolute;inset:0;border-radius:20px;padding:4px;background:linear-gradient(145deg,var(--k1),var(--k2) 55%,var(--k1));backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 36px color-mix(in srgb,var(--k1) 30%,transparent)}
+.fk-back{transform:rotateY(180deg)}
+.fk-c{height:100%;border-radius:16px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--k1) 16%,#17181a),#121315 70%);color:#ece8df;display:flex;flex-direction:column;gap:8px;padding:14px 14px 12px;overflow:hidden;position:relative}
+.fk-c::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-80%;width:45%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.14),transparent);transform:skewX(-20deg);animation:bdshine 5s ease-in-out infinite;pointer-events:none}
+.fk-top{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.fk-top strong{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.01em;line-height:1.15;overflow-wrap:anywhere;text-transform:uppercase}
+.fk-top .ttl-d{background:color-mix(in srgb,var(--k1) 18%,transparent);border-color:var(--k1);color:#ece8df}
+.fk-art{flex:1;min-height:0;display:grid;place-items:center;position:relative;padding-bottom:16px}
+.fk-art img{max-height:100%;max-width:62%;border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.6),0 0 0 2px color-mix(in srgb,var(--k1) 70%,transparent)}
+.fk-art img.av{border-radius:50%;max-width:46%;aspect-ratio:1;object-fit:cover}
+.fk-art img.bal{box-shadow:none;max-width:50%;opacity:.55;filter:grayscale(.3)}
+.fk-art small{position:absolute;bottom:-2px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#9a978f}
+.fk-dev{margin:0;text-align:center;font-style:italic;font-size:13.5px;color:#d9d4c8;min-height:1.3em;overflow-wrap:anywhere}
+.fk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fk-row div{padding:7px 9px;border:1px solid color-mix(in srgb,var(--k1) 40%,transparent);border-radius:10px;background:rgba(0,0,0,.35);min-width:0}
+.fk-row span{display:block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#9a978f}
+.fk-row b{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:2px;overflow-wrap:anywhere;line-height:1.25}
+.fk-row b .bm{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;position:relative}
+.fk-row b .bm svg{width:15px;height:15px}.fk-row b .bm img{width:20px}
+.fk-foot{display:flex;justify-content:space-between;font-size:12px;color:#b9b6ad;border-top:1px solid color-mix(in srgb,var(--k1) 35%,transparent);padding-top:8px}
+.fk-back .fk-c{overflow:auto}.fk-back .fk-c::after{display:none}
+.fk-back h3{margin:0;font-family:var(--display);font-weight:400;font-size:17px;text-transform:uppercase;text-align:center}
+.fk-back .fc-t{grid-template-columns:1fr 1fr;margin:0}.fk-back .fc-t div{background:rgba(0,0,0,.35);border-color:color-mix(in srgb,var(--k1) 35%,transparent);padding:7px 10px}
+.fk-back .fc-t b{font-size:18px}.fk-back .fc-t span,.fk-back .fc-t small{color:#9a978f}
+.fk-back .fc-g{grid-template-columns:1fr 1fr;gap:8px 10px}.fk-back .fs{flex-direction:row;align-items:center;gap:8px}.fk-back .fs .th{width:38px;flex:none}.fk-back .fs p{line-height:1.25}.fk-back .fc-t b{font-size:17px}.fk-back .fc-t{gap:6px}.fk-back .fc-t div{padding:5px 9px}.fk-back .fc-t small{font-size:11px}.fk-back .fs p{color:#d9d4c8;font-size:11px}.fk-back .fs p b{font-size:10px;color:#9a978f}.fk-back .fs p small{font-size:10px;color:#9a978f}
+.fk-act .btn.ghost{color:#ece8df;border-color:rgba(236,232,223,.4);background:rgba(0,0,0,.35)}.fk-act{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.fe{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:28px;align-items:start;margin-top:18px}
+.fe-pv .fk{margin:0 auto;height:520px}
+.fe-f{display:flex;flex-direction:column;gap:18px}
+.fe-f label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.fe-f input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
+.fe-f .fv{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fe-f .fv em{font-style:normal;color:var(--muted);font-size:13.5px}
+.fe-pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);max-height:340px;overflow:auto}
+.fe-pg .bd{width:auto}
+.cadres{display:flex;gap:10px}.cadres button{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;background:linear-gradient(145deg,var(--k1),var(--k2))}
+.cadres button.sel{border-color:var(--text)}
+.cadres .c-or{--k1:#f3c969;--k2:#8a5a1c}.cadres .c-rouge{--k1:#ff5468;--k2:#7a0f1d}.cadres .c-bleu{--k1:#78b0ff;--k2:#14357a}.cadres .c-argent{--k1:#eef3f9;--k2:#6c7683}
+@media (max-width:860px){.fe{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.fk-in{transition:none}.fk-c::after{animation:none}}
 .flinks{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .fl{display:flex;gap:20px}
 .fl a:hover{color:var(--text)}
@@ -1200,6 +1247,11 @@ nav{min-width:0}
   </section>
 </div>
 
+<div id="fichem" role="dialog" aria-modal="true" aria-label="Fiche de collectionneur" hidden>
+  <button class="zb zc" data-fm="close" aria-label="Fermer">&times;</button>
+  <div id="fmbody"></div>
+</div>
+
 <div id="zoom" role="dialog" aria-modal="true" aria-label="Carte en grand" hidden>
   <button class="zb zc" data-z="close" aria-label="Fermer">&times;</button>
   <button class="zb zp" data-z="prev" aria-label="Carte précédente">&lsaquo;</button>
@@ -1406,7 +1458,7 @@ function ficheCarteHtml(id){
   if(who && COLLECTIONS[who]) h += '<div><span>' + esc(who) + '</span><b>' + copies(who, id) + ' exemplaire' + (copies(who, id) > 1 ? 's' : '') + '</b></div>';
   return h + '</div>';
 }
-function ficheCollecteurHtml(name){
+function ficheStatsHtml(name){
   if(!COLLECTIONS[name] || sheetState !== 'ok') return '';
   var key = name.toLowerCase(), rows = LOGROWS.filter(function(r){ return r.p.toLowerCase() === key && cardInfo(r.c); });
   var defs = [['Toute première carte', null], ['Première Commune', 'Commune'], ['Première Peu commune', 'Peu commune'], ['Première Rare', 'Rare'], ['Première Légendaire', 'Légendaire'], ['Première Spéciale', 'Spéciale']];
@@ -1416,18 +1468,61 @@ function ficheCollecteurHtml(name){
     var i = cardInfo(r.c);
     return '<div class="fs">' + thumb(r.c) + '<p><b>' + d[0] + '</b>Carte ' + pad(i.c.n) + '<small>' + esc(i.s.label) + (r.t ? ' · ' + dateT(r.t) : '') + '</small></p></div>';
   }).join('');
-  var all = Object.keys(COLLECTIONS).map(function(n){ return countOf(n); }), mine = countOf(name), rank = 1 + all.filter(function(k){ return k > mine; }).length;
-  var dups = 0; openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var k = copies(name, c.id); if(k > 1) dups += k - 1; }); });
-  var since = rows.filter(function(r){ return r.t; })[0];
-  var tt = titreDe(name);
-  return '<div class="fc"><div class="fc-h"><h3>Fiche de ' + esc(name) + '</h3>' + (tt ? '<span class="ttl-d">' + esc(tt) + '</span>' : '') + '</div>' +
-    '<div class="fc-t"><div><span>Rang</span><b>N°' + rank + '</b><small>sur ' + all.length + ' collectionneur' + (all.length > 1 ? 's' : '') + '</small></div>' +
-    '<div><span>Cartes</span><b>' + mine + ' / ' + totalCards() + '</b><small>' + (totalCards() ? Math.round(mine / totalCards() * 100) : 0) + ' % de la collection</small></div>' +
-    '<div><span>Doublons</span><b>' + dups + '</b><small>exemplaires en plus</small></div>' +
-    (since ? '<div><span>Dernier tirage</span><b style="font-size:17px">' + relT(rows.filter(function(r){ return r.t; }).slice(-1)[0].t) + '</b></div>' : '') + '</div>' +
-    '<div class="fc-g">' + slots + '</div></div>';
+  var rk = rangDe(name), dups = 0; openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var k = copies(name, c.id); if(k > 1) dups += k - 1; }); });
+  var last = rows.filter(function(r){ return r.t; }).slice(-1)[0];
+  return '<div class="fc-t"><div><span>Rang</span><b>N°' + rk.rang + '</b><small>sur ' + rk.sur + '</small></div>' +
+    '<div><span>Cartes</span><b>' + rk.n + ' / ' + totalCards() + '</b><small>' + (totalCards() ? Math.round(rk.n / totalCards() * 100) : 0) + ' %</small></div>' +
+    '<div><span>Doublons</span><b>' + dups + '</b><small>en plus</small></div>' +
+    '<div><span>Dernier tirage</span><b style="font-size:15px">' + (last ? relT(last.t) : '–') + '</b></div></div><div class="fc-g">' + slots + '</div>';
 }
-function renderFiche(){ var el = document.getElementById('fiche'); if(el) el.innerHTML = who ? ficheCollecteurHtml(who) : ''; }
+function rangDe(name){
+  var all = Object.keys(COLLECTIONS).map(function(n){ return countOf(n); }), n = countOf(name);
+  return {rang: 1 + all.filter(function(k){ return k > n; }).length, sur: all.length, n: n};
+}
+function cardImg(id, name){ return id.indexOf('tarot-') === 0 ? 'cartes/' + id + '-' + (copies(name, id) >= 2 ? 'ravivee' : 'effacee') + '.png' : 'cartes/' + id + '.png'; }
+// d = {name, pseudo, avatar, titre, fiche:{carte,jeu,badge,devise,cadre}, ficheBadge:[...], prive}
+function ficheCardHtml(d){
+  var f = d.fiche || {}, name = d.name, ok = name && COLLECTIONS[name] && sheetState === 'ok', rk = ok ? rangDe(name) : null;
+  var art = ok && f.carte && owns(name, f.carte) ? '<img src="' + esc(cardImg(f.carte, name)) + '" alt="Carte préférée" onerror="this.remove()"><small>Carte préférée</small>' :
+    d.avatar ? '<img class="av" src="' + esc(d.avatar) + '" alt="" onerror="this.remove()">' : '<img class="bal" src="images-site/balise.png" alt="">';
+  var jeuS = window.CompteJeu && name ? window.CompteJeu(name) : null, bx = null;
+  if(f.badge){ bx = ok ? badgeCatalog(name, jeuS).filter(function(z){ return z.id === f.badge && z.got; })[0] : null;
+    if(!bx){ var e = (d.ficheBadge || []).filter(function(z){ return z.id === f.badge; })[0]; if(e) bx = {name:e.nom, tier:e.tier, ico:e.ico}; } }
+  var back = ok ? ficheStatsHtml(name) : '<p style="text-align:center;color:#9a978f;font-size:13px">Pas encore de carte obtenue.</p>';
+  return '<div class="fk c-' + esc(f.cadre || 'or') + '"><div class="fk-in">' +
+    '<div class="fk-face fk-front"><div class="fk-c"><div class="fk-top"><strong>' + esc(d.pseudo || name || '') + '</strong>' + (d.titre ? '<span class="ttl-d">' + esc(d.titre) + '</span>' : '') + '</div>' +
+    '<div class="fk-art">' + art + '</div><p class="fk-dev">' + (f.devise ? '« ' + esc(f.devise) + ' »' : '') + '</p>' +
+    '<div class="fk-row"><div><span>Jeu favori</span><b>' + (f.jeu ? esc(f.jeu) : '<em style="font-style:normal;color:#77746c">–</em>') + '</b></div>' +
+    '<div><span>Badge favori</span><b>' + (bx ? '<span class="bm t-' + bx.tier + '">' + bdIco(bx.ico) + '</span>' + esc(bx.name) : '<em style="font-style:normal;color:#77746c">–</em>') + '</b></div></div>' +
+    '<div class="fk-foot"><span>' + (rk ? 'Rang N°' + rk.rang + ' / ' + rk.sur : '') + '</span><span>' + (rk ? rk.n + ' / ' + totalCards() + ' cartes' : '') + '</span></div></div></div>' +
+    '<div class="fk-face fk-back"><div class="fk-c"><h3>Fiche de ' + esc(d.pseudo || name || '') + '</h3>' + back + '</div></div></div></div>';
+}
+function renderFiche(){
+  var el = document.getElementById('fiche'); if(!el) return;
+  el.innerHTML = who && sheetState === 'ok' ? '<div class="row" style="margin:0 0 18px"><button type="button" class="btn ghost" data-fiche="' + esc(who) + '">Voir la fiche de ' + esc(who) + '</button></div>' : '';
+}
+var fichem = document.getElementById('fichem'), fmbody = document.getElementById('fmbody');
+function openFiche(name){
+  if(!COLLECTIONS[name]) return;
+  fichem.hidden = false; document.body.style.overflow = 'hidden';
+  fmbody.innerHTML = '<p style="color:#9a978f">Chargement…</p>';
+  var pr = window.CompteProfil ? window.CompteProfil(name) : Promise.resolve(null);
+  pr.then(function(p){
+    p = p || {}; if(fichem.hidden) return;
+    fmbody.innerHTML = '<div class="fk-wrap" data-for="' + esc(name) + '">' + ficheCardHtml({name:name, pseudo:p.pseudo || name, avatar:p.avatar, titre:p.titre || titreDe(name), fiche:p.prive ? {} : p.fiche, ficheBadge:p.ficheBadge, prive:p.prive}) +
+      '<div class="fk-act"><button type="button" class="btn" data-fm="flip">Retourner la fiche</button><button type="button" class="btn ghost" data-fm="copy">Copier le lien</button></div></div>';
+  });
+}
+function closeFiche(){ fichem.hidden = true; document.body.style.overflow = ''; }
+fichem.addEventListener('click', function(e){
+  var a = e.target.dataset.fm;
+  if(e.target === fichem || a === 'close') closeFiche();
+  else if(a === 'flip'){ var k = fmbody.querySelector('.fk'); if(k) k.classList.toggle('flip'); }
+  else if(a === 'copy'){ var w = fmbody.querySelector('.fk-wrap'); var u = location.origin + location.pathname + '#collection=' + encodeURIComponent(w ? w.dataset.for : ''); if(navigator.clipboard) navigator.clipboard.writeText(u).then(function(){ e.target.textContent = 'Lien copié ✓'; }); }
+});
+document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('[data-fiche]'); if(b){ openFiche(b.dataset.fiche); } });
+document.addEventListener('keydown', function(e){ if(!fichem.hidden && e.key === 'Escape') closeFiche(); });
+window.addEventListener('hashchange', closeFiche);
 function loadTitres(){
   var a = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, ''); if(!a) return;
   fetch(a + '/titres').then(function(r){ return r.json(); }).then(function(d){
@@ -2653,7 +2748,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   var API = JEU_API, CID = String((window.JEU_CONFIG || {}).TWITCH_CLIENT_ID || ''), ON = !!(API && CID);
   var KS = 'leclubi-session', KT = 'leclubi-twitch';
   var g = function(i){ return document.getElementById(i); };
-  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '', cpTab = 'profil', bsel = null, msgB = '', dfData = null, dfEtat = '', spT = null, spOn = false, spPlanned = false;
+  var moi = null, etat = ON ? 'init' : 'off', pick = null, pubCache = {}, busy = false, msgPick = '', props = null, propsEtat = '', cpTab = 'profil', bsel = null, msgB = '', dfData = null, dfEtat = '', spT = null, spOn = false, spPlanned = false, fdraft = null, fpick = null, msgF = '';
   function lire(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function ecrire(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   function suppr(k){ try{ localStorage.removeItem(k); }catch(e){} }
@@ -2767,14 +2862,19 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 
     // onglets Profil / Collection / Badges / Commandes
     parkColl();
-    if(!name && (cpTab === 'badges' || cpTab === 'collection')) cpTab = 'profil';
-    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges']] : []).concat([['defis', 'Défis'], ['commandes', 'Commandes']]);
+    if(!name && (cpTab === 'badges' || cpTab === 'collection' || cpTab === 'fiche')) cpTab = 'profil';
+    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges'], ['fiche', 'Fiche']] : []).concat([['defis', 'Défis'], ['commandes', 'Commandes']]);
     var tabs = '<div class="cp-tabs" role="tablist">' + TB.map(function(t){ return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (cpTab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if(cpTab === 'collection' && name){
       h.push(tabs); h.push('<div id="cpcoll" style="margin-top:20px"></div>');
       el.innerHTML = h.join('');
       var wr = document.querySelector('#v-collection .wrap'), host = g('cpcoll');
       if(wr && host){ host.appendChild(wr); wr.classList.add('cpemb'); who = name; render(); }
+      return;
+    }
+    if(cpTab === 'fiche' && name){
+      h.push(tabs); h.push(ficheTabHtml(name));
+      el.innerHTML = h.join('');
       return;
     }
     if(cpTab === 'defis'){
@@ -2835,7 +2935,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
           '</div><div class="row"><button type="button" class="btn" data-act="save"' + (busy ? ' disabled' : '') + '>Enregistrer</button><button type="button" class="btn ghost" data-act="cancel">Annuler</button><button type="button" class="btn ghost" data-act="clear">Vider</button><em>' + (msgPick || pick.length + ' / 3') + '</em></div></div>');
       }
       // titres, badges, récompenses
-      h.push('<div class="cp-h"><h2>Ma fiche de collectionneur</h2><small>Visible par tous sur ta page de collection</small></div>' + ficheCollecteurHtml(name));
+      h.push('<div class="cp-h"><h2>Ma fiche de collectionneur</h2><small>Une carte à ton nom, visible par tous</small></div><div class="row" style="gap:10px"><button type="button" class="btn" data-fiche="' + esc(name) + '">Voir ma fiche</button><button type="button" class="btn ghost" data-tab="fiche">Modifier ma fiche</button></div>');
       h.push('<div class="cp-h"><h2>Mon titre</h2></div>' + achHtml(name));
       var vb = badgesChoisis(name, jeu, moi.badges), allb = badgeCatalog(name, jeu);
       h.push('<div class="cp-h"><h2>Mes badges</h2><small>' + allb.filter(function(z){ return z.got; }).length + ' / ' + allb.length + ' obtenus</small></div><div class="vbrow">' +
@@ -2993,6 +3093,43 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     });
   }
 
+
+  // ----- onglet « Fiche » : éditer sa fiche de collectionneur -----
+  function ficheData(name){ return {name:name, pseudo:moi.pseudo, avatar:moi.avatar, titre:moi.titre, fiche:fdraft, ficheBadge:moi.succes || []}; }
+  function ficheTabHtml(name){
+    if(!fdraft) fdraft = JSON.parse(JSON.stringify(moi.fiche || {carte:'', jeu:'', badge:'', devise:'', cadre:'or'}));
+    var jeu = moi.jeu || {}, own = possedees(name), got = badgeCatalog(name, jeu).filter(function(z){ return z.got; });
+    var bx = fdraft.badge ? got.filter(function(z){ return z.id === fdraft.badge; })[0] : null;
+    var h = '<div class="fe"><div class="fe-pv" id="fepv">' + ficheCardHtml(ficheData(name)) + '<p class="cp-note" style="text-align:center">Clique sur la carte pour la retourner.</p></div><div class="fe-f">';
+    h += '<div><label>Ma carte préférée</label><div class="fv"><button type="button" class="btn ghost" data-act="favcard" style="padding:8px 16px;font-size:14px">' + (fdraft.carte ? 'Changer ma carte préférée' : 'Choisir ma carte préférée') + '</button>' + (fdraft.carte ? '<button type="button" class="btn ghost" data-act="nocard" style="padding:8px 14px;font-size:14px">Retirer</button>' : '') + '</div>';
+    if(fpick === 'card') h += '<div class="fe-pg">' + (own.length ? own.map(function(id){ return vcHtml(id, name, 'button', fdraft.carte === id ? 'sel' : '').replace('data-id=', 'data-fav="1" data-id='); }).join('') : '<p class="cp-note">Débloque une carte pour la choisir.</p>') + '</div>';
+    h += '</div><div><label for="fjeu">Mon jeu vidéo favori</label><input type="text" id="fjeu" maxlength="40" placeholder="Celui que tu veux faire découvrir à tout le monde" value="' + esc(fdraft.jeu || '') + '"></div>';
+    h += '<div><label>Mon badge favori</label><div class="fv"><button type="button" class="btn ghost" data-act="favbadge" style="padding:8px 16px;font-size:14px">' + (bx ? 'Changer mon badge favori' : 'Choisir mon badge favori') + '</button>' + (bx ? '<em>' + esc(bx.name) + '</em><button type="button" class="btn ghost" data-act="nobadge" style="padding:8px 14px;font-size:14px">Retirer</button>' : '') + '</div>';
+    if(fpick === 'badge') h += '<div class="fe-pg">' + (got.length ? got.map(function(z){ return '<button type="button" class="bd got t-' + z.tier + ' pk' + (fdraft.badge === z.id ? ' sel' : '') + '" data-fbid="' + esc(z.id) + '" title="' + esc(z.task) + '"><div class="bm">' + bdIco(z.ico) + '</div><strong>' + esc(z.name) + '</strong></button>'; }).join('') : '<p class="cp-note">Aucun badge obtenu pour le moment.</p>') + '</div>';
+    h += '</div><div><label for="fdev">Ma devise (une phrase courte)</label><input type="text" id="fdev" maxlength="60" placeholder="Ex. : Toujours une carte de plus" value="' + esc(fdraft.devise || '') + '"></div>';
+    h += '<div><label>Couleur du cadre</label><div class="cadres">' + ['or', 'rouge', 'bleu', 'argent'].map(function(c){ return '<button type="button" class="c-' + c + (fdraft.cadre === c ? ' sel' : '') + '" data-cadre="' + c + '" aria-label="Cadre ' + c + '"></button>'; }).join('') + '</div></div>';
+    h += '<div class="row" style="gap:10px;align-items:center"><button type="button" class="btn" data-act="savefiche"' + (busy ? ' disabled' : '') + '>Enregistrer ma fiche</button><button type="button" class="btn ghost" data-act="cancelfiche">Annuler</button><em style="color:var(--muted);font-size:14px">' + esc(msgF) + '</em></div>';
+    h += '<p class="cp-note" style="text-align:left;margin:0">Ta fiche est visible par tous depuis ta page de collection (bouton « Voir la fiche »), sauf si ton profil est privé. Écris des textes respectueux : LeClubi peut effacer ceux qui ne le sont pas.</p>';
+    return h + '</div></div>';
+  }
+  function majApercu(){ var pv = g('fepv'); if(pv && cpTab === 'fiche'){ var k = pv.querySelector('.fk'), fl = k && k.classList.contains('flip'); pv.innerHTML = ficheCardHtml(ficheData(maCollection())) + '<p class="cp-note" style="text-align:center">Clique sur la carte pour la retourner.</p>'; if(fl) pv.querySelector('.fk').classList.add('flip'); } }
+  function envoyerFiche(){
+    if(busy) return; busy = true; msgF = 'Enregistrement…'; rendreCompte();
+    appel('/fiche', {session:sess(), body:fdraft}).then(function(r){
+      busy = false;
+      if(r.ok){ moi.fiche = r.d.fiche; fdraft = JSON.parse(JSON.stringify(r.d.fiche)); delete pubCache[moi.login]; msgF = 'Fiche enregistrée ✓'; }
+      else msgF = 'Enregistrement impossible, réessaie.';
+      rendreCompte();
+    }).catch(function(){ busy = false; msgF = 'Enregistrement impossible, réessaie.'; rendreCompte(); });
+  }
+  window.CompteProfil = function(nom){
+    var l = String(nom).toLowerCase();
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return Promise.resolve({pseudo:moi.pseudo, avatar:moi.avatar, titre:moi.titre, fiche:moi.fiche, ficheBadge:moi.succes || [], prive:false});
+    if(!ON) return Promise.resolve(null);
+    var c = pubCache[l]; if(c) return Promise.resolve(c);
+    return appel('/profil/' + encodeURIComponent(l)).then(function(r){ pubCache[l] = r.ok ? r.d : false; return pubCache[l] || null; }).catch(function(){ return null; });
+  };
+
   // ----- propositions (privées : lues seulement par LeClubi) -----
   function saisonLabel(id){ var x = SEASONS.filter(function(z){ return z.id === id; })[0]; return x ? x.label : id; }
   function chargerProps(){
@@ -3128,10 +3265,18 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }
     var cc = e.target.closest('[data-cp]');
     if(cc){ var t0 = cc.dataset.cp; (navigator.clipboard ? navigator.clipboard.writeText(t0) : Promise.reject()).then(function(){ cc.textContent = 'Copié ✓'; setTimeout(function(){ cc.textContent = 'Copier'; }, 1500); }, function(){ cc.textContent = 'Copie impossible'; }); return; }
+    var fvv = e.target.closest('[data-fav]');
+    if(fvv){ fdraft.carte = fvv.dataset.id; fpick = null; rendreCompte(); return; }
+    var fbb = e.target.closest('[data-fbid]');
+    if(fbb){ fdraft.badge = fbb.dataset.fbid; fpick = null; rendreCompte(); return; }
+    var fcd = e.target.closest('[data-cadre]');
+    if(fcd){ fdraft.cadre = fcd.dataset.cadre; var sy2 = window.scrollY; rendreCompte(); window.scrollTo(0, sy2); return; }
+    var fkk = e.target.closest('#fepv .fk');
+    if(fkk){ fkk.classList.toggle('flip'); return; }
     var tt = e.target.closest('[data-titre]');
     if(tt){ choisirTitre(tt.dataset.titre); return; }
     var tb = e.target.closest('[data-tab]');
-    if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; cmd.conf = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
+    if(tb){ cpTab = tb.dataset.tab; bsel = null; msgB = ''; fdraft = null; fpick = null; msgF = ''; cmd.conf = ''; rendreCompte(); window.scrollTo({top: cpEl.getBoundingClientRect().top + window.scrollY - 80}); return; }
     var bb = e.target.closest('[data-bid]');
     if(bb && bsel){
       var bid = bb.dataset.bid, bj = bsel.indexOf(bid);
@@ -3147,6 +3292,12 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     else if(a === 'cancel'){ pick = null; msgPick = ''; rendreCompte(); }
     else if(a === 'clear'){ pick = []; msgPick = ''; rendreCompte(); }
     else if(a === 'save') envoyerVitrine();
+    else if(a === 'favcard'){ fpick = fpick === 'card' ? null : 'card'; rendreCompte(); }
+    else if(a === 'favbadge'){ fpick = fpick === 'badge' ? null : 'badge'; rendreCompte(); }
+    else if(a === 'nocard'){ fdraft.carte = ''; rendreCompte(); }
+    else if(a === 'nobadge'){ fdraft.badge = ''; rendreCompte(); }
+    else if(a === 'savefiche') envoyerFiche();
+    else if(a === 'cancelfiche'){ fdraft = null; fpick = null; msgF = ''; rendreCompte(); }
     else if(a === 'defis'){ dfEtat = ''; chargerDefis(); rendreCompte(); }
     else if(a === 'authchat') connexion('compte', SCOPE_CHAT, 'commandes');
     else if(a === 'clearbadges'){ bsel = []; msgB = ''; rendreCompte(); }
@@ -3155,6 +3306,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       var url = location.origin + location.pathname + '#collection=' + encodeURIComponent(maCollection() || moi.pseudo), done = function(){ b.textContent = 'Lien copié ✓'; setTimeout(function(){ b.textContent = 'Copier le lien de mon profil'; }, 1800); };
       if(navigator.clipboard) navigator.clipboard.writeText(url).then(done, function(){ b.textContent = 'Copie impossible'; }); else b.textContent = 'Copie impossible';
     }
+  });
+  cpEl.addEventListener('input', function(e){
+    if(!fdraft) return;
+    if(e.target.id === 'fjeu'){ fdraft.jeu = e.target.value; majApercu(); }
+    else if(e.target.id === 'fdev'){ fdraft.devise = e.target.value; majApercu(); }
   });
   cpEl.addEventListener('change', function(e){
     if(e.target.dataset.act !== 'pub') return;
