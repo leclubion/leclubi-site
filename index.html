@@ -874,9 +874,24 @@ nav{min-width:0}
 .bchg img{height:36px;width:auto;animation:bglow 1.8s ease-in-out infinite}
 @keyframes bglow{0%,100%{opacity:.6;filter:drop-shadow(0 0 0 transparent)}50%{opacity:1;filter:drop-shadow(0 0 10px var(--accent))}}
 footer{position:relative}
-.fbal{position:absolute;right:clamp(16px,7vw,110px);top:-47px;height:48px;width:auto;pointer-events:none;filter:drop-shadow(0 -4px 14px color-mix(in srgb,var(--accent) 45%,transparent))}
 body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;background:radial-gradient(ellipse 55% 100% at 50% 0,color-mix(in srgb,var(--accent) 8%,transparent),transparent 72%);pointer-events:none;z-index:-1}
 @media (prefers-reduced-motion:reduce){.bchg img{animation:none}}
+.pdc.annule{border-color:#4a4c52;background:#0d0e10;cursor:default}
+.pdc.annule::before{background:linear-gradient(180deg,#050506 0%,#17181b 45%,#4b4d53 100%)}
+.pdc.annule .bt{position:absolute;inset:36% auto auto 50%;width:auto;height:36%;object-fit:contain;transform:translateX(-50%);z-index:-1;opacity:.92;filter:grayscale(.45) brightness(.82);transition:none}
+.pdc.annule:hover .bt{transform:translateX(-50%)}
+.pdc.annule .tm{background:#3a3c41;color:#c9c5bb;text-decoration:line-through}
+.pdc.annule .gn{color:#b9b6ad;text-decoration:line-through;text-decoration-thickness:1px}
+.pdc.annule .fin{background:rgba(20,21,24,.9);color:#e8e4da;border-block:1px solid rgba(255,255,255,.28);top:30%}
+@media (max-width:980px){.plan-sec .pdc.annule{min-height:132px}.pdc.annule .nt{display:none}.plan-sec .pdc.annule .fin,.pdc.annule .fin{top:14px}.pdc.annule .bt{inset:auto auto 0 10px;height:72%;transform:none}.pdc.annule:hover .bt{transform:none}}
+.cc-host{position:relative}
+.cch{position:absolute;z-index:3;padding:0;border:0;background:none;cursor:pointer;line-height:0;opacity:.88;transition:transform .2s ease,opacity .2s ease,filter .2s ease;-webkit-tap-highlight-color:transparent}
+.cch img{height:34px;width:auto;display:block;pointer-events:none}
+.cch:hover,.cch:focus-visible{opacity:1;transform:scale(1.18) rotate(-4deg);filter:drop-shadow(0 0 8px var(--accent))}
+.cch.got{pointer-events:none;animation:ccgot .7s ease-in forwards}
+@keyframes ccgot{0%{transform:scale(1.2) rotate(-4deg);opacity:1}35%{transform:scale(1.7) translateY(-10px) rotate(8deg);opacity:1;filter:drop-shadow(0 0 16px var(--accent))}100%{transform:scale(.2) translateY(-40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cch.got{animation:none;opacity:0}}
+
 </style>
 </head>
 <body>
@@ -1269,7 +1284,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
   <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
 </div>
 
-<footer><img class="fbal" src="images-site/balise-mini.png" alt="" onerror="this.remove()"><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
+<footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
 // Thème clair / sombre : suit l'appareil tant que le visiteur n'a rien choisi, puis garde son choix
@@ -2273,11 +2288,13 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // ---- Planning ----
 // Une ligne par live : date (AAAA-MM-JJ), heure (heure de Paris), jeu, lien Steam (facultatif), image (facultatif), note (facultatif).
 // Pour l'image : colle l'adresse d'une image dans img:'...' (sur une page Steam : clic droit sur l'image, "Copier l'adresse de l'image").
+// Pour annuler un live : ajoute  annule:true  à la fin de sa ligne (après note:''). La case devient grise avec « ANNULÉ ».
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
   {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-12', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
+  {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:'', annule:true},
   {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
 var JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -2308,7 +2325,7 @@ function nextLive(){
   var now = new Date(), best = null;
   PLANNING.forEach(function(e){
     var d = mkDate(e.date, e.time);
-    if(d.getTime() + 4 * 3600000 >= now.getTime() && (!best || d < best.d)) best = {e:e, d:d};
+    if(!e.annule && d.getTime() + 4 * 3600000 >= now.getTime() && (!best || d < best.d)) best = {e:e, d:d};
   });
   return best;
 }
@@ -2333,6 +2350,7 @@ function renderPlan(){
     var key = ymd(d), list = PLANNING.filter(function(e){ return e.date === key; }), cls = (+d === +t0 ? ' today' : '') + (d < t0 ? ' past' : '');
     var head = '<div class="pdh"><b>' + JOURS[i] + '</b><span>' + d.getDate() + ' ' + MABR[d.getMonth()] + '</span></div>';
     var body = list.length ? list.map(function(e){
+      if(e.annule) return '<div class="pdc annule"><img class="bt" src="images-site/balise-triste.png" alt="" onerror="this.remove()"><span class="tm">' + hh(e.time) + '</span><span class="fin">ANNULÉ</span><span class="tx"><span class="gn">' + esc(e.game) + '</span><small class="nt">' + esc(e.note || 'Live annulé, la Balise est triste…') + '</small></span></div>';
       var tag = e.steam ? 'a href="' + esc(e.steam) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(e.game) + ', ' + hh(e.time) + ' (page Steam, nouvel onglet)"' : 'div';
       var done = mkDate(e.date, e.time).getTime() + 4 * 3600000 < now.getTime();   // un live est « terminé » 4 h après son heure de début
       return '<' + tag.split(' ')[0] + tag.slice(tag.split(' ')[0].length) + ' class="pdc' + (done ? ' done' : '') + '">' + planImg(e) + '<span class="tm">' + hh(e.time) + '</span>' + (done ? '<span class="fin">TERMINÉ</span>' : '') +
@@ -2797,13 +2815,14 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var redir = new URL('jeu.html', location.href); redir.hash = ''; redir.search = '';
     location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + encodeURIComponent(CID) + '&redirect_uri=' + encodeURIComponent(redir.href) + '&response_type=token&scope=' + encodeURIComponent(scope || '') + '&state=' + st;
   }
-  function deconnexion(){ suppr(KS); suppr(KT); clearTimeout(spT); spPlanned = false; dfData = null; dfEtat = ''; moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
+  function deconnexion(){ suppr(KS); suppr(KT); clearTimeout(spT); spPlanned = false; ccSync = false; dfData = null; dfEtat = ''; moi = null; etat = 'out'; pick = null; props = null; propsEtat = ''; ui(); location.hash = ''; }
 
   // ----- en-tête -----
   function ui(){
     var b = g('login'), p = g('moi');
     if(etat === 'in' && dfEtat === '') chargerDefis();
     if(etat === 'in' && !spPlanned){ spPlanned = true; planSpider(true); }
+    if(etat === 'in' && moi) ccSynchro();
     if(!ON){ b.hidden = true; p.hidden = true; }
     else if(etat === 'in' && moi){
       b.hidden = true; p.hidden = false;
@@ -3045,6 +3064,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
         if(d.badge && !d.fait && d.etat !== 'termine') out.push({cat:d.fin - d.debut > 20 * 864e5 ? 'Événements' : 'Défis', id:'defi-' + d.n, name:d.badge.nom, task:d.descr || d.titre, tier:d.badge.tier, ico:d.badge.ico, cur:d.progres, max:d.cible, got:false});
       });
       if(!sc.some(function(x){ return x.id === 'balise'; })) out.push({cat:'Fidélité', id:'balise', name:'Gardien de la Balise', task:'Reviens sur le site 10 jours différents.', tier:'or', ico:'balise', cur:Math.min(moi.visites || 0, 10), max:10, got:false});
+      if(!sc.some(function(x){ return x.id === 'cachecache'; })) out.push({cat:'Secrets', id:'cachecache', name:'???', task:'Des petits habitants se cachent sur les pages du site…', tier:'epique', ico:'balise', cur:0, max:1, got:false, secret:true});
       if(!sc.some(function(x){ return x.id === 'araignee'; })) out.push({cat:'Secrets', id:'araignee', name:'???', task:'Un secret se cache quelque part sur le site…', tier:'epique', ico:'spider', cur:0, max:1, got:false, secret:true});
     } else {
       var c = pubCache[l];
@@ -3073,6 +3093,50 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     t.innerHTML = '<img src="images-site/balise-mini.png" alt=""><div><b>' + esc(titre) + '</b><span>' + esc(txt) + '</span></div>';
     document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 6500);
   }
+
+  // ----- les 6 Balises cachées : les retrouver toutes donne le badge secret « Cache-Cache » -----
+  var CCP = ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos'], CCK = 'leclubi-cache', ccSync = false;
+  var CCPOS = {accueil:['#v-accueil section:last-of-type .wrap', 'right:5%;bottom:14px'], planning:['#v-planning .wrap', 'left:41%;bottom:-40px'], collection:['#v-collection .wrap', 'right:8%;top:34px;rotate:8deg'],
+    collectionneurs:['#v-collectionneurs .wrap', 'right:16%;bottom:10px;rotate:-6deg'], classement:['#v-classement .wrap', 'right:3%;bottom:70px'], apropos:['#v-apropos .wrap', 'left:9%;bottom:18px;rotate:5deg']};
+  function ccLire(){ try{ var a = JSON.parse(localStorage.getItem(CCK) || '[]'); return Array.isArray(a) ? a.filter(function(x, i){ return CCP.indexOf(x) > -1 && a.indexOf(x) === i; }) : []; }catch(e){ return []; } }
+  function ccEcrire(a){ try{ localStorage.setItem(CCK, JSON.stringify(a)); }catch(e){} }
+  function ccPoser(){
+    var vues = ccLire();
+    CCP.forEach(function(pg){
+      var d = CCPOS[pg], host = document.querySelector(d[0]); if(!host || host.querySelector('.cch[data-cc="' + pg + '"]')) return;
+      host.classList.add('cc-host');
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'cch'; b.dataset.cc = pg; b.tabIndex = -1; b.setAttribute('aria-hidden', 'true');
+      b.style.cssText = d[1]; b.innerHTML = '<img src="images-site/balise-mini.png" alt="">'; b.hidden = vues.indexOf(pg) > -1; host.appendChild(b);
+    });
+  }
+  function ccMaj(){ var v = ccLire(); [].forEach.call(document.querySelectorAll('.cch'), function(b){ b.hidden = v.indexOf(b.dataset.cc) > -1; }); }
+  function ccServeur(pages){
+    if(!ON || etat !== 'in' || !moi) return Promise.resolve(null);
+    return appel('/cache', {session:sess(), body:{pages:pages}}).then(function(r){
+      if(!r.ok) return null;
+      var tous = ccLire(); (r.d.pages || []).forEach(function(x){ if(tous.indexOf(x) < 0) tous.push(x); }); ccEcrire(tous); ccMaj(); moi.cache = r.d.pages || [];
+      if(r.d.badge && !(moi.succes || []).some(function(x){ return x.id === 'cachecache'; })){
+        moi.succes = (moi.succes || []).concat([{id:'cachecache', nom:'Cache-Cache', desc:'Tu as retrouvé les 6 Balises cachées sur les pages du site.', ico:'balise', tier:'epique', cat:'Secrets', ts:Date.now()}]);
+      }
+      return r.d;
+    }).catch(function(){ return null; });
+  }
+  function ccTrouvee(b){
+    var pg = b.dataset.cc, v = ccLire(); if(v.indexOf(pg) > -1) return;
+    v.push(pg); ccEcrire(v); b.classList.add('got'); setTimeout(ccMaj, 700);
+    if(v.length < CCP.length){ toast('Balise trouvée !', v.length + ' sur ' + CCP.length + '. Il en reste ' + (CCP.length - v.length) + (CCP.length - v.length > 1 ? ' cachées' : ' cachée') + ' sur les pages du site.'); ccServeur(v); return; }
+    if(etat === 'in' && ON){
+      ccServeur(v).then(function(d){ if(d && d.nouveau) toast('Badge secret débloqué', 'Cache-Cache : tu as retrouvé les 6 Balises !'); else if(d) toast('Les 6 Balises !', 'Tu les as toutes retrouvées.'); else toast('Les 6 Balises !', 'Reconnecte-toi pour recevoir ton badge secret.'); });
+    } else toast('Les 6 Balises !', ON ? 'Connecte-toi avec Twitch pour recevoir ton badge secret Cache-Cache.' : 'Bravo, tu les as toutes trouvées !');
+  }
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.cch'); if(b) ccTrouvee(b); });
+  function ccSynchro(){
+    if(ccSync || !ON || etat !== 'in' || !moi) return; ccSync = true;
+    var loc = ccLire(), srv = moi.cache || [];
+    if(srv.length){ var tous = loc.slice(); srv.forEach(function(x){ if(tous.indexOf(x) < 0) tous.push(x); }); ccEcrire(tous); ccMaj(); }
+    if(loc.some(function(x){ return srv.indexOf(x) < 0; })) ccServeur(loc);
+  }
+  ccPoser();
   function montrerAraignee(){
     if(document.hidden || spOn || etat !== 'in' || aAraignee()){ planSpider(false); return; }
     spOn = true;
