@@ -679,6 +679,58 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .hlinks .tgl:hover{border-color:var(--muted);opacity:1}
 #theme[data-eff="dark"] .i-moon,#theme[data-eff="light"] .i-sun{display:none}
 .hlinks{flex-wrap:wrap}
+/* ---- Jeu du jour ---- */
+.qweek{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:18px 0 26px}
+.qd{padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:center;font-size:12px;color:var(--muted);line-height:1.3}
+.qd b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:3px}
+.qd.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;color:var(--text)}
+@media (max-width:640px){.qweek{grid-template-columns:repeat(4,1fr)}}
+.qcard{max-width:760px;margin:0 auto;padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--panel);display:flex;flex-direction:column;gap:18px}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.qhead h2{margin:0;font-size:22px}
+.qpips{display:flex;gap:8px}
+.qpip{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);background:transparent;transition:.25s}
+.qpip.no{background:#d4443c;border-color:#d4443c}.qpip.ok{background:#37b26c;border-color:#37b26c}
+.qsub{margin:0;color:var(--muted);font-size:14px}
+.qimgw{display:flex;justify-content:center;background:#0e0f10;border-radius:12px;padding:10px;min-height:120px}
+.qimg{display:block;max-width:100%;max-height:420px;border-radius:6px;transition:opacity .5s}
+.qimg.px{image-rendering:pixelated;width:min(100%,520px);height:auto}
+.qemo{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:clamp(38px,9vw,64px);padding:14px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.qemo span{min-width:1.3em;text-align:center}.qemo .q{opacity:.25;filter:grayscale(1)}
+.qemo span:not(.q){animation:qpop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes qpop{from{transform:scale(.2);opacity:0}}
+.qpend{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center}
+@media (max-width:560px){.qpend{grid-template-columns:1fr;justify-items:center}}
+.qmask{font:700 clamp(22px,5vw,34px)/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;word-break:break-word;text-align:center}
+.qgal path,.qgal line,.qgal circle{stroke:var(--text);stroke-width:4;fill:none;stroke-linecap:round}
+.qgal .p{opacity:0;transition:opacity .4s}.qgal .p.v{opacity:1}
+.qkb{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.qkb button{width:38px;height:42px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:600 15px inherit;cursor:pointer}
+.qkb button:hover:not(:disabled){border-color:var(--accent)}
+.qkb button.ok{background:#37b26c;border-color:#37b26c;color:#fff}.qkb button.no{background:#d4443c;border-color:#d4443c;color:#fff}.qkb button:disabled{cursor:default;opacity:.85}
+.qclues{display:flex;flex-wrap:wrap;gap:8px}
+.qclue{padding:8px 12px;border-radius:999px;border:1px solid var(--accent);font-size:14px}.qclue small{color:var(--muted);margin-right:6px;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.qtab{width:100%;border-collapse:separate;border-spacing:4px;font-size:13px}
+.qtab th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;text-align:center}
+.qtab td{padding:9px 6px;border-radius:8px;text-align:center;color:#fff;background:#d4443c;font-weight:600}
+.qtab td.ok{background:#37b26c}.qtab td.part{background:#e0a030}.qtab td.nom{background:transparent;color:var(--text);text-align:left}
+.qres p{font-size:17px;line-height:1.8;margin:0}
+.qres .h{background:var(--text);color:transparent;border-radius:3px;user-select:none}
+.qres .r{color:var(--accent);font-weight:700}
+.qin{position:relative;display:flex;gap:8px}
+.qin input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.qsug{position:absolute;left:0;right:90px;top:100%;margin-top:4px;z-index:6;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.qsug button{display:block;width:100%;text-align:left;padding:10px 14px;border:0;background:transparent;color:var(--text);font:inherit;cursor:pointer}
+.qsug button:hover,.qsug button.sel{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.qwrong{display:flex;gap:6px;flex-wrap:wrap}.qwrong span{padding:5px 10px;border-radius:999px;background:color-mix(in srgb,#d4443c 22%,transparent);font-size:13px;text-decoration:line-through;text-decoration-color:#d4443c}
+.qend{padding:16px 18px;border-radius:12px;border:1px solid var(--line);text-align:center;display:flex;flex-direction:column;gap:6px}
+.qend.win{border-color:#37b26c;background:color-mix(in srgb,#37b26c 12%,transparent)}.qend.lose{border-color:#d4443c;background:color-mix(in srgb,#d4443c 10%,transparent)}
+.qend b{font-size:20px}.qend em{font-style:normal;color:var(--accent);font-weight:700}
+.qstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qstats div{padding:10px;border:1px solid var(--line);border-radius:10px;text-align:center;font-size:12px;color:var(--muted)}.qstats b{display:block;font-size:20px;color:var(--text)}
+@media (max-width:560px){.qstats{grid-template-columns:repeat(2,1fr)}.qcard{padding:16px}}
+.qmsg{min-height:1.2em;font-size:13px;color:#d4443c}
+
 
 /* dos de carte du site (cartes pas encore débloquées) : même direction artistique que le Clubi Card Battle */
 .face.back{border:2px solid #d4a53c;background:repeating-linear-gradient(45deg,rgba(212,165,60,.1) 0 2px,transparent 2px 9px),repeating-linear-gradient(-45deg,rgba(212,165,60,.1) 0 2px,transparent 2px 9px),radial-gradient(ellipse at 50% 40%,#7a0d16,#2a0509 75%);box-shadow:inset 0 0 0 5px rgba(0,0,0,.35)}
@@ -689,6 +741,46 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 /* barre du haut : À propos regroupé à droite avec les liens et le thème ; Collectionneurs fusionné dans Collection de Cartes */
 .hlinks .nav-r{order:0;flex:none;display:flex;margin-right:6px;padding-right:10px;border-right:1px solid var(--line)}
 .hlinks .nav-r a{padding:6px 10px;font-size:14px}
+
+/* ===== Cartes Arcade ===== */
+:root{--acemb:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20200%20200%22%3E%3Cg%20fill=%22none%22%20stroke=%22%23f4d98a%22%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2286%22%20stroke-width=%221.5%22%20stroke-dasharray=%222%206%22/%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2270%22%20stroke-width=%223%22/%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2254%22%20stroke-width=%221.5%22/%3E%3C/g%3E%3Cg%20stroke=%22%23d4a53c%22%20stroke-width=%222.2%22%20opacity=%22.85%22%3E%3Cpath%20d=%22M100%204V30M100%20170V196M4%20100H30M170%20100H196M32%2032l18%2018M150%20150l18%2018M168%2032l-18%2018M50%20150l-18%2018%22/%3E%3C/g%3E%3C/svg%3E");--rc-c:#9aa0aa;--rc-u:#3fcf9b;--rc-r:#4a8aff;--rc-l:#ffb02e;--rc-s:#ff5fa8}
+.ac-art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ac-art .nk{fill:#0a0818;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}.ac-art .nf{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.ac-art .nc{stroke:#7df9ff}.ac-art .np{stroke:#ff5fa8}.ac-art .nv{stroke:#b46bff}.ac-art .ny{stroke:#ffe45a}.ac-art .ng{stroke:#7dff9a}.ac-art .no{stroke:#ff9a3a}.ac-art .nr{stroke:#ff4a4a}
+.ac-stats{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:4px 0 14px}
+.ac-prog{flex:1 1 220px;height:10px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden}.ac-prog i{display:block;height:100%;background:linear-gradient(90deg,#7df9ff,#b46bff,#ff5fa8);transition:width .6s}
+.ac-stats b{font-size:18px}
+.ac-pend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 18px;margin:0 0 16px;border-radius:14px;border:1px solid var(--accent);background:linear-gradient(135deg,rgba(125,249,255,.12),rgba(180,107,255,.14))}
+.ac-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}.ac-chips button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:7px 14px;border-radius:99px;font:600 13px inherit;font-family:inherit;cursor:pointer}.ac-chips button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.ac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+.ac-card{position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#0d0b16;cursor:pointer;transition:transform .2s;--rc:var(--rc-c);box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.ac-card.r-u{--rc:var(--rc-u)}.ac-card.r-r{--rc:var(--rc-r)}.ac-card.r-l{--rc:var(--rc-l);box-shadow:0 0 18px rgba(255,176,46,.5)}.ac-card.r-s{--rc:var(--rc-s);box-shadow:0 0 18px rgba(255,95,168,.55)}
+.ac-card:hover{transform:translateY(-4px)}
+.ac-card::after{content:"";position:absolute;inset:0;border-radius:inherit;border:3px solid var(--rc);pointer-events:none;z-index:5}
+.ac-card .ac-n{position:absolute;top:8px;left:9px;z-index:4;font:700 9px/1 system-ui;letter-spacing:.18em;color:#0a0a14;background:var(--rc);padding:4px 6px;border-radius:4px}
+.ac-card .ac-pl{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:24px 8px 9px;background:linear-gradient(transparent,rgba(5,5,12,.9) 55%);text-align:center;color:#fff}
+.ac-card .ac-pl b{display:block;font:800 13px/1.1 system-ui;letter-spacing:.03em;text-transform:uppercase}.ac-card .ac-pl small{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#9fe9ff}
+.ac-card.lock{cursor:default;filter:saturate(.7)}.ac-card.lock:hover{transform:none}
+.ac-back{position:absolute;inset:0;background:var(--acemb) 50% 50%/62% no-repeat,repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 6px,transparent 6px 12px),linear-gradient(160deg,#2b2f3b,#14161d)}
+.ac-card.lock .ac-n{background:#454a54;color:#c8ccd4}
+.ac-ov{position:fixed;inset:0;z-index:300;background:rgba(6,6,12,.88);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.ac-box{width:min(720px,100%);text-align:center;color:#fff}.ac-box h2{margin:0 0 6px}.ac-box p{color:#b9b6d4;margin:0 0 18px}
+.ac-3{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.ac-fl{perspective:900px;width:min(200px,28vw);min-width:130px;aspect-ratio:2/3;border:0;background:none;padding:0;cursor:pointer}
+.ac-fl .in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,1.2,.4,1);transform-style:preserve-3d}
+.ac-fl.on .in{transform:rotateY(180deg)}.ac-fl:not(.on):hover .in{transform:translateY(-6px) rotateZ(-1.5deg)}
+.ac-fl .f{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden}
+.ac-fl .fb{background:var(--acemb) 50% 50%/62% no-repeat,linear-gradient(160deg,#2b2f3b,#14161d);border:3px solid #6a7080;box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.ac-fl .ff{transform:rotateY(180deg)}.ac-fl .ff .ac-card{position:absolute;inset:0;aspect-ratio:auto;cursor:default}
+.ac-fl.dim{opacity:.55;filter:saturate(.6)}.ac-fl[disabled]{cursor:default}
+.ac-res{min-height:26px;font-size:17px;font-weight:700;margin-bottom:14px}
+.ac-zoom{width:min(300px,86vw);margin:0 auto}.ac-zoom .ac-card{cursor:default}
+.ac-info{margin-top:12px;font-size:14px;color:#b9b6d4}.ac-info b{color:#fff;text-transform:uppercase;letter-spacing:.06em}
+.ac-coffre{position:absolute;right:10px;bottom:6px;width:30px;height:30px;padding:0;border:0;background:none;opacity:.1;cursor:pointer;transition:opacity .3s}
+.ac-coffre:hover,.ac-coffre:focus-visible{opacity:.75}.ac-coffre.shake{animation:acsh .5s}
+@keyframes acsh{25%{transform:rotate(-12deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-6deg)}}
+.ab{position:relative}
+@media (prefers-reduced-motion:reduce){.ac-fl .in{transition:none}.ac-coffre.shake{animation:none}}
 .subtabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--panel);margin-bottom:22px}
 .subtabs a{padding:8px 20px;border-radius:999px;font-size:14px;font-weight:600;color:var(--muted);transition:background .2s,color .2s}
 .subtabs a:hover{color:var(--text)}
@@ -953,6 +1045,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
     <nav aria-label="Navigation principale">
       <a href="#accueil" data-nav="accueil">Accueil</a>
       <a href="#planning" data-nav="planning">Planning</a>
+      <a href="#jeudujour" data-nav="jeudujour" id="navQ" hidden>Jeu du jour</a>
       <a href="#collection" data-nav="collection">Collection de Cartes</a>
       <a href="#classement" data-nav="classement" id="navClass" hidden>Classement</a>
     </nav>
@@ -1102,7 +1195,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 <div class="view" id="v-collectionneurs" hidden>
   <section>
     <div class="wrap">
-      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a></div>
+      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
       <h1>Collectionneurs</h1>
       <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
       <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
@@ -1112,6 +1205,29 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 </div>
 
 <!-- CLASSEMENT DU JEU -->
+<!-- JEU DU JOUR -->
+<div class="view" id="v-arcade" hidden>
+  <section>
+    <div class="wrap">
+      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
+      <h1>Cartes Arcade</h1>
+      <p class="lead">Une collection à part, rien que pour le site : réussis le Jeu du jour et choisis 1 carte parmi 3 retournées. Un peu de chance, un peu d'habileté… et quelques secrets à découvrir.</p>
+      <div id="acmain"></div>
+    </div>
+  </section>
+</div>
+
+<div class="view" id="v-jeudujour" hidden>
+  <section>
+    <div class="wrap">
+      <h1>Jeu du jour</h1>
+      <p class="lead" id="qlead">Un mini-jeu différent chaque jour de la semaine. 5 essais : si tu rates, reviens demain !</p>
+      <div class="qweek" id="qweek"></div>
+      <div id="qmain"></div>
+    </div>
+  </section>
+</div>
+
 <div class="view" id="v-classement" hidden>
   <section>
     <div class="wrap">
@@ -1221,6 +1337,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
         <a class="btn" href="#collection">Voir la collection</a>
         <a class="btn ghost" href="#collectionneurs">Voir les collectionneurs</a>
       </div>
+    <button type="button" class="ac-coffre" id="acCoffre" aria-label="Un petit coffre"><svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 14a12 10 0 0124 0z"/><rect x="4" y="14" width="24" height="12" rx="2"/><rect x="13" y="17" width="6" height="6" rx="1"/></svg></button>
     </div>
   </section>
 </div>
@@ -1235,7 +1352,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 <div class="view" id="v-collection" hidden>
   <section>
     <div class="wrap">
-      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a></div>
+      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
       <h1>Collection Officielle</h1>
       <div class="bar2" id="acct"></div>
       <div id="vit"></div>
@@ -1362,13 +1479,15 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 // Navigation
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
-  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'collection', 'collectionneurs', 'classement', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#arcade' ? 'arcade' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement' && window.chargerClassement) window.chargerClassement();
+  if(page === 'jeudujour' && window.lcJeuDuJour) window.lcJeuDuJour();
+  if(page === 'arcade' && window.lcArcadeOuvrir) window.lcArcadeOuvrir();
   if(page === 'compte' && window.rendreCompte) window.rendreCompte();
-  document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'collectionneurs' ? 'collectionneurs' : 'collection')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'collectionneurs' || page === 'arcade' ? page : 'collection')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   document.querySelectorAll('[data-nav]').forEach(function(a){
-    if(a.dataset.nav === (page === 'collectionneurs' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    if(a.dataset.nav === (page === 'collectionneurs' || page === 'arcade' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
   document.body.classList.toggle('planw', page === 'planning');
   window.scrollTo(0,0);
@@ -2055,6 +2174,7 @@ var BD_ICO = {
   sword:'<path d="M14.5 4.5l5 5L9 20l-5 1 1-5z"/><path d="M13 6l5 5"/>',
   dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>',
   bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/>',
+  key:'<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M15 12v3"/>',
   spider:'<ellipse cx="12" cy="13.5" rx="3" ry="4"/><circle cx="12" cy="8.5" r="2"/><path d="M9.5 11L4 7M9 13.5L3 13M9.3 16L4 20M10 18l-2 3M14.5 11L20 7M15 13.5l6-.5M14.7 16L20 20M14 18l2 3"/>'
 };
 var BD_TIER = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', mythique:'Mythique'};
@@ -2256,6 +2376,144 @@ document.getElementById('pform').addEventListener('submit', function(e){
       if(vis && !running) play();
     }, {threshold:.35}).observe(st);
   } else { vis = true; play(); }
+})();
+
+// ---- Jeu du jour : un mini-jeu différent chaque jour de la semaine ----
+(function(){
+  var ORDRE = ['pixel', 'silhouette', 'emoji', 'pendu', 'zoom', 'indices', 'resume'], JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  var FM = {
+    pixel: {n: 'PixelPelé', d: "Retrouve le jeu : l'image devient plus nette à chaque erreur."},
+    silhouette: {n: 'Silhouette', d: "De quel jeu vient ce personnage ? La silhouette se dévoile à chaque erreur."},
+    emoji: {n: 'Emoji', d: "Retrouve le jeu grâce à ces emojis. Chaque erreur en révèle un de plus."},
+    pendu: {n: 'Le Pendu', d: "Propose des lettres pour deviner le titre. Une mauvaise lettre fait avancer le pendu."},
+    zoom: {n: 'Zoom', d: "Un détail d'une image du jeu : le zoom recule à chaque erreur."},
+    indices: {n: 'Indices', d: "Chaque essai est comparé au bon jeu : genre, année, studio, plateforme…"},
+    resume: {n: 'Résumé caviardé', d: "Le résumé du jeu est censuré. Chaque erreur lève un peu de la censure."}
+  };
+  var CLUE = {genre: 'Genre', annee: 'Année', studio: 'Studio', plateforme: 'Plateforme', chaine: 'Sur la chaîne'};
+  var KB = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+  var g = function(i){ return document.getElementById(i); };
+  var E = function(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; };
+  var nrm = function(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  var st = null, jeux = [], msg = '', busy = false, sug = [], sel = -1, tick = null, charge = false;
+  function C(){ return window.lcCompte; }
+  function parisDow(){ return new Date(new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'}) + 'T12:00:00Z').getUTCDay(); }
+  function semaine(){
+    var f = st ? st.fmt : null, dow = parisDow(), auj = f || ['resume', 'pixel', 'silhouette', 'emoji', 'pendu', 'zoom', 'indices'][dow];
+    g('qweek').innerHTML = ORDRE.map(function(k, i){ var jd = (i + 1) % 7; return '<div class="qd' + (k === auj ? ' on' : '') + '"><b>' + JOURS[jd].slice(0, 3) + '.</b>' + FM[k].n + '</div>'; }).join('');
+  }
+  function pips(){
+    var h = '', i, ess = st.essais || [], faux = ess.filter(function(e){ return !e.ok; }).length;
+    for(i = 0; i < 5; i++) h += '<span class="qpip' + (i < faux ? ' no' : (st.gagne && i === faux ? ' ok' : '')) + '"></span>';
+    return '<div class="qpips" aria-label="' + faux + ' erreur(s) sur 5">' + h + '</div>';
+  }
+  function gal(n){
+    var P = ['<circle class="p" cx="95" cy="52" r="12"/>', '<line class="p" x1="95" y1="64" x2="95" y2="105"/>', '<path class="p" d="M95 75 L78 92 M95 75 L112 92"/>', '<line class="p" x1="95" y1="105" x2="80" y2="132"/>', '<line class="p" x1="95" y1="105" x2="110" y2="132"/>'];
+    return '<svg class="qgal" viewBox="0 0 140 160" width="150" height="170" aria-hidden="true"><path d="M15 150 H120 M40 150 V15 H95 V40"/>' + P.map(function(p, i){ return p.replace('class="p"', 'class="p' + (i < n ? ' v' : '') + '"'); }).join('') + '</svg>';
+  }
+  function zone(){
+    var f = st.fmt, h = '';
+    if(f === 'pixel' || f === 'zoom' || f === 'silhouette') h = '<div class="qimgw">' + (st.img ? '<img class="qimg' + (f === 'pixel' && !st.fini ? ' px' : '') + '" alt="Image du jeu à deviner" src="' + st.img + '">' : '') + '</div>';
+    else if(f === 'emoji'){ var e = st.emojis || [], x; h = '<div class="qemo" aria-label="Emojis">'; for(x = 0; x < e.length; x++) h += '<span>' + E(e[x]) + '</span>'; for(x = e.length; x < (st.total || e.length); x++) h += '<span class="q">❓</span>'; h += '</div>'; }
+    else if(f === 'pendu'){
+      var used = {}; (st.lettres || []).forEach(function(l){ used[l.l] = l.ok ? 'ok' : 'no'; });
+      h = '<div class="qpend">' + gal(st.erreurs) + '<div><div class="qmask" aria-label="Titre à deviner">' + E(st.masque).replace(/ /g, '&nbsp;&nbsp;') + '</div>' + (st.indice ? '<p class="qsub" style="text-align:center">Indice : ' + E(st.indice) + '</p>' : '') + '</div></div>' +
+        (st.fini ? '' : '<div class="qkb">' + KB.map(function(k){ return '<button type="button" data-k="' + k + '"' + (used[k] ? ' disabled class="' + used[k] + '"' : '') + '>' + k + '</button>'; }).join('') + '</div>');
+    }
+    else if(f === 'indices'){
+      h = '<div class="qclues">' + (st.indices || []).map(function(c){ return '<span class="qclue"><small>' + CLUE[c.k] + '</small>' + E(c.v) + '</span>'; }).join('') + '</div>';
+      if((st.essais || []).length) h += '<table class="qtab"><thead><tr><th></th><th>Genre</th><th>Année</th><th>Studio</th><th>Plateforme</th><th>Chaîne</th></tr></thead><tbody>' +
+        st.essais.map(function(e){ return '<tr><td class="nom">' + E(e.g) + '</td>' + (e.cmp || []).map(function(c){ return '<td class="' + c.s + '">' + E(c.v) + (c.dir ? (c.dir === 'up' ? ' ↑' : ' ↓') : '') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+    }
+    else if(f === 'resume') h = '<div class="qres"><p>' + (st.resume || []).map(function(s){ return s.h ? '<span class="h">' + E(s.t) + '</span>' : (s.r ? '<span class="r">' + E(s.t) + '</span>' : E(s.t)); }).join('') + '</p></div>';
+    return h;
+  }
+  function fin(){
+    var rep = st.reponse ? st.reponse.nom : '', faux = st.erreurs, h;
+    if(st.gagne) h = '<div class="qend win"><b>Bravo ! 🎉</b><span>C\'était <em>' + E(rep) + '</em> · trouvé avec ' + faux + ' erreur' + (faux > 1 ? 's' : '') + '</span><span><em>+' + st.pts + ' points</em></span>';
+    else h = '<div class="qend lose"><b>Raté…</b><span>C\'était <em>' + E(rep) + '</em></span>';
+    if(st.arcade && st.arcade.attente > 0) h += '<button class="btn" type="button" onclick="window.lcArcadeAuto=true;location.hash=\'#arcade\'">🎴 Choisir ma carte Arcade' + (st.arcade.attente > 1 ? ' (' + st.arcade.attente + ')' : '') + '</button>';
+    return h + '<span class="qsub">Prochain jeu demain : <b>' + FM[st.demain].n + '</b> · dans <span id="qcd"></span></span></div>';
+  }
+  function cdTick(){
+    var el = g('qcd'); if(!el){ clearInterval(tick); tick = null; return; }
+    var p = new Date().toLocaleTimeString('en-GB', {timeZone: 'Europe/Paris', hour12: false}).split(':'), r = 86400 - (+p[0] * 3600 + +p[1] * 60 + +p[2]);
+    el.textContent = Math.floor(r / 3600) + ' h ' + ('0' + Math.floor(r % 3600 / 60)).slice(-2) + ' min';
+  }
+  function stats(){
+    var s = st.stats || {};
+    return '<div class="qstats"><div><b>' + (s.serie || 0) + '</b>jour(s) de suite</div><div><b>' + (s.meilleure || 0) + '</b>meilleure série</div><div><b>' + (s.victoires || 0) + '</b>victoires</div><div><b>' + (s.points || 0) + '</b>points</div></div>';
+  }
+  function entree(){
+    var faux = (st.essais || []).filter(function(e){ return !e.ok; });
+    return '<div class="qin"><input id="qi" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tape le nom d\'un jeu…" aria-label="Nom du jeu"><button class="btn" id="qgo" type="button">Valider</button><div class="qsug" id="qsug" hidden></div></div>' +
+      (st.fmt !== 'indices' && faux.length ? '<div class="qwrong">' + faux.map(function(e){ return '<span>' + E(e.g) + '</span>'; }).join('') + '</div>' : '');
+  }
+  function render(){
+    var m = g('qmain'); if(!m) return;
+    var C0 = C();
+    if(!C0 || C0.etat() !== 'in'){
+      semaine();
+      m.innerHTML = '<div class="qcard"><h2 style="margin:0">Connecte-toi pour jouer</h2><p class="qsub">Le jeu du jour est réservé aux comptes Twitch : ça permet de compter tes points et ta série de jours. Le site ne reçoit que ton pseudo.</p><div class="row"><button class="btn" id="qlog" type="button">Se connecter avec Twitch</button></div></div>';
+      g('qlog').onclick = function(){ var b = g('login'); if(b) b.click(); };
+      return;
+    }
+    if(!st){ m.innerHTML = '<div class="qcard"><p class="qsub">' + (charge === 'err' ? 'Le jeu du jour est momentanément indisponible. Réessaie un peu plus tard.' : 'Chargement…') + '</p></div>'; return; }
+    semaine();
+    if(st.vide){ m.innerHTML = '<div class="qcard"><h2 style="margin:0">Pas de jeu aujourd\'hui</h2><p class="qsub">Rien n\'est prévu pour ce jour. Reviens demain !</p>' + stats() + '</div>'; return; }
+    var f = FM[st.fmt], focus = document.activeElement && document.activeElement.id === 'qi', val = g('qi') ? g('qi').value : '';
+    m.innerHTML = '<div class="qcard"><div class="qhead"><h2>' + f.n + '</h2>' + pips() + '</div><p class="qsub">' + f.d + '</p>' + zone() + (st.fini ? fin() : (st.fmt === 'pendu' ? '' : entree())) + '<div class="qmsg" id="qmsg" role="status">' + E(msg) + '</div>' + stats() + '</div>';
+    if(st.fini){ clearInterval(tick); tick = setInterval(cdTick, 30000); cdTick(); }
+    var qi = g('qi'); if(qi){ qi.value = val; if(focus) qi.focus(); brancher(); }
+    Array.prototype.forEach.call(m.querySelectorAll('.qkb button'), function(b){ b.onclick = function(){ envoyer(b.getAttribute('data-k')); }; });
+  }
+  function sugg(){
+    var q = nrm(g('qi').value), box = g('qsug'), deja = (st.essais || []).map(function(e){ return nrm(e.g); });
+    sug = q ? jeux.filter(function(n){ var x = nrm(n); return x.indexOf(q) >= 0 && deja.indexOf(x) < 0; }).slice(0, 8) : []; sel = -1;
+    box.hidden = !sug.length;
+    box.innerHTML = sug.map(function(n, i){ return '<button type="button" data-i="' + i + '">' + E(n) + '</button>'; }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('button'), function(b){ b.onmousedown = function(e){ e.preventDefault(); g('qi').value = sug[+b.getAttribute('data-i')]; box.hidden = true; envoyer(g('qi').value); }; });
+  }
+  function brancher(){
+    var qi = g('qi'), box = g('qsug');
+    qi.oninput = sugg;
+    qi.onblur = function(){ setTimeout(function(){ if(g('qsug')) g('qsug').hidden = true; }, 120); };
+    qi.onkeydown = function(e){
+      if(e.key === 'ArrowDown' && sug.length){ e.preventDefault(); sel = (sel + 1) % sug.length; }
+      else if(e.key === 'ArrowUp' && sug.length){ e.preventDefault(); sel = (sel - 1 + sug.length) % sug.length; }
+      else if(e.key === 'Escape'){ box.hidden = true; return; }
+      else if(e.key === 'Enter'){ e.preventDefault(); var v = sel >= 0 ? sug[sel] : (sug.length === 1 ? sug[0] : qi.value); box.hidden = true; envoyer(v); return; }
+      else return;
+      Array.prototype.forEach.call(box.querySelectorAll('button'), function(b, i){ b.classList.toggle('sel', i === sel); });
+    };
+    g('qgo').onclick = function(){ envoyer(qi.value); };
+  }
+  function envoyer(v){
+    v = String(v || '').trim(); if(!v || busy || !st || st.fini) return;
+    busy = true; msg = '';
+    C().appel('/quotidien', {session: C().sess(), body: {g: v}}).then(function(r){
+      busy = false;
+      if(r.ok){ var gagne = r.d.fini && r.d.gagne; jeuxKeep(r.d); st = r.d; if(g('qi')) g('qi').value = ''; }
+      else if(r.d && r.d.erreur === 'inconnu') msg = "Ce jeu n'est pas dans la liste : choisis-en un dans les suggestions.";
+      else if(r.d && r.d.erreur === 'deja') msg = 'Tu as déjà essayé celui-là.';
+      else if(r.status === 401) msg = 'Ta session a expiré : reconnecte-toi.';
+      else msg = 'Oups, ça n\'a pas marché. Réessaie.';
+      render();
+    }).catch(function(){ busy = false; msg = 'Connexion impossible pour le moment.'; render(); });
+  }
+  function jeuxKeep(d){ if(!d.jeux) d.jeux = null; }
+  function charger(){
+    var C0 = C(); if(!C0 || C0.etat() !== 'in'){ st = null; render(); return; }
+    if(charge === true) return; charge = true;
+    C0.appel('/quotidien?jeux=1', {session: C0.sess()}).then(function(r){
+      charge = false;
+      if(r.ok){ if(r.d.jeux) jeux = r.d.jeux; st = r.d; } else charge = 'err';
+      render();
+    }).catch(function(){ charge = 'err'; render(); });
+  }
+  window.lcJeuDuJour = function(){ semaine(); render(); charger(); };
+  window.lcOnUi = function(){ var v = g('v-jeudujour'); if(v && !v.hidden){ render(); charger(); } };
+  semaine();
 })();
 
 // ---- Accueil : communauté en cartes ----
@@ -2799,7 +3057,7 @@ var JEU_OUVERT = !!(window.JEU_CONFIG || {}).OUVERT;
 if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(function(e){ e.textContent = JEU_CONFIG.NOM; });
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10;
-  if(JEU_API) document.getElementById('navClass').hidden = false;
+  if(JEU_API){ document.getElementById('navClass').hidden = false; document.getElementById('navQ').hidden = false; }
   if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
   function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
   function liste(){
@@ -2850,6 +3108,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     return fetch(API + chemin, init).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok:r.ok, status:r.status, d:d}; }); });
   }
 
+  window.lcCompte = {appel: appel, sess: sess, etat: function(){ return etat; }, toast: function(a, b){ toast(a, b); }, ajoutSucces: function(s){ if(moi && !(moi.succes || []).some(function(x){ return x.id === s.id; })){ moi.succes = (moi.succes || []).concat([s]); try{ renderBadges(); }catch(e){} } }};
+
   // ----- connexion -----
   function demarrer(){
     if(!ON){ ui(); return; }
@@ -2880,6 +3140,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 
   // ----- en-tête -----
   function ui(){
+    if(window.lcOnUi) setTimeout(window.lcOnUi, 0);
     var b = g('login'), p = g('moi');
     if(etat === 'in' && dfEtat === '') chargerDefis();
     if(etat === 'in' && !spPlanned){ spPlanned = true; planSpider(true); }
@@ -3126,6 +3387,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       });
       if(!sc.some(function(x){ return x.id === 'balise'; })) out.push({cat:'Fidélité', id:'balise', name:'Gardien de la Balise', task:'Reviens sur le site 10 jours différents.', tier:'or', ico:'balise', cur:Math.min(moi.visites || 0, 10), max:10, got:false});
       if(!sc.some(function(x){ return x.id === 'cachecache'; })) out.push({cat:'Secrets', id:'cachecache', name:'???', task:'Des petits habitants se cachent sur les pages du site…', tier:'epique', ico:'balise', cur:0, max:1, got:false, secret:true});
+      if(!sc.some(function(x){ return x.id === 'coffre'; })) out.push({cat:'Secrets', id:'coffre', name:'???', task:'Encore un secret à trouver quelque part sur le site…', tier:'epique', ico:'key', cur:0, max:1, got:false, secret:true});
       if(!sc.some(function(x){ return x.id === 'araignee'; })) out.push({cat:'Secrets', id:'araignee', name:'???', task:'Un secret se cache quelque part sur le site…', tier:'epique', ico:'spider', cur:0, max:1, got:false, secret:true});
     } else {
       var c = pubCache[l];
@@ -3476,6 +3738,113 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   };
   demarrer();
   if(location.hash === '#compte') route();
+})();
+</script>
+
+<script>
+(function(){
+  var g = function(i){ return document.getElementById(i); };
+  var E = function(x){ var d = document.createElement('div'); d.textContent = x == null ? '' : x; return d.innerHTML; };
+  var C = function(){ return window.lcCompte; };
+  var RN = {c:'Commune', u:'Peu commune', r:'Rare', l:'Légendaire', s:'Secrète'};
+  var DATA = null, ST = null, loading = null, filtre = 'tous', busy = false;
+  function charge(){
+    if(DATA) return Promise.resolve(DATA);
+    if(loading) return loading;
+    loading = fetch('arcade-cartes.json').then(function(r){ return r.json(); }).then(function(d){
+      DATA = d; var h = document.createElement('div'); h.setAttribute('aria-hidden', 'true'); h.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+      h.innerHTML = d.defs; document.body.insertBefore(h, document.body.firstChild); return d;
+    }).catch(function(){ loading = null; return null; });
+    return loading;
+  }
+  function etat(){ var c = C(); return c && c.etat() === 'in'; }
+  function chargeEtat(){
+    if(!etat()){ ST = null; return Promise.resolve(); }
+    var c = C();
+    return c.appel('/arcade', {session: c.sess()}).then(function(r){ ST = r.ok ? r.d : null; }).catch(function(){ ST = null; });
+  }
+  function posse(){ var o = {}; ((ST && ST.cartes) || []).forEach(function(x){ o[x.carte] = x.ts; }); return o; }
+  function carte(c, own, num){
+    if(!own) return '<div class="ac-card lock"><span class="ac-n">N° ' + c.n + '</span><div class="ac-back"></div></div>';
+    return '<div class="ac-card r-' + c.r + '" data-id="' + c.id + '" tabindex="0" role="button" aria-label="' + E(c.nom) + '"><span class="ac-n">' + (c.r === 's' ? 'SECRÈTE' : RN[c.r].toUpperCase()) + '</span>' + c.svg + '<div class="ac-pl"><b>' + E(c.nom) + '</b><small>' + E(c.type) + ' · ' + E(c.theme) + '</small></div></div>';
+  }
+  function parId(id){ return DATA.cartes.filter(function(c){ return c.id === id; })[0]; }
+  function render(){
+    var m = g('acmain'); if(!m) return;
+    if(!DATA){ m.innerHTML = '<p class="msg">Chargement des cartes…</p>'; return; }
+    if(!etat()){
+      m.innerHTML = '<div class="qcard"><h2 style="margin:0">Connecte-toi pour collectionner</h2><p class="qsub">Les cartes Arcade sont liées à ton compte Twitch. Le site ne reçoit que ton pseudo.</p><div class="row"><button class="btn" id="aclog" type="button">Se connecter avec Twitch</button></div></div>';
+      g('aclog').onclick = function(){ var b = g('login'); if(b) b.click(); }; return;
+    }
+    if(!ST){ m.innerHTML = '<p class="msg">Impossible de charger ta collection pour le moment.</p>'; return; }
+    var own = posse(), tot = DATA.cartes.length, n = Object.keys(own).length;
+    var h = '<div class="ac-stats"><b>' + n + ' / ' + tot + '</b><div class="ac-prog" aria-hidden="true"><i style="width:' + Math.round(100 * n / tot) + '%"></i></div></div>';
+    if(ST.attente > 0) h += '<div class="ac-pend"><span><b>🎴 ' + (ST.attente > 1 ? ST.attente + ' cartes t\'attendent' : 'Une carte t\'attend') + '</b> : tu as réussi le Jeu du jour !</span><button class="btn" id="acpioche" type="button">Choisir ma carte</button></div>';
+    var F = [['tous', 'Toutes'], ['Personnage', 'Personnages'], ['Lieu', 'Lieux'], ['Objet', 'Objets'], ['manq', 'Manquantes']];
+    h += '<div class="ac-chips" role="group" aria-label="Filtrer">' + F.map(function(f){ return '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (filtre === f[0]) + '">' + f[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="ac-grid">' + DATA.cartes.filter(function(c){ return filtre === 'tous' || (filtre === 'manq' ? !own[c.id] : c.type === filtre); }).map(function(c){ return carte(c, !!own[c.id]); }).join('') + '</div>';
+    m.innerHTML = h;
+    var pb = g('acpioche'); if(pb) pb.onclick = piocher;
+    Array.prototype.forEach.call(m.querySelectorAll('.ac-chips button'), function(b){ b.onclick = function(){ filtre = b.dataset.f; render(); }; });
+    Array.prototype.forEach.call(m.querySelectorAll('.ac-card[data-id]'), function(el){
+      var ouvre = function(){ zoom(el.dataset.id); }; el.onclick = ouvre; el.onkeydown = function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); ouvre(); } };
+    });
+  }
+  function overlay(inner){
+    var o = document.createElement('div'); o.className = 'ac-ov'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.innerHTML = '<div class="ac-box">' + inner + '</div>';
+    document.body.appendChild(o); document.body.style.overflow = 'hidden';
+    o.close = function(){ o.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', k); };
+    var k = function(e){ if(e.key === 'Escape') o.close(); }; document.addEventListener('keydown', k);
+    return o;
+  }
+  function zoom(id){
+    var c = parId(id); if(!c) return;
+    var o = overlay('<div class="ac-zoom">' + carte(c, true) + '</div><div class="ac-info"><b>' + E(c.nom) + '</b><br>' + E(c.type) + ' · ' + E(c.theme) + ' · ' + RN[c.r] + '<br>Carte n° ' + c.n + ' sur ' + DATA.cartes.length + '</div><p style="margin-top:14px"><button class="btn" type="button" id="aczc">Fermer</button></p>');
+    o.onclick = function(e){ if(e.target === o) o.close(); }; o.querySelector('#aczc').onclick = o.close;
+  }
+  function piocher(){
+    if(!ST || ST.attente < 1) return;
+    var o = overlay('<h2>Choisis ta carte</h2><p>Trois cartes retournées : une seule est pour toi.</p><div class="ac-3">' + [0, 1, 2].map(function(i){ return '<button type="button" class="ac-fl" data-i="' + i + '" aria-label="Carte ' + (i + 1) + '"><div class="in"><div class="f fb"></div><div class="f ff"></div></div></button>'; }).join('') + '</div><div class="ac-res" aria-live="polite"></div><p><button class="btn" type="button" id="acnext" hidden>Carte suivante</button> <button class="btn" type="button" id="acclose" hidden>Voir ma collection</button></p>');
+    var bs = o.querySelectorAll('.ac-fl'), res = o.querySelector('.ac-res'), busy2 = false;
+    o.querySelector('#acclose').onclick = function(){ o.close(); chargeEtat().then(render); };
+    o.querySelector('#acnext').onclick = function(){ o.close(); chargeEtat().then(function(){ render(); piocher(); }); };
+    Array.prototype.forEach.call(bs, function(b){
+      b.onclick = function(){
+        if(busy2) return; busy2 = true; var c = C(), i = +b.dataset.i;
+        c.appel('/arcade', {session: c.sess(), body: {choix: i}}).then(function(r){
+          if(!r.ok){ res.textContent = 'Oups, ça n\'a pas marché. Réessaie dans un instant.'; busy2 = false; if(r.d && r.d.erreur === 'aucun_tirage'){ o.close(); chargeEtat().then(render); } return; }
+          var d = r.d; Array.prototype.forEach.call(bs, function(x){ x.disabled = true; }); b.querySelector('.ff').innerHTML = carte(parId(d.carte), true);
+          b.classList.add('on'); var cc = parId(d.carte);
+          setTimeout(function(){ res.innerHTML = (d.nouvelle ? '✨ Nouvelle carte : ' : 'Déjà en ta possession : ') + E(cc.nom); }, 650);
+          setTimeout(function(){ Array.prototype.forEach.call(bs, function(x){ if(x !== b){ x.classList.add('dim'); } }); }, 1100);
+          setTimeout(function(){ if(d.attente > 0) o.querySelector('#acnext').hidden = false; o.querySelector('#acclose').hidden = false; }, 1400);
+          if(ST){ ST.attente = d.attente; ST.cartes = (ST.cartes || []).concat(d.nouvelle ? [{carte: d.carte, ts: Date.now()}] : []); }
+        }).catch(function(){ res.textContent = 'Connexion impossible.'; busy2 = false; });
+      };
+    });
+  }
+  window.lcArcadeOuvrir = function(){
+    var auto = !!window.lcArcadeAuto; window.lcArcadeAuto = false;
+    render();
+    Promise.all([charge(), chargeEtat()]).then(function(){ render(); if(auto && ST && ST.attente > 0) piocher(); });
+  };
+  if(location.hash === '#arcade') setTimeout(window.lcArcadeOuvrir, 0);
+  window.lcArcadeMaj = function(){ var v = g('v-arcade'); if(v && !v.hidden){ chargeEtat().then(render); } };
+  var oldUi = window.lcOnUi;
+  window.lcOnUi = function(){ if(oldUi) oldUi(); window.lcArcadeMaj(); };
+  // le coffre caché (page « À propos ») : il ne s'ouvre qu'avec la bonne carte, sans rien dire de plus
+  document.addEventListener('click', function(e){
+    var cf = e.target.closest ? e.target.closest('#acCoffre') : null; if(!cf) return;
+    cf.classList.remove('shake'); void cf.offsetWidth; cf.classList.add('shake');
+    var c = C(), ferme = function(){ if(c) c.toast('Le coffre est verrouillé', 'Rien ne bouge…'); };
+    if(!c || c.etat() !== 'in'){ ferme(); return; }
+    c.appel('/arcade/coffre', {session: c.sess(), body: {}}).then(function(r){
+      if(!r.ok || !r.d.ouvert){ ferme(); return; }
+      c.ajoutSucces({id: 'coffre', nom: 'Ouvrir le Coffre', desc: 'Tu as trouvé le coffre caché sur le site et tu l\'as ouvert.', ico: 'key', tier: 'epique', cat: 'Secrets', ts: Date.now()});
+      c.toast(r.d.badgeNouveau ? 'Badge secret débloqué !' : 'Le coffre s\'ouvre', r.d.nouvelle ? 'Une carte Arcade t\'attendait à l\'intérieur.' : 'Il est vide : tu as déjà tout pris.');
+      charge().then(function(){ return chargeEtat(); }).then(function(){ if(r.d.nouvelle) zoom('le-coffre-ferme'); render(); });
+    }).catch(ferme);
+  });
 })();
 </script>
 </body>
