@@ -14,6 +14,7 @@ button.g{background:transparent;color:var(--text);border-color:var(--line)}butto
 input{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:220px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.w{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+textarea{font:inherit;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
 label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}select{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px}.wrapc{white-space:normal!important;min-width:220px;max-width:420px;overflow-wrap:anywhere}.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
 </style>
 </head>
@@ -54,6 +55,32 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
     <h3 style="font-size:15px;margin:20px 0 8px">Donner à la main</h3>
     <p style="margin-top:0">Pour un défi « Tu valides toi-même », un cadeau ou un événement. Écris le pseudo Twitch (en minuscules) du viewer, qui doit s'être déjà connecté au moins une fois sur le site.</p>
     <div class="row"><input id="glogin" placeholder="pseudo twitch" style="min-width:160px"><select id="gtype"><option value="titre">Un titre libre</option><option value="defi">Les récompenses d'un défi</option></select><input id="gval" placeholder="Titre à donner" style="min-width:200px"><button id="give" type="button" class="g">Donner</button><span id="gmsg"></span></div>
+    <h2>Jeu du jour</h2>
+    <div class="box"><b>Comment ça marche</b><br>Chaque jour de la semaine a son mini-jeu : lundi PixelPelé, mardi Silhouette, mercredi Emoji, jeudi Pendu, vendredi Zoom, samedi Indices, dimanche Résumé caviardé. Pour chaque format, tu prépares autant de jeux à deviner que tu veux : le site les fait tourner tout seul, une semaine après l'autre. Tu peux aussi choisir une date précise pour un jeu.<br>
+      1. Remplis d'abord la <b>liste des jeux</b> (c'est elle qui sert aux suggestions des joueurs et au format Indices). 2. Ajoute les <b>jeux à deviner</b>. Les images sont préparées toutes seules dans ton navigateur : tu n'envoies que l'image de départ.</div>
+    <div class="box" id="qdep"><b>Démarrage rapide</b><br>Pour ne pas partir de zéro : tu peux ajouter une <b>liste de départ de 70 jeux</b> (horreur, dark fantasy, aventure, indé…) et <b>32 jeux à deviner prêts</b> (emoji, pendu, indices, résumé caviardé). Rien n'est écrasé : les doublons sont ignorés. Les images (PixelPelé, Silhouette, Zoom) restent à faire avec tes artworks. Pense ensuite à passer à « oui » les jeux que tu as vraiment joués sur la chaîne (colonne de droite de la liste).<div class="row" style="margin-top:8px"><button id="qdepl" type="button">1. Ajouter la liste de départ</button><button id="qdepp" type="button">2. Ajouter les jeux à deviner prêts</button><span id="qdepm" style="color:var(--muted);font-size:13px"></span></div></div>
+    <h3 style="font-size:15px;margin:20px 0 8px">1. Liste des jeux</h3>
+    <p style="margin-top:0">Une ligne par jeu, séparée par des « ; » : <b>Nom ; Genre ; Année ; Plateforme(s) ; Studio ; oui/non</b> (le dernier = déjà joué sur la chaîne). Plusieurs genres ou plateformes : sépare-les avec « / ». Exemple : <i>Silent Hill 2 ; Horreur ; 2001 ; PS2/PC ; Konami ; oui</i></p>
+    <textarea id="qlist" rows="8" spellcheck="false" placeholder="Silent Hill 2 ; Horreur ; 2001 ; PS2/PC ; Konami ; oui"></textarea>
+    <div class="row" style="margin-top:8px"><button id="qsavelist" type="button">Enregistrer la liste</button><span id="qlmsg" style="color:var(--muted);font-size:13px"></span></div>
+    <h3 style="font-size:15px;margin:20px 0 8px">2. Ajouter un jeu à deviner</h3>
+    <div class="box" id="qform">
+      <div class="row" style="margin-bottom:8px"><label class="f">Format<select id="qfmt"><option value="pixel">Lundi · PixelPelé</option><option value="silhouette">Mardi · Silhouette</option><option value="emoji">Mercredi · Emoji</option><option value="pendu">Jeudi · Pendu</option><option value="zoom">Vendredi · Zoom</option><option value="indices">Samedi · Indices</option><option value="resume">Dimanche · Résumé caviardé</option></select></label>
+        <label class="f">Le bon jeu<input id="qjeu" list="qdl" placeholder="Silent Hill 2" autocomplete="off"><datalist id="qdl"></datalist></label>
+        <label class="f">Date précise (facultatif)<input id="qdate" type="date" style="min-width:150px"></label></div>
+      <div id="qp-img" class="row" style="margin-bottom:8px"><label class="f" id="qfl">Image<input id="qfile" type="file" accept="image/*"></label><span id="qimgh" style="color:var(--muted);font-size:13px"></span></div>
+      <div id="qp-zoom" hidden style="margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Clique sur l'image pour choisir le point à agrandir (le détail du départ).</span><br><canvas id="qzc" style="max-width:100%;border:1px solid var(--line);border-radius:6px;cursor:crosshair;margin-top:6px"></canvas></div>
+      <div id="qp-emoji" hidden class="row" style="margin-bottom:8px"><label class="f">Emojis (2 à 8, séparés par des espaces)<input id="qemo" placeholder="👻 🔔 🏚️ 🌫️ 🔪" style="min-width:320px"></label></div>
+      <div id="qp-pendu" hidden class="row" style="margin-bottom:8px"><label class="f">Indice affiché (facultatif)<input id="qind" maxlength="120" placeholder="Un jeu d'horreur de Konami" style="min-width:320px"></label></div>
+      <div id="qp-resume" hidden style="margin-bottom:8px"><label class="f">Résumé du jeu<textarea id="qtxt" rows="5" placeholder="Un homme reçoit une lettre de sa [[femme]] décédée et part pour [[!Silent Hill]]…"></textarea></label><span style="color:var(--muted);font-size:13px">Entoure les mots à cacher avec [[ ]]. Avec [[! ]] le mot reste caché jusqu'à la fin de la partie (idéal pour le titre).</span></div>
+      <div class="row" style="margin-top:10px"><button id="qadd" type="button">Ajouter ce jeu à deviner</button><span id="qmsg2" style="color:var(--muted);font-size:13px"></span></div>
+    </div>
+    <h3 style="font-size:15px;margin:20px 0 8px">3. Les jeux préparés</h3>
+    <div class="w"><table><thead><tr><th>Format</th><th>Le bon jeu</th><th>Date</th><th>Taille</th><th></th></tr></thead><tbody id="qtab"></tbody></table></div>
+    <div class="box" id="qview" style="margin-top:10px" hidden></div>
+    <h2>Cartes Arcade (donner une carte à un viewer)</h2>
+    <p>Pour tester, ou pour faire un geste : donne une carte Arcade à un viewer (écris son pseudo Twitch en minuscules). Pour tester le coffre caché, donne-lui « la-cle-ancienne ». « Un tirage » lui offre un choix 1 parmi 3 supplémentaire.</p>
+    <div class="row"><input id="adlog" placeholder="pseudo twitch"><input id="adcarte" placeholder="identifiant de la carte, ex. la-cle-ancienne" style="min-width:260px"><button id="adbtn" type="button">Donner la carte</button><button id="adtir" type="button">Offrir un tirage</button><span id="admsg" style="color:var(--muted);font-size:13px"></span></div>
     <h2>Fiches des viewers (jeu favori et devise)</h2>
     <p>Les textes que les viewers écrivent sur leur fiche de collectionneur sont publics. Si un texte est déplacé, clique sur « Effacer » : le jeu favori et la devise de ce viewer sont vidés (il peut en écrire d'autres).</p>
     <div class="w"><table><thead><tr><th>Viewer</th><th>Jeu favori</th><th>Devise</th><th></th></tr></thead><tbody id="fiches"></tbody></table></div>
@@ -78,6 +105,8 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
     return fetch(API + '/admin/' + chemin, {method: corps ? 'POST' : 'GET', headers: {Authorization: 'Bearer ' + cle, 'Content-Type': 'application/json'}, body: corps ? JSON.stringify(corps) : undefined})
       .then(function(r){ if(r.status === 401) throw new Error('Clé admin incorrecte.'); return r.json(); });
   }
+$('adbtn').onclick = function(){ var m = $('admsg'); appel('a-donner', {login: $('adlog').value.trim().toLowerCase(), carte: $('adcarte').value.trim()}).then(function(r){ m.textContent = r && r.ok ? '✓ Carte donnée.' : 'Viewer ou carte introuvable.'; }).catch(function(){ m.textContent = 'Erreur.'; }); };
+$('adtir').onclick = function(){ var m = $('admsg'); appel('a-tirage', {login: $('adlog').value.trim().toLowerCase()}).then(function(r){ m.textContent = r && r.ok ? '✓ Tirage offert.' : 'Viewer introuvable.'; }).catch(function(){ m.textContent = 'Erreur.'; }); };
   function charger(){
     msg('Chargement…');
     return Promise.all([appel('etat'), appel('joueurs'), appel('paiements'), appel('propositions'), appel('journal-etat'), appel('defis'), appel('fiches')]).then(function(r){
@@ -96,7 +125,7 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
         return '<tr><td>' + new Date(p.ts).toLocaleDateString('fr-FR') + '</td><td>' + esc(p.pseudo) + '</td><td>' + esc(p.kind) + ' · ' + esc(p.saison) + '</td><td class="wrapc">' + esc(p.texte) + '</td><td class="' + (p.statut === 'retenue' ? 'ok' : p.statut === 'ouverte' ? '' : 'bad') + '">' + STATUTS[p.statut] + '</td><td>' +
           b('retenue', 'Retenir') + b('ouverte', 'Rouvrir') + b('refusee', 'Refuser') + b('masquee', 'Masquer') + '<button type="button" class="g s" data-pn="' + p.n + '" data-del="1">Supprimer</button></td></tr>';
       }).join('') || '<tr><td colspan="7">Aucune proposition pour le moment.</td></tr>';
-      rendreDefis(r[5]);
+      rendreDefis(r[5]); qCharger();
       $('fiches').innerHTML = (r[6] || []).map(function(f){ return '<tr><td>' + esc(f.pseudo) + '</td><td class="wrapc">' + esc(f.jeu) + '</td><td class="wrapc">' + esc(f.devise) + '</td><td><button type="button" class="g s" data-fl="' + esc(f.login) + '">Effacer</button></td></tr>'; }).join('') || '<tr><td colspan="4">Aucune fiche remplie pour le moment.</td></tr>';
       var j = r[4];
       $('jetat').innerHTML = '<b>' + j.cartes + '</b> carte(s) et <b>' + j.usages + '</b> utilisation(s) copiées sur le serveur.' + (j.dernieres.length ? '<br>Dernières cartes reçues : ' + j.dernieres.map(function(c){ return esc(c.pseudo) + ' (' + esc(c.carte) + ')'; }).join(', ') : '');
@@ -225,10 +254,134 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
     if($('gtype').value === 'defi'){ var x = dData.filter(function(z){ return z.titre.toLowerCase() === v.toLowerCase(); })[0]; if(!x){ m.textContent = ' Aucun défi avec ce nom exact.'; return; } body.defi = x.n; } else body.titre = v;
     appel('donner', body).then(function(r){ m.textContent = r.ok ? ' Donné ✓' : r.erreur === 'inconnu' ? ' Ce viewer ne s\'est jamais connecté au site.' : ' Impossible.'; }).catch(function(e){ m.textContent = ' ' + e.message; });
   };
+  // ---- Jeu du jour ----
+  var QNOM = {pixel: 'PixelPelé', silhouette: 'Silhouette', emoji: 'Emoji', pendu: 'Pendu', zoom: 'Zoom', indices: 'Indices', resume: 'Résumé caviardé'};
+  var qImg = null, qFocus = {x: .5, y: .5};
+  function qCharger(){
+    Promise.all([appel('q-jeux'), appel('q-liste')]).then(function(r){
+      var j = r[0] || [], l = r[1] || [];
+      if(document.activeElement !== $('qlist')) $('qlist').value = j.map(function(x){ return [x.nom, x.genre, x.annee || '', x.plateforme, x.studio, x.chaine ? 'oui' : 'non'].join(' ; '); }).join('\n');
+      $('qdl').innerHTML = j.map(function(x){ return '<option value="' + esc(x.nom) + '">'; }).join('');
+      $('qtab').innerHTML = l.map(function(p){ return '<tr><td>' + QNOM[p.fmt] + '</td><td>' + esc(p.jeu) + '</td><td>' + (p.jour || 'automatique') + '</td><td>' + Math.round(p.taille / 1024) + ' Ko</td><td><button type="button" class="g s" data-qv="' + p.n + '">Voir</button> <button type="button" class="g s" data-qd="' + p.n + '">Supprimer</button></td></tr>'; }).join('') || '<tr><td colspan="5">Aucun jeu préparé pour le moment.</td></tr>';
+    }).catch(function(){});
+  }
+  function qFmtUi(){
+    var f = $('qfmt').value;
+    $('qp-img').hidden = !(f === 'pixel' || f === 'silhouette' || f === 'zoom' || f === 'resume');
+    $('qp-zoom').hidden = f !== 'zoom' || !qImg;
+    $('qp-emoji').hidden = f !== 'emoji'; $('qp-pendu').hidden = f !== 'pendu'; $('qp-resume').hidden = f !== 'resume';
+    $('qimgh').textContent = f === 'pixel' ? "L'artwork du jeu (il sera pixelisé automatiquement)." : f === 'silhouette' ? 'Un personnage en PNG avec fond transparent.' : f === 'zoom' ? "Une capture d'écran du jeu." : f === 'resume' ? "Image de fin (facultatif) : affichée quand la partie est terminée." : '';
+  }
+  function qLireImg(file){ return new Promise(function(ok, ko){ var r = new FileReader(); r.onload = function(){ var im = new Image(); im.onload = function(){ ok(im); }; im.onerror = ko; im.src = r.result; }; r.onerror = ko; r.readAsDataURL(file); }); }
+  function qCv(w, h){ var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
+  function qFit(im, mw, mh){ var k = Math.min(1, mw / im.width, mh / im.height), c = qCv(im.width * k, im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c; }
+  function qDessinerZoom(){
+    var c = $('qzc'), im = qImg; if(!im) return; var k = Math.min(1, 560 / im.width); c.width = im.width * k; c.height = im.height * k;
+    var x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height); x.strokeStyle = '#ff3b30'; x.lineWidth = 2; x.beginPath(); x.arc(qFocus.x * c.width, qFocus.y * c.height, 14, 0, 7); x.moveTo(qFocus.x * c.width - 22, qFocus.y * c.height); x.lineTo(qFocus.x * c.width + 22, qFocus.y * c.height); x.moveTo(qFocus.x * c.width, qFocus.y * c.height - 22); x.lineTo(qFocus.x * c.width, qFocus.y * c.height + 22); x.stroke();
+  }
+  function qFabriquer(f){
+    var im = qImg, d = {};
+    if(f === 'pixel'){
+      d.final = qFit(im, 560, 420).toDataURL('image/jpeg', .85);
+      d.stages = [8, 14, 26, 50, 90].map(function(w){ var c = qCv(w, w * im.height / im.width); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c.toDataURL('image/png'); });
+    } else if(f === 'silhouette'){
+      var base = qFit(im, 420, 420), x = base.getContext('2d').getImageData(0, 0, base.width, base.height).data, transp = false, i;
+      for(i = 3; i < x.length; i += 4 * 97) if(x[i] < 250){ transp = true; break; }
+      if(!transp) throw new Error("Cette image n'a pas de fond transparent : la silhouette serait un grand rectangle noir.");
+      d.final = base.toDataURL('image/webp', .85);
+      d.stages = [0, .2, .4, .65].map(function(v){ var c = qCv(base.width, base.height), cx = c.getContext('2d'); cx.drawImage(base, 0, 0); cx.globalCompositeOperation = 'source-atop'; cx.fillStyle = 'rgba(0,0,0,' + (1 - v) + ')'; cx.fillRect(0, 0, c.width, c.height); return c.toDataURL('image/webp', .85); });
+    } else if(f === 'zoom'){
+      d.final = qFit(im, 560, 420).toDataURL('image/jpeg', .85);
+      d.stages = [8, 5, 3.2, 2, 1.3].map(function(s){
+        var ar = 560 / 340, sw = im.width / s, sh = sw / ar; if(sh > im.height){ sh = im.height; sw = sh * ar; }
+        var sx = Math.max(0, Math.min(im.width - sw, qFocus.x * im.width - sw / 2)), sy = Math.max(0, Math.min(im.height - sh, qFocus.y * im.height - sh / 2)), c = qCv(560, 340);
+        c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, 560, 340); return c.toDataURL('image/jpeg', .8);
+      });
+    }
+    return d;
+  }
+  function qApercu(n){
+    var v = $('qview'); v.hidden = false; v.innerHTML = 'Chargement…';
+    function dessiner(e){
+      appel('q-apercu', {n: n, erreurs: e}).then(function(s){
+        var h = '<div class="row" style="margin-bottom:8px"><b>' + QNOM[s.fmt] + '</b> · erreurs simulées : ' + [0, 1, 2, 3, 4].map(function(k){ return '<button type="button" class="' + (k === e ? '' : 'g ') + 's" data-qe="' + k + '">' + k + '</button>'; }).join(' ') + ' <button type="button" class="g s" data-qe="fin">Fin de partie</button></div>';
+        if(s.img) h += '<img src="' + s.img + '" style="max-width:100%;max-height:300px;image-rendering:' + (s.fmt === 'pixel' && !s.fini ? 'pixelated' : 'auto') + ';' + (s.fmt === 'pixel' && !s.fini ? 'width:420px' : '') + ';background:#222;border-radius:6px">';
+        if(s.emojis) h += '<div style="font-size:36px">' + s.emojis.join(' ') + ' ' + '❓'.repeat(Math.max(0, (s.total || 0) - s.emojis.length)) + '</div>';
+        if(s.masque) h += '<div style="font:700 24px monospace;letter-spacing:.12em">' + esc(s.masque) + '</div>';
+        if(s.resume) h += '<p style="color:var(--text);line-height:1.8">' + s.resume.map(function(z){ return z.h ? '<span style="background:#ece8df;color:transparent;border-radius:3px">' + esc(z.t) + '</span>' : (z.r ? '<b style="color:var(--accent)">' + esc(z.t) + '</b>' : esc(z.t)); }).join('') + '</p>';
+        if(s.indices) h += '<p style="color:var(--text)">' + s.indices.map(function(c){ return '<b>' + c.k + '</b> : ' + esc(c.v); }).join(' · ') + '</p>';
+        if(s.reponse) h += '<p>Réponse : <b style="color:var(--accent)">' + esc(s.reponse.nom) + '</b></p>';
+        v.innerHTML = h;
+        Array.prototype.forEach.call(v.querySelectorAll('[data-qe]'), function(b){ b.onclick = function(){ var k = b.getAttribute('data-qe'); if(k === 'fin') appel('q-apercu', {n: n, erreurs: 1, fini: true, gagne: true}).then(function(z){ s = z; v.querySelector('.row').insertAdjacentHTML('afterend', ''); dessinerFin(z); }); else dessiner(+k); }; });
+      });
+    }
+    function dessinerFin(z){
+      var h = '<div class="row" style="margin-bottom:8px"><button type="button" class="g s" id="qback">← Retour</button></div>';
+      if(z.img) h += '<img src="' + z.img + '" style="max-width:100%;max-height:300px;border-radius:6px">';
+      if(z.reponse && z.reponse.img) h += '<img src="' + z.reponse.img + '" style="max-width:100%;max-height:300px;border-radius:6px">';
+      if(z.resume) h += '<p style="color:var(--text);line-height:1.8">' + z.resume.map(function(a){ return a.r ? '<b style="color:var(--accent)">' + esc(a.t) + '</b>' : esc(a.t); }).join('') + '</p>';
+      h += '<p>Réponse : <b style="color:var(--accent)">' + esc(z.reponse.nom) + '</b></p>'; v.innerHTML = h; $('qback').onclick = function(){ dessiner(0); };
+    }
+    dessiner(0);
+  }
+  $('qfmt').onchange = qFmtUi;
+  $('qfile').onchange = function(){
+    var f = this.files[0]; qImg = null; qFocus = {x: .5, y: .5}; if(!f){ qFmtUi(); return; }
+    qLireImg(f).then(function(im){ qImg = im; qFmtUi(); qDessinerZoom(); }).catch(function(){ $('qmsg2').textContent = " Image illisible."; });
+  };
+  $('qzc').onclick = function(e){ var r = this.getBoundingClientRect(); qFocus = {x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height}; qDessinerZoom(); };
+  // ---- démarrage rapide ----
+  var QDEP = {"games": ["Silent Hill 2 ; Horreur ; 2001 ; PS2/Xbox/PC ; Konami", "Silent Hill ; Horreur ; 1999 ; PS1 ; Konami", "Resident Evil ; Horreur ; 1996 ; PS1/Saturn/PC ; Capcom", "Resident Evil 4 ; Action/Horreur ; 2005 ; GameCube/PS2/PC ; Capcom", "Resident Evil 7 ; Horreur ; 2017 ; PC/PS4/Xbox One ; Capcom", "Resident Evil Village ; Horreur ; 2021 ; PC/PS4/PS5/Xbox ; Capcom", "Dead Space ; Horreur ; 2008 ; PC/PS3/Xbox 360 ; EA", "Amnesia: The Dark Descent ; Horreur ; 2010 ; PC ; Frictional Games", "Soma ; Horreur ; 2015 ; PC/PS4 ; Frictional Games", "Outlast ; Horreur ; 2013 ; PC/PS4 ; Red Barrels", "Alien: Isolation ; Horreur ; 2014 ; PC/PS4/Xbox One ; Creative Assembly", "Five Nights at Freddy's ; Horreur ; 2014 ; PC ; Scott Cawthon", "Layers of Fear ; Horreur ; 2016 ; PC/PS4/Xbox One ; Bloober Team", "Little Nightmares ; Plateforme/Horreur ; 2017 ; PC/PS4/Xbox One ; Tarsier Studios", "The Evil Within ; Horreur ; 2014 ; PC/PS4/Xbox One ; Tango Gameworks", "Signalis ; Horreur ; 2022 ; PC/Switch/PS4/Xbox ; rose-engine", "Darkwood ; Horreur ; 2017 ; PC/PS4/Xbox One/Switch ; Acid Wizard Studio", "Phasmophobia ; Horreur ; 2020 ; PC ; Kinetic Games", "Lethal Company ; Horreur ; 2023 ; PC ; Zeekerss", "Alan Wake ; Action/Horreur ; 2010 ; Xbox 360/PC ; Remedy", "Until Dawn ; Horreur ; 2015 ; PS4 ; Supermassive Games", "Inscryption ; Horreur/Cartes ; 2021 ; PC ; Daniel Mullins Games", "Content Warning ; Horreur ; 2024 ; PC ; Landfall", "Visage ; Horreur ; 2020 ; PC ; SadSquare Studio", "Bendy and the Ink Machine ; Horreur ; 2017 ; PC ; Joey Drew Studios", "Sons of the Forest ; Survie/Horreur ; 2023 ; PC ; Endnight Games", "The Forest ; Survie/Horreur ; 2018 ; PC/PS4 ; Endnight Games", "Bloodborne ; Action-RPG ; 2015 ; PS4 ; FromSoftware", "Dark Souls ; Action-RPG ; 2011 ; PS3/Xbox 360/PC ; FromSoftware", "Demon's Souls ; Action-RPG ; 2009 ; PS3 ; FromSoftware", "Elden Ring ; Action-RPG ; 2022 ; PC/PS4/PS5/Xbox ; FromSoftware", "Sekiro: Shadows Die Twice ; Action ; 2019 ; PC/PS4/Xbox One ; FromSoftware", "Lies of P ; Action-RPG ; 2023 ; PC/PS4/PS5/Xbox ; Round8 Studio", "Nioh ; Action-RPG ; 2017 ; PS4/PC ; Team Ninja", "Salt and Sanctuary ; Action/Metroidvania ; 2016 ; PC/PS4 ; Ska Studios", "Blasphemous ; Metroidvania ; 2019 ; PC/PS4/Xbox One/Switch ; The Game Kitchen", "Hollow Knight ; Metroidvania ; 2017 ; PC/Switch/PS4/Xbox One ; Team Cherry", "Dead Cells ; Roguelike/Metroidvania ; 2018 ; PC/Switch/PS4/Xbox One ; Motion Twin", "Hades ; Roguelike ; 2020 ; PC/Switch/PS4/Xbox ; Supergiant Games", "Celeste ; Plateforme ; 2018 ; PC/Switch/PS4/Xbox One ; Maddy Makes Games", "Undertale ; RPG ; 2015 ; PC ; Toby Fox", "Outer Wilds ; Aventure ; 2019 ; PC/PS4/Xbox One ; Mobius Digital", "Disco Elysium ; RPG ; 2019 ; PC/PS4/Xbox One ; ZA/UM", "Return of the Obra Dinn ; Aventure/Puzzle ; 2018 ; PC/Switch/PS4/Xbox One ; Lucas Pope", "Stardew Valley ; Simulation ; 2016 ; PC/Switch/PS4/Xbox One ; ConcernedApe", "Minecraft ; Bac à sable ; 2011 ; PC/Consoles ; Mojang", "Terraria ; Bac à sable ; 2011 ; PC/Consoles ; Re-Logic", "Subnautica ; Survie ; 2018 ; PC/PS4/Xbox One ; Unknown Worlds", "Limbo ; Plateforme ; 2010 ; Xbox 360/PC ; Playdead", "Inside ; Plateforme ; 2016 ; PC/PS4/Xbox One ; Playdead", "Cuphead ; Run and gun ; 2017 ; PC/Xbox One/Switch ; Studio MDHR", "Ori and the Blind Forest ; Plateforme ; 2015 ; PC/Xbox One/Switch ; Moon Studios", "The Legend of Zelda: Breath of the Wild ; Action-aventure ; 2017 ; Switch/Wii U ; Nintendo", "The Legend of Zelda: Ocarina of Time ; Action-aventure ; 1998 ; Nintendo 64 ; Nintendo", "Metal Gear Solid ; Infiltration ; 1998 ; PS1 ; Konami", "Castlevania: Symphony of the Night ; Metroidvania ; 1997 ; PS1 ; Konami", "Final Fantasy VII ; JRPG ; 1997 ; PS1 ; Square", "Chrono Trigger ; JRPG ; 1995 ; Super Nintendo ; Square", "Persona 5 ; JRPG ; 2016 ; PS3/PS4 ; Atlus", "Half-Life 2 ; FPS ; 2004 ; PC ; Valve", "Portal 2 ; Puzzle ; 2011 ; PC/PS3/Xbox 360 ; Valve", "BioShock ; FPS ; 2007 ; PC/Xbox 360 ; Irrational Games", "The Witcher 3: Wild Hunt ; Action-RPG ; 2015 ; PC/PS4/Xbox One ; CD Projekt RED", "The Elder Scrolls V: Skyrim ; Action-RPG ; 2011 ; PC/PS3/Xbox 360 ; Bethesda", "Fallout: New Vegas ; RPG ; 2010 ; PC/PS3/Xbox 360 ; Obsidian", "God of War ; Action-aventure ; 2018 ; PS4 ; Santa Monica Studio", "The Last of Us ; Action-aventure ; 2013 ; PS3/PS4/PS5 ; Naughty Dog", "Death Stranding ; Action-aventure ; 2019 ; PS4/PC ; Kojima Productions", "Hellblade: Senua's Sacrifice ; Action-aventure ; 2017 ; PC/PS4/Xbox One ; Ninja Theory", "Dredge ; Pêche/Horreur ; 2023 ; PC/Switch/PS4/Xbox ; Black Salt Games"], "puzzles": [{"fmt": "emoji", "jeu": "Silent Hill 2", "data": {"emojis": ["🌫️", "✉️", "🏚️", "📻", "🔺"]}}, {"fmt": "emoji", "jeu": "Five Nights at Freddy's", "data": {"emojis": ["🐻", "🍕", "🌙", "📹", "🔦"]}}, {"fmt": "emoji", "jeu": "Hollow Knight", "data": {"emojis": ["🪲", "🗡️", "🕳️", "🏰", "😶"]}}, {"fmt": "emoji", "jeu": "Dead Space", "data": {"emojis": ["🚀", "🔪", "🧟", "🔧", "🪐"]}}, {"fmt": "emoji", "jeu": "Elden Ring", "data": {"emojis": ["💍", "🌳", "🗡️", "🐎", "🔥"]}}, {"fmt": "emoji", "jeu": "Alien: Isolation", "data": {"emojis": ["👽", "🚀", "📡", "🔦", "⏱️"]}}, {"fmt": "emoji", "jeu": "Little Nightmares", "data": {"emojis": ["🌧️", "🧒", "🥾", "🍽️", "🚢"]}}, {"fmt": "emoji", "jeu": "Stardew Valley", "data": {"emojis": ["🌾", "🐔", "⛏️", "🎣", "🏡"]}}, {"fmt": "pendu", "jeu": "Outlast", "data": {"indice": "Un journaliste, une caméra et une batterie qui s’épuise."}}, {"fmt": "pendu", "jeu": "Bloodborne", "data": {"indice": "Une chasse de nuit dans une ville gothique."}}, {"fmt": "pendu", "jeu": "Amnesia: The Dark Descent", "data": {"indice": "Tu ne peux pas te battre : seulement fuir et te cacher."}}, {"fmt": "pendu", "jeu": "Hades", "data": {"indice": "Un fils qui veut quitter la maison… celle des Enfers."}}, {"fmt": "pendu", "jeu": "Resident Evil", "data": {"indice": "Un manoir, une équipe, et des invités qui ne sont plus vraiment vivants."}}, {"fmt": "pendu", "jeu": "Dark Souls", "data": {"indice": "« Tu es mort. » Souvent."}}, {"fmt": "pendu", "jeu": "Lethal Company", "data": {"indice": "Ramasser de la ferraille sur des lunes dangereuses, en équipe."}}, {"fmt": "pendu", "jeu": "Undertale", "data": {"indice": "Un jeu où personne n’est obligé de mourir."}}, {"fmt": "indices", "jeu": "Alien: Isolation", "data": {}}, {"fmt": "indices", "jeu": "Dark Souls", "data": {}}, {"fmt": "indices", "jeu": "Hollow Knight", "data": {}}, {"fmt": "indices", "jeu": "Phasmophobia", "data": {}}, {"fmt": "indices", "jeu": "Signalis", "data": {}}, {"fmt": "indices", "jeu": "Disco Elysium", "data": {}}, {"fmt": "indices", "jeu": "Lies of P", "data": {}}, {"fmt": "indices", "jeu": "Outer Wilds", "data": {}}, {"fmt": "resume", "jeu": "Silent Hill 2", "data": {"texte": "Un veuf reçoit une [[lettre]] de sa [[femme]], morte depuis trois ans, qui lui donne rendez-vous dans leur lieu de vacances, [[!Silent Hill]]. Dans la [[brume]] de la ville déserte, il croise d’étranges survivants et des [[monstres]] qui semblent le [[juger]]."}}, {"fmt": "resume", "jeu": "Dark Souls", "data": {"texte": "Un [[mort-vivant]] s’échappe d’une [[cellule]] et traverse un royaume en ruine, [[!Lordran]]. Pour réussir sa [[quête]], il doit sonner deux [[cloches]] et allumer des [[feux]] de camp, en mourant encore et encore."}}, {"fmt": "resume", "jeu": "Hollow Knight", "data": {"texte": "Un petit [[insecte]] muet, armé d’un [[clou]], descend dans un royaume souterrain en ruine, [[!Hallownest]], ravagé par une étrange [[infection]]. Il y affronte des [[boss]] et y découvre des secrets enfouis."}}, {"fmt": "resume", "jeu": "Celeste", "data": {"texte": "Une jeune femme décide de gravir la [[montagne]] [[!Celeste]], et affronte en chemin ses [[doutes]], sa [[peur]] et un reflet d’elle-même. Les [[fraises]] sont facultatives, mais indispensables."}}, {"fmt": "resume", "jeu": "Outer Wilds", "data": {"texte": "Un [[astronaute]] d’un tout petit système solaire se réveille chaque fois au même moment : le [[soleil]] explose au bout de vingt-deux minutes. Il explore les [[planètes]] pour comprendre cette [[boucle]] et le mystère des [[!Nomaï]]."}}, {"fmt": "resume", "jeu": "Resident Evil", "data": {"texte": "Une équipe d’agents est envoyée enquêter près d’une petite ville et se réfugie dans un [[manoir]] infesté de [[zombies]]. Elle découvre qu’une [[compagnie]] pharmaceutique cache d’horribles [[expériences]], dans [[!Raccoon City]]."}}, {"fmt": "resume", "jeu": "Hades", "data": {"texte": "Le fils du dieu des [[Enfers]] veut [[s’échapper]] de la demeure de son père. À chaque [[mort]], il renaît dans le fleuve [[!Styx]], plus fort, et en apprend davantage sur sa famille."}}, {"fmt": "resume", "jeu": "Stardew Valley", "data": {"texte": "Un employé de bureau [[épuisé]] hérite de la [[ferme]] de son grand-père et s’installe à [[!Pelican Town]]. Il cultive, pêche, descend dans les [[mines]] et se fait des amis au fil des [[saisons]]."}}]};
+  var qnk = function(s){ return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  $('qdepl').onclick = function(){
+    var m = $('qdepm'), cur = $('qlist').value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean), vus = {}, ajout = 0;
+    cur.forEach(function(l){ vus[qnk(l.split(';')[0])] = 1; });
+    QDEP.games.forEach(function(l){ var k = qnk(l.split(';')[0]); if(!vus[k]){ vus[k] = 1; cur.push(l + ' ; non'); ajout++; } });
+    $('qlist').value = cur.join('\n'); m.textContent = ' ' + ajout + ' jeu(x) ajouté(s) dans la liste. Enregistrement…';
+    $('qsavelist').click(); setTimeout(function(){ m.textContent = ' ✓ ' + ajout + ' jeu(x) ajouté(s) à la liste (' + cur.length + ' au total).'; }, 1500);
+  };
+  $('qdepp').onclick = function(){
+    var m = $('qdepm'); m.textContent = ' Ajout en cours…'; $('qdepp').disabled = true;
+    appel('q-liste').then(function(l){
+      var vus = {}; (l || []).forEach(function(p){ vus[p.fmt + '|' + qnk(p.jeu)] = 1; });
+      var todo = QDEP.puzzles.filter(function(p){ return !vus[p.fmt + '|' + qnk(p.jeu)]; }), ok = 0, ko = 0;
+      return todo.reduce(function(pr, p){ return pr.then(function(){ return appel('q-ajouter', p).then(function(r){ if(r && r.ok) ok++; else ko++; }).catch(function(){ ko++; }); }); }, Promise.resolve()).then(function(){
+        m.textContent = ' ✓ ' + ok + ' ajouté(s)' + (ko ? ', ' + ko + ' refusé(s) (le jeu est-il bien dans la liste ? fais d\'abord l\'étape 1)' : '') + (QDEP.puzzles.length - todo.length ? ', ' + (QDEP.puzzles.length - todo.length) + ' déjà présent(s)' : '') + '.';
+        $('qdepp').disabled = false; qCharger();
+      });
+    }).catch(function(){ m.textContent = ' Erreur.'; $('qdepp').disabled = false; });
+  };
+  $('qsavelist').onclick = function(){
+    var l = $('qlist').value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean).map(function(x){ var p = x.split(';').map(function(z){ return z.trim(); }); return {nom: p[0], genre: p[1] || '', annee: p[2] || 0, plateforme: p[3] || '', studio: p[4] || '', chaine: /^(oui|o|1|yes|x)$/i.test(p[5] || '')}; });
+    $('qlmsg').textContent = ' Enregistrement…';
+    appel('q-jeux-set', {jeux: l}).then(function(r){ $('qlmsg').textContent = r.ok ? ' ✓ ' + r.n + ' jeu(x) enregistré(s)' : ' Impossible d\'enregistrer.'; qCharger(); });
+  };
+  $('qadd').onclick = function(){
+    var f = $('qfmt').value, jeu = $('qjeu').value.trim(), m = $('qmsg2'), data = {};
+    if(!jeu){ m.textContent = ' Choisis le bon jeu.'; return; }
+    try{
+      if(f === 'pixel' || f === 'silhouette' || f === 'zoom'){ if(!qImg){ m.textContent = ' Ajoute une image.'; return; } data = qFabriquer(f); }
+      else if(f === 'emoji') data.emojis = $('qemo').value.trim().split(/\s+/).filter(Boolean);
+      else if(f === 'pendu') data.indice = $('qind').value.trim();
+      else if(f === 'resume'){ data.texte = $('qtxt').value.trim(); if(qImg) data.final = qFit(qImg, 560, 420).toDataURL('image/jpeg', .85); }
+    }catch(e){ m.textContent = ' ' + e.message; return; }
+    m.textContent = ' Envoi…';
+    appel('q-ajouter', {fmt: f, jeu: jeu, jour: $('qdate').value, data: data}).then(function(r){
+      if(r.ok){ m.textContent = ' ✓ Ajouté'; qCharger(); }
+      else m.textContent = ' ' + ({jeu_absent_de_la_liste: "Ce jeu n'est pas dans la liste des jeux (étape 1).", emojis: 'Mets au moins 2 emojis.', resume: 'Entoure au moins un mot avec [[ ]].', images: 'Images invalides.', trop_gros: 'Image trop lourde.'}[r.erreur] || 'Impossible (' + (r.erreur || 'erreur') + ').');
+    });
+  };
+  $('qtab').onclick = function(e){
+    var v = e.target.getAttribute('data-qv'), d = e.target.getAttribute('data-qd');
+    if(v) qApercu(+v);
+    if(d && confirm('Supprimer ce jeu à deviner ?')) appel('q-supprimer', {n: +d}).then(function(){ qCharger(); $('qview').hidden = true; });
+  };
+  qFmtUi();
   formVide();
   $('cle').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('ok').click(); });
   try{ var k = sessionStorage.getItem('leclubi-admin'); if(k && API){ $('cle').value = k; cle = k; charger(); } }catch(e){}
 })();
+
 </script>
 </body>
 </html>
