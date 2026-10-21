@@ -2382,13 +2382,13 @@ document.getElementById('pform').addEventListener('submit', function(e){
 
 // ---- Jeu du jour : un mini-jeu différent chaque jour de la semaine ----
 (function(){
-  var ORDRE = ['pixel', 'silhouette', 'emoji', 'pendu', 'zoom', 'indices', 'resume'], JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  var ORDRE = ['pixel', 'anagramme', 'emoji', 'pendu', 'citation', 'indices', 'resume'], JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
   var FM = {
     pixel: {n: 'PixelPelé', d: "Retrouve le jeu : l'image devient plus nette à chaque erreur."},
-    silhouette: {n: 'Silhouette', d: "De quel jeu vient ce personnage ? La silhouette se dévoile à chaque erreur."},
+    anagramme: {n: 'Anagramme', d: "Les lettres du titre sont mélangées. Chaque erreur remet une lettre à sa place."},
     emoji: {n: 'Emoji', d: "Retrouve le jeu grâce à ces emojis. Chaque erreur en révèle un de plus."},
     pendu: {n: 'Le Pendu', d: "Propose des lettres pour deviner le titre. Une mauvaise lettre fait avancer le pendu."},
-    zoom: {n: 'Zoom', d: "Un détail d'une image du jeu : le zoom recule à chaque erreur."},
+    citation: {n: 'Citation', d: "De quel jeu vient cette réplique ? Chaque erreur donne un indice de plus."},
     indices: {n: 'Indices', d: "Chaque essai est comparé au bon jeu : genre, année, studio, plateforme…"},
     resume: {n: 'Résumé caviardé', d: "Le résumé du jeu est censuré. Chaque erreur lève un peu de la censure."}
   };
@@ -2401,7 +2401,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
   function C(){ return window.lcCompte; }
   function parisDow(){ return new Date(new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'}) + 'T12:00:00Z').getUTCDay(); }
   function semaine(){
-    var f = st ? st.fmt : null, dow = parisDow(), auj = f || ['resume', 'pixel', 'silhouette', 'emoji', 'pendu', 'zoom', 'indices'][dow];
+    var f = st ? st.fmt : null, dow = parisDow(), auj = f || ['resume', 'pixel', 'anagramme', 'emoji', 'pendu', 'citation', 'indices'][dow];
     g('qweek').innerHTML = ORDRE.map(function(k, i){ var jd = (i + 1) % 7; return '<div class="qd' + (k === auj ? ' on' : '') + '"><b>' + JOURS[jd].slice(0, 3) + '.</b>' + FM[k].n + '</div>'; }).join('');
   }
   function pips(){
@@ -2415,7 +2415,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
   }
   function zone(){
     var f = st.fmt, h = '';
-    if(f === 'pixel' || f === 'zoom' || f === 'silhouette') h = '<div class="qimgw">' + (st.img ? '<img class="qimg' + (f === 'pixel' && !st.fini ? ' px' : '') + '" alt="Image du jeu à deviner" src="' + st.img + '">' : '') + '</div>';
+    if(f === 'pixel') h = '<div class="qimgw">' + (st.img ? '<img class="qimg' + (f === 'pixel' && !st.fini ? ' px' : '') + '" alt="Image du jeu à deviner" src="' + st.img + '">' : '') + '</div>';
     else if(f === 'emoji'){ var e = st.emojis || [], x; h = '<div class="qemo" aria-label="Emojis">'; for(x = 0; x < e.length; x++) h += '<span>' + E(e[x]) + '</span>'; for(x = e.length; x < (st.total || e.length); x++) h += '<span class="q">❓</span>'; h += '</div>'; }
     else if(f === 'pendu'){
       var used = {}; (st.lettres || []).forEach(function(l){ used[l.l] = l.ok ? 'ok' : 'no'; });
@@ -2426,6 +2426,12 @@ document.getElementById('pform').addEventListener('submit', function(e){
       h = '<div class="qclues">' + (st.indices || []).map(function(c){ return '<span class="qclue"><small>' + CLUE[c.k] + '</small>' + E(c.v) + '</span>'; }).join('') + '</div>';
       if((st.essais || []).length) h += '<table class="qtab"><thead><tr><th></th><th>Genre</th><th>Année</th><th>Studio</th><th>Plateforme</th><th>Chaîne</th></tr></thead><tbody>' +
         st.essais.map(function(e){ return '<tr><td class="nom">' + E(e.g) + '</td>' + (e.cmp || []).map(function(c){ return '<td class="' + c.s + '">' + E(c.v) + (c.dir ? (c.dir === 'up' ? ' ↑' : ' ↓') : '') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+    }
+    else if(f === 'anagramme'){
+      h = '<div class="qpend"><div style="width:100%;text-align:center">' + (st.debut ? '<div class="qmask">' + E(st.debut) + '</div>' : '') + '<div class="qemo" aria-label="Lettres mélangées">' + (st.melange || []).map(function(c){ return '<span>' + E(c) + '</span>'; }).join('') + '</div><p class="qsub" style="text-align:center">Mots : ' + (st.forme || []).join(' · ') + ' lettres</p></div></div>';
+    }
+    else if(f === 'citation'){
+      h = '<blockquote class="qres" style="font-size:1.15em;font-style:italic;text-align:center;margin:0 0 10px">« ' + E(st.citation) + ' »</blockquote><div class="qclues">' + (st.indices || []).map(function(c){ return '<span class="qclue"><small>' + CLUE[c.k] + '</small>' + E(c.v) + '</span>'; }).join('') + '</div>';
     }
     else if(f === 'resume') h = '<div class="qres"><p>' + (st.resume || []).map(function(s){ return s.h ? '<span class="h">' + E(s.t) + '</span>' : (s.r ? '<span class="r">' + E(s.t) + '</span>' : E(s.t)); }).join('') + '</p></div>';
     return h;
@@ -2471,7 +2477,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
   }
   function sugg(){
     var q = nrm(g('qi').value), box = g('qsug'), deja = (st.essais || []).map(function(e){ return nrm(e.g); });
-    sug = q ? jeux.filter(function(n){ var x = nrm(n); return x.indexOf(q) >= 0 && deja.indexOf(x) < 0; }).slice(0, 8) : []; sel = -1;
+    sug = q.length >= 3 ? jeux.filter(function(n){ var x = nrm(n); return x.indexOf(q) >= 0 && deja.indexOf(x) < 0; }).slice(0, 8) : []; sel = -1;
     box.hidden = !sug.length;
     box.innerHTML = sug.map(function(n, i){ return '<button type="button" data-i="' + i + '">' + E(n) + '</button>'; }).join('');
     Array.prototype.forEach.call(box.querySelectorAll('button'), function(b){ b.onmousedown = function(e){ e.preventDefault(); g('qi').value = sug[+b.getAttribute('data-i')]; box.hidden = true; envoyer(g('qi').value); }; });
