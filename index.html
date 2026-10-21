@@ -778,6 +778,8 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .ac-info{margin-top:12px;font-size:14px;color:#b9b6d4}.ac-info b{color:#fff;text-transform:uppercase;letter-spacing:.06em}
 .ac-coffre{position:absolute;right:14px;bottom:10px;width:36px;height:36px;padding:3px;border:0;background:none;color:var(--accent);opacity:.38;cursor:pointer;transition:opacity .3s,transform .3s}
 .ac-coffre:hover,.ac-coffre:focus-visible{opacity:1;transform:scale(1.12)}.ac-coffre.shake{animation:acsh .5s}
+:root[data-theme="dark"] .ac-coffre{opacity:.75;filter:drop-shadow(0 0 5px rgba(199,154,75,.7))}:root[data-theme="dark"] .ac-coffre:hover,:root[data-theme="dark"] .ac-coffre:focus-visible{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ac-coffre{opacity:.75;filter:drop-shadow(0 0 5px rgba(199,154,75,.7))}:root:not([data-theme="light"]) .ac-coffre:hover,:root:not([data-theme="light"]) .ac-coffre:focus-visible{opacity:1}}
 @keyframes acsh{25%{transform:rotate(-12deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-6deg)}}
 .ab{position:relative}
 @media (prefers-reduced-motion:reduce){.ac-fl .in{transition:none}.ac-coffre.shake{animation:none}}
