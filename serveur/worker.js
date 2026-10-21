@@ -918,7 +918,7 @@ function qVue(h, j, p, pa) {
   if (fmt === 'emoji') { const e = d.emojis || []; out.emojis = fini ? e : e.slice(0, Math.min(e.length, 2 + erreurs)); out.total = e.length; }
   if (fmt === 'pendu') {
     const trouvees = new Set(ess.filter(e => e.ok).map(e => nrm(e.g)));
-    out.masque = fini && !gagne ? p.jeu : qMasque(p.jeu, trouvees); out.lettres = ess.map(e => ({l: e.g, ok: e.ok})); if (d.indice) out.indice = d.indice;
+    out.masque = fini && !gagne ? p.jeu : qMasque(p.jeu, trouvees); out.lettres = ess.map(e => ({l: e.g, ok: e.ok})); if (d.indice && (fini || erreurs >= 3)) out.indice = d.indice;
   }
   if (fmt === 'indices') {
     const rep = d.attrs || qAttrs(h, p.jeu) || {}; const ordre = ['genre', 'annee', 'studio', 'plateforme', 'chaine'], n = fini ? 5 : Math.min(5, 1 + erreurs);
