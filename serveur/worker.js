@@ -858,7 +858,7 @@ export class Hub {
 }
 
 // ---------- Jeu du jour (7 formats, un par jour de la semaine) ----------
-const QFMT = {1: 'pixel', 2: 'silhouette', 3: 'emoji', 4: 'pendu', 5: 'zoom', 6: 'indices', 0: 'resume'};
+const QFMT = {1: 'pixel', 2: 'anagramme', 3: 'emoji', 4: 'pendu', 5: 'citation', 6: 'indices', 0: 'resume'};
 const QPTS = [100, 85, 70, 55, 40];
 const nrm = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const joursDepuis = j => Math.floor(Date.parse(j + 'T12:00:00Z') / 86400000);
@@ -925,6 +925,18 @@ function qVue(h, j, p, pa) {
     const lab = {genre: rep.genre, annee: rep.annee, studio: rep.studio, plateforme: rep.plateforme, chaine: rep.chaine ? 'Joué sur la chaîne' : 'Pas joué sur la chaîne'};
     out.indices = ordre.slice(0, n).map(k => ({k, v: lab[k] || '?'}));
     out.essais = ess.map(e => ({...e, cmp: qComparer(rep, qAttrs(h, e.g))}));
+  }
+  if (fmt === 'anagramme') {
+    const L = [...String(p.jeu)].map(c => c.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()).filter(c => /[A-Z0-9]/.test(c)), k = fini ? L.length : Math.min(erreurs, Math.max(0, L.length - 2));
+    const reste = L.slice(k); let s = (p.n || 1) * 7919 + 13; const alea = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+    const m = reste.slice(); for (let i = m.length - 1; i > 0; i--) { const j = Math.floor(alea() * (i + 1)); [m[i], m[j]] = [m[j], m[i]]; }
+    if (m.length > 1 && m.join('') === reste.join('')) m.push(m.shift());
+    out.debut = L.slice(0, k).join(''); out.melange = fini ? [] : m;
+    out.forme = String(p.jeu).split(/\s+/).map(x => [...x].filter(c => /[A-Za-z0-9\u00C0-\u017F]/.test(c)).length).filter(Boolean);
+  }
+  if (fmt === 'citation') {
+    const rep = qAttrs(h, p.jeu) || {}, ordre = ['genre', 'annee', 'studio', 'plateforme'], n = fini ? 4 : Math.min(4, erreurs);
+    out.citation = d.citation || ''; out.indices = ordre.slice(0, n).map(k => ({k, v: rep[k] || '?'}));
   }
   if (fmt === 'resume') out.resume = qResume(d.texte, erreurs, fini, p.n * 7919);
   if (fini) out.reponse = {nom: p.jeu, img: (fmt === 'pixel' || fmt === 'zoom' || fmt === 'silhouette') ? undefined : (d.final || undefined)};
@@ -1030,6 +1042,7 @@ async function qAdmin(h, act, b) {
     if (fmt === 'emoji') { const e = (Array.isArray(d.emojis) ? d.emojis : []).map(x => String(x).slice(0, 16)).filter(Boolean).slice(0, 8); if (e.length < 2) return json({erreur: 'emojis'}, {}, 400); data.emojis = e; }
     if (fmt === 'pendu' && d.indice) data.indice = String(d.indice).slice(0, 120);
     if (fmt === 'indices') { const a = qAttrs(h, jeu); if (!a) return json({erreur: 'jeu_absent_de_la_liste'}, {}, 400); data.attrs = a; }
+    if (fmt === 'citation') { data.citation = String(d.citation || '').trim().slice(0, 300); if (data.citation.length < 5) return json({erreur: 'citation'}, {}, 400); if (!qAttrs(h, jeu)) return json({erreur: 'jeu_absent_de_la_liste'}, {}, 400); }
     if (fmt === 'resume') { data.texte = String(d.texte || '').slice(0, 1500); if (!/\[\[/.test(data.texte)) return json({erreur: 'resume'}, {}, 400); if (img(d.final)) data.final = d.final; }
     const s = JSON.stringify(data); if (s.length > 1700000) return json({erreur: 'trop_gros'}, {}, 400);
     h.run('INSERT INTO puzzles(fmt,jeu,data,jour,ts) VALUES(?,?,?,?,?)', fmt, jeu, s, jour, Date.now());
