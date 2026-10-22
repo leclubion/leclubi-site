@@ -400,6 +400,35 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 .mn-back{display:inline-block;margin:0 0 10px}
 @media (max-height:700px){.mn-men{gap:7px;padding:14px 14px}.mn-bt{padding-top:9px;padding-bottom:9px}.mn-bt.main{padding-top:11px;padding-bottom:11px}.mn-men h3{margin-bottom:6px}}
 @media (prefers-reduced-motion:reduce){#vMenu *{animation:none!important}#mnCard{transition-duration:.01s}}
+
+/* ===== DA du menu appliquée à l'encart « Jouer en ligne » et à l'écran de lancement de partie ===== */
+#vMenu>.box,#vLobby>.box{--g1:#f4d98a;--g2:#d4a53c;--g3:#8a6420;--glow:255,120,60;position:relative;background:linear-gradient(170deg,rgba(58,8,16,.94),rgba(22,3,8,.96) 55%,rgba(12,2,5,.97));border:2px solid var(--g2);border-radius:18px;color:#f6ead0;padding:24px 24px 22px;box-shadow:0 0 0 1px #000,0 0 0 5px rgba(212,165,60,.18),0 0 46px rgba(var(--glow),.28),0 24px 60px rgba(0,0,0,.7),inset 0 0 40px rgba(0,0,0,.45)}
+#vMenu>.box::before,#vLobby>.box::before{content:"";position:absolute;inset:7px;border:1px solid rgba(244,217,138,.35);border-radius:12px;pointer-events:none}
+#vMenu>.box h2,#vLobby>.box h2{font:400 clamp(22px,4.4vw,30px)/1.1 MnD,Inter,sans-serif;letter-spacing:.05em;margin:0 0 10px;background:linear-gradient(#fff6cf 8%,var(--g1) 35%,var(--g2) 62%,var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 14px rgba(var(--glow),.45))}
+#vMenu>.box p,#vLobby>.box p{color:#e8d9b8}
+#vMenu .menu .mcompte b,#vMenu>.box .mcompte b{font:400 20px MnD,Inter,sans-serif;letter-spacing:.06em;color:var(--g1)}
+#vMenu>.box .mcompte span,#vMenu>.box .mpres,#vLobby .lhint,#vLobby #lnote{color:#c9b48a}
+#vMenu>.box .go,#vLobby>.box .go{font:600 15px MnZ,Inter,sans-serif;letter-spacing:.08em;border:2px solid #fff0b8;border-radius:12px;color:#3a0a10;background:linear-gradient(#ffe9a0,#e7b94a 55%,#c08a28);box-shadow:0 4px 0 #7a5214,0 6px 14px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.65);transition:transform .18s cubic-bezier(.3,1.6,.5,1),filter .18s}
+#vMenu>.box .go:hover,#vLobby>.box .go:hover{transform:translateY(-2px);filter:brightness(1.08)}
+#vMenu>.box .go:active,#vLobby>.box .go:active{transform:translateY(3px);box-shadow:0 1px 0 #7a5214,0 2px 6px #000}
+#vMenu>.box .go.big,#vLobby>.box .go.big{background:linear-gradient(#ff7a68,#c8202a 55%,#7a0d16);color:#fff3d0;border-color:#ffd9a0;box-shadow:0 5px 0 #4a060c,0 8px 16px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.4)}
+#vMenu>.box .go.ghost,#vLobby>.box .go.ghost,#vMenu .menu .mdeux .go,#vMenu>.box .mdeux .go{background:rgba(20,3,8,.7);color:#f4d98a;border:1.5px solid rgba(244,217,138,.6);box-shadow:inset 0 0 12px rgba(0,0,0,.5)}
+#vMenu>.box .go.wait,#vLobby>.box .go.wait{background:rgba(20,3,8,.7);color:#f4d98a;box-shadow:none}
+#vMenu>.box input[type=text]{background:rgba(10,2,5,.8);color:#f6ead0;border:1.5px solid rgba(244,217,138,.5);border-radius:10px}
+#vMenu>.box input[type=text]:focus{outline:0;border-color:var(--g1);box-shadow:0 0 12px rgba(var(--glow),.4)}
+#vMenu>.box .lienc,#vLobby>.box .lienc{color:var(--g1)}
+/* écran de lancement : décor (ciel de braise, lune, lueurs) au lieu du plateau noir */
+#vLobby{--glow:255,120,60;overflow:hidden;background:radial-gradient(ellipse 60% 45% at 76% 18%,rgba(var(--glow),.28),transparent 70%),radial-gradient(ellipse at 50% 120%,rgba(200,32,42,.45),transparent 60%),linear-gradient(#000,#0b0204 10%,#2b060c 62%,#5a0f17);backdrop-filter:none}
+#vLobby::before{content:"";position:absolute;left:74%;top:9%;width:min(22vw,200px,24vh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 38% 35%,#fff6dc,#f0cf8c 55%,#c8963c);box-shadow:0 0 60px 20px rgba(var(--glow),.35),0 0 200px 80px rgba(var(--glow),.18);pointer-events:none}
+#vLobby::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.8)),linear-gradient(transparent 70%,rgba(0,0,0,.55))}
+#vLobby>.box{z-index:2}
+#vLobby .duel{margin:16px 0 6px}
+#vLobby .pl b{font-family:MnZ,Inter,sans-serif;letter-spacing:.06em;color:#fff3d0}
+#vLobby .pl .av{background:radial-gradient(circle at 35% 30%,#5a1019,#1c0308);border:3px solid var(--g2);color:var(--g1);font-family:MnD,Inter,sans-serif;box-shadow:0 0 0 3px rgba(0,0,0,.6),0 0 18px rgba(var(--glow),.25)}
+#vLobby .pl.ok .av{border-color:#ffe08a;box-shadow:0 0 0 4px rgba(255,224,138,.2),0 0 30px rgba(255,170,60,.7)}
+#vLobby .pl .etat{color:#c9b48a}#vLobby .pl.ok .etat{color:#ffe08a}
+#vLobby .vs{font:400 28px MnD,Inter,sans-serif;color:#e23a40;text-shadow:0 2px 0 #000,0 0 14px rgba(255,90,70,.6)}
+#vLobby .cnt{font-family:MnD,Inter,sans-serif;color:var(--g1);text-shadow:0 3px 0 #000,0 0 20px rgba(var(--glow),.6)}
 </style>
 <script>
 // Retour de connexion Twitch lancée depuis le site (page « Mon compte ») : on garde le jeton puis on repart sur le site.
