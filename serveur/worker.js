@@ -366,7 +366,7 @@ export class Hub {
   profilPublic(j) {
     const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
     if (j.prive) return base;
-    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), serie: qSerie(this, j.id).serie, arcade: this.sql.exec("SELECT carte FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme') ORDER BY ts", j.id).toArray().map(r => r.carte), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
   }
   async compte(req, url) {
     const p = url.pathname;
@@ -468,6 +468,9 @@ export class Hub {
       if (r.cle === 'balise') { out.push({id: 'balise', nom: 'Gardien de la Balise', desc: 'Tu es revenu sur le site 10 jours différents : la Balise veille sur toi.', ico: 'balise', tier: 'or', cat: 'Fidélité', ts: r.ts}); return; }
       if (r.cle === 'cachecache') { out.push({id: 'cachecache', nom: 'Cache-Cache', desc: 'Tu as retrouvé les 6 Balises cachées sur les pages du site.', ico: 'balise', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'coffre') { out.push({id: 'coffre', nom: 'Ouvrir le Coffre', desc: 'Tu as trouvé le coffre caché sur le site et tu l\'as ouvert.', ico: 'key', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
+      if (r.cle === 'serie3') { out.push({id: 'serie3', nom: 'Série de 3', desc: 'Tu as terminé le Jeu du jour 3 jours de suite.', ico: 'flame', tier: 'bronze', cat: 'Jeu du jour', ts: r.ts}); return; }
+      if (r.cle === 'serie7') { out.push({id: 'serie7', nom: 'Une semaine de flamme', desc: 'Tu as terminé le Jeu du jour 7 jours de suite.', ico: 'flame', tier: 'or', cat: 'Jeu du jour', ts: r.ts}); return; }
+      if (r.cle === 'serie30') { out.push({id: 'serie30', nom: 'Inarrêtable', desc: 'Tu as tenu une série de 30 jours au Jeu du jour.', ico: 'flame', tier: 'mythique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
       if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
@@ -898,14 +901,34 @@ function qResume(texte, erreurs, fini, graine) {
     return (fini || ouverts.has(i)) ? {t: c.mot, r: 1} : {t: '█'.repeat(Math.max(3, Math.min(c.mot.length, 10))), h: 1};
   });
 }
+const joursPlus = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+const semaineDe = d => Math.floor((joursDepuis(d) + 3) / 7);
+// Série du Jeu du jour : un jour compte dès que la partie est terminée (gagnée ou perdue). Un « joker » par semaine pardonne un jour manqué.
+function qSerie(h, id) {
+  const jours = h.sql.exec(`SELECT DISTINCT jour FROM qparties WHERE joueur=? AND fini=1 ORDER BY jour`, id).toArray().map(r => r.jour);
+  const auj = jourParis(), jok = new Set(), sd = {}; let streak = 0, best = 0, last = null;
+  for (const d of jours) {
+    if (!last) streak = 1;
+    else { const gap = joursDepuis(d) - joursDepuis(last); const manque = gap === 2 ? joursPlus(last, 1) : null;
+      if (gap === 1) streak++; else if (manque && !jok.has(semaineDe(manque))) { jok.add(semaineDe(manque)); streak++; } else streak = 1; }
+    sd[d] = streak; if (streak > best) best = streak; last = d;
+  }
+  let serie = 0;
+  if (last) { const gap = joursDepuis(auj) - joursDepuis(last); if (gap <= 1 || (gap === 2 && !jok.has(semaineDe(joursPlus(auj, -1))))) serie = streak; }
+  const pal = [3, 7, 15], prochain = serie < 15 ? pal.find(x => x > serie) : (Math.floor(serie / 15) + 1) * 15;
+  return {serie, meilleure: Math.max(best, serie), sd, joker: !jok.has(semaineDe(auj)), prochain};
+}
 function qStats(h, j) {
-  const rows = h.sql.exec(`SELECT jour, gagne, pts FROM qparties WHERE joueur=? AND essais!='[]' ORDER BY jour DESC`, j.id).toArray();
-  const jours = new Set(rows.map(r => r.jour)), auj = jourParis();
-  const jm = d => new Date(Date.parse(d + 'T12:00:00Z') - 86400000).toISOString().slice(0, 10);
-  let d = jours.has(auj) ? auj : jm(auj), serie = 0; while (jours.has(d)) { serie++; d = jm(d); }
-  const asc = rows.map(r => r.jour).sort(); let best = 0, cur = 0, prev = '';
-  asc.forEach(x => { cur = prev && jm(x) === prev ? cur + 1 : 1; prev = x; if (cur > best) best = cur; });
-  return {serie, meilleure: Math.max(best, serie), jouees: rows.length, victoires: rows.filter(r => r.gagne).length, points: rows.reduce((a, r) => a + (r.pts || 0), 0)};
+  const rows = h.sql.exec(`SELECT jour, gagne, pts FROM qparties WHERE joueur=? AND essais!='[]' ORDER BY jour DESC`, j.id).toArray(), s = qSerie(h, j.id);
+  return {serie: s.serie, meilleure: s.meilleure, joker: s.joker, prochain: s.prochain, jouees: rows.length, victoires: rows.filter(r => r.gagne).length, points: rows.reduce((a, r) => a + (r.pts || 0), 0)};
+}
+// récompenses de série : pioche bonus à 3 / 7 / 15 jours (puis tous les 15), badges 3 / 7 / 30
+function qRecompenseSerie(h, id, jour) {
+  const s = qSerie(h, id), n = s.sd[jour] || 0; let bonus = null;
+  const pal = n >= 15 ? (n % 15 === 0 ? 15 : 0) : (n === 3 || n === 7 ? n : 0);
+  if (pal) { const cle = jour + ':s' + pal; if (!h.un('SELECT 1 AS x FROM atirages WHERE joueur=? AND jour=?', id, cle)) { aTirage(h, id, cle, pal); bonus = {palier: pal, serie: n}; } }
+  [[3, 'serie3'], [7, 'serie7'], [30, 'serie30']].forEach(([k, c]) => { if (n >= k) h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, id, 'badge', c, Date.now(), 'serie'); });
+  return bonus;
 }
 function qVue(h, j, p, pa) {
   const jour = jourParis(), ess = pa ? JSON.parse(pa.essais || '[]') : [], fmt = p.fmt;
@@ -947,14 +970,16 @@ const ARC_POIDS = {c: 50, u: 30, r: 15, l: 5};
 function aAlea(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
 function aPossedees(h, id) { return new Set(h.sql.exec('SELECT carte FROM acartes WHERE joueur=?', id).toArray().map(r => r.carte)); }
 // 3 cartes tirées au hasard (jamais la secrète), de préférence des cartes que le joueur n'a pas encore
-function aTirage(h, id, jour) {
+function aTirage(h, id, jour, palier) {
   if (h.un('SELECT 1 AS x FROM atirages WHERE joueur=? AND jour=?', id, jour)) return;
   const own = aPossedees(h, id), sel = [];
-  let pool = ARCADE.filter(c => c[1] !== 's' && !own.has(c[0]));
-  if (pool.length < 3) pool = pool.concat(ARCADE.filter(c => c[1] !== 's' && own.has(c[0])));
+  const poids = palier === 15 ? {c: 0, u: 0, r: 75, l: 25} : palier === 7 ? {c: 20, u: 35, r: 35, l: 10} : ARC_POIDS;
+  const ok = c => c[1] !== 's' && poids[c[1]] > 0;
+  let pool = ARCADE.filter(c => ok(c) && !own.has(c[0]));
+  if (pool.length < 3) pool = pool.concat(ARCADE.filter(c => ok(c) && own.has(c[0])));
   while (sel.length < 3 && pool.length) {
-    const tot = pool.reduce((a, c) => a + ARC_POIDS[c[1]], 0); let x = aAlea(tot * 10) / 10, k = 0;
-    for (; k < pool.length - 1; k++) { x -= ARC_POIDS[pool[k][1]]; if (x < 0) break; }
+    const tot = pool.reduce((a, c) => a + poids[c[1]], 0); let x = aAlea(tot * 10) / 10, k = 0;
+    for (; k < pool.length - 1; k++) { x -= poids[pool[k][1]]; if (x < 0) break; }
     sel.push(pool[k][0]); pool = pool.filter((_, i) => i !== k);
   }
   h.run('INSERT INTO atirages(joueur,jour,cartes,choix) VALUES(?,?,?,-1)', id, jour, JSON.stringify(sel));
@@ -986,7 +1011,7 @@ async function aCoffre(h, j) {
   return json({ouvert: true, nouvelle, badgeNouveau: !deja});
 }
 async function qQuotidien(h, j, req, url) {
-  const jour = jourParis(), p = qPuzzle(h, jour);
+  const jour = jourParis(), p = qPuzzle(h, jour); let bonusSerie = null;
   let pa = h.un('SELECT * FROM qparties WHERE joueur=? AND jour=?', j.id, jour);
   if (req.method === 'POST') {
     if (p.vide) return json({erreur: 'vide'}, {}, 400);
@@ -1013,8 +1038,10 @@ async function qQuotidien(h, j, req, url) {
     h.run(`INSERT INTO qparties(joueur,jour,fmt,puzzle,essais,fini,gagne,pts) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(joueur,jour) DO UPDATE SET essais=excluded.essais, fini=excluded.fini, gagne=excluded.gagne, pts=excluded.pts`, j.id, jour, p.fmt, p.n || 0, JSON.stringify(ess), fini, gagne, pts);
     pa = h.un('SELECT * FROM qparties WHERE joueur=? AND jour=?', j.id, jour);
     if (pa && pa.gagne) aTirage(h, j.id, jour);
+    if (pa && pa.fini) bonusSerie = qRecompenseSerie(h, j.id, jour);
   }
   const v = qVue(h, j, p, pa);
+  if (bonusSerie) v.bonus = bonusSerie;
   v.arcade = {attente: aAttente(h, j.id)};
   if (url.searchParams.get('jeux')) v.jeux = h.sql.exec('SELECT nom FROM qjeux ORDER BY nom COLLATE NOCASE').toArray().map(x => x.nom);
   return json(v);
