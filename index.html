@@ -2440,6 +2440,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
     var rep = st.reponse ? st.reponse.nom : '', faux = st.erreurs, h;
     if(st.gagne) h = '<div class="qend win"><b>Bravo ! 🎉</b><span>C\'était <em>' + E(rep) + '</em> · trouvé avec ' + faux + ' erreur' + (faux > 1 ? 's' : '') + '</span><span><em>+' + st.pts + ' points</em></span>';
     else h = '<div class="qend lose"><b>Raté…</b><span>C\'était <em>' + E(rep) + '</em></span>';
+    if(st.bonus) h += '<span><em>🔥 Série de ' + st.bonus.serie + ' jours !</em> Une pioche bonus Arcade t\'attend' + (st.bonus.palier === 15 ? ' (rare ou mieux)' : st.bonus.palier === 7 ? ' (meilleures chances de rare)' : '') + '.</span>';
     if(st.arcade && st.arcade.attente > 0) h += '<button class="btn" type="button" onclick="window.lcArcadeAuto=true;location.hash=\'#arcade\'">🎴 Choisir ma carte Arcade' + (st.arcade.attente > 1 ? ' (' + st.arcade.attente + ')' : '') + '</button>';
     return h + '<span class="qsub">Prochain jeu demain : <b>' + FM[st.demain].n + '</b> · dans <span id="qcd"></span></span></div>';
   }
@@ -2450,7 +2451,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
   }
   function stats(){
     var s = st.stats || {};
-    return '<div class="qstats"><div><b>' + (s.serie || 0) + '</b>jour(s) de suite</div><div><b>' + (s.meilleure || 0) + '</b>meilleure série</div><div><b>' + (s.victoires || 0) + '</b>victoires</div><div><b>' + (s.points || 0) + '</b>points</div></div>';
+    return '<div class="qstats"><div><b>🔥 ' + (s.serie || 0) + '</b>jour(s) de suite</div><div><b>' + (s.meilleure || 0) + '</b>meilleure série</div><div><b>' + (s.victoires || 0) + '</b>victoires</div><div><b>' + (s.points || 0) + '</b>points</div></div><p class="qsub" style="text-align:center;margin:6px 0 0">Prochaine récompense à <b>' + (s.prochain || 3) + ' jours</b> de suite (pioche bonus) · ' + (s.joker === false ? 'joker de la semaine utilisé' : '🃏 joker de la semaine disponible : un jour manqué ne casse pas ta série') + '</p>';
   }
   function entree(){
     var faux = (st.essais || []).filter(function(e){ return !e.ok; });
@@ -3328,6 +3329,9 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
     el.innerHTML = ids.length ? '<div class="cp-vp"><h3>' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="" onerror="this.remove()">' : '') + 'Vitrine de ' + esc(c.pseudo) + '</h3><div class="cp-vit">' + ids.map(function(id){ return vcHtml(id, who); }).join('') + '</div></div>' : '';
+    if(c && !c.prive && c.serie >= 2) el.insertAdjacentHTML('afterbegin', '<p class="qsub">🔥 Série du Jeu du jour : ' + c.serie + ' jours</p>');
+    var ar = c && !c.prive && c.arcade ? c.arcade : [];
+    if(ar.length && window.lcArcadeMini){ var lg = login; window.lcArcadeMini(ar).then(function(hh){ if(hh && who && who.toLowerCase() === lg && g('vit') && !g('vit').querySelector('.ac-grid')) g('vit').insertAdjacentHTML('beforeend', '<div class="cp-vp"><h3>Cartes Arcade de ' + esc(c.pseudo) + ' (' + ar.length + ')</h3>' + hh + '</div>'); }); }
   }
 
 
@@ -3831,6 +3835,13 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       };
     });
   }
+  window.lcArcadeMini = function(ids){
+    return charge().then(function(d){
+      if(!d) return '';
+      var l = ids.map(parId).filter(Boolean);
+      return l.length ? '<div class="ac-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px">' + l.map(function(c){ return carte(c, true).replace(' tabindex="0" role="button"', ' style="cursor:default"'); }).join('') + '</div>' : '';
+    });
+  };
   window.lcArcadeOuvrir = function(){
     var auto = !!window.lcArcadeAuto; window.lcArcadeAuto = false;
     render();
