@@ -1070,6 +1070,7 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 .cl-top .bar2{margin:0;padding:0;border:0;background:none;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .cl-top .bar2 label{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:14px;color:var(--muted)}
 .cl-top .bar2 .sel{border:0;background:transparent;color:var(--text);font-weight:600;font-size:14px;max-width:240px}
+.cl-top .bar2 .sel option{background:var(--panel);color:var(--text)}
 .cl-top .bar2 p{display:none}
 .cl-top .bar2 .btn{border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;background:transparent;color:var(--accent);border-color:var(--accent)}
 .cl-wrap .tabs{gap:10px;margin-bottom:18px}
@@ -1471,6 +1472,12 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
   </section>
 </div>
 
+<div class="view" id="v-profil" hidden>
+  <section>
+    <div class="wrap w1240 cp-wrap" id="pp"></div>
+  </section>
+</div>
+
 <div class="view" id="v-boutique" hidden>
   <section>
     <div class="wrap" id="bq"></div>
@@ -1619,15 +1626,16 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
   var h = location.hash; if(h === '#arcade'){ current = 'arcade'; h = '#collection'; }
-  var page = h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var page = h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h.indexOf('#profil=') === 0 ? 'profil' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'profil', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement'){ var qz = h === '#classement-jeu'; document.getElementById('kcb').hidden = qz; document.getElementById('kqz').hidden = !qz; document.getElementById('kswA').setAttribute('aria-selected', !qz); document.getElementById('kswB').setAttribute('aria-selected', qz); if(qz){ if(window.lcClassementQuiz) window.lcClassementQuiz(); } else if(window.chargerClassement) window.chargerClassement(); }
   if(page === 'boutique' && window.lcBoutique) window.lcBoutique();
+  if(page === 'profil' && window.lcProfilPublic){ var pn = ''; try{ pn = decodeURIComponent(h.slice(8)); }catch(e){} window.lcProfilPublic(pn); }
   if(page === 'jeudujour' && window.lcJeuDuJour) window.lcJeuDuJour();
   if(page === 'compte' && window.rendreCompte) window.rendreCompte();
   document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'collectionneurs' || page === 'arcade' ? page : 'collection')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   document.querySelectorAll('[data-nav]').forEach(function(a){
-    if(a.dataset.nav === (page === 'collectionneurs' || page === 'arcade' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    if(a.dataset.nav === (page === 'collectionneurs' || page === 'arcade' || page === 'profil' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
   document.body.classList.toggle('planw', page === 'planning');
   window.scrollTo(0,0);
@@ -1944,7 +1952,7 @@ function render(newId){
     '<label>Collection de <select class="sel" id="who"><option value="">Aucun viewer (cartes cachées)</option>' +
     names.map(function(n, i){ return '<option value="' + i + '"' + (n === who ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') +
     '</select></label>' +
-    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who && mine() ? '<a class="btn" href="#compte">Voir le profil</a>' : (who ? '<button class="btn" data-act="link">Copier le lien</button>' : '')));
+    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who && mine() ? '<a class="btn" href="#compte">Voir le profil</a>' : (who ? '<a class="btn" href="#profil=' + encodeURIComponent(who) + '">Voir le profil</a>' : '')));
 
   document.getElementById('cready').innerHTML = who ? readyHtml() + tarotRewardHtml() : '';
   document.getElementById('ach').innerHTML = who ? achHtml(who) : '';
@@ -3517,6 +3525,45 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     return o.join('');
   }
 
+  // ----- profil d'un autre viewer (même présentation que « Mon profil ») -----
+  function rendrePP(name){
+    var el = g('pp'); if(!el) return;
+    var l = String(name || '').toLowerCase();
+    if(!name){ el.innerHTML = '<div class="cp-out"><p class="cp-note">Profil introuvable.</p></div>'; return; }
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })){ location.replace('#compte'); return; }
+    var p = pubCache[l];
+    if(p === undefined){ el.innerHTML = '<div style="padding:30px 0">' + balChg('Chargement…') + '</div>'; window.CompteProfil(name).then(function(){ if(location.hash.indexOf('#profil=') === 0) rendrePP(name); }); return; }
+    var known = !!COLLECTIONS[name];
+    if(!p && !known){ el.innerHTML = '<div class="cp-out"><h1>Profil introuvable</h1><p class="cp-note">Ce viewer n\'a pas encore de profil.</p><p><a class="btn" href="#collectionneurs">Voir les collectionneurs</a></p></div>'; return; }
+    p = p || {pseudo: name, prive: true};
+    var pseudo = p.pseudo || name, cm = p.cosm || {}, ps = p.pstats || null, pv = !!p.prive;
+    var tot = totalCards(), n = known ? countOf(name) : 0, t = known ? titleOf(n, tot) : null;
+    var since = p.cree ? new Date(p.cree).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}) : '';
+    var subl = [t ? t.name : '', known ? n + ' / ' + tot + ' cartes' : '', since ? 'membre depuis ' + since : ''].filter(Boolean).join(' · ');
+    var h = [];
+    h.push('<div class="pf-ban">' + LCC.banniere(pv ? '' : cm.banniere, 'pf-bn') + '</div><div class="pf-id"><div class="pf-av">' + LCC.avatar(p.avatar, pseudo, pv ? '' : cm.cadre, 148) + '</div>' +
+      '<div class="pf-nm"><div class="pf-n"><h1>' + LCC.nom(pseudo, pv ? '' : cm.couleur) + '</h1>' + (!pv && p.titre ? '<span class="pf-chip">' + esc(p.titre) + '</span>' : '') + '</div><p>' + esc(subl || ' ') + '</p></div>' +
+      '<div class="pf-act">' + (known ? '<a class="pf-btn" href="#collection=' + encodeURIComponent(name) + '">Voir sa collection</a>' : '') + '</div></div>');
+    if(pv){ h.push('<div class="pf-c"><h2>Profil privé</h2><p class="cp-note" style="text-align:left;margin:0">' + esc(pseudo) + ' a choisi de garder son profil privé. ' + (known ? 'Sa collection reste visible.' : '') + '</p></div>'); el.innerHTML = h.join(''); return; }
+    var stc = function(lb, v, sub, col){ return '<div class="pf-s"><span>' + lb + '</span><b' + (col ? ' style="color:' + col + '"' : '') + '>' + v + '</b><small>' + sub + '</small></div>'; };
+    if(ps) h.push('<div class="pf-stats">' + stc('Points', lcFormatPts(ps.score), 'au Jeu du jour', 'var(--accent)') + stc('Classement', ps.rang ? '#' + ps.rang : '–', ps.rang ? 'cette semaine' : 'pas encore classé') +
+      stc('Victoires', ps.victoires, 'sur ' + ps.parties + ' partie' + (ps.parties > 1 ? 's' : '')) + stc('Série', ps.serie + ' j', 'meilleure : ' + ps.meilleure + ' jour' + (ps.meilleure > 1 ? 's' : ''), '#ff9a5c') + '</div>');
+    h.push('<div class="row" style="gap:10px;margin:0 0 20px">' + (known ? '<button type="button" class="btn ghost" data-fiche="' + esc(name) + '">Voir sa fiche</button>' : '') + '<button type="button" class="btn ghost" data-pp="copy">Copier le lien du profil</button></div>');
+    var vit = known ? (p.vitrine || []).filter(function(id){ return owns(name, id); }) : [];
+    var TC = {bronze: ['#a8642a', '#e6a96b'], argent: ['#8c99a8', '#e4ecf4'], or: ['#d29a24', '#ffe08a'], epique: ['#6a3fc4', '#c8a6ff'], mythique: ['#c8202a', '#ff8a78']};
+    var bl = (known ? badgesChoisis(name, {parties: p.parties, victoires: p.victoires}, p.badges) : []).map(function(x){ return {id: x.id, name: x.name, tier: x.tier, ico: x.ico}; });
+    (p.badgesInfo || []).forEach(function(x){ if(!bl.some(function(z){ return z.id === x.id; })) bl.push({id: x.id, name: x.nom, tier: x.tier, ico: x.ico}); });
+    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
+    var ar = (ps && ps.arcade) || {n: (p.arcade || []).length, total: 62};
+    h.push('<div class="ov"><section class="pf-c"><h2>Vitrine</h2>' + (vit.length ? '<div class="cp-vit">' + vit.map(function(id){ return vcHtml(id, name); }).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">La vitrine est vide pour le moment.</p>') +
+      '<h2 style="margin-top:28px">Badges</h2>' + (bl.length ? '<div class="ov-bl">' + bl.slice(0, 5).map(round).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">Aucun badge en vitrine pour le moment.</p>') + '</section>' +
+      '<aside class="ov-a"><section class="pf-c"><h2>Cartes Arcade</h2><div class="cl-pb"><b>' + ar.n + ' / ' + ar.total + '</b><i><u style="width:' + Math.round(ar.n / ar.total * 100) + '%"></u></i></div><a class="ov-l" href="#collection=' + encodeURIComponent(name) + '" data-arc="1">Voir sa collection →</a></section>' +
+      '<section class="pf-c"><h2>Jeu du jour</h2><div class="ov-f"><svg width="22" height="22" viewBox="0 0 24 24" fill="#ff7a3c" aria-hidden="true"><path d="M12 2c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg><b>' + (ps && ps.serie ? 'Série de ' + ps.serie + ' jour' + (ps.serie > 1 ? 's' : '') : 'Pas de série en cours') + '</b></div>' + (ps ? '<p class="ov-p">Meilleure série : ' + ps.meilleure + ' jour' + (ps.meilleure > 1 ? 's' : '') + '.</p>' : '') + '</section></aside></div>');
+    el.innerHTML = h.join('');
+  }
+  document.addEventListener('click', function(e){ var b = e.target.closest('[data-pp="copy"]'); if(b && navigator.clipboard){ navigator.clipboard.writeText(location.href).then(function(){ b.textContent = 'Lien copié ✓'; }); } });
+  window.lcProfilPublic = rendrePP;
+
   // ----- vitrine sur les profils publics (page d'un collectionneur) -----
   function n0(x){ return window.lcFormatPts ? lcFormatPts(x) : x; }
   function vitrinePublique(){
@@ -3932,7 +3979,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   window.addEventListener('hashchange', majNav);
   window.avErr = function(im){ var d = document.createElement(im.classList.contains('cp-av') ? 'div' : 'i'); d.className = im.className; d.textContent = im.getAttribute('data-i') || '?'; im.replaceWith(d); };
   window.rendreCompte = rendreCompte;
-  window.CompteRefresh = function(){ if(!g('v-compte').hidden) rendreCompte(); vitrinePublique(); renderBadges(); };
+  window.CompteRefresh = function(){ if(!g('v-profil').hidden && location.hash.indexOf('#profil=') === 0){ try{ rendrePP(decodeURIComponent(location.hash.slice(8))); }catch(e){} } if(!g('v-compte').hidden) rendreCompte(); vitrinePublique(); renderBadges(); };
   window.CompteVitrine = vitrinePublique;
   // stats de jeu connues pour ce viewer : les siennes s'il est connecté, sinon celles de son profil public (si public)
   window.CompteBadges = function(nom){
