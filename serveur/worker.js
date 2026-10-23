@@ -54,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage', '/boutique', '/classement-quiz']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -134,7 +134,7 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
-     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`].forEach(a => { try { q(a); } catch (e) {} });
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS propositions(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, saison TEXT, part TEXT, kind TEXT, texte TEXT, ts INTEGER,
@@ -149,6 +149,8 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS acartes(joueur TEXT, carte TEXT, ts INTEGER, src TEXT DEFAULT '', PRIMARY KEY(joueur, carte))`);
     q(`CREATE TABLE IF NOT EXISTS atirages(joueur TEXT, jour TEXT, cartes TEXT, choix INTEGER DEFAULT -1, PRIMARY KEY(joueur, jour))`);
     q(`CREATE TABLE IF NOT EXISTS qparties(joueur TEXT, jour TEXT, fmt TEXT, puzzle INTEGER, essais TEXT DEFAULT '[]', fini INTEGER DEFAULT 0, gagne INTEGER DEFAULT 0, pts INTEGER DEFAULT 0, PRIMARY KEY(joueur, jour))`);
+    q(`CREATE TABLE IF NOT EXISTS bq_achats(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, item TEXT, prix INTEGER, jour TEXT, ts INTEGER)`);
+    q(`CREATE TABLE IF NOT EXISTS qsemaines(sem INTEGER PRIMARY KEY, deb TEXT, top TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS visites(joueur TEXT, jour TEXT, PRIMARY KEY(joueur, jour))`);
     this.jCache = null;            // journal sérialisé gardé en mémoire (relu seulement après un ajout)
     this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
@@ -187,7 +189,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -366,7 +368,7 @@ export class Hub {
   profilPublic(j) {
     const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
     if (j.prive) return base;
-    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), serie: qSerie(this, j.id).serie, arcade: this.sql.exec("SELECT carte FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme') ORDER BY ts", j.id).toArray().map(r => r.carte), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), serie: qSerie(this, j.id).serie, cosm: cosmDe(j), score: ptsScore(this, j.id), arcade: this.sql.exec("SELECT carte FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme') ORDER BY ts", j.id).toArray().map(r => r.carte), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
   }
   async compte(req, url) {
     const p = url.pathname;
@@ -375,6 +377,7 @@ export class Hub {
       const j = this.un('SELECT * FROM joueurs WHERE login=? AND banni=0', login);
       return j ? json(this.profilPublic(j)) : json({erreur: 'inconnu'}, {}, 404);
     }
+    if (p === '/classement-quiz') return json(ptsClassementVue(this));
     if (p === '/auth' && req.method === 'POST') {
       const ip = req.headers.get('X-Ip') || '?', now = Date.now(), e = this.essaisAuth.get(ip) || {n: 0, t: now};
       if (now - e.t > 60000) { e.n = 0; e.t = now; }
@@ -392,8 +395,9 @@ export class Hub {
     }
     const j = await this.lireSession(req);
     if (!j) return json({erreur: 'session'}, {}, 401);
-    this.visite(j);
-    if (p === '/moi') { this.evaluer(j); const mj = this.moi(j); mj.solde = await this.solde(mj.login); return json({moi: mj}); }
+    this.visite(j); qCloture(this);
+    if (p === '/boutique') return bqRoute(this, j, req);
+    if (p === '/moi') { this.evaluer(j); ptsPaliers(this, j.id); const mj = this.moi(j); mj.solde = await this.solde(mj.login); return json({moi: mj}); }
     if (p === '/defis') { this.evaluer(j); return json(this.defisPour(j)); }
     if (p === '/titre' && req.method === 'POST') {
       let b = {}; try { b = await req.json(); } catch (x) {}
@@ -448,7 +452,7 @@ export class Hub {
   cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j),
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j),
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
@@ -460,7 +464,12 @@ export class Hub {
     return {carte: /^((s\d+|halloween)-\d{1,3}|tarot-\d{1,2})$/.test(f.carte || '') ? f.carte : '', jeu: txt(f.jeu, 40), badge: /^[a-z0-9-]{2,24}$/.test(f.badge || '') ? f.badge : '',
       devise: txt(f.devise, 60), cadre: ['or', 'rouge', 'bleu', 'argent'].includes(f.cadre) ? f.cadre : 'or'};
   }
-  titresDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='titre' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
+  titresDe(j) {
+    const t = this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='titre' ORDER BY ts`, j.id).toArray().map(r => r.cle);
+    const last = this.un('SELECT top FROM qsemaines WHERE sem=?', semaineDe(jourParis()) - 1);   // le 1er de la semaine passée garde ce titre jusqu'au lundi suivant
+    if (last) { try { const top = JSON.parse(last.top); if (top[0] && top[0].id === j.id) t.push('Champion de la semaine'); } catch (e) {} }
+    return t;
+  }
   titreDe(j) { return j.titre && this.titresDe(j).includes(j.titre) ? j.titre : ''; }
   succesDe(j) {
     const out = [];
@@ -472,6 +481,7 @@ export class Hub {
       if (r.cle === 'serie7') { out.push({id: 'serie7', nom: 'Une semaine de flamme', desc: 'Tu as terminé le Jeu du jour 7 jours de suite.', ico: 'flame', tier: 'or', cat: 'Jeu du jour', ts: r.ts}); return; }
       if (r.cle === 'serie30') { out.push({id: 'serie30', nom: 'Inarrêtable', desc: 'Tu as tenu une série de 30 jours au Jeu du jour.', ico: 'flame', tier: 'mythique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
+      const bqb = bqBadge(r.cle); if (bqb) { out.push({...bqb, ts: r.ts}); return; }
       const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
       if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
     });
@@ -480,7 +490,7 @@ export class Hub {
   titresPublics() {
     const t = {};
     this.sql.exec(`SELECT id, login, nom, titre FROM joueurs WHERE titre!='' AND prive=0 AND banni=0 LIMIT 2000`).toArray().forEach(r => {
-      if (!this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='titre' AND cle=?`, r.id, r.titre)) return;
+      if (!this.titresDe(r).includes(r.titre)) return;
       t[String(r.login).toLowerCase()] = r.titre; t[String(r.nom || '').toLowerCase()] = r.titre;
     });
     return json({t});
@@ -1011,7 +1021,7 @@ async function aCoffre(h, j) {
   return json({ouvert: true, nouvelle, badgeNouveau: !deja});
 }
 async function qQuotidien(h, j, req, url) {
-  const jour = jourParis(), p = qPuzzle(h, jour); let bonusSerie = null;
+  qCloture(h); const jour = jourParis(), p = qPuzzle(h, jour); let bonusSerie = null;
   let pa = h.un('SELECT * FROM qparties WHERE joueur=? AND jour=?', j.id, jour);
   if (req.method === 'POST') {
     if (p.vide) return json({erreur: 'vide'}, {}, 400);
@@ -1038,13 +1048,115 @@ async function qQuotidien(h, j, req, url) {
     h.run(`INSERT INTO qparties(joueur,jour,fmt,puzzle,essais,fini,gagne,pts) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(joueur,jour) DO UPDATE SET essais=excluded.essais, fini=excluded.fini, gagne=excluded.gagne, pts=excluded.pts`, j.id, jour, p.fmt, p.n || 0, JSON.stringify(ess), fini, gagne, pts);
     pa = h.un('SELECT * FROM qparties WHERE joueur=? AND jour=?', j.id, jour);
     if (pa && pa.gagne) aTirage(h, j.id, jour);
-    if (pa && pa.fini) bonusSerie = qRecompenseSerie(h, j.id, jour);
+    if (pa && pa.fini) { bonusSerie = qRecompenseSerie(h, j.id, jour); ptsPaliers(h, j.id); }
   }
   const v = qVue(h, j, p, pa);
   if (bonusSerie) v.bonus = bonusSerie;
-  v.arcade = {attente: aAttente(h, j.id)};
+  v.arcade = {attente: aAttente(h, j.id)}; v.points = ptsEtat(h, j);
   if (url.searchParams.get('jeux')) v.jeux = h.sql.exec('SELECT nom FROM qjeux ORDER BY nom COLLATE NOCASE').toArray().map(x => x.nom);
   return json(v);
+}
+// ---------- Points, classement, récompenses hebdo, boutique ----------
+// « score » = points gagnés au Jeu du jour, cumulés, ne baisse jamais (sert au classement et aux paliers).
+// « solde » = score moins ce qui a été dépensé en boutique.
+const lundiDe = d => joursPlus(d, -((new Date(d + 'T12:00:00Z').getUTCDay() + 6) % 7));
+const PALIERS = [[500, 'pts500', 'Initié du Quiz'], [2000, 'pts2000', 'Expert du Quiz'], [5000, 'pts5000', 'Légende du Quiz']];
+const BQ_BADGES = {
+  pts500: {nom: 'Initié du Quiz', desc: 'Tu as cumulé 500 points au Jeu du jour.', ico: 'bulb', tier: 'bronze', cat: 'Jeu du jour'},
+  pts2000: {nom: 'Expert du Quiz', desc: 'Tu as cumulé 2 000 points au Jeu du jour.', ico: 'trophy', tier: 'or', cat: 'Jeu du jour'},
+  pts5000: {nom: 'Légende du Quiz', desc: 'Tu as cumulé 5 000 points au Jeu du jour.', ico: 'crown', tier: 'mythique', cat: 'Jeu du jour'},
+  champion: {nom: 'Champion de la semaine', desc: 'Tu as fini dans le top 3 du classement hebdomadaire du Jeu du jour.', ico: 'trophy', tier: 'epique', cat: 'Jeu du jour'},
+  'bq-etoile': {nom: 'Étoile filante', desc: 'Acheté à la boutique de points.', ico: 'star', tier: 'bronze', cat: 'Boutique'},
+  'bq-lune': {nom: 'Hibou de nuit', desc: 'Acheté à la boutique de points.', ico: 'moon', tier: 'bronze', cat: 'Boutique'},
+  'bq-vue': {nom: 'Vue perçante', desc: 'Acheté à la boutique de points.', ico: 'eye', tier: 'argent', cat: 'Boutique'},
+  'bq-des': {nom: 'Joueur de dés', desc: 'Acheté à la boutique de points.', ico: 'dice', tier: 'argent', cat: 'Boutique'},
+  'bq-couronne': {nom: 'Couronné', desc: 'Acheté à la boutique de points.', ico: 'crown', tier: 'or', cat: 'Boutique'},
+  'bq-gemme': {nom: 'Chasseur de gemmes', desc: 'Acheté à la boutique de points.', ico: 'gem', tier: 'epique', cat: 'Boutique'}
+};
+const bqBadge = cle => BQ_BADGES[cle] ? {id: cle, ...BQ_BADGES[cle]} : null;
+const BQ = [
+  {id: 'pioche', kind: 'pioche', nom: 'Pioche Arcade', prix: 400, desc: 'Trois cartes Arcade tirées au hasard, tu en gardes une. Une seule par jour.'},
+  ...[['Curieux', 150], ['Noctambule', 200], ['Œil de lynx', 250], ['Chasseur d’énigmes', 300], ['Collectionneur', 400], ['Gardien des Cartes', 600], ['Légende vivante', 1200], ['Roi de l’Arcade', 2000]]
+    .map(([n, p]) => ({id: 't-' + nrm(n), kind: 'titre', nom: n, prix: p, val: n, desc: 'Un titre affiché sous ton pseudo.'})),
+  ...[['etoile', 200], ['lune', 250], ['vue', 400], ['des', 350], ['couronne', 800], ['gemme', 1200]]
+    .map(([k, p]) => ({id: 'bq-' + k, kind: 'badge', nom: BQ_BADGES['bq-' + k].nom, prix: p, cle: 'bq-' + k, desc: 'Un badge à ranger dans ta vitrine.'})),
+  ...[['pixel', 'Pixel doré', 300], ['neon', 'Néon violet', 400], ['ronces', 'Ronces', 500], ['flamme', 'Flammes', 600], ['glace', 'Givre', 600], ['etoiles', 'Voie lactée', 700], ['arcade', 'Arcade RGB', 800], ['glitch', 'Glitch', 900], ['royal', 'Couronne royale', 1500]]
+    .map(([k, n, p]) => ({id: 'c-' + k, kind: 'cadre', nom: n, prix: p, desc: 'Un cadre autour de ton avatar.'})),
+  ...[['ville', 'Ville sous la pluie', 600], ['salle', 'Salle d’arcade', 700], ['foret', 'Forêt du Renard', 800], ['neon', 'Néons du Ronin', 900], ['station', 'Station du Pilote', 1000], ['tour', 'Tour du Bourreau', 1200], ['ile', 'Île du Pirate Fantôme', 1500], ['manoir', 'Manoir du Veilleur', 2000]]
+    .map(([k, n, p]) => ({id: 'b-' + k, kind: 'banniere', nom: n, prix: p, desc: 'Une bannière animée en haut de ton profil.'})),
+  ...[['or', 'Or', 250], ['rose', 'Rose', 250], ['cyan', 'Cyan', 250], ['vert', 'Vert', 250], ['arc', 'Arc-en-ciel animé', 700]]
+    .map(([k, n, p]) => ({id: 'p-' + k, kind: 'couleur', nom: n, prix: p, desc: 'Une couleur pour ton pseudo.'}))
+];
+const BQ_PAR_ID = Object.fromEntries(BQ.map(x => [x.id, x]));
+function ptsScore(h, id) { return h.un('SELECT COALESCE(SUM(pts),0) AS s FROM qparties WHERE joueur=?', id).s; }
+function ptsEtat(h, j) {
+  const score = ptsScore(h, j.id), depense = h.un('SELECT COALESCE(SUM(prix),0) AS s FROM bq_achats WHERE joueur=?', j.id).s, jour = jourParis();
+  const prochain = PALIERS.find(p => score < p[0]);
+  return {score, solde: score - depense, piocheFaite: !!h.un('SELECT 1 AS x FROM bq_achats WHERE joueur=? AND item=? AND jour=?', j.id, 'pioche', jour),
+    prochainPalier: prochain ? {pts: prochain[0], titre: prochain[2]} : null};
+}
+function ptsPaliers(h, id) {
+  const s = ptsScore(h, id);
+  PALIERS.forEach(([n, cle, titre]) => { if (s >= n) { h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, id, 'badge', cle, Date.now(), 'points'); h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, id, 'titre', titre, Date.now(), 'points'); } });
+}
+function cosmDe(j) { return {cadre: j.cadre_av || '', banniere: j.banniere || '', couleur: j.couleur || ''}; }
+// classement : deb/fin = bornes (jours) ou null pour « depuis le début » ; les profils privés et bannis n'apparaissent pas
+function ptsClassement(h, deb, fin, lim) {
+  const w = deb ? ' AND q.jour>=? AND q.jour<=?' : '', args = deb ? [deb, fin] : [];
+  return h.sql.exec(`SELECT j.*, SUM(q.pts) AS pts, SUM(q.gagne) AS wins, COUNT(*) AS n FROM qparties q JOIN joueurs j ON j.id=q.joueur
+    WHERE j.banni=0 AND j.prive=0 AND q.fini=1${w} GROUP BY q.joueur HAVING SUM(q.pts)>0 ORDER BY pts DESC, wins DESC, n ASC, q.joueur ASC LIMIT ?`, ...args, lim).toArray();
+}
+function ptsLigne(h, r, i) {
+  return {rang: i + 1, login: r.login, pseudo: r.nom, avatar: r.avatar || '', titre: h.titreDe(r), pts: r.pts, victoires: r.wins, parties: r.n, serie: qSerie(h, r.id).serie, cosm: cosmDe(r)};
+}
+// à chaque début de semaine, les 3 meilleurs de la semaine passée reçoivent leur récompense (traité à la première visite, une seule fois)
+function qCloture(h) {
+  const cur = semaineDe(jourParis()); if (h._clot === cur) return;
+  const prem = h.un('SELECT MIN(jour) AS d FROM qparties WHERE pts>0').d;
+  if (prem) for (let s = semaineDe(prem); s < cur; s++) {
+    if (h.un('SELECT 1 AS x FROM qsemaines WHERE sem=?', s)) continue;
+    const deb = joursPlus(lundiDe(prem), (s - semaineDe(prem)) * 7), top = ptsClassement(h, deb, joursPlus(deb, 6), 3);
+    h.run('INSERT OR IGNORE INTO qsemaines(sem,deb,top) VALUES(?,?,?)', s, deb, JSON.stringify(top.map(r => ({id: r.id, login: r.login, pseudo: r.nom, pts: r.pts}))));
+    top.forEach((r, i) => { aTirage(h, r.id, 'w' + s + ':' + (i + 1), 0); h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, r.id, 'badge', 'champion', Date.now(), 'semaine'); });
+  }
+  h._clot = cur;
+}
+function ptsClassementVue(h) {
+  qCloture(h);
+  const auj = jourParis(), deb = lundiDe(auj), fin = joursPlus(deb, 6);
+  const sem = ptsClassement(h, deb, fin, 50).map((r, i) => ptsLigne(h, r, i)), tot = ptsClassement(h, null, null, 50).map((r, i) => ptsLigne(h, r, i));
+  const passee = h.un('SELECT deb, top FROM qsemaines WHERE sem=?', semaineDe(auj) - 1);
+  return {jour: auj, debut: deb, fin, joursRestants: joursDepuis(fin) - joursDepuis(auj), semaine: sem, total: tot, semainePassee: passee ? {debut: passee.deb, top: JSON.parse(passee.top)} : null};
+}
+function bqCatalogue(h, j) {
+  const possede = new Set(h.sql.exec('SELECT item FROM bq_achats WHERE joueur=? AND item!=?', j.id, 'pioche').toArray().map(r => r.item));
+  const e = ptsEtat(h, j);
+  return {...e, equipe: cosmDe(j), articles: BQ.map(x => ({id: x.id, kind: x.kind, nom: x.nom, prix: x.prix, desc: x.desc, possede: x.kind === 'pioche' ? false : possede.has(x.id)}))};
+}
+async function bqRoute(h, j, req) {
+  ptsPaliers(h, j.id);
+  if (req.method !== 'POST') return json(bqCatalogue(h, j));
+  let b = {}; try { b = await req.json(); } catch (x) {}
+  if (b.act === 'acheter') {
+    const x = BQ_PAR_ID[String(b.id)]; if (!x) return json({erreur: 'article'}, {}, 400);
+    const e = ptsEtat(h, j), jour = jourParis();
+    if (x.kind !== 'pioche' && h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, x.id)) return json({erreur: 'deja'}, {}, 400);
+    if (x.kind === 'pioche' && e.piocheFaite) return json({erreur: 'pioche_du_jour'}, {}, 400);
+    if (e.solde < x.prix) return json({erreur: 'solde'}, {}, 400);
+    h.run('INSERT INTO bq_achats(joueur,item,prix,jour,ts) VALUES(?,?,?,?,?)', j.id, x.id, x.prix, jour, Date.now());
+    if (x.kind === 'pioche') aTirage(h, j.id, 'b' + jour, 0);
+    if (x.kind === 'titre') h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'titre', x.val, Date.now(), 'boutique');
+    if (x.kind === 'badge') h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', x.cle, Date.now(), 'boutique');
+    return json({ok: true, article: x.id, ...bqCatalogue(h, j), attente: aAttente(h, j.id)});
+  }
+  if (b.act === 'equiper') {
+    const kind = String(b.kind), id = String(b.id || ''), col = {cadre: 'cadre_av', banniere: 'banniere', couleur: 'couleur'}[kind];
+    if (!col) return json({erreur: 'type'}, {}, 400);
+    if (id) { const x = BQ_PAR_ID[id]; if (!x || x.kind !== kind || !h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, id)) return json({erreur: 'pas_possede'}, {}, 400); }
+    h.run(`UPDATE joueurs SET ${col}=? WHERE id=?`, id.replace(/^[a-z]-/, ''), j.id);
+    return json({ok: true, equipe: cosmDe(h.joueur(j.id))});
+  }
+  return json({erreur: 'action'}, {}, 400);
 }
 async function qAdmin(h, act, b) {
   if (act === 'q-jeux') return json(h.sql.exec('SELECT * FROM qjeux ORDER BY nom COLLATE NOCASE').toArray());
