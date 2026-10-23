@@ -1062,16 +1062,16 @@ async function qQuotidien(h, j, req, url) {
 const lundiDe = d => joursPlus(d, -((new Date(d + 'T12:00:00Z').getUTCDay() + 6) % 7));
 const PALIERS = [[500, 'pts500', 'Initié du Quiz'], [2000, 'pts2000', 'Expert du Quiz'], [5000, 'pts5000', 'Légende du Quiz']];
 const BQ_BADGES = {
-  pts500: {nom: 'Initié du Quiz', desc: 'Tu as cumulé 500 points au Jeu du jour.', ico: 'bulb', tier: 'bronze', cat: 'Jeu du jour'},
-  pts2000: {nom: 'Expert du Quiz', desc: 'Tu as cumulé 2 000 points au Jeu du jour.', ico: 'trophy', tier: 'or', cat: 'Jeu du jour'},
-  pts5000: {nom: 'Légende du Quiz', desc: 'Tu as cumulé 5 000 points au Jeu du jour.', ico: 'crown', tier: 'mythique', cat: 'Jeu du jour'},
-  champion: {nom: 'Champion de la semaine', desc: 'Tu as fini dans le top 3 du classement hebdomadaire du Jeu du jour.', ico: 'trophy', tier: 'epique', cat: 'Jeu du jour'},
-  'bq-etoile': {nom: 'Étoile filante', desc: 'Acheté à la boutique de points.', ico: 'star', tier: 'bronze', cat: 'Boutique'},
-  'bq-lune': {nom: 'Hibou de nuit', desc: 'Acheté à la boutique de points.', ico: 'moon', tier: 'bronze', cat: 'Boutique'},
-  'bq-vue': {nom: 'Vue perçante', desc: 'Acheté à la boutique de points.', ico: 'eye', tier: 'argent', cat: 'Boutique'},
-  'bq-des': {nom: 'Joueur de dés', desc: 'Acheté à la boutique de points.', ico: 'dice', tier: 'argent', cat: 'Boutique'},
-  'bq-couronne': {nom: 'Couronné', desc: 'Acheté à la boutique de points.', ico: 'crown', tier: 'or', cat: 'Boutique'},
-  'bq-gemme': {nom: 'Chasseur de gemmes', desc: 'Acheté à la boutique de points.', ico: 'gem', tier: 'epique', cat: 'Boutique'}
+  pts500: {nom: 'Initié du Quiz', desc: 'Tu as cumulé 500 points au Jeu du jour.', ico: 'pts500', tier: 'bronze', cat: 'Jeu du jour'},
+  pts2000: {nom: 'Expert du Quiz', desc: 'Tu as cumulé 2 000 points au Jeu du jour.', ico: 'pts2000', tier: 'or', cat: 'Jeu du jour'},
+  pts5000: {nom: 'Légende du Quiz', desc: 'Tu as cumulé 5 000 points au Jeu du jour.', ico: 'pts5000', tier: 'mythique', cat: 'Jeu du jour'},
+  champion: {nom: 'Champion de la semaine', desc: 'Tu as fini dans le top 3 du classement hebdomadaire du Jeu du jour.', ico: 'champion', tier: 'epique', cat: 'Jeu du jour'},
+  'bq-etoile': {nom: 'Étoile filante', desc: 'Acheté à la boutique de points.', ico: 'bq-etoile', tier: 'bronze', cat: 'Boutique'},
+  'bq-lune': {nom: 'Hibou de nuit', desc: 'Acheté à la boutique de points.', ico: 'bq-lune', tier: 'bronze', cat: 'Boutique'},
+  'bq-vue': {nom: 'Vue perçante', desc: 'Acheté à la boutique de points.', ico: 'bq-vue', tier: 'argent', cat: 'Boutique'},
+  'bq-des': {nom: 'Joueur de dés', desc: 'Acheté à la boutique de points.', ico: 'bq-des', tier: 'argent', cat: 'Boutique'},
+  'bq-couronne': {nom: 'Couronné', desc: 'Acheté à la boutique de points.', ico: 'bq-couronne', tier: 'or', cat: 'Boutique'},
+  'bq-gemme': {nom: 'Chasseur de gemmes', desc: 'Acheté à la boutique de points.', ico: 'bq-gemme', tier: 'epique', cat: 'Boutique'}
 };
 const bqBadge = cle => BQ_BADGES[cle] ? {id: cle, ...BQ_BADGES[cle]} : null;
 const BQ = [
