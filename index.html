@@ -1799,7 +1799,7 @@ function render(newId){
 
   if(arcadeMode){
     document.getElementById('panel').innerHTML = '<h2>Cartes Arcade</h2><p class="lead">Une collection à part, rien que pour le site : réussis le Jeu du jour et choisis 1 carte parmi 3 retournées. Un peu de chance, un peu d\'habileté… et quelques secrets à découvrir.</p><div id="acmain"></div>';
-    if(window.lcArcadeOuvrir) window.lcArcadeOuvrir();
+    if(window.lcArcadeOuvrir) window.lcArcadeOuvrir(who);
   } else if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
   if(!arcadeMode && !tarotMode) document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
     ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId) + seasonReward(s, cards)
@@ -3112,7 +3112,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     return fetch(API + chemin, init).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok:r.ok, status:r.status, d:d}; }); });
   }
 
-  window.lcCompte = {appel: appel, sess: sess, etat: function(){ return etat; }, toast: function(a, b){ toast(a, b); }, ajoutSucces: function(s){ if(moi && !(moi.succes || []).some(function(x){ return x.id === s.id; })){ moi.succes = (moi.succes || []).concat([s]); try{ renderBadges(); }catch(e){} } }};
+  window.lcCompte = {login: function(){ return moi && moi.login ? String(moi.login).toLowerCase() : ''; }, appel: appel, sess: sess, etat: function(){ return etat; }, toast: function(a, b){ toast(a, b); }, ajoutSucces: function(s){ if(moi && !(moi.succes || []).some(function(x){ return x.id === s.id; })){ moi.succes = (moi.succes || []).concat([s]); try{ renderBadges(); }catch(e){} } }};
 
   // ----- connexion -----
   function demarrer(){
@@ -3325,8 +3325,6 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
     el.innerHTML = ids.length ? '<div class="cp-vp"><h3>' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="" onerror="this.remove()">' : '') + 'Vitrine de ' + esc(c.pseudo) + '</h3><div class="cp-vit">' + ids.map(function(id){ return vcHtml(id, who); }).join('') + '</div></div>' : '';
     if(c && !c.prive && c.serie >= 2) el.insertAdjacentHTML('afterbegin', '<p class="qsub">🔥 Série du Jeu du jour : ' + c.serie + ' jours</p>');
-    var ar = c && !c.prive && c.arcade ? c.arcade : [];
-    if(ar.length && window.lcArcadeMini){ var lg = login; window.lcArcadeMini(ar).then(function(hh){ if(hh && who && who.toLowerCase() === lg && g('vit') && !g('vit').querySelector('.ac-grid')) g('vit').insertAdjacentHTML('beforeend', '<div class="cp-vp"><h3>Cartes Arcade de ' + esc(c.pseudo) + ' (' + ar.length + ')</h3>' + hh + '</div>'); }); }
   }
 
 
@@ -3776,9 +3774,32 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     return '<div class="ac-card r-' + c.r + '" data-id="' + c.id + '" tabindex="0" role="button" aria-label="' + E(c.nom) + '"><span class="ac-n">' + (c.r === 's' ? 'SECRÈTE' : RN[c.r].toUpperCase()) + '</span>' + c.svg + '<div class="ac-pl"><b>' + E(c.nom) + '</b><small>' + E(c.type) + ' · ' + E(c.theme) + '</small></div></div>';
   }
   function parId(id){ return DATA.cartes.filter(function(c){ return c.id === id; })[0]; }
+  var CIBLE = '', PUB = null, SECRETS = ['la-cle-ancienne', 'le-coffre-ferme'];
+  function estMoi(){ var c = C(); return !CIBLE || (etat() && c.login && c.login() === CIBLE); }
+  function chargePub(){
+    if(estMoi()){ PUB = null; return Promise.resolve(); }
+    var c = C(); PUB = null;
+    return c.appel('/profil/' + encodeURIComponent(CIBLE)).then(function(r){ PUB = r.ok ? r.d : false; }).catch(function(){ PUB = false; });
+  }
+  function renderPub(m){
+    if(PUB === null){ m.innerHTML = '<p class="msg">Chargement…</p>'; return; }
+    if(!PUB || PUB.prive){ m.innerHTML = '<p class="msg">' + (PUB && PUB.prive ? 'Ce joueur garde sa collection privée.' : 'Aucune collection Arcade à afficher pour ce joueur.') + '</p>'; return; }
+    var own = {}; (PUB.arcade || []).forEach(function(id){ own[id] = 1; });
+    var cs = DATA.cartes.filter(function(c){ return SECRETS.indexOf(c.id) < 0; }), n = Object.keys(own).length, tot = cs.length;
+    var h = '<p class="qsub" style="margin:0 0 8px">Collection Arcade de <b>' + E(PUB.pseudo || CIBLE) + '</b></p><div class="ac-stats"><b>' + n + ' / ' + tot + '</b><div class="ac-prog" aria-hidden="true"><i style="width:' + Math.round(100 * n / tot) + '%"></i></div></div>';
+    var F = [['tous', 'Toutes'], ['Personnage', 'Personnages'], ['Lieu', 'Lieux'], ['Objet', 'Objets'], ['manq', 'Manquantes']];
+    h += '<div class="ac-chips" role="group" aria-label="Filtrer">' + F.map(function(f){ return '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (filtre === f[0]) + '">' + f[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="ac-grid">' + cs.filter(function(c){ return filtre === 'tous' || (filtre === 'manq' ? !own[c.id] : c.type === filtre); }).map(function(c){ return carte(c, !!own[c.id]); }).join('') + '</div>';
+    m.innerHTML = h;
+    Array.prototype.forEach.call(m.querySelectorAll('.ac-chips button'), function(b){ b.onclick = function(){ filtre = b.dataset.f; render(); }; });
+    Array.prototype.forEach.call(m.querySelectorAll('.ac-card[data-id]'), function(el){
+      var ouvre = function(){ zoom(el.dataset.id); }; el.onclick = ouvre; el.onkeydown = function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); ouvre(); } };
+    });
+  }
   function render(){
     var m = g('acmain'); if(!m) return;
     if(!DATA){ m.innerHTML = '<p class="msg">Chargement des cartes…</p>'; return; }
+    if(!estMoi()){ renderPub(m); return; }
     if(!etat()){
       m.innerHTML = '<div class="qcard"><h2 style="margin:0">Connecte-toi pour collectionner</h2><p class="qsub">Les cartes Arcade sont liées à ton compte Twitch. Le site ne reçoit que ton pseudo.</p><div class="row"><button class="btn" id="aclog" type="button">Se connecter avec Twitch</button></div></div>';
       g('aclog').onclick = function(){ var b = g('login'); if(b) b.click(); }; return;
@@ -3837,10 +3858,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       return l.length ? '<div class="ac-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px">' + l.map(function(c){ return carte(c, true).replace(' tabindex="0" role="button"', ' style="cursor:default"'); }).join('') + '</div>' : '';
     });
   };
-  window.lcArcadeOuvrir = function(){
+  window.lcArcadeOuvrir = function(cible){
     var auto = !!window.lcArcadeAuto; window.lcArcadeAuto = false;
+    CIBLE = cible ? String(cible).toLowerCase() : '';
     render();
-    Promise.all([charge(), chargeEtat()]).then(function(){ render(); if(auto && ST && ST.attente > 0) piocher(); });
+    Promise.all([charge(), chargeEtat(), chargePub()]).then(function(){ render(); if(auto && ST && ST.attente > 0 && estMoi()) piocher(); });
   };
   if(location.hash === '#arcade') setTimeout(window.lcArcadeOuvrir, 0);
   window.lcArcadeMaj = function(){ if(g('acmain')){ chargeEtat().then(render); } };
