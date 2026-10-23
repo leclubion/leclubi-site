@@ -1197,7 +1197,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 <div class="view" id="v-collectionneurs" hidden>
   <section>
     <div class="wrap">
-      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
+      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a></div>
       <h1>Collectionneurs</h1>
       <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
       <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
@@ -1208,16 +1208,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 
 <!-- CLASSEMENT DU JEU -->
 <!-- JEU DU JOUR -->
-<div class="view" id="v-arcade" hidden>
-  <section>
-    <div class="wrap">
-      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
-      <h1>Cartes Arcade</h1>
-      <p class="lead">Une collection à part, rien que pour le site : réussis le Jeu du jour et choisis 1 carte parmi 3 retournées. Un peu de chance, un peu d'habileté… et quelques secrets à découvrir.</p>
-      <div id="acmain"></div>
-    </div>
-  </section>
-</div>
+<div class="view" id="v-arcade" hidden></div>
 
 <div class="view" id="v-jeudujour" hidden>
   <section>
@@ -1354,7 +1345,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 <div class="view" id="v-collection" hidden>
   <section>
     <div class="wrap">
-      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a><a href="#arcade" data-sub="arcade">Cartes Arcade</a></div>
+      <div class="subtabs" role="tablist" aria-label="Collection"><a href="#collection" data-sub="collection">Les cartes</a><a href="#collectionneurs" data-sub="collectionneurs">Collectionneurs</a></div>
       <h1>Collection Officielle</h1>
       <div class="bar2" id="acct"></div>
       <div id="vit"></div>
@@ -1481,11 +1472,11 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 // Navigation
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
-  var h = location.hash, page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#arcade' ? 'arcade' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  var h = location.hash; if(h === '#arcade'){ current = 'arcade'; h = '#collection'; }
+  var page = h === '#planning' ? 'planning' : h === '#classement' ? 'classement' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
   ['accueil', 'planning', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement' && window.chargerClassement) window.chargerClassement();
   if(page === 'jeudujour' && window.lcJeuDuJour) window.lcJeuDuJour();
-  if(page === 'arcade' && window.lcArcadeOuvrir) window.lcArcadeOuvrir();
   if(page === 'compte' && window.rendreCompte) window.rendreCompte();
   document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'collectionneurs' || page === 'arcade' ? page : 'collection')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   document.querySelectorAll('[data-nav]').forEach(function(a){
@@ -1525,7 +1516,7 @@ var SEASONS = [
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
   {id:'s2', label:'Saison 2', groups:[]}
 ];
-var current = 's1', who = '', draft = false;
+var current = location.hash === '#arcade' ? 'arcade' : 's1', who = '', draft = false;
 
 // ---- Tarot « Les Dieux Oubliés » (à part des saisons : ne compte ni dans les 16/16, ni dans les titres, ni dans les badges) ----
 // Pour ajouter un dieu : ajoute une ligne {n:3, nom:'...'} et mets les images cartes/tarot-3-effacee.png et cartes/tarot-3-ravivee.png
@@ -1787,15 +1778,15 @@ function groupsHtml(s, cards, newId){
 }
 function render(newId){
   if(current === 'tarot' && !(who && tarotCount(who))) current = 's1';
-  var tarotMode = current === 'tarot';
-  var s = SEASONS.filter(function(x){ return x.id === (tarotMode ? 's1' : current); })[0], cards = cardsOf(s);
+  var tarotMode = current === 'tarot', arcadeMode = current === 'arcade';
+  var s = SEASONS.filter(function(x){ return x.id === (tarotMode || arcadeMode ? 's1' : current); })[0], cards = cardsOf(s);
   var got = cards.filter(function(c){ return has(c.id); }).length, names = Object.keys(COLLECTIONS);
 
   document.getElementById('acct').innerHTML =
     '<label>Collection de <select class="sel" id="who"><option value="">Aucun viewer (cartes cachées)</option>' +
     names.map(function(n, i){ return '<option value="' + i + '"' + (n === who ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') +
     '</select></label>' +
-    '<p>' + (tarotMode ? esc(who) + ' : ' + tarotOwned().length + ' / ' + TAROT.cartes.length + ' cartes de Tarot' : (who && cards.length ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '')) + '</p>' +
+    '<p>' + (tarotMode ? esc(who) + ' : ' + tarotOwned().length + ' / ' + TAROT.cartes.length + ' cartes de Tarot' : (who && cards.length && !arcadeMode ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '')) + '</p>' +
     (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
 
   document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() + tarotRewardHtml() : '';
@@ -1804,10 +1795,13 @@ function render(newId){
 
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
-  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot">Tarot</button>' : '');
+  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot">Tarot</button>' : '') + '<button class="tab" role="tab" aria-selected="' + arcadeMode + '" data-season="arcade">Arcade</button>';
 
-  if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
-  else document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
+  if(arcadeMode){
+    document.getElementById('panel').innerHTML = '<h2>Cartes Arcade</h2><p class="lead">Une collection à part, rien que pour le site : réussis le Jeu du jour et choisis 1 carte parmi 3 retournées. Un peu de chance, un peu d\'habileté… et quelques secrets à découvrir.</p><div id="acmain"></div>';
+    if(window.lcArcadeOuvrir) window.lcArcadeOuvrir();
+  } else if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
+  if(!arcadeMode && !tarotMode) document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
     ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId) + seasonReward(s, cards)
     : '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>');
 
@@ -1829,7 +1823,7 @@ document.addEventListener('change', function(e){
 document.addEventListener('click', function(e){
   var t = e.target.closest('[data-act],[data-season],.card');
   if(!t) return;
-  if(t.dataset.season){ current = t.dataset.season; return render(); }
+  if(t.dataset.season){ current = t.dataset.season; try{ if(current === 'arcade') history.replaceState(null, '', '#arcade'); else if(location.hash === '#arcade') history.replaceState(null, '', '#collection'); }catch(err){} return render(); }
   var a = t.dataset.act;
   if(a === 'link'){ copyLink(); }
   else if(a === 'add'){
@@ -1990,6 +1984,7 @@ function loadSheet(){
 var zoomEl = document.getElementById('zoom'), zbody = document.getElementById('zbody'), zid = null;
 function ownedList(){
   if(current === 'tarot') return tarotOwned();
+  if(current === 'arcade') return [];
   var s = SEASONS.filter(function(x){ return x.id === current; })[0];
   return cardsOf(s).filter(function(c){ return has(c.id); });
 }
@@ -2382,13 +2377,13 @@ document.getElementById('pform').addEventListener('submit', function(e){
 
 // ---- Jeu du jour : un mini-jeu différent chaque jour de la semaine ----
 (function(){
-  var ORDRE = ['pixel', 'anagramme', 'emoji', 'pendu', 'citation', 'indices', 'resume'], JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  var ORDRE = ['pixel', 'anagramme', 'emoji', 'pendu', 'motscles', 'indices', 'resume'], JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
   var FM = {
     pixel: {n: 'PixelPelé', d: "Retrouve le jeu : l'image devient plus nette à chaque erreur."},
     anagramme: {n: 'Anagramme', d: "Les lettres du titre sont mélangées. Chaque erreur remet une lettre à sa place."},
     emoji: {n: 'Emoji', d: "Retrouve le jeu grâce à ces emojis. Chaque erreur en révèle un de plus."},
     pendu: {n: 'Le Pendu', d: "Propose des lettres pour deviner le titre. Une mauvaise lettre fait avancer le pendu."},
-    citation: {n: 'Citation', d: "De quel jeu vient cette réplique ? Chaque erreur donne un indice de plus."},
+    motscles: {n: 'Mots-clés', d: "Des mots liés au jeu, du plus vague au plus parlant. Chaque erreur en dévoile un de plus."},
     indices: {n: 'Indices', d: "Chaque essai est comparé au bon jeu : genre, année, studio, plateforme…"},
     resume: {n: 'Résumé caviardé', d: "Le résumé du jeu est censuré. Chaque erreur lève un peu de la censure."}
   };
@@ -2401,7 +2396,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
   function C(){ return window.lcCompte; }
   function parisDow(){ return new Date(new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'}) + 'T12:00:00Z').getUTCDay(); }
   function semaine(){
-    var f = st ? st.fmt : null, dow = parisDow(), auj = f || ['resume', 'pixel', 'anagramme', 'emoji', 'pendu', 'citation', 'indices'][dow];
+    var f = st ? st.fmt : null, dow = parisDow(), auj = f || ['resume', 'pixel', 'anagramme', 'emoji', 'pendu', 'motscles', 'indices'][dow];
     g('qweek').innerHTML = ORDRE.map(function(k, i){ var jd = (i + 1) % 7; return '<div class="qd' + (k === auj ? ' on' : '') + '"><b>' + JOURS[jd].slice(0, 3) + '.</b>' + FM[k].n + '</div>'; }).join('');
   }
   function pips(){
@@ -2430,8 +2425,8 @@ document.getElementById('pform').addEventListener('submit', function(e){
     else if(f === 'anagramme'){
       h = '<div class="qpend"><div style="width:100%;text-align:center">' + (st.debut ? '<div class="qmask">' + E(st.debut) + '</div>' : '') + '<div class="qemo" aria-label="Lettres mélangées">' + (st.melange || []).map(function(c){ return '<span>' + E(c) + '</span>'; }).join('') + '</div><p class="qsub" style="text-align:center">Mots : ' + (st.forme || []).join(' · ') + ' lettres</p></div></div>';
     }
-    else if(f === 'citation'){
-      h = '<blockquote class="qres" style="font-size:1.15em;font-style:italic;text-align:center;margin:0 0 10px">« ' + E(st.citation) + ' »</blockquote><div class="qclues">' + (st.indices || []).map(function(c){ return '<span class="qclue"><small>' + CLUE[c.k] + '</small>' + E(c.v) + '</span>'; }).join('') + '</div>';
+    else if(f === 'motscles'){
+      var mm = st.mots || [], q2; h = '<div class="qemo qmots" aria-label="Mots-clés">'; for(q2 = 0; q2 < mm.length; q2++) h += '<span style="font-size:.9em;padding:8px 14px">' + E(mm[q2]) + '</span>'; for(q2 = mm.length; q2 < (st.totalMots || mm.length); q2++) h += '<span class="q">❓</span>'; h += '</div>';
     }
     else if(f === 'resume') h = '<div class="qres"><p>' + (st.resume || []).map(function(s){ return s.h ? '<span class="h">' + E(s.t) + '</span>' : (s.r ? '<span class="r">' + E(s.t) + '</span>' : E(s.t)); }).join('') + '</p></div>';
     return h;
@@ -3848,7 +3843,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     Promise.all([charge(), chargeEtat()]).then(function(){ render(); if(auto && ST && ST.attente > 0) piocher(); });
   };
   if(location.hash === '#arcade') setTimeout(window.lcArcadeOuvrir, 0);
-  window.lcArcadeMaj = function(){ var v = g('v-arcade'); if(v && !v.hidden){ chargeEtat().then(render); } };
+  window.lcArcadeMaj = function(){ if(g('acmain')){ chargeEtat().then(render); } };
   var oldUi = window.lcOnUi;
   window.lcOnUi = function(){ if(oldUi) oldUi(); window.lcArcadeMaj(); };
   // le coffre caché (page « À propos ») : il ne s'ouvre qu'avec la bonne carte, sans rien dire de plus
