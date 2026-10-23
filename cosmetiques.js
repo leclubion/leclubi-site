@@ -311,5 +311,112 @@
   ].join('\n');
   var st = document.createElement('style'); st.id = 'lcc-css'; st.textContent = css; document.head.appendChild(st);
 
-  window.LCC = {banniere: banniere, avatar: avatar, nom: nom, NOMS: NOMS, CADRES: CADRES, COULEURS: COULEURS};
+
+  /* ---- Emblèmes de badges uniques (palettes exclusives, jamais réutilisées) ---- */
+  function poly(n, r1, r2, rot) { var o = []; for (var i = 0; i < n * 2; i++) { var a = Math.PI * i / n + (rot || -Math.PI / 2), r = i % 2 ? r2 : r1; o.push((32 + r * Math.cos(a)).toFixed(1) + ',' + (32 + r * Math.sin(a)).toFixed(1)); } return o.join(' '); }
+  var BASE = {
+    scallop: function (n) { return '<polygon points="' + poly(n || 12, 30, 26) + '"'; },
+    circle: function () { return '<circle cx="32" cy="32" r="29"'; },
+    hex: function () { return '<polygon points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5"'; },
+    hexf: function () { return '<polygon points="17,5 47,5 61,32 47,59 17,59 3,32"'; },
+    sq: function () { return '<rect x="5" y="5" width="54" height="54" rx="15"'; },
+    shield: function () { return '<path d="M9 7h46v27c0 13-10 21-23 25C19 55 9 47 9 34z"'; },
+    diamond: function () { return '<polygon points="32,2 62,32 32,62 2,32"'; },
+    oct: function () { return '<polygon points="21,4 43,4 60,21 60,43 43,60 21,60 4,43 4,21"'; }
+  };
+  var K = '#fff';
+  var EMB = {
+    'bq-etoile': {b: BASE.scallop(14), c: ['#0aa4ff', '#1b2bd1', '#7ff3ff'], g: '#38c6ff',
+      i: '<polygon points="' + poly(5, 19, 8, -Math.PI / 2) + '" fill="#fff6a8" stroke="#0b2a4a" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 48h14M40 50h12M16 53h9" stroke="#7ff3ff" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>'},
+    'bq-lune': {b: BASE.circle(), c: ['#6a4fd6', '#160a4a', '#b9a6ff'], g: '#8a6bff',
+      i: '<path d="M38 14a19 19 0 1 0 12 30 15 15 0 0 1-12-30z" fill="#f4efff" stroke="#1a0f3a" stroke-width="2.2" stroke-linejoin="round"/><circle cx="44" cy="20" r="2.4" fill="#ffd86b"/><circle cx="50" cy="31" r="1.7" fill="#ffd86b"/><circle cx="21" cy="19" r="1.6" fill="#ffd86b"/>'},
+    'bq-vue': {b: BASE.hexf(), c: ['#10c98f', '#04473a', '#3dffb0'], g: '#2dffb4',
+      i: '<path d="M7 32Q32 10 57 32Q32 54 7 32z" fill="#eafff6" stroke="#04281f" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="32" r="10" fill="#0fa37a" stroke="#04281f" stroke-width="2"/><circle cx="32" cy="32" r="4.6" fill="#052b3a"/><circle cx="35.5" cy="28.5" r="2.2" fill="#fff"/>'},
+    'bq-des': {b: BASE.sq(), c: ['#ff4f93', '#6d0a3c', '#ffd1e3'], g: '#ff5c9a',
+      i: '<g transform="rotate(-12 32 32)"><rect x="14" y="14" width="36" height="36" rx="8" fill="#fff" stroke="#3a0a24" stroke-width="2.2"/><circle cx="23" cy="23" r="3.2" fill="#c2185b"/><circle cx="41" cy="23" r="3.2" fill="#c2185b"/><circle cx="32" cy="32" r="3.2" fill="#c2185b"/><circle cx="23" cy="41" r="3.2" fill="#c2185b"/><circle cx="41" cy="41" r="3.2" fill="#c2185b"/></g>'},
+    'bq-couronne': {b: BASE.shield(), c: ['#ffc928', '#8a4a00', '#fff3b0'], g: '#ffbf1f',
+      i: '<path d="M14 42L11 20l12 11 9-17 9 17 12-11-3 22z" fill="#ffe36b" stroke="#3b2300" stroke-width="2.2" stroke-linejoin="round"/><rect x="14" y="43" width="36" height="6" rx="2" fill="#ffc928" stroke="#3b2300" stroke-width="2"/><circle cx="32" cy="38" r="3.4" fill="#ff2d4d" stroke="#3b2300" stroke-width="1.4"/><circle cx="20" cy="39" r="2.2" fill="#ff2d4d"/><circle cx="44" cy="39" r="2.2" fill="#ff2d4d"/>'},
+    'bq-gemme': {b: BASE.diamond(), c: ['#d34bff', '#3a0a6e', '#ffd0ff'], g: '#e05bff',
+      i: '<path d="M21 22h22l9 10-20 20L12 32z" fill="#f6c8ff" stroke="#240a3d" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 32h40M21 22l11 10 11-10M32 32v20" fill="none" stroke="#8d1fd1" stroke-width="1.8" stroke-linejoin="round"/><path d="M26 25l-3 5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'},
+    'pts500': {b: BASE.oct(), c: ['#b7f21a', '#2b5a00', '#f1ff9a'], g: '#c8ff3d',
+      i: '<path d="M32 10a15 15 0 0 0-8.5 27.4c1.6 1.3 2.5 3 2.5 5.1v1h12v-1c0-2.1.9-3.8 2.5-5.1A15 15 0 0 0 32 10z" fill="#fffbd0" stroke="#3a2b00" stroke-width="2.2" stroke-linejoin="round"/><rect x="26" y="46" width="12" height="4" rx="2" fill="#8fc400" stroke="#3a2b00" stroke-width="1.8"/><path d="M28 30l4 4 4-4M32 34v8" fill="none" stroke="#d7a800" stroke-width="2" stroke-linecap="round"/>'},
+    'pts2000': {b: BASE.circle(), c: ['#ff8a3d', '#5a1a00', '#ffe3c4'], g: '#ff8a3d', ring: '#6fe3ff',
+      i: '<path d="M20 12h24v12c0 8-5 13-12 13S20 32 20 24z" fill="#ffe3c4" stroke="#1d1a2b" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 15h-7v4c0 5 3 8 8 9M44 15h7v4c0 5-3 8-8 9" fill="none" stroke="#6fe3ff" stroke-width="2.4" stroke-linecap="round"/><path d="M32 37v7M23 51h18l-2-7H25z" fill="#b4501a" stroke="#1d1a2b" stroke-width="2.2" stroke-linejoin="round"/><path d="M26 17v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'},
+    'pts5000': {b: BASE.scallop(18), c: ['#ff6bd5', '#2a0f8a', '#ffffff'], g: '#ffffff', rb: true,
+      i: '<path d="M12 44L9 18l14 12 9-18 9 18 14-12-3 26z" fill="url(#LCRB)" stroke="#101018" stroke-width="2.2" stroke-linejoin="round"/><rect x="12" y="45" width="40" height="7" rx="2.5" fill="#f2f5ff" stroke="#101018" stroke-width="2"/><circle cx="32" cy="12" r="3" fill="#fff" stroke="#101018" stroke-width="1.6"/><circle cx="9" cy="17" r="2.6" fill="#5cf2ff"/><circle cx="55" cy="17" r="2.6" fill="#ffe66b"/>'},
+    'champion': {b: BASE.hex(), c: ['#ff3b30', '#2a0000', '#ffd45a'], g: '#ff3b30',
+      i: '<path d="M18 46C8 40 7 27 13 18M46 46c10-6 11-19 5-28" fill="none" stroke="#ffd45a" stroke-width="3" stroke-linecap="round"/><path d="M12 24l-4-3M10 31l-5-1M13 38l-5 1M52 24l4-3M54 31l5-1M51 38l5 1" stroke="#ffd45a" stroke-width="2.4" stroke-linecap="round"/><path d="M23 17h18v10c0 7-4 11-9 11s-9-4-9-11z" fill="#fff" stroke="#1a0000" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 38v6M25 49h14l-1.5-5h-11z" fill="#ffd45a" stroke="#1a0000" stroke-width="2.2" stroke-linejoin="round"/><polygon points="' + poly(5, 6, 2.6, -Math.PI / 2).replace(/([\d.]+),([\d.]+)/g, function (m, x, y) { return (+x).toFixed(1) + ',' + (+y + 3).toFixed(1); }) + '" fill="#ff3b30"/>'}
+  };
+
+  /* ---- Tous les autres badges : emblèmes générés (forme + teinte + pictogramme + plaque uniques) ---- */
+  var IC = {
+    star: function (L, D, A) { return '<polygon points="' + poly(5, 19, 8) + '" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="32" r="3" fill="' + A + '"/>'; },
+    cards: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="2" stroke-linejoin="round"><rect x="20" y="15" width="22" height="30" rx="4" fill="' + A + '" transform="rotate(-18 32 32)"/><rect x="22" y="15" width="22" height="30" rx="4" fill="' + A + '" transform="rotate(14 32 32)" opacity=".9"/><rect x="21" y="15" width="22" height="30" rx="4" fill="' + L + '"/></g><polygon points="' + poly(4, 6, 2.4).replace(/([\d.]+),([\d.]+)/g, function (m, x, y) { return (+x - 0).toFixed(1) + ',' + (+y - 2).toFixed(1); }) + '" fill="' + A + '"/>'; },
+    layers: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="2" stroke-linejoin="round"><polygon points="32,35 53,45 32,55 11,45" fill="' + A + '"/><polygon points="32,25 53,35 32,45 11,35" fill="' + A + '" opacity=".92"/><polygon points="32,12 53,23 32,34 11,23" fill="' + L + '"/></g>'; },
+    crown: function (L, D, A) { return '<path d="M14 42L11 20l12 11 9-17 9 17 12-11-3 22z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><rect x="14" y="43" width="36" height="6" rx="2" fill="' + A + '" stroke="' + D + '" stroke-width="2"/><circle cx="32" cy="37" r="3.2" fill="' + A + '" stroke="' + D + '" stroke-width="1.4"/>'; },
+    trophy: function (L, D, A) { return '<path d="M20 12h24v12c0 8-5 13-12 13S20 32 20 24z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 15h-7v4c0 5 3 8 8 9M44 15h7v4c0 5-3 8-8 9" fill="none" stroke="' + A + '" stroke-width="2.6" stroke-linecap="round"/><path d="M32 37v7M23 51h18l-2-7H25z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M26 17v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'; },
+    gem: function (L, D, A) { return '<path d="M21 20h22l10 11-21 22L11 31z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M11 31h42M21 20l11 11 11-11M32 31v22" fill="none" stroke="' + A + '" stroke-width="1.8" stroke-linejoin="round"/><path d="M25 24l-3 5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'; },
+    flame: function (L, D, A) { return '<path d="M32 9c2 9 14 13 14 26a14 14 0 0 1-28 0c0-6 3-9 6-12 0 5 2 8 5 8-1-8-1-14 3-22z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 29c1 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 4-6 0 3 1 4 2 4-1-4-1-7 1-11z" fill="' + L + '" stroke="' + D + '" stroke-width="1.6" stroke-linejoin="round"/>'; },
+    sword: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M16 14l8-2 22 24-4 4L14 22z" fill="' + L + '"/><path d="M48 14l-8-2-22 24 4 4 28-18z" fill="' + L + '" transform="translate(0 0)"/><path d="M42 40l8 8M22 40l-8 8" stroke="' + A + '" stroke-width="4"/><path d="M38 38l8 4-4 4zM26 38l-8 4 4 4z" fill="' + A + '"/></g>'; },
+    sword1: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M32 8l6 6v22H26V14z" fill="' + L + '"/><path d="M20 38h24v5H20z" fill="' + A + '"/><path d="M29 43h6v10h-6z" fill="' + A + '" opacity=".9"/><circle cx="32" cy="55" r="3" fill="' + L + '"/></g><path d="M32 12v20" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"/>'; },
+    shield: function (L, D, A) { return '<path d="M32 9l18 6v14c0 12-8 19-18 24C22 48 14 41 14 29V15z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 15v32M22 27h20" stroke="' + A + '" stroke-width="3.4" stroke-linecap="round"/>'; },
+    medal: function (L, D, A) { return '<path d="M20 8l8 16h8l8-16" fill="' + A + '" stroke="' + D + '" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="38" r="14" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><polygon points="' + poly(5, 8, 3.4).replace(/([\d.]+),([\d.]+)/g, function (m, x, y) { return (+x).toFixed(1) + ',' + (+y + 6).toFixed(1); }) + '" fill="' + A + '" stroke="' + D + '" stroke-width="1.2" stroke-linejoin="round"/>'; },
+    dice: function (L, D, A) { return '<g transform="rotate(-12 32 32)"><rect x="14" y="14" width="36" height="36" rx="8" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><g fill="' + A + '"><circle cx="23" cy="23" r="3.2"/><circle cx="41" cy="23" r="3.2"/><circle cx="32" cy="32" r="3.2"/><circle cx="23" cy="41" r="3.2"/><circle cx="41" cy="41" r="3.2"/></g></g>'; },
+    eye: function (L, D, A) { return '<path d="M7 32Q32 10 57 32Q32 54 7 32z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="32" r="10" fill="' + A + '" stroke="' + D + '" stroke-width="2"/><path d="M32 25v14M25 32h14" stroke="' + D + '" stroke-width="2.2" stroke-linecap="round"/><circle cx="35" cy="28" r="2" fill="#fff"/>'; },
+    moon: function (L, D, A) { return '<path d="M38 12a20 20 0 1 0 13 32 16 16 0 0 1-13-32z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><circle cx="46" cy="20" r="2.6" fill="' + A + '"/><circle cx="51" cy="31" r="1.8" fill="' + A + '"/>'; },
+    key: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><circle cx="22" cy="32" r="10" fill="' + L + '"/><circle cx="22" cy="32" r="4" fill="' + A + '"/><path d="M32 32h22v8h-5v-4h-5v4h-5v-4H32z" fill="' + L + '"/></g>'; },
+    spider: function (L, D, A) { return '<g stroke="' + D + '" stroke-width="3" stroke-linecap="round" fill="none"><path d="M26 28L10 16M25 33L8 33M26 38L11 50M27 43l-5 12M38 28l16-12M39 33l17 0M38 38l15 12M37 43l5 12"/></g><ellipse cx="32" cy="37" rx="9" ry="11" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><circle cx="32" cy="24" r="6" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><circle cx="29.6" cy="23" r="1.8" fill="' + A + '"/><circle cx="34.4" cy="23" r="1.8" fill="' + A + '"/><path d="M28 34h8M29 39h6" stroke="' + A + '" stroke-width="2" stroke-linecap="round"/>'; },
+    phare: function (L, D, A) { return '<path d="M25 53l3-28h8l3 28z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M26.4 40h11.2M27.4 32h9.2" stroke="' + A + '" stroke-width="3.2"/><rect x="26" y="17" width="12" height="9" rx="1.5" fill="' + A + '" stroke="' + D + '" stroke-width="2"/><path d="M24 17l8-7 8 7z" fill="' + L + '" stroke="' + D + '" stroke-width="2" stroke-linejoin="round"/><path d="M22 20l-12-4v8zM42 20l12-4v8z" fill="' + A + '" opacity=".85"/><rect x="19" y="52" width="26" height="4" rx="2" fill="' + D + '"/>'; },
+    coffre: function (L, D, A) { return '<rect x="11" y="28" width="42" height="24" rx="3" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><path d="M11 30a21 16 0 0 1 42 0z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M11 38h42" stroke="' + D + '" stroke-width="2"/><rect x="27" y="33" width="10" height="10" rx="2" fill="' + A + '" stroke="' + D + '" stroke-width="1.8"/><circle cx="32" cy="38" r="1.8" fill="' + D + '"/>'; },
+    orbe: function (L, D, A) { return '<circle cx="32" cy="28" r="17" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><path d="M22 24c3-6 9-8 14-6" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/><polygon points="32,24 34,29 39,29 35,33 36.500,38 32,35 27.500,38 29,33 25,29 30,29" fill="' + A + '"/><path d="M20 46h24l4 8H16z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/>'; },
+    temple: function (L, D, A) { return '<path d="M10 24L32 10l22 14z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><g fill="' + L + '" stroke="' + D + '" stroke-width="2"><rect x="15" y="27" width="6" height="20" rx="1"/><rect x="29" y="27" width="6" height="20" rx="1"/><rect x="43" y="27" width="6" height="20" rx="1"/></g><rect x="9" y="47" width="46" height="6" rx="2" fill="' + A + '" stroke="' + D + '" stroke-width="2"/>'; },
+    soleil: function (L, D, A) { return '<path d="M8 46h48" stroke="' + D + '" stroke-width="3" stroke-linecap="round"/><path d="M16 46a16 16 0 0 1 32 0z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><g stroke="' + A + '" stroke-width="3.4" stroke-linecap="round"><path d="M32 14v7M14 22l5 5M50 22l-5 5M7 36h7M50 36h7"/></g><path d="M16 52h32" stroke="' + A + '" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>'; }
+  };
+  var SPEC = {};
+  function defBadge(id, base, ic, hue, o) {
+    o = o || {};
+    var h = hue, sat = o.sat || 88, L = 'hsl(' + h + ',100%,96%)', D = 'hsl(' + h + ',70%,9%)', A = 'hsl(' + ((h + (o.sh || 160)) % 360) + ',95%,' + (o.al || 58) + '%)';
+    var ico = IC[ic](L, D, A);
+    if (o.n) ico = '<g transform="translate(3.200 -2.400) scale(.9)">' + ico + '</g><rect x="19" y="46" width="26" height="13" rx="6.500" fill="' + D + '" stroke="' + A + '" stroke-width="1.600"/><text x="32" y="56" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="' + (String(o.n).length > 2 ? 8 : 10) + '" fill="#fff">' + o.n + '</text>';
+    if (o.tw) ico += '<g fill="#fff"><path d="M54 6l1.600 4.400L60 12l-4.400 1.600L54 18l-1.600-4.400L48 12l4.400-1.600z"><animate attributeName="opacity" values="0;1;0" dur="2.400s" repeatCount="indefinite"/></path></g>';
+    EMB[id] = {b: BASE[base[0]](base[1]), c: ['hsl(' + h + ',' + sat + '%,54%)', 'hsl(' + ((h + 14) % 360) + ',80%,19%)', o.rim || 'hsl(' + h + ',100%,86%)'], g: 'hsl(' + h + ',100%,60%)', i: ico, rb: !!o.rb, rimrb: !!o.rimrb, ring: o.ring};
+  }
+  var TW = function (t) { return t === 'or' || t === 'epique' || t === 'mythique'; };
+  [
+    // id, base, icône, teinte, options
+    ['col1', ['circle'], 'star', 52, {sat: 95, al: 52}], ['col5', ['sq'], 'cards', 192, {n: 5}], ['col10', ['hexf'], 'cards', 330, {n: 10}], ['col20', ['shield'], 'trophy', 28, {n: 20, tw: 1}],
+    ['legende', ['scallop', 20], 'crown', 300, {rimrb: 1, rb: 1, tw: 1, rim: '#fff'}],
+    ['lc', ['oct'], 'layers', 118, {}], ['lp', ['sq'], 'layers', 218, {}], ['lr', ['diamond'], 'gem', 276, {tw: 1}], ['ll', ['hex'], 'flame', 14, {tw: 1}], ['ls', ['scallop', 10], 'star', 66, {tw: 1}],
+    ['sa-all', ['hex'], 'layers', 246, {tw: 1}], ['d2', ['circle'], 'cards', 172, {n: 2}], ['d3', ['oct'], 'cards', 96, {n: 3}], ['d5', ['scallop', 16], 'dice', 346, {n: 5, tw: 1}],
+    ['t1', ['circle'], 'eye', 262, {sh: 60, tw: 1}], ['t2', ['hexf'], 'moon', 204, {sh: 120, tw: 1}], ['t3', ['sq'], 'orbe', 286, {sh: 100, tw: 1}], ['t4', ['shield'], 'temple', 164, {sh: 180, tw: 1}],
+    ['t5', ['hex'], 'temple', 4, {sh: 40, rimrb: 1, tw: 1}], ['t6', ['scallop', 14], 'soleil', 40, {sh: 180, rimrb: 1, tw: 1}],
+    ['j1', ['circle'], 'sword1', 80, {}], ['j2', ['oct'], 'sword', 232, {n: 10}], ['j3', ['shield'], 'sword', 18, {n: 50, tw: 1}],
+    ['j4', ['circle'], 'medal', 140, {}], ['j5', ['hexf'], 'trophy', 188, {n: 10}], ['j6', ['hex'], 'trophy', 322, {n: 50, tw: 1}], ['j7', ['scallop', 22], 'crown', 8, {rimrb: 1, tw: 1, n: 200}],
+    ['balise', ['circle'], 'phare', 46, {tw: 1}], ['cachecache', ['hexf'], 'phare', 252, {sh: 100, tw: 1}], ['coffre', ['shield'], 'coffre', 34, {sh: 190, tw: 1}],
+    ['serie3', ['circle'], 'flame', 24, {n: 3}], ['serie7', ['oct'], 'flame', 356, {n: 7, tw: 1}], ['serie30', ['scallop', 18], 'flame', 200, {n: 30, rimrb: 1, tw: 1}], ['araignee', ['hex'], 'spider', 100, {sh: 220, sat: 70, tw: 1}]
+  ].forEach(function (d) { defBadge(d[0], d[1], d[2], d[3], d[4]); });
+  var SABASE = [['hex'], ['shield'], ['oct'], ['sq'], ['hexf'], ['circle']];
+  function embFor(id) {
+    if (EMB[id]) return id;
+    if (/^sa-/.test(id)) { var hs = 0; for (var i = 0; i < id.length; i++) hs = (hs * 31 + id.charCodeAt(i)) >>> 0; defBadge(id, SABASE[hs % 6], 'trophy', (hs * 47) % 360, {tw: 1, sh: 150}); return id; }
+    return null;
+  }
+  function emb(id, size) {
+    embFor(id); var e = EMB[id]; if (!e) return '';
+    var u = 'lce' + id.replace(/[^a-z0-9]/gi, ''), s = size || 64;
+    var rim = e.rimrb ? '<linearGradient id="' + u + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6bd5"><animate attributeName="stop-color" values="#ff6bd5;#5cf2ff;#ffe66b;#ff6bd5" dur="3s" repeatCount="indefinite"/></stop><stop offset="1" stop-color="#5cf2ff"><animate attributeName="stop-color" values="#5cf2ff;#ffe66b;#ff6bd5;#5cf2ff" dur="3s" repeatCount="indefinite"/></stop></linearGradient>' : '';
+    var fill = (e.rb ? '<linearGradient id="LCRB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6bd5"><animate attributeName="stop-color" values="#ff6bd5;#5cf2ff;#ffe66b;#ff6bd5" dur="4s" repeatCount="indefinite"/></stop><stop offset="1" stop-color="#5cf2ff"><animate attributeName="stop-color" values="#5cf2ff;#ffe66b;#ff6bd5;#5cf2ff" dur="4s" repeatCount="indefinite"/></stop></linearGradient>' : '') + rim;
+    var shape = e.b;
+    return '<svg class="emb" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" style="overflow:visible;filter:drop-shadow(0 0 6px ' + e.g + '88) drop-shadow(0 2px 3px rgba(0,0,0,.5))">' +
+      '<defs><linearGradient id="' + u + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + e.c[0] + '"/><stop offset="1" stop-color="' + e.c[1] + '"/></linearGradient>' + fill +
+      '<clipPath id="' + u + 'c">' + shape.replace(/ fill=.*$/, '') + '/></clipPath></defs>' +
+      shape + ' fill="url(#' + u + 'g)" stroke="' + (e.rimrb ? 'url(#' + u + 'r)' : e.c[2]) + '" stroke-width="3" stroke-linejoin="round"/>' +
+      (e.ring ? '<circle cx="32" cy="32" r="24.5" fill="none" stroke="' + e.ring + '" stroke-width="1.6" stroke-dasharray="3 3" opacity=".9"/>' : '<g clip-path="url(#' + u + 'c)" opacity=".55"><path d="M0 0h64v26C44 20 20 30 0 24z" fill="#fff" opacity=".28"/></g>') +
+      e.i.replace('url(#LCRB)', e.rb ? 'url(#LCRB)' : '') +
+      '<g clip-path="url(#' + u + 'c)"><rect x="-30" y="-10" width="16" height="90" fill="#fff" opacity=".6" transform="rotate(20 32 32)"><animateTransform attributeName="transform" type="translate" values="-40 0;110 0;110 0" keyTimes="0;.35;1" dur="' + (3 + (id.length % 3)) + 's" repeatCount="indefinite" additive="sum"/></rect></g>' +
+      '</svg>';
+  }
+
+  var stb=document.createElement('style');stb.textContent='.bm:has(.emb),.ov-bi:has(.emb){background:none!important;box-shadow:none!important;animation:none!important;overflow:visible!important;border:0!important}.bm:has(.emb)::after{display:none!important}.bm svg.emb,.ov-bi svg.emb{width:100%!important;height:100%!important;stroke:none;animation:none!important}.bq-emb{flex:none}';document.head.appendChild(stb);
+  window.LCC = {emb: emb, EMB: EMB, embFor: embFor, banniere: banniere, avatar: avatar, nom: nom, NOMS: NOMS, CADRES: CADRES, COULEURS: COULEURS};
 })();

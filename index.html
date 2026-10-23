@@ -2360,7 +2360,7 @@ var BD_TIER = {bronze:'Bronze', argent:'Argent', or:'Or', epique:'Épique', myth
 function badgeCatalog(name, jeu){
   if(!COLLECTIONS[name]) return [];
   var seasons = openSeasons(), tot = totalCards(), n = countOf(name), out = [], cp = function(id){ return ((RAW[name] || {})[id]) || 0; };
-  function add(cat, id, nom, task, tier, ico, cur, max){ out.push({cat:cat, id:id, name:nom, task:task, tier:tier, ico:ico, cur:Math.min(cur, max), max:max, got:cur >= max}); }
+  function add(cat, id, nom, task, tier, ico, cur, max){ out.push({cat:cat, id:id, name:nom, task:task, tier:tier, ico:(window.LCC && LCC.embFor(id)) || ico, cur:Math.min(cur, max), max:max, got:cur >= max}); }
   // collection
   [[1, 'Premier pas', 'bronze', 'star'], [5, 'Apprenti collectionneur', 'argent', 'cards'], [10, 'Collectionneur', 'argent', 'cards'], [20, 'Grand collectionneur', 'or', 'trophy']].forEach(function(t){
     if(t[0] < tot) add('Collection', 'col' + t[0], t[1], 'Débloquer ' + t[0] + (t[0] > 1 ? ' cartes' : ' carte') + ' au total.', t[2], t[3], n, t[0]);
@@ -2403,7 +2403,7 @@ function badgeCatalog(name, jeu){
   if(window.CompteSucces) out = out.concat(window.CompteSucces(name));   // badges donnés par le serveur : défis, événements, secrets
   return out;
 }
-function bdIco(i){ return i === 'balise' ? '<img src="images-site/balise-mini.png" alt="">' : '<svg viewBox="0 0 24 24" aria-hidden="true">' + (BD_ICO[i] || BD_ICO.star) + '</svg>'; }
+function bdIco(i){ if(window.LCC && LCC.EMB && LCC.EMB[i]) return LCC.emb(i, 66); return i === 'balise' ? '<img src="images-site/balise-mini.png" alt="">' : '<svg viewBox="0 0 24 24" aria-hidden="true">' + (BD_ICO[i] || BD_ICO.star) + '</svg>'; }
 function vbHtml(x){ return '<div class="bd vb got t-' + x.tier + '" title="' + esc(x.name + ' : ' + x.task) + '"><div class="bm">' + bdIco(x.ico) + '</div></div>'; }
 function badgesPanelHtml(name, jeu, mineView, sel){
   var l = badgeCatalog(name, jeu);
@@ -3516,7 +3516,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var vit = name ? (moi.vitrine || []).filter(function(id){ return owns(name, id); }) : [];
     var TC = {bronze: ['#a8642a', '#e6a96b'], argent: ['#8c99a8', '#e4ecf4'], or: ['#d29a24', '#ffe08a'], epique: ['#6a3fc4', '#c8a6ff'], mythique: ['#c8202a', '#ff8a78']};
     var vb = name ? badgesChoisis(name, jeu, moi.badges) : [];
-    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
+    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (LCC.embFor(x.id) || LCC.EMB[x.ico] ? LCC.emb(LCC.embFor(x.id) || x.ico, 62) : x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
     o.push('<div class="ov"><section class="pf-c"><h2>Vitrine</h2>' + (vit.length ? '<div class="cp-vit">' + vit.map(function(id){ return vcHtml(id, name); }).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">' + (name ? 'Ta vitrine est vide. Choisis 3 cartes dans l’onglet Personnaliser.' : 'Débloque une carte pour la montrer ici.') + '</p>') +
       '<h2 style="margin-top:28px">Badges</h2>' + (vb.length ? '<div class="ov-bl">' + vb.map(round).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">Aucun badge en vitrine pour le moment. Choisis-les dans l’onglet Badges.</p>') + '</section>');
     var ar = pt.arcade || {n: 0, total: 62};
@@ -3553,7 +3553,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var TC = {bronze: ['#a8642a', '#e6a96b'], argent: ['#8c99a8', '#e4ecf4'], or: ['#d29a24', '#ffe08a'], epique: ['#6a3fc4', '#c8a6ff'], mythique: ['#c8202a', '#ff8a78']};
     var bl = (known ? badgesChoisis(name, {parties: p.parties, victoires: p.victoires}, p.badges) : []).map(function(x){ return {id: x.id, name: x.name, tier: x.tier, ico: x.ico}; });
     (p.badgesInfo || []).forEach(function(x){ if(!bl.some(function(z){ return z.id === x.id; })) bl.push({id: x.id, name: x.nom, tier: x.tier, ico: x.ico}); });
-    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
+    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (LCC.embFor(x.id) || LCC.EMB[x.ico] ? LCC.emb(LCC.embFor(x.id) || x.ico, 62) : x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
     var ar = (ps && ps.arcade) || {n: (p.arcade || []).length, total: 62};
     h.push('<div class="ov"><section class="pf-c"><h2>Vitrine</h2>' + (vit.length ? '<div class="cp-vit">' + vit.map(function(id){ return vcHtml(id, name); }).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">La vitrine est vide pour le moment.</p>') +
       '<h2 style="margin-top:28px">Badges</h2>' + (bl.length ? '<div class="ov-bl">' + bl.slice(0, 5).map(round).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">Aucun badge en vitrine pour le moment.</p>') + '</section>' +
@@ -3638,7 +3638,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   window.CompteSucces = function(nom){
     if(!ON || !nom) return [];
     var l = String(nom).toLowerCase(), out = [];
-    var item = function(x){ return {cat:x.cat, id:x.id, name:x.nom, task:x.desc, tier:x.tier, ico:x.ico, cur:1, max:1, got:true}; };
+    var item = function(x){ return {cat:x.cat, id:x.id, name:x.nom, task:x.desc, tier:x.tier, ico:(window.LCC && LCC.embFor(x.id)) || x.ico, cur:1, max:1, got:true}; };
     if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })){
       var sc = moi.succes || [];
       sc.forEach(function(x){ out.push(item(x)); });

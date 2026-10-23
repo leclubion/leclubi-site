@@ -108,6 +108,7 @@
     var av = m.avatar, nm = m.pseudo;
     if (a.kind === 'cadre') return '<div class="bq-c">' + LCC.avatar(av, nm, a.id, 84) + '<div><div class="bq-n">' + esc(a.nom) + '</div><div class="bq-k">' + KIND.cadre + '</div></div>' + btn(a) + '</div>';
     if (a.kind === 'banniere') return '<div class="bq-c ban">' + LCC.banniere(a.id) + '<div class="bq-cb"><div><div class="bq-n">' + esc(a.nom) + '</div><div class="bq-k">' + KIND.banniere + '</div></div>' + btn(a) + '</div></div>';
+    if (a.kind === 'badge' && LCC.EMB[a.cle]) return '<div class="bq-c ln" style="align-items:center;gap:14px"><span class="bq-emb">' + LCC.emb(a.cle, 62) + '</span><div style="flex:1"><div class="bq-kk">' + KIND.badge + '</div><div class="bq-n">' + esc(a.nom) + '</div></div>' + btn(a) + '</div>';
     var k = a.kind === 'couleur' ? '<div class="bq-n" style="font-size:18px">' + LCC.nom(nm, a.id) + '</div>' : '<div class="bq-n">' + esc(a.nom) + '</div>';
     return '<div class="bq-c ln"><div><div class="bq-kk">' + KIND[a.kind] + '</div>' + k + '</div>' + btn(a) + '</div>';
   }
