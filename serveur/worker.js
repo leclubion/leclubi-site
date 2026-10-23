@@ -452,7 +452,7 @@ export class Hub {
   cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j),
+    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
@@ -1092,7 +1092,9 @@ function ptsScore(h, id) { return h.un('SELECT COALESCE(SUM(pts),0) AS s FROM qp
 function ptsEtat(h, j) {
   const score = ptsScore(h, j.id), depense = h.un('SELECT COALESCE(SUM(prix),0) AS s FROM bq_achats WHERE joueur=?', j.id).s, jour = jourParis();
   const prochain = PALIERS.find(p => score < p[0]);
-  return {score, solde: score - depense, piocheFaite: !!h.un('SELECT 1 AS x FROM bq_achats WHERE joueur=? AND item=? AND jour=?', j.id, 'pioche', jour),
+  const qs = qStats(h, j), sem = ptsClassement(h, lundiDe(jour), joursPlus(lundiDe(jour), 6), 500), ix = sem.findIndex(r => r.id === j.id);
+  return {score, solde: score - depense, rang: ix >= 0 ? ix + 1 : null, victoires: qs.victoires, parties: qs.jouees, serie: qs.serie, meilleure: qs.meilleure, joker: qs.joker, prochain: qs.prochain,
+    arcade: {n: h.un("SELECT COUNT(*) AS c FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme')", j.id).c, total: ARCADE.length - 2}, piocheFaite: !!h.un('SELECT 1 AS x FROM bq_achats WHERE joueur=? AND item=? AND jour=?', j.id, 'pioche', jour),
     prochainPalier: prochain ? {pts: prochain[0], titre: prochain[2]} : null};
 }
 function ptsPaliers(h, id) {
