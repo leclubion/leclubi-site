@@ -257,16 +257,16 @@
     '.lcb-rain{animation:lcbrn .55s linear infinite}.lcb-rain2{animation:lcbrn .8s linear infinite}@keyframes lcbrn{from{transform:translate(0,-6px)}to{transform:translate(-4px,18px)}}',
     /* cadres d'avatar */
     '.lcf{--s:64px;position:relative;display:inline-block;width:var(--s);height:var(--s);flex:0 0 auto;vertical-align:middle;line-height:0}',
-    '.lcf-a{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;background:#2c2e33;display:flex;align-items:center;justify-content:center;font:800 calc(var(--s)*.42)/1 Archivo,Inter,sans-serif;color:#ece8df;background-image:linear-gradient(135deg,#3a3d44,#232428)}',
+    '.lcf-a{position:absolute;left:0;top:0;max-width:none;width:100%;height:100%;border-radius:50%;object-fit:cover;background:#2c2e33;display:flex;align-items:center;justify-content:center;font:800 calc(var(--s)*.42)/1 Archivo,Inter,sans-serif;color:#ece8df;background-image:linear-gradient(135deg,#3a3d44,#232428)}',
     '.lcf-r,.lcf-x{position:absolute;pointer-events:none}',
     '.lcf:not([class*=" lcf-"]):not(.lcf-pixel) .lcf-a{box-shadow:0 0 0 1px rgba(255,255,255,.08)}',
     /* les cadres : l'avatar est réduit pour laisser la place à l'anneau */
-    '.lcf[class*=" lcf-"] .lcf-a{inset:calc(var(--s)*.1);width:auto;height:auto}',
+    '.lcf[class*=" lcf-"] .lcf-a{inset:auto;left:calc(var(--s)*.1);top:calc(var(--s)*.1);width:calc(var(--s)*.8);height:calc(var(--s)*.8)}',
     '.lcf-r{inset:0;border-radius:50%;--w:calc(var(--s)*.1);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px))}',
     /* pixel doré */
     '.lcf-pixel .lcf-r{border-radius:0;clip-path:polygon(0 18%,8% 18%,8% 8%,18% 8%,18% 0,82% 0,82% 8%,92% 8%,92% 18%,100% 18%,100% 82%,92% 82%,92% 92%,82% 92%,82% 100%,18% 100%,18% 92%,8% 92%,8% 82%,0 82%);background:linear-gradient(135deg,#fff0a8,#e0a82a 40%,#8a5a12 60%,#f4d35e);-webkit-mask:none;mask:none;--w:0}',
     '.lcf-pixel .lcf-a{border-radius:0;clip-path:polygon(0 14%,10% 14%,10% 6%,14% 6%,14% 0,86% 0,86% 6%,90% 6%,90% 14%,100% 14%,100% 86%,90% 86%,90% 94%,86% 94%,86% 100%,14% 100%,14% 94%,10% 94%,10% 86%,0 86%)}',
-    '.lcf-pixel .lcf-a{inset:calc(var(--s)*.12)}',
+    '.lcf-pixel .lcf-a{left:calc(var(--s)*.12);top:calc(var(--s)*.12);width:calc(var(--s)*.76);height:calc(var(--s)*.76)}',
     '.lcf-pixel .lcf-x{inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.7) 50%,transparent 60%);background-size:250% 100%;animation:lcfsh 2.8s linear infinite;clip-path:polygon(0 18%,8% 18%,8% 8%,18% 8%,18% 0,82% 0,82% 8%,92% 8%,92% 18%,100% 18%,100% 82%,92% 82%,92% 92%,82% 92%,82% 100%,18% 100%,18% 92%,8% 92%,8% 82%,0 82%);mix-blend-mode:overlay}',
     '@keyframes lcfsh{from{background-position:150% 0}to{background-position:-100% 0}}',
     /* néon violet */

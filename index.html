@@ -24,7 +24,7 @@
 <meta name="twitter:description" content="Jouez. Choisissez. Collectionnez. Lives Twitch, sondage des prochains jeux et cartes à collectionner.">
 <meta name="twitter:image" content="https://leclubion.github.io/leclubi-site/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Archivo:wght@700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#17181a; --panel:#1f2023; --line:#2e3034; --text:#ece8df; --muted:#9a978f; --accent:#c79a4b; --accent-ink:#17181a;
@@ -236,7 +236,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .btn.pts:hover{border-color:var(--accent);opacity:1}
 @media (max-width:760px){.btn.pts{display:none}}
 @media (max-width:1320px){.btn.me span{display:none}.btn.me{padding:5px 7px}}
-.cp-wrap{max-width:900px}
+.cp-wrap{max-width:1240px}
 .mp-l{display:grid;gap:8px}
 .mp{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(128,128,128,.3));font-size:14.5px}
 .mp small{display:block;color:var(--muted);font-size:12.5px}
@@ -1060,6 +1060,68 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:360px;backgro
 @media (max-width:980px){.ddm{position:absolute}}
 
 details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}details.coll-more>summary{cursor:pointer;font-weight:600;color:var(--muted);padding:6px 0;list-style:revert}details.coll-more[open]>summary{margin-bottom:18px;color:var(--text)}
+
+/* ---- Maquette : titres, collection, profil ---- */
+.h8{font-family:'Archivo','Arial Black',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(30px,4.4vw,44px);line-height:1.08;margin:14px 0 0}
+.w1240{max-width:1240px}
+.cl-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.cl-sw{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;font-size:14px;font-weight:500}
+.cl-sw a{padding:8px 18px;border-radius:999px;color:var(--muted)}.cl-sw a[aria-current=page]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.cl-top .bar2{margin:0;padding:0;border:0;background:none;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cl-top .bar2 label{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:14px;color:var(--muted)}
+.cl-top .bar2 .sel{border:0;background:transparent;color:var(--text);font-weight:600;font-size:14px;max-width:240px}
+.cl-top .bar2 p{display:none}
+.cl-top .bar2 .btn{border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;background:transparent;color:var(--accent);border-color:var(--accent)}
+.cl-wrap .tabs{gap:10px;margin-bottom:18px}
+.cl-wrap .tab{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:11px 18px;font-size:15px;font-weight:600;background:var(--panel);color:var(--text)}
+.cl-wrap .tab .tc{font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--line);color:var(--muted)}
+.cl-wrap .tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.cl-wrap .tab[aria-selected=true] .tc{background:rgba(0,0,0,.18);color:var(--accent-ink)}
+.cl-prog{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-bottom:26px}
+.cl-pb{display:flex;align-items:center;gap:12px;flex:1 1 280px;min-width:240px}.cl-pb b{font:800 22px 'Archivo',sans-serif;white-space:nowrap}
+.cl-pb i{flex:1;height:8px;border-radius:999px;background:var(--line);overflow:hidden}.cl-pb i u{display:block;height:100%;background:linear-gradient(90deg,#8a6420,#ffe08a)}
+.cl-f{display:flex;flex-wrap:wrap;gap:8px}.cl-f button{cursor:pointer;border-radius:999px;padding:8px 16px;font:500 13px Inter,sans-serif;border:1px solid var(--line);background:transparent;color:var(--muted)}
+.cl-f button[aria-pressed=true]{border-color:var(--accent);background:rgba(199,154,75,.16);color:var(--accent)}
+.cl-wrap .msg{min-height:0;margin:0}
+.cl-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
+@media (max-width:1000px){.cl-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media (max-width:640px){.cl-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}}
+.cl-vide{grid-column:1/-1;border:1px dashed var(--line);border-radius:14px;padding:36px;text-align:center;color:var(--muted)}
+.cl-rew{margin-top:34px;display:grid;gap:10px}.cl-rl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:14px}
+.cl-rl>span:first-child{display:inline-flex;align-items:center;gap:8px;font-weight:600;min-width:170px}.cl-rl .ri{width:22px;height:22px}
+.cpemb .cl-top>div:first-child{display:none}.cpemb .cl-top{justify-content:flex-start}
+
+/* ---- Profil (maquette) ---- */
+.pf-ban{margin-top:-30px}.pf-ban .lcb{height:230px;aspect-ratio:auto;border-radius:20px 20px 0 0;border:1px solid var(--line);border-bottom:0}
+.pf-ban .lcb-vide{background:radial-gradient(ellipse at 80% 20%,rgba(255,224,138,.28),transparent 45%),linear-gradient(110deg,#2b060c,#7a1620 45%,#c2502e 75%,#3a0a10)}
+.pf-id{position:relative;display:flex;flex-wrap:wrap;gap:20px 28px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-top:0;border-radius:0 0 20px 20px;padding:0 32px 28px;margin-bottom:26px}
+.pf-av{flex:0 0 auto;margin-top:-74px;border-radius:50%}.pf-av .lcf{border-radius:50%}
+.pf-av .lcf:not([class*=" lcf-"]){box-shadow:0 0 0 7px var(--panel),0 0 0 9px var(--accent)}
+.pf-nm{flex:1 1 320px;min-width:240px;padding-top:18px}
+.pf-n{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.pf-n h1{margin:0;font:800 34px 'Archivo',sans-serif;overflow-wrap:anywhere;text-transform:none;letter-spacing:0}
+.pf-chip{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:4px 12px;background:rgba(210,154,36,.12)}
+.pf-nm p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.pf-btn{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;display:inline-block}
+.pf-btn:hover{opacity:.9}
+.pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:26px}
+.pf-s{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.pf-s span{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pf-s b{display:block;margin-top:8px;font:800 30px 'Archivo',sans-serif}
+.pf-s small{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
+@media (max-width:760px){.pf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.pf-id{padding:0 18px 22px}.pf-ban .lcb{height:150px}.pf-n h1{font-size:26px}}
+.cp-tabs{gap:8px;border-bottom:0!important;margin-bottom:20px}
+.cp-tabs button{border-radius:999px!important;padding:9px 18px!important;font-size:14px;font-weight:600;border:1px solid var(--line)!important;background:transparent;color:var(--muted)}
+.cp-tabs button[aria-selected=true]{background:var(--accent);border-color:var(--accent)!important;color:var(--accent-ink)}
+.ov{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px}
+@media (max-width:900px){.ov{grid-template-columns:1fr}}
+.pf-c{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}
+.pf-c h2{margin:0 0 16px;font:800 20px 'Archivo',sans-serif;text-transform:uppercase}
+.ov .cp-vit{max-width:none;gap:18px}
+.ov-bl{display:flex;flex-wrap:wrap;gap:14px}.ov-b{display:flex;flex-direction:column;align-items:center;gap:8px;width:92px;text-align:center}
+.ov-bi{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ov-b span{font-size:12px;color:var(--muted);line-height:1.3}
+.ov-a{display:flex;flex-direction:column;gap:22px}.ov-a .pf-c h2{font-size:18px;margin-bottom:14px}
+.ov-l{display:inline-block;margin-top:14px;color:var(--accent);font-size:14px;font-weight:600}
+.ov-f{display:flex;align-items:center;gap:10px;font-size:15px}.ov-p{margin:8px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
 /* ---- Accueil : même univers que les cartes Arcade ---- */
 #v-accueil section{padding:56px 0}
 #v-accueil h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.01em;font-weight:400;font-size:clamp(22px,3vw,30px)}
@@ -1259,8 +1321,9 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 <!-- COLLECTIONNEURS -->
 <div class="view" id="v-collectionneurs" hidden>
   <section>
-    <div class="wrap">
-      <h1>Collectionneurs</h1>
+    <div class="wrap w1240">
+      <div class="cl-sw"><a href="#collection">Les cartes</a><a href="#collectionneurs" aria-current="page">Collectionneurs</a></div>
+      <h1 class="h8" style="margin-bottom:12px">Collectionneurs</h1>
       <p class="lead">Les viewers qui ont commencé leur collection. Clique sur un nom pour voir ses cartes.</p>
       <div class="cfilter"><input id="cq" type="search" placeholder="Rechercher un viewer" aria-label="Rechercher un viewer" autocomplete="off"><span id="ccount"></span></div>
       <div class="cgrid" id="coll"></div>
@@ -1416,15 +1479,22 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 
 <div class="view" id="v-collection" hidden>
   <section>
-    <div class="wrap">
-      <h1>Collection Officielle</h1>
-      <div class="bar2" id="acct"></div>
+    <div class="wrap w1240 cl-wrap">
+      <div class="cl-top">
+        <div>
+          <div class="cl-sw"><a href="#collection" aria-current="page">Les cartes</a><a href="#collectionneurs">Collectionneurs</a></div>
+          <h1 class="h8">Collection officielle</h1>
+        </div>
+        <div class="bar2" id="acct"></div>
+      </div>
       <div class="tabs" role="tablist" aria-label="Saisons" id="tabs"></div>
+      <div id="cfil"></div>
       <p class="msg" id="msg" aria-live="polite"></p>
       <div id="export"></div>
+      <div id="cready"></div>
       <div id="panel"></div>
       <details class="coll-more">
-        <summary>Profil, titres et badges de ce collectionneur</summary>
+        <summary>Titres, badges et fiche de ce collectionneur</summary>
         <div id="vit"></div>
         <div id="ach"></div>
         <div id="bpan"></div>
@@ -1863,6 +1933,7 @@ function groupsHtml(s, cards, newId){
       '<div class="rcards">' + part.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') + '</div></div>';
   }).join('');
 }
+var cardFilter = 'all';
 function render(newId){
   if(current === 'tarot' && !(who && tarotCount(who))) current = 's1';
   var tarotMode = current === 'tarot', arcadeMode = current === 'arcade';
@@ -1873,24 +1944,39 @@ function render(newId){
     '<label>Collection de <select class="sel" id="who"><option value="">Aucun viewer (cartes cachées)</option>' +
     names.map(function(n, i){ return '<option value="' + i + '"' + (n === who ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') +
     '</select></label>' +
-    '<p>' + (tarotMode ? esc(who) + ' : ' + tarotOwned().length + ' / ' + TAROT.cartes.length + ' cartes de Tarot' : (who && cards.length && !arcadeMode ? esc(who) + ' : ' + got + ' / ' + cards.length + ' cartes débloquées' : '')) + '</p>' +
-    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who ? '<button class="btn ghost" data-act="link">Copier le lien</button>' : ''));
+    (streamer() ? '<div class="row"><button class="btn ghost" data-act="add">Ajouter un viewer</button><button class="btn" data-act="copy">Copier les données</button></div>' : (who && mine() ? '<a class="btn" href="#compte">Voir le profil</a>' : (who ? '<button class="btn" data-act="link">Copier le lien</button>' : '')));
 
-  document.getElementById('ach').innerHTML = who ? achHtml(who) + readyHtml() + tarotRewardHtml() : '';
+  document.getElementById('cready').innerHTML = who ? readyHtml() + tarotRewardHtml() : '';
+  document.getElementById('ach').innerHTML = who ? achHtml(who) : '';
   if(window.CompteVitrine) window.CompteVitrine();
   renderBadges();
 
+  var cnt = function(x){ var cs = cardsOf(x); return !cs.length ? 'bientôt' : (who ? cs.filter(function(c){ return has(c.id); }).length + '/' + cs.length : String(cs.length)); };
   document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
-    return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '">' + x.label + '</button>';
-  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot">Tarot</button>' : '') + '<button class="tab" role="tab" aria-selected="' + arcadeMode + '" data-season="arcade">Arcade</button>';
+    return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '"><span>' + x.label + '</span><span class="tc">' + cnt(x) + '</span></button>';
+  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot"><span>Tarot</span><span class="tc">' + tarotOwned().length + '/' + TAROT.cartes.length + '</span></button>' : '') + '<button class="tab" role="tab" aria-selected="' + arcadeMode + '" data-season="arcade"><span>Arcade</span></button>';
+
+  var fil = document.getElementById('cfil');
+  if(!arcadeMode && !tarotMode && cards.length){
+    var rars = s.groups.map(function(g){ return g[0]; }), FL = [['all', 'Toutes']].concat(rars.map(function(r){ return [r, r === 'Commune' ? 'Communes' : r === 'Peu commune' ? 'Peu communes' : r === 'Rare' ? 'Rares' : r === 'Légendaire' ? 'Légendaires' : r === 'Spéciale' ? 'Spéciales' : r]; })).concat(who ? [['missing', 'Manquantes']] : []);
+    if(FL.every(function(f){ return f[0] !== cardFilter; })) cardFilter = 'all';
+    fil.innerHTML = '<div class="cl-prog"><div class="cl-pb"><b>' + (who ? got : '?') + ' / ' + cards.length + '</b><i><u style="width:' + (who && cards.length ? Math.round(got / cards.length * 100) : 0) + '%"></u></i></div><div class="cl-f">' +
+      FL.map(function(f){ return '<button type="button" data-cf="' + f[0] + '" aria-pressed="' + (cardFilter === f[0]) + '">' + f[1] + '</button>'; }).join('') + '</div></div>';
+  } else fil.innerHTML = '';
 
   if(arcadeMode){
-    document.getElementById('panel').innerHTML = '<h2>Cartes Arcade</h2><p class="lead">Une collection à part, rien que pour le site : réussis le Jeu du jour et choisis 1 carte parmi 3 retournées. Un peu de chance, un peu d\'habileté… et quelques secrets à découvrir.</p><div id="acmain"></div>';
+    document.getElementById('panel').innerHTML = '<div id="acmain"></div>';
     if(window.lcArcadeOuvrir) window.lcArcadeOuvrir(who);
   } else if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
-  if(!arcadeMode && !tarotMode) document.getElementById('panel').innerHTML = '<h2>' + s.label + '</h2>' + (cards.length
-    ? '<p class="lead">' + cards.length + ' cartes au total. ' + s.intro + '</p>' + groupsHtml(s, cards, newId) + seasonReward(s, cards)
-    : '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>');
+  if(!arcadeMode && !tarotMode){
+    if(!cards.length) document.getElementById('panel').innerHTML = '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>';
+    else {
+      var vis = cards.filter(function(c){ return cardFilter === 'all' || (cardFilter === 'missing' ? !has(c.id) : c.r === cardFilter); }), idx = 0;
+      var rl = who ? s.groups.map(function(g){ var part = cards.slice(idx, idx + g[1]), n = part.filter(function(c){ return has(c.id); }).length; idx += g[1]; var r = lineReward(s, g, n === g[1]); return r ? '<div class="cl-rl"><span>' + rIco(g[0]) + g[0] + ' · ' + n + ' / ' + g[1] + '</span>' + r + '</div>' : ''; }).join('') : '';
+      document.getElementById('panel').innerHTML = '<div class="cl-grid">' + (vis.length ? vis.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') : '<div class="cl-vide">Aucune carte dans ce filtre.</div>') + '</div>' +
+        '<div class="cl-rew">' + rl + seasonReward(s, cards) + '</div>';
+    }
+  }
 
   if(newId) setTimeout(function(){
     var el = document.querySelector('[data-id="' + newId + '"]');
@@ -1899,6 +1985,7 @@ function render(newId){
 }
 function setMsg(t){ document.getElementById('msg').textContent = t || ''; }
 
+document.addEventListener('click', function(e){ var b = e.target.closest('[data-cf]'); if(!b) return; cardFilter = b.getAttribute('data-cf'); render(); });
 document.addEventListener('change', function(e){
   if(e.target.id !== 'who') return;
   who = e.target.value === '' ? '' : Object.keys(COLLECTIONS)[+e.target.value];
@@ -3300,18 +3387,24 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var name = maCollection(), jeu = moi.jeu || {}, tot = totalCards(), n = name ? countOf(name) : 0, t = name ? titleOf(n, tot) : null;
     var h = [];
     // en-tête du profil
-    var cm = moi.cosm || {};
-    h.push('<div class="cp-ban">' + LCC.banniere(cm.banniere) + '</div><div class="cp-hero cp2">' + LCC.avatar(moi.avatar, moi.pseudo, cm.cadre, 104, 'cp-lcf') +
-      '<div><h1>' + LCC.nom(moi.pseudo, cm.couleur) + '</h1><p class="cp-sub"><span>@' + esc(moi.login) + '</span>' + (moi.titre ? '<b class="ttl-d">' + esc(moi.titre) + '</b>' : '') + (t ? '<b>' + icoK(t.k) + t.name + '</b>' : '') + (name && tarotTitle(name) ? '<b>✦ ' + esc(tarotTitle(name)) + '</b>' : '') + '</p>' +
-      '<div class="cp-acts">' + (name ? '<button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') +
-      '<a class="btn ghost" href="#boutique">Personnaliser mon profil</a>' +
-      (JEU_OUVERT ? '<a class="btn" href="jeu.html">Jouer à <span class="nomjeu">' + esc((window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle') + '</span></a>' : '') + '</div></div></div>');
+    var cm = moi.cosm || {}, pt = moi.points || null;
+    var since = moi.cree ? new Date(moi.cree).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}) : '';
+    var subl = [t ? t.name : '', name && sheetState === 'ok' ? n + ' / ' + tot + ' cartes' : '', since ? 'membre depuis ' + since : ''].filter(Boolean).join(' · ');
+    h.push('<div class="pf-ban">' + LCC.banniere(cm.banniere, 'pf-bn') + '</div><div class="pf-id"><div class="pf-av">' + LCC.avatar(moi.avatar, moi.pseudo, cm.cadre, 148) + '</div>' +
+      '<div class="pf-nm"><div class="pf-n"><h1>' + LCC.nom(moi.pseudo, cm.couleur) + '</h1>' + (moi.titre ? '<span class="pf-chip">' + esc(moi.titre) + '</span>' : '') + '</div><p>' + esc(subl || '@' + moi.login) + '</p></div>' +
+      '<div class="pf-act"><a class="pf-btn" href="#boutique">Personnaliser (Boutique)</a></div></div>');
+    if(pt){
+      var stc = function(l, v, sub, col){ return '<div class="pf-s"><span>' + l + '</span><b' + (col ? ' style="color:' + col + '"' : '') + '>' + v + '</b><small>' + sub + '</small></div>'; };
+      h.push('<div class="pf-stats">' + stc('Points', lcFormatPts(pt.score), 'solde : ' + lcFormatPts(pt.solde) + ' pts', 'var(--accent)') + stc('Classement', pt.rang ? '#' + pt.rang : '–', pt.rang ? 'cette semaine' : 'pas encore classé') +
+        stc('Victoires', pt.victoires, 'sur ' + pt.parties + ' partie' + (pt.parties > 1 ? 's' : '')) + stc('Série', pt.serie + ' j', 'meilleure : ' + pt.meilleure + ' jour' + (pt.meilleure > 1 ? 's' : ''), '#ff9a5c') + '</div>');
+    }
 
     // onglets Profil / Collection / Badges / Commandes
     parkColl();
     if(!name && (cpTab === 'badges' || cpTab === 'collection' || cpTab === 'fiche')) cpTab = 'profil';
-    var TB = [['profil', 'Profil']].concat(name ? [['collection', 'Collection'], ['badges', 'Badges'], ['fiche', 'Fiche']] : []).concat([['defis', 'Défis'], ['commandes', 'Commandes']]);
-    var tabs = '<div class="cp-tabs" role="tablist">' + TB.map(function(t){ return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (cpTab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    var ovOnly = cpTab === 'profil';
+    var TB = [['profil', 'Vue d’ensemble']].concat(name ? [['collection', 'Cartes'], ['badges', 'Badges']] : []).concat([['stats', 'Statistiques'], ['perso', 'Personnaliser'], ['defis', 'Défis'], ['commandes', 'Commandes']]);
+    var tabs = '<div class="cp-tabs" role="tablist">' + TB.map(function(t){ return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (cpTab === t[0] || (t[0] === 'perso' && cpTab === 'fiche')) + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if(cpTab === 'collection' && name){
       h.push(tabs); h.push('<div id="cpcoll" style="margin-top:20px"></div>');
       el.innerHTML = h.join('');
@@ -3347,11 +3440,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       el.innerHTML = h.join('');
       return;
     }
-    h.push(tabs);
+    var secStats = [], secPerso = [], S = secStats;
     // chiffres clés
     var rg = jeu.rang || {}, ratio = jeu.ratio, p = jeu.parties || 0;
     var sRatio = !p ? 'Joue ta première partie pour apparaître ici.' : rg.ratio ? 'N°' + rg.ratio + ' au classement par ratio' : 'Encore ' + Math.max(0, (jeu.minimumRatio || 10) - p) + ' partie' + ((jeu.minimumRatio || 10) - p > 1 ? 's' : '') + ' pour entrer au classement par ratio';
-    h.push('<div class="cp-tiles">' +
+    S.push('<div class="cp-tiles">' +
       '<div class="cp-t"><span>Cartes</span><b>' + (sheetState === 'ok' ? n + ' <small>/ ' + tot + '</small>' : '…') + '</b>' + (sheetState === 'ok' ? barre(n, tot) : '') +
         '<p>' + (sheetState === 'loading' ? 'Chargement de ta collection…' : sheetState === 'error' ? 'Collection indisponible pour le moment.' : name ? (nextTitle(n, tot) ? 'Prochain titre : ' + nextTitle(n, tot).name + ' (encore ' + nextTitle(n, tot).need + ')' : 'Collection complète !') : 'Aucune carte pour l\'instant.') + '</p></div>' +
       '<div class="cp-t"><span>Parties jouées</span><b>' + p + '</b><p>' + (p ? (jeu.victoires || 0) + ' victoire' + ((jeu.victoires || 0) > 1 ? 's' : '') + ' · ' + (jeu.defaites || 0) + ' défaite' + ((jeu.defaites || 0) > 1 ? 's' : '') + ((jeu.nuls || 0) ? ' · ' + jeu.nuls + ' nul' + (jeu.nuls > 1 ? 's' : '') : '') : 'Pas encore de partie.') + '</p></div>' +
@@ -3360,48 +3453,68 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       (moi.points ? '<div class="cp-t"><span>Points du Jeu du jour</span><b>' + lcFormatPts(moi.points.score) + '</b><p>Solde à dépenser : ' + lcFormatPts(moi.points.solde) + ' pts · <a href="#boutique" style="color:var(--accent)">Boutique</a> · <a href="#classement-jeu" style="color:var(--accent)">Classement</a></p></div>' : '') + '</div>');
 
     if(sheetState === 'ok' && !name){
-      h.push('<div class="cp-h"><h2>Ma collection</h2></div><div class="cp-t"><p style="margin:0;font-size:15px;color:var(--text)">Tu n\'as pas encore de carte. Elles apparaîtront ici dès ton premier tirage avec les Power-ups ou la boutique de la chaîne, sous le pseudo <b>' + esc(moi.pseudo) + '</b>.</p></div>');
+      S.push('<div class="cp-h"><h2>Ma collection</h2></div><div class="cp-t"><p style="margin:0;font-size:15px;color:var(--text)">Tu n\'as pas encore de carte. Elles apparaîtront ici dès ton premier tirage avec les Power-ups ou la boutique de la chaîne, sous le pseudo <b>' + esc(moi.pseudo) + '</b>.</p></div>');
     } else if(name){
       // progression par saison
-      h.push('<div class="cp-h"><h2>Ma progression</h2><small>' + esc(name) + '</small></div><div class="cp-seasons">' + openSeasons().map(function(s){
+      S.push('<div class="cp-h"><h2>Ma progression</h2><small>' + esc(name) + '</small></div><div class="cp-seasons">' + openSeasons().map(function(s){
         var cs = cardsOf(s), k = cs.filter(function(c){ return owns(name, c.id); }).length;
         return '<div class="cp-s"><span>' + esc(s.label) + '</span>' + barre(k, cs.length) + '<b>' + k + ' / ' + cs.length + '</b></div>';
       }).join('') + '</div>');
+      S = secPerso;
       // vitrine
       var own = possedees(name), vit = (moi.vitrine || []).filter(function(id){ return owns(name, id); });
-      h.push('<div class="cp-h"><h2>Ma vitrine</h2><small>Visible sur ton profil public</small></div><div class="cp-vit">');
+      S.push('<div class="cp-h"><h2>Ma vitrine</h2><small>Visible sur ton profil public</small></div><div class="cp-vit">');
       for(var i = 0; i < 3; i++){
-        if(vit[i]) h.push(vcHtml(vit[i], name));
-        else if(own.length) h.push('<button type="button" class="vc vide" data-act="pick">+ Ajouter une carte</button>');
-        else h.push('<div class="vc vide">Débloque une carte pour la montrer ici</div>');
+        if(vit[i]) S.push(vcHtml(vit[i], name));
+        else if(own.length) S.push('<button type="button" class="vc vide" data-act="pick">+ Ajouter une carte</button>');
+        else S.push('<div class="vc vide">Débloque une carte pour la montrer ici</div>');
       }
-      h.push('</div>');
-      if(own.length && !pick) h.push('<p style="margin:14px 0 0"><button type="button" class="btn ghost" data-act="pick" style="padding:8px 16px;font-size:14px">Modifier ma vitrine</button></p>');
+      S.push('</div>');
+      if(own.length && !pick) S.push('<p style="margin:14px 0 0"><button type="button" class="btn ghost" data-act="pick" style="padding:8px 16px;font-size:14px">Modifier ma vitrine</button></p>');
       if(pick){
-        h.push('<div class="cp-pick"><p>Choisis jusqu\'à 3 cartes parmi celles que tu possèdes. L\'ordre du choix est l\'ordre d\'affichage.</p><div class="cp-pg">' +
+        S.push('<div class="cp-pick"><p>Choisis jusqu\'à 3 cartes parmi celles que tu possèdes. L\'ordre du choix est l\'ordre d\'affichage.</p><div class="cp-pg">' +
           own.map(function(id){ var i = pick.indexOf(id); return vcHtml(id, name, 'button', (i > -1 ? 'sel' : '')).replace('</button>', (i > -1 ? '<b class="n">' + (i + 1) + '</b>' : '') + '</button>').replace('data-id=', 'data-pk="1" data-id='); }).join('') +
           '</div><div class="row"><button type="button" class="btn" data-act="save"' + (busy ? ' disabled' : '') + '>Enregistrer</button><button type="button" class="btn ghost" data-act="cancel">Annuler</button><button type="button" class="btn ghost" data-act="clear">Vider</button><em>' + (msgPick || pick.length + ' / 3') + '</em></div></div>');
       }
       // titres, badges, récompenses
-      h.push('<div class="cp-h"><h2>Ma fiche de collectionneur</h2><small>Une carte à ton nom, visible par tous</small></div><div class="row" style="gap:10px"><button type="button" class="btn" data-fiche="' + esc(name) + '">Voir ma fiche</button><button type="button" class="btn ghost" data-tab="fiche">Modifier ma fiche</button></div>');
-      h.push('<div class="cp-h"><h2>Mon titre</h2></div>' + achHtml(name));
+      S.push('<div class="cp-h"><h2>Ma fiche de collectionneur</h2><small>Une carte à ton nom, visible par tous</small></div><div class="row" style="gap:10px"><button type="button" class="btn" data-fiche="' + esc(name) + '">Voir ma fiche</button><button type="button" class="btn ghost" data-tab="fiche">Modifier ma fiche</button></div>');
+      S.push('<div class="cp-h"><h2>Mon titre</h2></div>' + achHtml(name));
       var vb = badgesChoisis(name, jeu, moi.badges), allb = badgeCatalog(name, jeu);
-      h.push('<div class="cp-h"><h2>Mes badges</h2><small>' + allb.filter(function(z){ return z.got; }).length + ' / ' + allb.length + ' obtenus</small></div><div class="vbrow">' +
+      S.push('<div class="cp-h"><h2>Mes badges</h2><small>' + allb.filter(function(z){ return z.got; }).length + ' / ' + allb.length + ' obtenus</small></div><div class="vbrow">' +
         (vb.length ? vb.map(vbHtml).join('') : '<p class="cp-note" style="margin:0;text-align:left">Aucun badge en vitrine pour le moment.</p>') + '<button type="button" class="btn ghost" data-tab="badges" style="margin-left:auto;padding:8px 16px;font-size:14px">' + (vb.length ? 'Modifier' : 'Choisir mes badges') + '</button></div>');
       var rw = avecWho(name, function(){ return readyHtml() + tarotRewardHtml(); });
-      if(rw) h.push('<div class="cp-h"><h2>Récompenses</h2></div>' + rw);
+      if(rw) S.push('<div class="cp-h"><h2>Récompenses</h2></div>' + rw);
     }
+    S = secStats;
     // mes propositions
     if(props && props.miennes && props.miennes.length){
       var ST = {ouverte:'Envoyée ✓', retenue:'Envoyée ✓', refusee:'Envoyée ✓'};
-      h.push('<div class="cp-h"><h2>Mes propositions</h2><small>Visibles par toi et LeClubi uniquement</small></div><div class="mp-l">' + props.miennes.map(function(m){
+      S.push('<div class="cp-h"><h2>Mes propositions</h2><small>Visibles par toi et LeClubi uniquement</small></div><div class="mp-l">' + props.miennes.map(function(m){
         return '<div class="mp"><span>' + esc(m.texte) + '<small>' + esc(m.kind) + ' · ' + esc(saisonLabel(m.saison)) + '</small></span><b>' + (ST[m.statut] || '') + '</b></div>';
       }).join('') + '</div>');
     }
+    S = secPerso;
     // réglages
-    h.push('<div class="cp-h"><h2>Mon profil</h2></div><div class="cp-set"><label><input type="checkbox" data-act="pub"' + (moi.prive ? '' : ' checked') + '><span>Profil public<small>Ta vitrine et tes stats de jeu sont visibles par les autres. Ta collection reste visible dans l\'onglet Collectionneurs, comme avant.</small></span></label>' +
+    S.push('<div class="cp-h"><h2>Mon profil</h2></div><div class="cp-set"><label><input type="checkbox" data-act="pub"' + (moi.prive ? '' : ' checked') + '><span>Profil public<small>Ta vitrine et tes stats de jeu sont visibles par les autres. Ta collection reste visible dans l\'onglet Collectionneurs, comme avant.</small></span></label>' +
       '<div><button type="button" class="btn ghost" data-act="logout" style="padding:8px 16px;font-size:14px">Se déconnecter</button></div></div>');
+    h.push(tabs);
+    if(cpTab === 'stats') h.push(secStats.join(''));
+    else if(cpTab === 'perso') h.push('<div class="row" style="gap:10px;margin-top:6px">' + (name ? '<button type="button" class="btn ghost" data-act="copy">Copier le lien de mon profil</button>' : '') + '<a class="btn ghost" href="#boutique">Boutique : cadres, bannières, titres</a>' + (JEU_OUVERT ? '<a class="btn" href="jeu.html">Jouer à <span class="nomjeu">' + esc((window.JEU_CONFIG || {}).NOM || 'Clubi Card Battle') + '</span></a>' : '') + '</div>' + secPerso.join(''));
+    else h.push(overview(name, jeu));
     el.innerHTML = h.join('');
+  }
+  function overview(name, jeu){
+    var pt = moi.points || {}, o = [];
+    var vit = name ? (moi.vitrine || []).filter(function(id){ return owns(name, id); }) : [];
+    var TC = {bronze: ['#a8642a', '#e6a96b'], argent: ['#8c99a8', '#e4ecf4'], or: ['#d29a24', '#ffe08a'], epique: ['#6a3fc4', '#c8a6ff'], mythique: ['#c8202a', '#ff8a78']};
+    var vb = name ? badgesChoisis(name, jeu, moi.badges) : [];
+    var round = function(x){ var c = TC[x.tier] || TC.or; return '<div class="ov-b"><div class="ov-bi" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ');box-shadow:0 0 18px ' + c[0] + '55">' + (x.ico === 'balise' ? '<img src="images-site/balise-mini.png" alt="" width="30" height="30">' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (BD_ICO[x.ico] || BD_ICO.star) + '</svg>') + '</div><span>' + esc(x.name) + '</span></div>'; };
+    o.push('<div class="ov"><section class="pf-c"><h2>Vitrine</h2>' + (vit.length ? '<div class="cp-vit">' + vit.map(function(id){ return vcHtml(id, name); }).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">' + (name ? 'Ta vitrine est vide. Choisis 3 cartes dans l’onglet Personnaliser.' : 'Débloque une carte pour la montrer ici.') + '</p>') +
+      '<h2 style="margin-top:28px">Badges</h2>' + (vb.length ? '<div class="ov-bl">' + vb.map(round).join('') + '</div>' : '<p class="cp-note" style="text-align:left;margin:0">Aucun badge en vitrine pour le moment. Choisis-les dans l’onglet Badges.</p>') + '</section>');
+    var ar = pt.arcade || {n: 0, total: 62};
+    o.push('<aside class="ov-a"><section class="pf-c"><h2>Cartes Arcade</h2><div class="cl-pb"><b>' + ar.n + ' / ' + ar.total + '</b><i><u style="width:' + Math.round(ar.n / ar.total * 100) + '%"></u></i></div><a class="ov-l" href="#arcade">Voir la collection Arcade →</a></section>' +
+      '<section class="pf-c"><h2>Jeu du jour</h2><div class="ov-f"><svg width="22" height="22" viewBox="0 0 24 24" fill="#ff7a3c" aria-hidden="true"><path d="M12 2c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg><b>' + (pt.serie ? 'Série de ' + pt.serie + ' jour' + (pt.serie > 1 ? 's' : '') : 'Pas de série en cours') + '</b></div><p class="ov-p">Prochaine récompense à ' + (pt.prochain || 3) + ' jours. ' + (pt.joker === false ? 'Joker de la semaine utilisé.' : 'Joker de la semaine disponible.') + '</p><a class="ov-l" href="#jeudujour">Jouer au Jeu du jour →</a></section></aside></div>');
+    return o.join('');
   }
 
   // ----- vitrine sur les profils publics (page d'un collectionneur) -----
