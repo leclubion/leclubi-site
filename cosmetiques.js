@@ -401,18 +401,19 @@
     if (/^sa-/.test(id)) { var hs = 0; for (var i = 0; i < id.length; i++) hs = (hs * 31 + id.charCodeAt(i)) >>> 0; defBadge(id, SABASE[hs % 6], 'trophy', (hs * 47) % 360, {tw: 1, sh: 150}); return id; }
     return null;
   }
+  var EMBN = 0;
   function emb(id, size) {
     embFor(id); var e = EMB[id]; if (!e) return '';
-    var u = 'lce' + id.replace(/[^a-z0-9]/gi, ''), s = size || 64;
+    var u = 'lce' + (++EMBN) + id.replace(/[^a-z0-9]/gi, ''), s = size || 64;
     var rim = e.rimrb ? '<linearGradient id="' + u + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6bd5"><animate attributeName="stop-color" values="#ff6bd5;#5cf2ff;#ffe66b;#ff6bd5" dur="3s" repeatCount="indefinite"/></stop><stop offset="1" stop-color="#5cf2ff"><animate attributeName="stop-color" values="#5cf2ff;#ffe66b;#ff6bd5;#5cf2ff" dur="3s" repeatCount="indefinite"/></stop></linearGradient>' : '';
-    var fill = (e.rb ? '<linearGradient id="LCRB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6bd5"><animate attributeName="stop-color" values="#ff6bd5;#5cf2ff;#ffe66b;#ff6bd5" dur="4s" repeatCount="indefinite"/></stop><stop offset="1" stop-color="#5cf2ff"><animate attributeName="stop-color" values="#5cf2ff;#ffe66b;#ff6bd5;#5cf2ff" dur="4s" repeatCount="indefinite"/></stop></linearGradient>' : '') + rim;
+    var fill = (e.rb ? '<linearGradient id="' + u + 'b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6bd5"><animate attributeName="stop-color" values="#ff6bd5;#5cf2ff;#ffe66b;#ff6bd5" dur="4s" repeatCount="indefinite"/></stop><stop offset="1" stop-color="#5cf2ff"><animate attributeName="stop-color" values="#5cf2ff;#ffe66b;#ff6bd5;#5cf2ff" dur="4s" repeatCount="indefinite"/></stop></linearGradient>' : '') + rim;
     var shape = e.b;
     return '<svg class="emb" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" style="overflow:visible;filter:drop-shadow(0 0 6px ' + e.g + '88) drop-shadow(0 2px 3px rgba(0,0,0,.5))">' +
       '<defs><linearGradient id="' + u + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + e.c[0] + '"/><stop offset="1" stop-color="' + e.c[1] + '"/></linearGradient>' + fill +
       '<clipPath id="' + u + 'c">' + shape.replace(/ fill=.*$/, '') + '/></clipPath></defs>' +
       shape + ' fill="url(#' + u + 'g)" stroke="' + (e.rimrb ? 'url(#' + u + 'r)' : e.c[2]) + '" stroke-width="3" stroke-linejoin="round"/>' +
       (e.ring ? '<circle cx="32" cy="32" r="24.5" fill="none" stroke="' + e.ring + '" stroke-width="1.6" stroke-dasharray="3 3" opacity=".9"/>' : '<g clip-path="url(#' + u + 'c)" opacity=".55"><path d="M0 0h64v26C44 20 20 30 0 24z" fill="#fff" opacity=".28"/></g>') +
-      e.i.replace('url(#LCRB)', e.rb ? 'url(#LCRB)' : '') +
+      e.i.replace('url(#LCRB)', 'url(#' + u + 'b)') +
       '<g clip-path="url(#' + u + 'c)"><rect x="-30" y="-10" width="16" height="90" fill="#fff" opacity=".6" transform="rotate(20 32 32)"><animateTransform attributeName="transform" type="translate" values="-40 0;110 0;110 0" keyTimes="0;.35;1" dur="' + (3 + (id.length % 3)) + 's" repeatCount="indefinite" additive="sum"/></rect></g>' +
       '</svg>';
   }
