@@ -161,6 +161,7 @@
   var css2 = '.lr-intro{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:0 0 22px}.lr-intro h2{margin:0;font-size:22px}.lr-intro p{margin:0;flex:1 1 340px;color:var(--muted);font-size:14px;line-height:1.5}.lr-cnt{font-size:20px;color:var(--accent)}' +
     '.lr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:24px;max-width:980px}.lr-dos{cursor:default}.lr-dos:hover{transform:none}' +
     '#lr-ban{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:14px;padding:12px 14px 12px 18px;border-radius:16px;background:#14121e;color:#fff;border:2px solid #f0b82a;box-shadow:0 10px 34px rgba(0,0,0,.55),0 0 26px rgba(240,184,42,.35);animation:lrb .6s cubic-bezier(.2,1.4,.4,1) both,lrg 2.4s ease-in-out infinite alternate;max-width:calc(100vw - 24px)}' +
+'#lr-zm{position:fixed;inset:0;z-index:9600;background:rgba(5,4,10,.9);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out;animation:lrz .2s ease-out}.lr-zb{width:min(440px,86vw,calc((100vh - 40px)*5/7));cursor:default}.lr-zb .lr-card{width:100%;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 40px rgba(255,200,80,.25)}.lr-zx{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:50%;border:2px solid #f0b82a;background:#14121e;color:#fff;font-size:18px;cursor:pointer}@keyframes lrz{from{opacity:0}}' +
     '@keyframes lrb{from{opacity:0;transform:translate(-50%,30px)}}@keyframes lrg{to{box-shadow:0 10px 34px rgba(0,0,0,.55),0 0 38px rgba(240,184,42,.6)}}' +
     '#lr-ban .lr-ico{font-size:24px;color:#ffd86a}#lr-ban .lr-tx{display:flex;flex-direction:column;line-height:1.25}#lr-ban b{font-size:15px}#lr-ban small{color:#c9c3a8;font-size:12px}#lr-ban .lr-go{border:0;border-radius:10px;padding:10px 16px;font:700 14px system-ui,sans-serif;color:#2a1a00;cursor:pointer;background:linear-gradient(135deg,#fff3b0,#f0b82a 55%,#c8901e)}#lr-ban .lr-x{background:none;border:0;color:#9a97aa;font-size:16px;cursor:pointer;padding:4px 6px}' +
     '#lr-ov{position:fixed;inset:0;z-index:9500;background:rgba(5,4,10,.92);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}.lr-bx{text-align:center;color:#fff;max-width:900px}.lr-bx h2{font-size:26px;margin:0 0 18px;color:#ffd86a}' +
@@ -169,5 +170,25 @@
     '.lr-pts{font-size:17px;color:#fff;margin:6px 0 18px}.lr-bt{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.lr-bt button{border-radius:10px;padding:11px 20px;font:700 14px system-ui,sans-serif;cursor:pointer;border:2px solid #f0b82a}.lr-b1{background:linear-gradient(135deg,#fff3b0,#f0b82a 55%,#c8901e);color:#2a1a00}.lr-b2{background:transparent;color:#ffd86a}' +
     '@media (prefers-reduced-motion:reduce){#lr-ban{animation:none}.lr-fi{transition:none}}';
   var st2 = document.createElement('style'); st2.textContent = css2; document.head.appendChild(st2);
+  /* ---------- agrandir une relique (seulement celles obtenues) ---------- */
+  function zoom(id) {
+    if (document.getElementById('lr-zm')) return;
+    var o = document.createElement('div'); o.id = 'lr-zm'; o.setAttribute('role', 'dialog');
+    o.innerHTML = '<div class="lr-zb">' + carte(id) + '</div><button type="button" class="lr-zx" aria-label="Fermer">✕</button>';
+    document.body.appendChild(o);
+    var fin = function () { o.remove(); document.removeEventListener('keydown', kd); };
+    var kd = function (e) { if (e.key === 'Escape') fin(); };
+    document.addEventListener('keydown', kd);
+    o.addEventListener('click', fin);
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest ? e.target.closest('.lr-grid .lr-card') : null;
+    if (!c || c.classList.contains('lr-dos') || !c.getAttribute('data-lr')) return;
+    zoom(c.getAttribute('data-lr'));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var c = document.activeElement; if (c && c.closest && c.closest('.lr-grid') && c.getAttribute && c.getAttribute('data-lr')) { e.preventDefault(); zoom(c.getAttribute('data-lr')); }
+  });
   window.LCR = {liste: LISTE, svg: svg, carte: carte, dos: dos, panel: panel};
 })();
