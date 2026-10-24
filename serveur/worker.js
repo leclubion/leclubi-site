@@ -54,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage', '/boutique', '/classement-quiz']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage', '/boutique', '/classement-quiz', '/shoot/debut', '/shoot/fin']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -151,6 +151,8 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS qparties(joueur TEXT, jour TEXT, fmt TEXT, puzzle INTEGER, essais TEXT DEFAULT '[]', fini INTEGER DEFAULT 0, gagne INTEGER DEFAULT 0, pts INTEGER DEFAULT 0, PRIMARY KEY(joueur, jour))`);
     q(`CREATE TABLE IF NOT EXISTS bq_achats(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, item TEXT, prix INTEGER, jour TEXT, ts INTEGER)`);
     q(`CREATE TABLE IF NOT EXISTS qsemaines(sem INTEGER PRIMARY KEY, deb TEXT, top TEXT)`);
+    q(`CREATE TABLE IF NOT EXISTS bonus(joueur TEXT, cle TEXT, pts INTEGER, ts INTEGER, PRIMARY KEY(joueur, cle))`);
+    q(`CREATE TABLE IF NOT EXISTS shoot_sessions(joueur TEXT PRIMARY KEY, seed INTEGER, ts INTEGER)`);
     q(`CREATE TABLE IF NOT EXISTS visites(joueur TEXT, jour TEXT, PRIMARY KEY(joueur, jour))`);
     this.jCache = null;            // journal sérialisé gardé en mémoire (relu seulement après un ajout)
     this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
@@ -189,7 +191,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname === '/shoot/debut' || url.pathname === '/shoot/fin' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -447,6 +449,8 @@ export class Hub {
     if (p === '/quotidien') return qQuotidien(this, j, req, url);
     if (p === '/arcade') return aArcade(this, j, req);
     if (p === '/arcade/coffre' && req.method === 'POST') return aCoffre(this, j);
+    if (p === '/shoot/debut' && req.method === 'POST') return shootDebut(this, j);
+    if (p === '/shoot/fin' && req.method === 'POST') return shootFin(this, j, req);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
@@ -476,6 +480,7 @@ export class Hub {
     this.sql.exec(`SELECT cle, ts FROM succes WHERE joueur=? AND kind='badge' ORDER BY ts`, j.id).toArray().forEach(r => {
       if (r.cle === 'balise') { out.push({id: 'balise', nom: 'Gardien de la Balise', desc: 'Tu es revenu sur le site 10 jours différents : la Balise veille sur toi.', ico: 'balise', tier: 'or', cat: 'Fidélité', ts: r.ts}); return; }
       if (r.cle === 'cachecache') { out.push({id: 'cachecache', nom: 'Cache-Cache', desc: 'Tu as retrouvé les 6 Balises cachées sur les pages du site.', ico: 'balise', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
+      if (r.cle === 'clubishoot') { out.push({id: 'clubishoot', nom: 'Maître du Clubi Shoot', desc: 'Tu as trouvé le jeu le mieux caché du site et vaincu toutes les araignées.', ico: 'clubishoot', tier: 'mythique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'coffre') { out.push({id: 'coffre', nom: 'Ouvrir le Coffre', desc: 'Tu as trouvé le coffre caché sur le site et tu l\'as ouvert.', ico: 'key', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       if (r.cle === 'serie3') { out.push({id: 'serie3', nom: 'Série de 3', desc: 'Tu as terminé le Jeu du jour 3 jours de suite.', ico: 'flame', tier: 'bronze', cat: 'Jeu du jour', ts: r.ts}); return; }
       if (r.cle === 'serie7') { out.push({id: 'serie7', nom: 'Une semaine de flamme', desc: 'Tu as terminé le Jeu du jour 7 jours de suite.', ico: 'flame', tier: 'or', cat: 'Jeu du jour', ts: r.ts}); return; }
@@ -1089,11 +1094,12 @@ const BQ = [
 ];
 const BQ_PAR_ID = Object.fromEntries(BQ.map(x => [x.id, x]));
 function ptsScore(h, id) { return h.un('SELECT COALESCE(SUM(pts),0) AS s FROM qparties WHERE joueur=?', id).s; }
+function ptsBonus(h, id) { return h.un('SELECT COALESCE(SUM(pts),0) AS s FROM bonus WHERE joueur=?', id).s; }
 function ptsEtat(h, j) {
-  const score = ptsScore(h, j.id), depense = h.un('SELECT COALESCE(SUM(prix),0) AS s FROM bq_achats WHERE joueur=?', j.id).s, jour = jourParis();
+  const score = ptsScore(h, j.id), bonus = ptsBonus(h, j.id), depense = h.un('SELECT COALESCE(SUM(prix),0) AS s FROM bq_achats WHERE joueur=?', j.id).s, jour = jourParis();
   const prochain = PALIERS.find(p => score < p[0]);
   const qs = qStats(h, j), sem = ptsClassement(h, lundiDe(jour), joursPlus(lundiDe(jour), 6), 500), ix = sem.findIndex(r => r.id === j.id);
-  return {score, solde: score - depense, rang: ix >= 0 ? ix + 1 : null, victoires: qs.victoires, parties: qs.jouees, serie: qs.serie, meilleure: qs.meilleure, joker: qs.joker, prochain: qs.prochain,
+  return {score, solde: score + bonus - depense, rang: ix >= 0 ? ix + 1 : null, victoires: qs.victoires, parties: qs.jouees, serie: qs.serie, meilleure: qs.meilleure, joker: qs.joker, prochain: qs.prochain,
     arcade: {n: h.un("SELECT COUNT(*) AS c FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme')", j.id).c, total: ARCADE.length - 2}, piocheFaite: !!h.un('SELECT 1 AS x FROM bq_achats WHERE joueur=? AND item=? AND jour=?', j.id, 'pioche', jour),
     prochainPalier: prochain ? {pts: prochain[0], titre: prochain[2]} : null};
 }
@@ -1159,6 +1165,115 @@ async function bqRoute(h, j, req) {
     return json({ok: true, equipe: cosmDe(h.joueur(j.id))});
   }
   return json({erreur: 'action'}, {}, 400);
+}
+// <SHOOT-SIM>
+/* Clubi Shoot : moteur du jeu, 100 % déterministe (même graine + mêmes touches = même partie).
+   Le navigateur l'utilise pour jouer, le serveur le rejoue pour vérifier la victoire avant de donner les points. */
+var LCSIM = (function () {
+  var W = 240, H = 320, FPS = 60, MAXF = 60 * 60 * 10, VAGUES = 3;
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function create(seed) {
+    var rnd = mulberry32(seed >>> 0);
+    var S = {f: 0, wave: 0, lives: 3, score: 0, px: 112, py: 296, cool: 0, inv: 0, wait: 90, bul: [], webs: [], sp: [], dir: 1, tick: 0, mv: 0, fireT: 60, state: 'play', total: 0, ev: []};
+    function spawn(w) {
+      var rows = w === 2 ? 5 : 4; S.sp = []; S.dir = 1; S.tick = 0;
+      for (var r = 0; r < rows; r++) for (var c = 0; c < 8; c++) S.sp.push({x: 20 + c * 22, y: 30 + w * 8 + r * 17, t: Math.min(r, 3), c: c});
+      S.total = S.sp.length; S.bul = []; S.webs = [];
+    }
+    spawn(0);
+    function step(mask) {
+      if (S.state !== 'play') return;
+      S.f++;
+      var dx = ((mask & 2) ? 1 : 0) - ((mask & 1) ? 1 : 0);
+      S.px = Math.max(0, Math.min(W - 16, S.px + dx * 2));
+      if (S.cool > 0) S.cool--; if (S.inv > 0) S.inv--;
+      if (S.wait > 0) { S.wait--; return; }
+      if ((mask & 4) && S.cool === 0 && S.bul.length < 2) { S.bul.push({x: S.px + 7, y: S.py - 4}); S.cool = 14; S.ev.push({k: 'tir'}); }
+      var i, j, b, s, wb;
+      for (i = S.bul.length - 1; i >= 0; i--) { b = S.bul[i]; b.y -= 5; if (b.y < -6) S.bul.splice(i, 1); }
+      // les araignées avancent d'autant plus vite qu'il en reste peu
+      var alive = S.sp.length; S.tick++;
+      var iv = Math.max(1, 1 + Math.floor(alive * 9 / S.total) - S.wave);
+      if (S.tick >= iv) {
+        S.tick = 0; S.mv++;
+        var mn = 999, mx = -1; for (i = 0; i < alive; i++) { if (S.sp[i].x < mn) mn = S.sp[i].x; if (S.sp[i].x > mx) mx = S.sp[i].x; }
+        if ((S.dir > 0 && mx + 12 + 2 > W - 6) || (S.dir < 0 && mn - 2 < 6)) { for (i = 0; i < alive; i++) S.sp[i].y += 8; S.dir = -S.dir; }
+        else for (i = 0; i < alive; i++) S.sp[i].x += S.dir * 2;
+      }
+      // tirs de toiles
+      if (--S.fireT <= 0 && alive > 0) {
+        var bas = {}; for (i = 0; i < alive; i++) { s = S.sp[i]; if (!bas[s.c] || s.y > bas[s.c].y) bas[s.c] = s; }
+        var ks = Object.keys(bas).map(Number).sort(function (a, c) { return a - c; });
+        var q = bas[ks[Math.floor(rnd() * ks.length)]];
+        if (S.webs.length < 4) S.webs.push({x: q.x + 5, y: q.y + 9});
+        S.fireT = Math.max(14, 36 - S.wave * 7) + Math.floor(rnd() * 30);
+      }
+      var ws = 2 + (S.wave >= 1 ? 1 : 0);
+      for (i = S.webs.length - 1; i >= 0; i--) { wb = S.webs[i]; wb.y += ws; if (wb.y > H) S.webs.splice(i, 1); }
+      // balles contre araignées
+      for (i = S.bul.length - 1; i >= 0; i--) {
+        b = S.bul[i];
+        for (j = 0; j < S.sp.length; j++) {
+          s = S.sp[j];
+          if (b.x + 2 > s.x && b.x < s.x + 12 && b.y < s.y + 9 && b.y + 6 > s.y) { S.score += 10 * (4 - s.t); S.ev.push({k: 'mort', x: s.x + 6, y: s.y + 4, t: s.t}); S.sp.splice(j, 1); S.bul.splice(i, 1); break; }
+        }
+      }
+      // toiles contre le chauve
+      if (S.inv === 0) for (i = 0; i < S.webs.length; i++) {
+        wb = S.webs[i];
+        if (wb.x + 3 > S.px + 2 && wb.x < S.px + 14 && wb.y + 8 > S.py + 2 && wb.y < S.py + 17) {
+          S.lives--; S.inv = 90; S.webs = []; S.ev.push({k: 'touche'});
+          if (S.lives <= 0) { S.state = 'lost'; return; }
+          break;
+        }
+      }
+      for (i = 0; i < S.sp.length; i++) if (S.sp[i].y + 9 >= S.py) { S.state = 'lost'; return; }
+      if (S.sp.length === 0) {
+        if (S.wave >= VAGUES - 1) { S.state = 'won'; S.ev.push({k: 'gagne'}); return; }
+        S.wave++; spawn(S.wave); S.wait = 90; S.ev.push({k: 'vague'});
+      }
+      if (S.ev.length > 40) S.ev.splice(0, S.ev.length - 40);
+    }
+    return {S: S, step: step};
+  }
+  // rejoue une partie à partir de la liste des changements de touches « frame:masque,frame:masque,… »
+  function rejouer(seed, n, liste) {
+    var g = create(seed), ch = [], p = String(liste || '').split(','), i, m = 0, k = 0;
+    if (p.length > 6000) return {state: 'invalide'};
+    for (i = 0; i < p.length; i++) { var a = p[i].split(':'); if (a.length === 2) { var f = +a[0], v = +a[1]; if (f >= 0 && f <= MAXF && (v >= 0 && v <= 7)) ch.push([f, v]); } }
+    ch.sort(function (x, y) { return x[0] - y[0]; });
+    n = Math.min(+n || 0, MAXF);
+    while (g.S.state === 'play' && g.S.f < n) { while (k < ch.length && ch[k][0] <= g.S.f) { m = ch[k][1]; k++; } g.step(m); g.S.ev.length = 0; }
+    return {state: g.S.state, f: g.S.f, score: g.S.score, lives: g.S.lives};
+  }
+  return {create: create, rejouer: rejouer, W: W, H: H, FPS: FPS, MAXF: MAXF};
+})();
+// </SHOOT-SIM>
+// ----- Clubi Shoot (jeu secret) : le serveur donne la graine, puis REJOUE la partie envoyée avant de verser les points -----
+const SHOOT_PTS = 1000;
+async function shootDebut(h, j) {
+  const now = Date.now(), prec = h.un('SELECT ts FROM shoot_sessions WHERE joueur=?', j.id);
+  if (prec && now - prec.ts < 3000) return json({erreur: 'trop_vite'}, {}, 429);
+  const deja = !!h.un('SELECT 1 AS x FROM bonus WHERE joueur=? AND cle=?', j.id, 'clubishoot');
+  const seed = aAlea(4294967295) + 1;
+  if (!deja) h.run('INSERT INTO shoot_sessions(joueur,seed,ts) VALUES(?,?,?) ON CONFLICT(joueur) DO UPDATE SET seed=excluded.seed, ts=excluded.ts', j.id, seed, now);
+  return json({seed, deja});
+}
+async function shootFin(h, j, req) {
+  let b = {}; try { b = await req.json(); } catch (x) {}
+  const se = h.un('SELECT * FROM shoot_sessions WHERE joueur=?', j.id);
+  if (!se) return json({ok: true, gagne: false});
+  h.run('DELETE FROM shoot_sessions WHERE joueur=?', j.id);
+  const n = Math.floor(+b.n || 0), liste = String(b.i || '').slice(0, 60000), ecoule = Date.now() - se.ts;
+  if (n < 600 || ecoule < n / 60 * 1000 * 0.85 - 4000 || ecoule > 3 * 3600 * 1000) return json({ok: true, gagne: false});
+  const r = LCSIM.rejouer(se.seed, n, liste);
+  if (r.state !== 'won' || r.f !== n) return json({ok: true, gagne: false});
+  const nouveau = !h.un('SELECT 1 AS x FROM bonus WHERE joueur=? AND cle=?', j.id, 'clubishoot');
+  if (nouveau) {
+    h.run('INSERT OR IGNORE INTO bonus(joueur,cle,pts,ts) VALUES(?,?,?,?)', j.id, 'clubishoot', SHOOT_PTS, Date.now());
+    h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, j.id, 'badge', 'clubishoot', Date.now(), 'secret');
+  }
+  return json({ok: true, gagne: true, pts: SHOOT_PTS, nouveau});
 }
 async function qAdmin(h, act, b) {
   if (act === 'q-jeux') return json(h.sql.exec('SELECT * FROM qjeux ORDER BY nom COLLATE NOCASE').toArray());
