@@ -370,6 +370,12 @@
     coffre: function (L, D, A) { return '<rect x="11" y="28" width="42" height="24" rx="3" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><path d="M11 30a21 16 0 0 1 42 0z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M11 38h42" stroke="' + D + '" stroke-width="2"/><rect x="27" y="33" width="10" height="10" rx="2" fill="' + A + '" stroke="' + D + '" stroke-width="1.8"/><circle cx="32" cy="38" r="1.8" fill="' + D + '"/>'; },
     orbe: function (L, D, A) { return '<circle cx="32" cy="28" r="17" fill="' + L + '" stroke="' + D + '" stroke-width="2.2"/><path d="M22 24c3-6 9-8 14-6" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/><polygon points="32,24 34,29 39,29 35,33 36.500,38 32,35 27.500,38 29,33 25,29 30,29" fill="' + A + '"/><path d="M20 46h24l4 8H16z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/>'; },
     temple: function (L, D, A) { return '<path d="M10 24L32 10l22 14z" fill="' + A + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><g fill="' + L + '" stroke="' + D + '" stroke-width="2"><rect x="15" y="27" width="6" height="20" rx="1"/><rect x="29" y="27" width="6" height="20" rx="1"/><rect x="43" y="27" width="6" height="20" rx="1"/></g><rect x="9" y="47" width="46" height="6" rx="2" fill="' + A + '" stroke="' + D + '" stroke-width="2"/>'; },
+    chauve: function (L, D, A) {
+      var P = {o: '#1b1209', s: '#f0c78f', h: '#f8e2b8', n: '#d9a56a', b: '#0a0a0a', w: '#fff', i: '#2a3cff', d: '#7a4a22', D: '#4e2e12', l: '#e8b070', g: '#c9d3e6', G: '#7f8aa3'};
+      var R = ['.......G', '.......g', '...ooooo', '..ossssh', '.ossssss', 'osssssss', 'osssssss', 'ossbbbbs', 'osswwiss', 'osswwiss', 'osssssss', 'ossssssn', 'oddsssss', 'oddddsll', 'odDDdlll', '.oDDDDDD', '..oooooo'], o = '<g transform="translate(14.400 8.500) scale(2.200)" shape-rendering="crispEdges">';
+      R.forEach(function (r, y) { var f = r + r.split('').reverse().join(''); for (var i = 0; i < 16; i++) if (P[f[i]]) o += '<rect x="' + i + '" y="' + y + '" width="1.050" height="1.050" fill="' + P[f[i]] + '"/>'; });
+      return o + '</g>';
+    },
     soleil: function (L, D, A) { return '<path d="M8 46h48" stroke="' + D + '" stroke-width="3" stroke-linecap="round"/><path d="M16 46a16 16 0 0 1 32 0z" fill="' + L + '" stroke="' + D + '" stroke-width="2.2" stroke-linejoin="round"/><g stroke="' + A + '" stroke-width="3.4" stroke-linecap="round"><path d="M32 14v7M14 22l5 5M50 22l-5 5M7 36h7M50 36h7"/></g><path d="M16 52h32" stroke="' + A + '" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>'; }
   };
   var SPEC = {};
@@ -392,7 +398,7 @@
     ['t5', ['hex'], 'temple', 4, {sh: 40, rimrb: 1, tw: 1}], ['t6', ['scallop', 14], 'soleil', 40, {sh: 180, rimrb: 1, tw: 1}],
     ['j1', ['circle'], 'sword1', 80, {}], ['j2', ['oct'], 'sword', 232, {n: 10}], ['j3', ['shield'], 'sword', 18, {n: 50, tw: 1}],
     ['j4', ['circle'], 'medal', 140, {}], ['j5', ['hexf'], 'trophy', 188, {n: 10}], ['j6', ['hex'], 'trophy', 322, {n: 50, tw: 1}], ['j7', ['scallop', 22], 'crown', 8, {rimrb: 1, tw: 1, n: 200}],
-    ['balise', ['circle'], 'phare', 46, {tw: 1}], ['cachecache', ['hexf'], 'phare', 252, {sh: 100, tw: 1}], ['coffre', ['shield'], 'coffre', 34, {sh: 190, tw: 1}],
+    ['clubishoot', ['scallop', 20], 'chauve', 150, {rimrb: 1, tw: 1, sat: 70}], ['balise', ['circle'], 'phare', 46, {tw: 1}], ['cachecache', ['hexf'], 'phare', 252, {sh: 100, tw: 1}], ['coffre', ['shield'], 'coffre', 34, {sh: 190, tw: 1}],
     ['serie3', ['circle'], 'flame', 24, {n: 3}], ['serie7', ['oct'], 'flame', 356, {n: 7, tw: 1}], ['serie30', ['scallop', 18], 'flame', 200, {n: 30, rimrb: 1, tw: 1}], ['araignee', ['hex'], 'spider', 100, {sh: 220, sat: 70, tw: 1}]
   ].forEach(function (d) { defBadge(d[0], d[1], d[2], d[3], d[4]); });
   var SABASE = [['hex'], ['shield'], ['oct'], ['sq'], ['hexf'], ['circle']];
