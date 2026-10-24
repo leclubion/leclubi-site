@@ -1073,6 +1073,7 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 .cl-top .bar2 .sel option{background:var(--panel);color:var(--text)}
 .cl-top .bar2 p{display:none}
 .cl-top .bar2 .btn{border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;background:transparent;color:var(--accent);border-color:var(--accent)}
+.tabdd{position:relative;display:inline-flex}.tabdd .tab svg{transition:transform .2s;margin-left:2px}.tabdd.open .tab svg{transform:rotate(180deg)}.tabddm{position:absolute;left:0;top:calc(100% + 6px);min-width:230px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.35);display:none;flex-direction:column;z-index:9}.tabdd.open .tabddm{display:flex}.tabddm button{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 14px;border:0;border-radius:8px;background:transparent;color:var(--text);font:600 14px Inter,sans-serif;cursor:pointer;text-align:left}.tabddm button:hover{background:color-mix(in srgb,var(--accent) 18%,transparent)}.tabddm button.on{color:var(--accent)}.tabddm .tc{font-size:12px;color:var(--muted)}
 .cl-wrap .tabs{gap:10px;margin-bottom:18px}
 .cl-wrap .tab{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:11px 18px;font-size:15px;font-weight:600;background:var(--panel);color:var(--text)}
 .cl-wrap .tab .tc{font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--line);color:var(--muted)}
@@ -1618,6 +1619,7 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 </script>
 <script src="cosmetiques.js"></script>
 <script src="points.js"></script>
+<script src="reliques.js"></script>
 <script>
 // Thème clair / sombre : suit l'appareil tant que le visiteur n'a rien choisi, puis garde son choix
 (function(){
@@ -1961,8 +1963,8 @@ function groupsHtml(s, cards, newId){
 var cardFilter = 'all';
 function render(newId){
   if(current === 'tarot' && !(who && tarotCount(who))) current = 's1';
-  var tarotMode = current === 'tarot', arcadeMode = current === 'arcade';
-  var s = SEASONS.filter(function(x){ return x.id === (tarotMode || arcadeMode ? 's1' : current); })[0], cards = cardsOf(s);
+  var tarotMode = current === 'tarot', arcadeMode = current === 'arcade', relMode = current === 'reliques';
+  var s = SEASONS.filter(function(x){ return x.id === (tarotMode || arcadeMode || relMode ? 's1' : current); })[0], cards = cardsOf(s);
   var got = cards.filter(function(c){ return has(c.id); }).length, names = Object.keys(COLLECTIONS);
 
   document.getElementById('acct').innerHTML =
@@ -1977,12 +1979,13 @@ function render(newId){
   renderBadges();
 
   var cnt = function(x){ var cs = cardsOf(x); return !cs.length ? 'bientôt' : (who ? cs.filter(function(c){ return has(c.id); }).length + '/' + cs.length : String(cs.length)); };
-  document.getElementById('tabs').innerHTML = SEASONS.map(function(x){
-    return '<button class="tab" role="tab" aria-selected="' + (x.id === current) + '" data-season="' + x.id + '"><span>' + x.label + '</span><span class="tc">' + cnt(x) + '</span></button>';
-  }).join('') + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot"><span>Tarot</span><span class="tc">' + tarotOwned().length + '/' + TAROT.cartes.length + '</span></button>' : '') + '<button class="tab" role="tab" aria-selected="' + arcadeMode + '" data-season="arcade"><span>Arcade</span></button>';
+  var curS = SEASONS.filter(function(z){ return z.id === current; })[0];
+  document.getElementById('tabs').innerHTML = '<div class="tabdd"><button type="button" class="tab" role="tab" aria-haspopup="true" aria-selected="' + !!curS + '" data-tdd="1"><span>' + (curS ? curS.label : 'Saisons') + '</span>' + (curS ? '<span class="tc">' + cnt(curS) + '</span>' : '') + '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="tabddm" role="menu">' + SEASONS.map(function(z){
+    return '<button type="button" role="menuitem" data-season="' + z.id + '"' + (z.id === current ? ' class="on"' : '') + '><span>' + z.label + '</span><span class="tc">' + cnt(z) + '</span></button>';
+  }).join('') + '</div></div>' + (who && tarotCount(who) ? '<button class="tab tarot" role="tab" aria-selected="' + tarotMode + '" data-season="tarot"><span>Tarot</span><span class="tc">' + tarotOwned().length + '/' + TAROT.cartes.length + '</span></button>' : '') + '<button class="tab" role="tab" aria-selected="' + arcadeMode + '" data-season="arcade"><span>Arcade</span></button><button class="tab" role="tab" aria-selected="' + relMode + '" data-season="reliques"><span>Reliques</span>' + (who && window.CompteReliques ? '<span class="tc">' + window.CompteReliques(who).length + '/4</span>' : '') + '</button>';
 
   var fil = document.getElementById('cfil');
-  if(!arcadeMode && !tarotMode && cards.length){
+  if(!arcadeMode && !tarotMode && !relMode && cards.length){
     var rars = s.groups.map(function(g){ return g[0]; }), FL = [['all', 'Toutes']].concat(rars.map(function(r){ return [r, r === 'Commune' ? 'Communes' : r === 'Peu commune' ? 'Peu communes' : r === 'Rare' ? 'Rares' : r === 'Légendaire' ? 'Légendaires' : r === 'Spéciale' ? 'Spéciales' : r]; })).concat(who ? [['missing', 'Manquantes']] : []);
     if(FL.every(function(f){ return f[0] !== cardFilter; })) cardFilter = 'all';
     fil.innerHTML = '<div class="cl-prog"><div class="cl-pb"><b>' + (who ? got : '?') + ' / ' + cards.length + '</b><i><u style="width:' + (who && cards.length ? Math.round(got / cards.length * 100) : 0) + '%"></u></i></div><div class="cl-f">' +
@@ -1993,7 +1996,8 @@ function render(newId){
     document.getElementById('panel').innerHTML = '<div id="acmain"></div>';
     if(window.lcArcadeOuvrir) window.lcArcadeOuvrir(who);
   } else if(tarotMode) document.getElementById('panel').innerHTML = tarotPanel();
-  if(!arcadeMode && !tarotMode){
+  else if(relMode) document.getElementById('panel').innerHTML = !who ? (window.lcCompte && lcCompte.etat() === 'in' && window.LCR ? LCR.panel(lcCompte.moi().reliques || [], true) : '<div class="soon">Choisis un viewer pour voir ses reliques.</div>') : (window.LCR ? LCR.panel(window.CompteReliques ? window.CompteReliques(who) : [], mine()) : '');
+  if(!arcadeMode && !tarotMode && !relMode){
     if(!cards.length) document.getElementById('panel').innerHTML = '<div class="soon">Cette saison n\'est pas encore ouverte. Les cartes arriveront ici.</div>';
     else {
       var vis = cards.filter(function(c){ return cardFilter === 'all' || (cardFilter === 'missing' ? !has(c.id) : c.r === cardFilter); }), idx = 0;
@@ -2020,6 +2024,9 @@ document.addEventListener('change', function(e){
 });
 
 document.addEventListener('click', function(e){
+  var td = e.target.closest('[data-tdd]'), dd = document.querySelector('.tabdd');
+  if(td){ td.parentNode.classList.toggle('open'); return; }
+  if(dd && !e.target.closest('.tabdd')) dd.classList.remove('open');
   var t = e.target.closest('[data-act],[data-season],.card');
   if(!t) return;
   if(t.dataset.season){ current = t.dataset.season; try{ if(current === 'arcade') history.replaceState(null, '', '#arcade'); else if(location.hash === '#arcade') history.replaceState(null, '', '#collection'); }catch(err){} return render(); }
@@ -2315,6 +2322,7 @@ function renderColl(){
 document.getElementById('cq').addEventListener('input', renderColl);
 
 // ---- Titres et badges ----
+window.lcOuvrirReliques = function(){ current = 'reliques'; if(location.hash !== '#collection') location.hash = '#collection'; else render(); };
 function openSeasons(){ return SEASONS.filter(function(x){ return x.groups.length; }); }
 function totalCards(){ return openSeasons().reduce(function(n, x){ return n + cardsOf(x).length; }, 0); }
 function countOf(name){ return openSeasons().reduce(function(k, x){ return k + cardsOf(x).filter(function(c){ return owns(name, c.id); }).length; }, 0); }
@@ -4005,6 +4013,13 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.badges || [];
     var c = pubCache[l];
     return c && !c.prive && c.badges ? c.badges : [];
+  };
+  window.CompteReliques = function(name){
+    var l = String(name || '').toLowerCase();
+    if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.reliques || [];
+    var p = pubCache[l];
+    if(p === undefined){ window.CompteProfil(name).then(function(){ if(current === 'reliques') render(); }); return []; }
+    return (p && p.reliques) || [];
   };
   window.CompteJeu = function(nom){
     if(!ON || !nom) return null;
