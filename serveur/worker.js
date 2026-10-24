@@ -485,7 +485,7 @@ export class Hub {
       if (r.cle === 'serie3') { out.push({id: 'serie3', nom: 'Série de 3', desc: 'Tu as terminé le Jeu du jour 3 jours de suite.', ico: 'flame', tier: 'bronze', cat: 'Jeu du jour', ts: r.ts}); return; }
       if (r.cle === 'serie7') { out.push({id: 'serie7', nom: 'Une semaine de flamme', desc: 'Tu as terminé le Jeu du jour 7 jours de suite.', ico: 'flame', tier: 'or', cat: 'Jeu du jour', ts: r.ts}); return; }
       if (r.cle === 'serie30') { out.push({id: 'serie30', nom: 'Inarrêtable', desc: 'Tu as tenu une série de 30 jours au Jeu du jour.', ico: 'flame', tier: 'mythique', cat: 'Secrets', ts: r.ts}); return; }
-      if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
+      if (r.cle === 'araignee') { out.push({id: 'araignee', nom: 'Arachnophobe', desc: 'Tu as écrasé l\'araignée qui rôdait sur le site. Mais elles étaient plusieurs… cherche du côté du logo.', ico: 'spider', tier: 'epique', cat: 'Secrets', ts: r.ts}); return; }
       const bqb = bqBadge(r.cle); if (bqb) { out.push({...bqb, ts: r.ts}); return; }
       const d = this.un('SELECT * FROM defis WHERE n=?', Number(String(r.cle).replace('defi-', '')));
       if (d && d.b_nom) out.push({id: r.cle, nom: d.b_nom, desc: d.descr || d.titre, ico: d.b_ico, tier: d.b_tier, cat: d.fin - d.debut > 20 * 86400e3 ? 'Événements' : 'Défis', ts: r.ts});
