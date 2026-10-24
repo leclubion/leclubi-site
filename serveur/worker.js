@@ -54,7 +54,7 @@ function parseCsv(t) {
   if (f !== '' || row.length) { row.push(f); rows.push(row); }
   return rows.filter(r => r.some(x => x !== ''));
 }
-const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage', '/boutique', '/classement-quiz', '/shoot/debut', '/shoot/fin']);
+const PROXIES = new Set(['/auth', '/moi', '/vitrine', '/vitrine-badges', '/reglage-profil', '/propositions', '/defis', '/titre', '/araignee', '/cache', '/fiche', '/quotidien', '/arcade', '/arcade/coffre', '/journal/carte', '/journal/usage', '/boutique', '/classement-quiz', '/shoot/debut', '/shoot/fin', '/reliques', '/reliques/recuperer']);
 
 export default {
   async fetch(req, env, ctx) {
@@ -153,6 +153,7 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS qsemaines(sem INTEGER PRIMARY KEY, deb TEXT, top TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS bonus(joueur TEXT, cle TEXT, pts INTEGER, ts INTEGER, PRIMARY KEY(joueur, cle))`);
     q(`CREATE TABLE IF NOT EXISTS shoot_sessions(joueur TEXT PRIMARY KEY, seed INTEGER, ts INTEGER)`);
+    q(`CREATE TABLE IF NOT EXISTS reliques(joueur TEXT, cle TEXT, ts INTEGER, PRIMARY KEY(joueur, cle))`);
     q(`CREATE TABLE IF NOT EXISTS visites(joueur TEXT, jour TEXT, PRIMARY KEY(joueur, jour))`);
     this.jCache = null;            // journal sérialisé gardé en mémoire (relu seulement après un ajout)
     this.essaisAuth = new Map();   // ip -> {n, t}  (limite les connexions répétées)
@@ -191,7 +192,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
-    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname === '/shoot/debut' || url.pathname === '/shoot/fin' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
+    if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname === '/shoot/debut' || url.pathname === '/shoot/fin' || url.pathname === '/reliques' || url.pathname === '/reliques/recuperer' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
   etat() {
@@ -370,7 +371,7 @@ export class Hub {
   profilPublic(j) {
     const base = {login: j.login, pseudo: j.nom, avatar: j.avatar || '', prive: !!j.prive};
     if (j.prive) return base;
-    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), serie: qSerie(this, j.id).serie, cosm: cosmDe(j), score: ptsScore(this, j.id), cree: j.cree || 0, pstats: (() => { const e = ptsEtat(this, j); return {score: e.score, rang: e.rang, victoires: e.victoires, parties: e.parties, serie: e.serie, meilleure: e.meilleure, arcade: e.arcade}; })(), arcade: this.sql.exec("SELECT carte FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme') ORDER BY ts", j.id).toArray().map(r => r.carte), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
+    const bj = this.badgesDe(j), fi = this.ficheDe(j); return {...base, fiche: fi, ficheBadge: this.succesDe(j).filter(x => x.id === fi.badge), titre: this.titreDe(j), badgesInfo: this.succesDe(j).filter(x => bj.includes(x.id)), vitrine: this.vitrineDe(j), serie: qSerie(this, j.id).serie, cosm: cosmDe(j), reliques: relEtat(this, j).reliques, score: ptsScore(this, j.id), cree: j.cree || 0, pstats: (() => { const e = ptsEtat(this, j); return {score: e.score, rang: e.rang, victoires: e.victoires, parties: e.parties, serie: e.serie, meilleure: e.meilleure, arcade: e.arcade}; })(), arcade: this.sql.exec("SELECT carte FROM acartes WHERE joueur=? AND carte NOT IN ('la-cle-ancienne','le-coffre-ferme') ORDER BY ts", j.id).toArray().map(r => r.carte), badges: bj, parties: j.parties, victoires: j.victoires, ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null};
   }
   async compte(req, url) {
     const p = url.pathname;
@@ -449,6 +450,8 @@ export class Hub {
     if (p === '/quotidien') return qQuotidien(this, j, req, url);
     if (p === '/arcade') return aArcade(this, j, req);
     if (p === '/arcade/coffre' && req.method === 'POST') return aCoffre(this, j);
+    if (p === '/reliques') return json(relEtat(this, j));
+    if (p === '/reliques/recuperer' && req.method === 'POST') return relRecuperer(this, j);
     if (p === '/shoot/debut' && req.method === 'POST') return shootDebut(this, j);
     if (p === '/shoot/fin' && req.method === 'POST') return shootFin(this, j, req);
     return json({erreur: 'inconnu'}, {}, 404);
@@ -456,7 +459,7 @@ export class Hub {
   cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   moi(j) {
     const jour = jourParis();
-    return {id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
+    return {...relEtat(this, j), id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
   }
@@ -1085,9 +1088,9 @@ const BQ = [
     .map(([n, p]) => ({id: 't-' + nrm(n), kind: 'titre', nom: n, prix: p, val: n, desc: 'Un titre affiché sous ton pseudo.'})),
   ...[['etoile', 200], ['lune', 250], ['vue', 400], ['des', 350], ['couronne', 800], ['gemme', 1200]]
     .map(([k, p]) => ({id: 'bq-' + k, kind: 'badge', nom: BQ_BADGES['bq-' + k].nom, prix: p, cle: 'bq-' + k, desc: 'Un badge à ranger dans ta vitrine.'})),
-  ...[['pixel', 'Pixel doré', 300], ['neon', 'Néon violet', 400], ['ronces', 'Ronces', 500], ['flamme', 'Flammes', 600], ['glace', 'Givre', 600], ['etoiles', 'Voie lactée', 700], ['arcade', 'Arcade RGB', 800], ['glitch', 'Glitch', 900], ['royal', 'Couronne royale', 1500]]
+  ...[['pixel', 'Pixel doré', 300], ['neon', 'Néon violet', 400], ['ronces', 'Ronces', 500], ['flamme', 'Flammes', 600], ['glace', 'Givre', 600], ['etoiles', 'Voie lactée', 700], ['arcade', 'Arcade RGB', 800], ['glitch', 'Glitch', 900], ['royal', 'Couronne royale', 1500], ['citrouille', 'Citrouille ardente (Halloween)', 700], ['fantome', 'Fantôme farceur (Halloween)', 800], ['toile', 'Toile d’araignée (Halloween)', 900], ['chauvesouris', 'Chauves-souris (Halloween)', 1000]]
     .map(([k, n, p]) => ({id: 'c-' + k, kind: 'cadre', nom: n, prix: p, desc: 'Un cadre autour de ton avatar.'})),
-  ...[['ville', 'Ville sous la pluie', 600], ['salle', 'Salle d’arcade', 700], ['foret', 'Forêt du Renard', 800], ['neon', 'Néons du Ronin', 900], ['station', 'Station du Pilote', 1000], ['tour', 'Tour du Bourreau', 1200], ['ile', 'Île du Pirate Fantôme', 1500], ['manoir', 'Manoir du Veilleur', 2000]]
+  ...[['ville', 'Ville sous la pluie', 600], ['salle', 'Salle d’arcade', 700], ['foret', 'Forêt du Renard', 800], ['neon', 'Néons du Ronin', 900], ['station', 'Station du Pilote', 1000], ['tour', 'Tour du Bourreau', 1200], ['ile', 'Île du Pirate Fantôme', 1500], ['manoir', 'Manoir du Veilleur', 2000], ['citrouilles', 'Champ de citrouilles (Halloween)', 900], ['fantomes', 'Bal des fantômes (Halloween)', 1000], ['toile', 'Repaire des araignées (Halloween)', 1100], ['sorciere', 'Nuit de la sorcière (Halloween)', 1300]]
     .map(([k, n, p]) => ({id: 'b-' + k, kind: 'banniere', nom: n, prix: p, desc: 'Une bannière animée en haut de ton profil.'})),
   ...[['or', 'Or', 250], ['rose', 'Rose', 250], ['cyan', 'Cyan', 250], ['vert', 'Vert', 250], ['arc', 'Arc-en-ciel animé', 700]]
     .map(([k, n, p]) => ({id: 'p-' + k, kind: 'couleur', nom: n, prix: p, desc: 'Une couleur pour ton pseudo.'}))
@@ -1249,6 +1252,23 @@ var LCSIM = (function () {
   return {create: create, rejouer: rejouer, W: W, H: H, FPS: FPS, MAXF: MAXF};
 })();
 // </SHOOT-SIM>
+// ----- Reliques du Site : une carte par secret trouvé, +500 points (solde de la boutique seulement) -----
+const RELIQUES = {araignee: 'veuve', cachecache: 'balise', coffre: 'coffre', clubishoot: 'shoot'};
+const RELIQUE_PTS = 500;
+function relEtat(h, j) {
+  const secrets = new Set(h.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='badge'`, j.id).toArray().map(r => r.cle));
+  const a = new Set(h.sql.exec('SELECT cle FROM reliques WHERE joueur=?', j.id).toArray().map(r => r.cle));
+  const dues = Object.entries(RELIQUES).filter(([sec, id]) => secrets.has(sec) && !a.has(id)).map(([, id]) => id);
+  return {reliques: [...a], relAttente: dues, relTotal: Object.keys(RELIQUES).length};
+}
+async function relRecuperer(h, j) {
+  const e = relEtat(h, j), now = Date.now();
+  e.relAttente.forEach(id => {
+    h.run('INSERT OR IGNORE INTO reliques(joueur,cle,ts) VALUES(?,?,?)', j.id, id, now);
+    h.run('INSERT OR IGNORE INTO bonus(joueur,cle,pts,ts) VALUES(?,?,?,?)', j.id, 'relique-' + id, RELIQUE_PTS, now);
+  });
+  return json({ok: true, nouvelles: e.relAttente, pts: e.relAttente.length * RELIQUE_PTS, ...relEtat(h, j)});
+}
 // ----- Clubi Shoot (jeu secret) : le serveur donne la graine, puis REJOUE la partie envoyée avant de verser les points -----
 const SHOOT_PTS = 1000;
 async function shootDebut(h, j) {
