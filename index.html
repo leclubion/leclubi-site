@@ -1148,10 +1148,22 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 .hz-champ b{font:400 15px var(--display);text-transform:uppercase}.hz-champ a{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}.hz-champ small{color:var(--muted);font-weight:500}
 @media (max-width:1000px){.hz-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.hz-tiles{grid-template-columns:1fr}}
+#wb9{position:absolute;top:0;left:0;width:100px;height:140px;z-index:6;pointer-events:none;color:var(--text);opacity:.3}
+#wb9 svg{position:absolute;top:0;left:0}
+#wb9 .wt{position:absolute;top:0;width:1px;height:0;background:currentColor;animation:wbd 22s ease-in-out infinite;animation-delay:var(--d)}
+#wb9 .wt b{position:absolute;left:-4px;bottom:-7px;width:9px;height:8px;background:currentColor;-webkit-mask:var(--sp) center/contain no-repeat;mask:var(--sp) center/contain no-repeat}
+#wb9{--sp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8'><path d='M0 0h1v1h1v1h1v1h3V2h1V1h1V0h1v1H8v1H7v1h2v1H7v1h1v1h1v1H8V7H7V6H6v1H5V6H4v1H3V6H2v1H1V6H0z'/></svg>")}
+@keyframes wbd{0%,12%{height:0}45%,60%{height:var(--l)}92%,100%{height:0}}
+@media (max-width:700px){#wb9{width:60px;height:90px}#wb9 svg{width:60px;height:60px}}
+@media (prefers-reduced-motion:reduce){#wb9 .wt{animation:none;height:var(--l)}}
+header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
+@keyframes lgfl{0%,100%{filter:none}15%,55%{filter:brightness(2.2) drop-shadow(0 0 10px #ffe66b)}35%{filter:none}}
+.hz-ind{margin:14px 0 0;font-size:12.5px;letter-spacing:.04em;color:var(--muted,#8a8780);opacity:.6;font-style:italic}
 </style>
 </head>
 <body>
 
+<div id="wb9" aria-hidden="true"><svg viewBox="0 0 100 100" width="100" height="100" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round"><path d="M0 0L100 18M0 0L88 52M0 0L62 84M0 0L30 98M0 0L98 0M0 0L0 98"/><path d="M26 4Q22 20 4 26M48 8Q40 36 8 48M70 13Q56 52 10 70M90 16Q70 70 12 90"/></svg><i class="wt" style="left:24px;--d:0s;--l:58px"><b></b></i><i class="wt" style="left:52px;--d:-9s;--l:84px"><b></b></i></div>
 <header>
   <div class="wrap bar">
     <a class="logo" href="#accueil" aria-label="LeClubi, accueil"><span aria-hidden="true">LE</span>CLUBI</a>
@@ -1188,6 +1200,7 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
         <div class="hz-eye">Chaîne Twitch · LeClubi</div>
         <h1>Jouez. Choisissez. Collectionnez.</h1>
         <p class="lead">Bienvenue sur la chaîne ! Ici, on découvre des jeux, on partage de bons moments en stream et c’est la communauté qui choisit nos prochaines aventures. Chaque saison, des cartes uniques à débloquer et à collectionner.</p>
+        <p class="hz-ind">LeClubi a toujours 2 coups d’avance.</p>
         <p class="lead end">À vous de jouer. À vous de choisir. Et surtout… à vous de toutes les collectionner !</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
@@ -1600,6 +1613,7 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 <footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
+(function(){var s=0,nx=120;setInterval(function(){if(document.hidden)return;if(++s<nx)return;nx=s+180;var g=document.querySelector('header .logo');if(!g)return;g.classList.remove('lgfl');void g.offsetWidth;g.classList.add('lgfl')},1000)})();
 (function(){var n=0,t=0,l=0;document.addEventListener('click',function(e){var s=e.target.closest&&e.target.closest('header .logo');if(!s)return;var k=Date.now();if(k-t>700)n=0;t=k;if(++n<2)return;n=0;if(window.LCShootOuvrir){window.LCShootOuvrir();return}if(l)return;l=1;var j=document.createElement('script');j.src='lc-s.js?v=1';j.onload=function(){l=0;if(window.LCShootOuvrir)window.LCShootOuvrir()};j.onerror=function(){l=0};document.head.appendChild(j)})})();
 </script>
 <script src="cosmetiques.js"></script>
@@ -3745,7 +3759,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       appel('/araignee', {session:sess(), body:{}}).then(function(r){
         if(r.ok){
           try{ localStorage.setItem(spiderKey(), '1'); }catch(x){}
-          if(!aAraignee()){ moi.succes = (moi.succes || []).concat([{id:'araignee', nom:'Arachnophobe', desc:'Tu as écrasé l\'araignée qui rôdait sur le site.', ico:'spider', tier:'epique', cat:'Secrets', ts:Date.now()}]); }
+          if(!aAraignee()){ moi.succes = (moi.succes || []).concat([{id:'araignee', nom:'Arachnophobe', desc:'Tu as écrasé l\'araignée qui rôdait sur le site. Mais elles étaient plusieurs… cherche du côté du logo.', ico:'spider', tier:'epique', cat:'Secrets', ts:Date.now()}]); }
           toast('Badge secret débloqué !', 'Arachnophobe : tu as écrasé l\'araignée. Retrouve-le dans l\'onglet Badges.');
           if(!g('v-compte').hidden) rendreCompte(); renderBadges();
           setTimeout(function(){ el.remove(); spOn = false; }, 1400);
