@@ -141,7 +141,7 @@
     for(var i = idx.length - 1; i >= 0; i--) detruites.unshift(col.splice(idx[i], 1)[0]);
     detruites.forEach(function(c){ S.defausse.push(c); });
     S.tours[p]++;
-    var nouvelle = piocher(S, p);
+    var nouvelle = S.hands[p].length < S.opts.hand ? piocher(S, p) : null;       // main déjà pleine (objets) : on ne pioche pas
     S.scores = [scoreBoard(S.board[0], S.opts), scoreBoard(S.board[1], S.opts)];
     var res = {p: p, card: card, ci: ci, detruites: detruites, indices: idx, pioche: nouvelle};
     if(pleine(S.board[p])){ terminer(S); res.fin = true; }
@@ -302,7 +302,7 @@
     S.board[p][ci].push(card);
     var d = detruireListe(S, 1 - p, idx.map(function(r){ return {ci: ci, r: r}; }));
     S.tours[p]++;
-    var nouvelle = piocher(S, p);
+    var nouvelle = S.hands[p].length < S.opts.hand ? piocher(S, p) : null;       // main déjà pleine (objets) : on ne pioche pas
     majScores(S);
     var res = {p: p, card: card, ci: ci, detruites: d.cartes, indices: d.parade ? [] : idx, pioche: nouvelle, parade: d.parade};
     if(pleine(S.board[p])){ terminer(S); res.fin = true; return res; }
