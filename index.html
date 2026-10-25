@@ -1368,14 +1368,11 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
       <div class="kz-sw" role="tablist" aria-label="Choisir un classement"><a id="kswA" role="tab" href="#classement" aria-selected="true">Clubi Card Battle</a><a id="kswB" role="tab" href="#classement-jeu" aria-selected="false">Jeu du jour</a></div>
       <div id="kqz" hidden></div>
       <div id="kcb">
-      <h1>Classement · <span class="nomjeu">Clash des Piliers</span></h1>
-      <p class="lead">Les meilleurs joueurs du jeu de cartes de LeClubi. Seules les parties entre joueurs comptent.</p>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="ktRatio" aria-selected="true" type="button">Ratio de victoires</button>
-        <button class="tab" role="tab" id="ktVict" aria-selected="false" type="button">Victoires</button>
-      </div>
-      <div class="cfilter"><input id="kq" type="search" placeholder="Rechercher un joueur" aria-label="Rechercher un joueur" autocomplete="off"><span id="kinfo"></span></div>
-      <div class="ktable-w"><table class="ktable" id="ktable"><thead><tr><th>#</th><th>Pseudo</th><th class="n">Parties jouées</th><th class="n">Parties gagnées</th><th class="n">Ratio</th></tr></thead><tbody id="kbody"></tbody></table></div>
+      <div class="kz-head"><div><h1>Classement · <span class="nomjeu">Clash des Piliers</span></h1><p class="lead" style="margin:6px 0 0">Les meilleurs joueurs du jeu de cartes de LeClubi. Seules les parties entre joueurs comptent.</p></div>
+      <div class="kz-sw" role="tablist" aria-label="Mode de jeu"><button role="tab" id="kmC" aria-selected="true" type="button">Mode Classique</button><button role="tab" id="kmS" aria-selected="false" type="button">Mode Survie</button></div></div>
+      <div class="cb-tools"><div class="kz-sw" role="tablist"><button role="tab" id="ktRatio" aria-selected="true" type="button">Ratio de victoires</button><button role="tab" id="ktVict" aria-selected="false" type="button">Victoires</button></div>
+      <span><input id="kq" type="search" placeholder="Rechercher un joueur" aria-label="Rechercher un joueur" autocomplete="off"> <span id="kinfo" class="note"></span></span></div>
+      <div id="kbody"></div>
       <p class="note" id="knote"></p>
       <p><a class="btn" id="kjouer" href="jeu.html" hidden>Jouer à <span class="nomjeu">Clash des Piliers</span></a></p>
       </div>
@@ -3270,7 +3267,7 @@ var JEU_API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, '')
 var JEU_OUVERT = !!(window.JEU_CONFIG || {}).OUVERT;
 if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(function(e){ e.textContent = JEU_CONFIG.NOM; });
 (function(){
-  var data = null, onglet = 'ratio', charge = 0, MIN = 10;
+  var data = null, onglet = 'ratio', charge = 0, MIN = 10, modeJ = 'classique', datas = {}, charges = {};
   if(JEU_API){ document.getElementById('navClass').hidden = false; document.getElementById('navQ').hidden = false; }
   if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
   function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
@@ -3282,21 +3279,25 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     return q ? l.filter(function(j){ return j.pseudo.toLowerCase().indexOf(q) >= 0; }) : l;
   }
   function dessiner(){
-    var body = document.getElementById('kbody'), me = pseudoMoi(), l = liste();
-    if(!data){ body.innerHTML = '<tr><td class="none" colspan="5">' + balChg('Chargement…') + '</td></tr>'; return; }
-    body.innerHTML = l.length ? l.map(function(j){
-      return '<tr class="' + (j.rang <= 3 ? 'top' + j.rang : '') + (j.pseudo.toLowerCase() === me ? ' me' : '') + '"><td>' + j.rang + '</td><td><a class="pfl2" href="#profil=' + encodeURIComponent(j.login || j.pseudo) + '" title="Voir le profil">' + esc(j.pseudo) + '</a>' + ttag(j.pseudo) + '</td><td class="n">' + j.parties + '</td><td class="n">' + j.victoires + '</td><td class="n">' + String(j.ratio).replace('.', ',') + ' %</td></tr>';
-    }).join('') : '<tr><td class="none" colspan="5">' + balVide(onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.') + '</td></tr>';
+    var body = document.getElementById('kbody'), l = liste();
+    document.getElementById('kcb').classList.toggle('cb-sv', modeJ === 'survie');
+    if(!data){ body.innerHTML = balChg('Chargement…'); return; }
+    var vide = onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.';
+    body.innerHTML = (modeJ === 'survie' ? '<div class="kz-rew">⚔️ <span style="flex:1 1 320px"><b>Mode Survie</b> : des objets tirés au hasard, 2 manches gagnantes. Ce classement est séparé du mode Classique.</span></div>' : '') + (window.lcClassementCB ? lcClassementCB({liste:l, onglet:onglet, me:pseudoMoi(), vide:vide}) : '');
     document.getElementById('knote').textContent = onglet === 'ratio' ? 'Le classement par ratio demande au moins ' + MIN + ' parties jouées, pour éviter les 100 % en une seule partie.' : 'Classé par nombre de victoires.';
     document.getElementById('kinfo').textContent = l.length + ' joueur' + (l.length > 1 ? 's' : '');
   }
   window.dessinerClassement = dessiner;
   window.chargerClassement = function(){
-    if(!JEU_API || Date.now() - charge < 15000) { dessiner(); return; }
-    charge = Date.now(); dessiner();
-    fetch(JEU_API.replace(/\/$/, '') + '/classement').then(function(r){ return r.json(); }).then(function(d){ data = d; MIN = d.minimumRatio || 10; dessiner(); })
-      .catch(function(){ if(!data){ document.getElementById('kbody').innerHTML = '<tr><td class="none" colspan="5">Le classement n\'est pas disponible pour le moment.</td></tr>'; } });
+    var mj = modeJ;
+    if(!JEU_API || Date.now() - (charges[mj] || 0) < 15000) { dessiner(); return; }
+    charges[mj] = Date.now(); dessiner();
+    fetch(JEU_API.replace(/\/$/, '') + (mj === 'survie' ? '/classement-survie' : '/classement')).then(function(r){ return r.json(); }).then(function(d){ datas[mj] = d; if(mj === modeJ){ data = d; MIN = d.minimumRatio || 10; } dessiner(); })
+      .catch(function(){ if(!data){ document.getElementById('kbody').innerHTML = '<p class="note">Le classement n\'est pas disponible pour le moment.</p>'; } });
   };
+  function choisirMode(m){ modeJ = m; data = datas[m] || null; document.getElementById('kmC').setAttribute('aria-selected', m === 'classique'); document.getElementById('kmS').setAttribute('aria-selected', m === 'survie'); window.chargerClassement(); }
+  document.getElementById('kmC').onclick = function(){ choisirMode('classique'); };
+  document.getElementById('kmS').onclick = function(){ choisirMode('survie'); };
   function choisir(o){ onglet = o; document.getElementById('ktRatio').setAttribute('aria-selected', o === 'ratio'); document.getElementById('ktVict').setAttribute('aria-selected', o === 'vict'); dessiner(); }
   document.getElementById('ktRatio').onclick = function(){ choisir('ratio'); };
   document.getElementById('ktVict').onclick = function(){ choisir('vict'); };

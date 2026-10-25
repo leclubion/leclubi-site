@@ -76,6 +76,25 @@
     '.kz-r .rk{font:800 17px var(--display);color:var(--muted)}',
     '.kz-r .who{display:flex;align-items:center;gap:12px;min-width:0}.kz-r .who span.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
     '.kz-r .num{text-align:right}.kz-r .num.s{color:#ff9a5c;font-weight:600}',
+    '.cb-pod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:end;margin:6px 0 26px}',
+    '.cb-p{position:relative;text-align:center;border-radius:20px;padding:24px 14px 22px;background:var(--panel);border:1px solid var(--line);overflow:hidden;animation:cbUp .6s cubic-bezier(.2,.9,.3,1.2) both}',
+    '.cb-p.r1{order:2;border-color:var(--accent);box-shadow:0 0 44px rgba(199,154,75,.26);padding-bottom:40px;animation-delay:.12s}.cb-p.r2{order:1;animation-delay:.04s}.cb-p.r3{order:3;animation-delay:.2s}',
+    '.cb-p.r1::before{content:"";position:absolute;inset:-40% -20% auto;height:80%;background:radial-gradient(ellipse at 50% 100%,rgba(255,224,138,.28),transparent 70%);pointer-events:none}',
+    '.cb-p.r1::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,235,170,.18),transparent);animation:cbShine 4.5s ease-in-out 1s infinite;pointer-events:none}',
+    '.cb-p a.pfl{display:flex;flex-direction:column;align-items:center}',
+    '.cb-p .md{font:800 38px var(--display);line-height:1}.cb-p.r1 .md{color:#ffe08a;text-shadow:0 0 18px rgba(255,208,100,.5)}.cb-p.r2 .md{color:#d5dbe4}.cb-p.r3 .md{color:#d39a64}',
+    '.cb-p .lcf{margin:12px 0 10px}.cb-p h3{margin:0;font-size:17px;overflow-wrap:anywhere}',
+    '.cb-p .pt{margin-top:8px;font:800 26px var(--display)}.cb-p .pt small{font:600 13px Inter,sans-serif;color:var(--muted)}',
+    '.cb-p .sb{font-size:13px;color:var(--muted);margin-top:2px}',
+    '.kcb-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);margin:12px auto 0;max-width:150px;overflow:hidden}.kcb-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#c79a4b,#ffe08a);transform-origin:left;animation:cbBar .9s .4s cubic-bezier(.2,.8,.2,1) both}',
+    '.cb-tb .kz-r{grid-template-columns:56px minmax(0,1fr) 90px 90px 90px;animation:cbRow .4s ease-out both}',
+    '.cb-tb .kz-r .bar{display:block;height:5px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:4px;overflow:hidden}.cb-tb .kz-r .bar i{display:block;height:100%;background:linear-gradient(90deg,#8a6a30,#e3c27d)}',
+    '.cb-tools{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin:0 0 18px}.cb-tools .kz-sw{margin:0}',
+    '.cb-tools input{background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--text);padding:9px 16px;font:500 14px Inter,sans-serif;min-width:200px}',
+    '.cb-sv .kz-rew{background:linear-gradient(110deg,#150a2b,#34175f);border-color:#5b3a99}',
+    '@keyframes cbUp{from{opacity:0;transform:translateY(34px) scale(.94)}to{opacity:1;transform:none}}@keyframes cbRow{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}@keyframes cbBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes cbShine{0%,55%{left:-60%}100%{left:130%}}',
+    '@media (prefers-reduced-motion:reduce){.cb-p,.cb-tb .kz-r,.kcb-bar i,.cb-p.r1::after{animation:none}}',
+    '@media (max-width:680px){.cb-pod{grid-template-columns:1fr}.cb-p.r1,.cb-p.r2,.cb-p.r3{order:0}.cb-tb .kz-r{grid-template-columns:38px minmax(0,1fr) 70px}}',
     '.kz-old{margin-top:26px;font-size:14px;color:var(--muted)}.kz-old b{color:var(--text)}',
     '@media (max-width:680px){.kz-pod{grid-template-columns:1fr}.kz-r{grid-template-columns:38px minmax(0,1fr) 70px;padding:11px 14px}.kz-r .hid{display:none}.bq-top{align-items:stretch}.bq-pv{padding:0 16px 16px;flex-wrap:wrap}}'
   ].join('\n');
@@ -203,6 +222,26 @@
     fetch(String(api0).replace(/\/$/, '') + '/classement-quiz').then(function (r) { return r.json(); }).then(function (d) { KZ = d; kzRendre(); }).catch(function () { if (!KZ) { kzLoad = -1; kzRendre(); } });
   }
   window.lcClassementQuiz = kzCharger;
+  // Classement du Clubi Card Battle (même style que le Jeu du jour) : renvoie le HTML complet
+  window.lcClassementCB = function (o) {
+    var l = o.liste, me = (o.me || '').toLowerCase(), h = [], MED = ['🥇', '🥈', '🥉'];
+    var lien = function (r) { return '#profil=' + encodeURIComponent(r.login || r.pseudo); };
+    var val = function (r) { return o.onglet === 'ratio' ? String(r.ratio).replace('.', ',') + ' %' : n(r.victoires); };
+    var max = l.length ? Math.max.apply(null, l.map(function (r) { return o.onglet === 'ratio' ? r.ratio : r.victoires; })) || 1 : 1;
+    if (!l.length) return '<p class="note" style="text-align:center;padding:34px 0">' + esc(o.vide) + '</p>';
+    var top = l.slice(0, 3);
+    h.push('<div class="cb-pod">' + top.map(function (r, i) {
+      var c = r.cosm || {}, v = o.onglet === 'ratio' ? r.ratio : r.victoires;
+      return '<div class="cb-p r' + (i + 1) + '"><div class="md">' + MED[i] + '</div><a class="pfl" href="' + lien(r) + '" title="Voir le profil de ' + esc(r.pseudo) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, i ? 70 : 84) + '<h3>' + LCC.nom(r.pseudo, c.couleur) + '</h3></a><div class="kz-t">' + esc(r.titre || '') + '</div>' +
+        '<div class="pt">' + val(r) + ' <small>' + (o.onglet === 'ratio' ? 'de victoires' : 'victoire' + (r.victoires > 1 ? 's' : '')) + '</small></div><div class="sb">' + n(r.victoires) + ' gagnée' + (r.victoires > 1 ? 's' : '') + ' sur ' + n(r.parties) + '</div><div class="kcb-bar"><i style="width:' + Math.max(8, Math.round(100 * v / max)) + '%"></i></div></div>';
+    }).join('') + '</div>');
+    if (l.length > 3) h.push('<div class="kz-tb cb-tb"><div class="kz-r h"><span>Rang</span><span>Joueur</span><span class="num">' + (o.onglet === 'ratio' ? 'Ratio' : 'Victoires') + '</span><span class="num hid">Parties</span><span class="num hid">Gagnées</span></div>' + l.slice(3).map(function (r, i) {
+      var c = r.cosm || {}, v = o.onglet === 'ratio' ? r.ratio : r.victoires;
+      return '<div class="kz-r' + (me && String(r.login || r.pseudo).toLowerCase() === me || me && r.pseudo.toLowerCase() === me ? ' me' : '') + '" style="animation-delay:' + Math.min(i, 14) * 35 + 'ms"><span class="rk">' + r.rang + '</span><a class="who pfl" href="' + lien(r) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span class="nm">' + LCC.nom(r.pseudo, c.couleur) + (r.titre ? ' <small style="color:var(--accent);font-weight:500">' + esc(r.titre) + '</small>' : '') + '<span class="bar"><i style="width:' + Math.max(4, Math.round(100 * v / max)) + '%"></i></span></span></a><span class="num"><b>' + val(r) + '</b></span><span class="num hid">' + n(r.parties) + '</span><span class="num hid">' + n(r.victoires) + '</span></div>';
+    }).join('') + '</div>');
+    return h.join('');
+  };
+
   window.lcFormatPts = n;
 
   /* ---------------- Accueil : scènes animées et top de la semaine ---------------- */

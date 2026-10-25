@@ -429,6 +429,93 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 #vLobby .pl .etat{color:#c9b48a}#vLobby .pl.ok .etat{color:#ffe08a}
 #vLobby .vs{font:400 28px MnD,Inter,sans-serif;color:#e23a40;text-shadow:0 2px 0 #000,0 0 14px rgba(255,90,70,.6)}
 #vLobby .cnt{font-family:MnD,Inter,sans-serif;color:var(--g1);text-shadow:0 3px 0 #000,0 0 20px rgba(var(--glow),.6)}
+/* ===== MODE SURVIE : objets, inventaires, bulle de description ===== */
+.mdSel{display:inline-flex;border:1.5px solid rgba(244,217,138,.55);border-radius:99px;overflow:hidden;background:rgba(20,3,8,.55);margin:2px 0 8px}
+.mdSel button{border:0;background:transparent;color:#d8cfa8;padding:7px 16px;font:600 13px Inter,sans-serif;letter-spacing:.04em;cursor:pointer}
+.mdSel button.on{background:linear-gradient(180deg,#f4d98a,#c79a4b);color:#2a1a05}
+.mdSel button:not(.on):hover{color:#fff}
+.mdNote{font-size:12px;color:var(--muted);margin:0 0 8px;min-height:16px}
+.manche{font-size:13px;font-weight:600;color:#ffe08a;white-space:nowrap;display:none}
+body.survie .manche{display:inline}
+#bAnnulObj{border:1px solid var(--line);background:transparent;border-radius:6px;padding:3px 10px;font-size:12px}
+#bAnnulObj[hidden]{display:none}
+.inv{display:none;grid-template-columns:repeat(2,calc(var(--sw) * .66));gap:5px;justify-content:center;margin-top:6px;min-height:calc(var(--sw) * .66 * 1.4)}
+body.survie .inv{display:grid}
+.inv .chip{grid-column:1/-1;font-size:11px;font-weight:600;text-align:center;padding:2px 6px;border-radius:99px;background:rgba(255,224,138,.16);color:#ffe08a;border:1px solid rgba(255,224,138,.4)}
+.ob{position:relative;width:calc(var(--sw) * .66);aspect-ratio:5/7;border-radius:7px;padding:2px;background:linear-gradient(150deg,#d39a64,#8a5a30 55%,#4e3015);box-shadow:0 3px 8px rgba(0,0,0,.55);transition:transform .15s,filter .2s,box-shadow .2s}
+.ob.r-peu{background:linear-gradient(150deg,#f4f6fa,#aeb4bd 55%,#626872)}
+.ob.r-rare{background:linear-gradient(150deg,#fff0b0,#e0b043 50%,#8a5a10);box-shadow:0 3px 8px rgba(0,0,0,.55),0 0 12px rgba(240,185,90,.5)}
+.ob img{display:block;width:100%;height:100%;object-fit:cover;border-radius:5px}
+.ob.me{cursor:pointer}
+.ob.me:hover{transform:translateY(-4px) scale(1.06)}
+.ob.me.off{filter:grayscale(.65) brightness(.65);cursor:not-allowed}
+.ob.me.sel{transform:translateY(-6px) scale(1.1);box-shadow:0 0 0 3px #ffe08a,0 0 20px 6px rgba(255,224,138,.6)}
+.ob.opp{opacity:.95}
+.ob.big{width:min(46vw,190px);border-radius:14px;padding:5px;box-shadow:0 18px 44px rgba(0,0,0,.7)}
+.ob.big img{border-radius:10px}
+.ob.mid{width:76px;border-radius:9px;padding:3px}
+.ob.mid img{border-radius:6px}
+.ob.perdu{filter:grayscale(1) brightness(.5)}
+#tip{position:fixed;z-index:55;width:230px;padding:10px 12px;border-radius:10px;background:rgba(16,14,10,.97);border:1px solid #c79a4b;box-shadow:0 12px 28px rgba(0,0,0,.6);pointer-events:none;font-size:13px;line-height:1.4;color:#e4dfd2}
+#tip[hidden]{display:none}
+#tip b{font-size:15px;color:#fbf6ea}
+#tip .fam{float:right;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid currentColor}
+#tip p{margin:6px 0 4px}#tip small{color:#ffe08a;letter-spacing:.08em}
+.col.cible,.gc.cible{outline:3px solid #ffe08a;outline-offset:1px;cursor:pointer;animation:cib .9s ease-in-out infinite}
+.gc.cible.pick{outline-color:#5fd6d8;animation:none}
+@keyframes cib{50%{outline-color:rgba(255,224,138,.35)}}
+.col.shield{box-shadow:0 0 0 2px rgba(124,192,255,.8),0 0 18px rgba(124,192,255,.55);background:rgba(124,192,255,.12)}
+.col.shield::after{content:"🛡 " attr(data-left);position:absolute;right:2px;top:-2px;font-size:11px;color:#cfe8ff;pointer-events:none}
+.col.lock{box-shadow:0 0 0 2px rgba(201,162,255,.85);background:repeating-linear-gradient(45deg,rgba(201,162,255,.14) 0 8px,rgba(0,0,0,.12) 8px 16px)}
+.col{position:relative}
+.col.lock::before{content:"⛓";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:calc(var(--sh) * .5);opacity:.55;pointer-events:none;z-index:6}
+.gc.sealed{box-shadow:0 0 0 2px #ffe08a,0 0 14px rgba(255,224,138,.7)}
+.gc.sealed::before{content:"🔒";position:absolute;right:2px;bottom:2px;z-index:5;font-size:calc(var(--sh) * .2)}
+.gc.pup .pw{background:#1c5b34;color:#9af0b8}
+.gc.pdn .pw{background:#6a1d1d;color:#ffb0a8}
+.gc.pulse{animation:pls .7s ease-out}
+@keyframes pls{0%{filter:brightness(2.4) saturate(1.8);transform:scale(1.18)}100%{filter:none;transform:none}}
+.ohand i.vu{width:calc(var(--sw) * .34);height:calc(var(--sh) * .34);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:calc(var(--sh) * .2);color:#fff;background:linear-gradient(135deg,#3b2a6a,#1f1540);border:1px solid #c9a2ff}
+#annonce{position:fixed;inset:0;z-index:45;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.62),rgba(0,0,0,0) 68%);animation:ann 1.45s ease-out forwards}
+#annonce .nom{font:800 clamp(24px,4.4vw,38px) Inter,sans-serif;color:#fff;letter-spacing:.02em;text-shadow:0 2px 16px rgba(0,0,0,.95);animation:nomIn 1.45s ease-out forwards}
+#annonce .qui{font-size:13px;color:#e6e0cf;text-shadow:0 2px 8px #000;letter-spacing:.16em;text-transform:uppercase;animation:nomIn 1.45s ease-out forwards}
+#annonce .ob{animation:slam 1.45s cubic-bezier(.2,.9,.25,1) forwards;box-shadow:0 18px 50px rgba(0,0,0,.8),0 0 60px 6px var(--fc,#fff)}
+@keyframes ann{0%{opacity:0}8%{opacity:1}82%{opacity:1}100%{opacity:0}}
+@keyframes nomIn{0%,12%{opacity:0;transform:translateY(16px) scale(.9);letter-spacing:.3em}30%{opacity:1;transform:none;letter-spacing:.02em}100%{opacity:1}}
+@keyframes slam{0%{transform:translateY(-140px) scale(3.4) rotate(-20deg);opacity:0}14%{transform:scale(.9) rotate(3deg);opacity:1}19%{transform:translate(-9px,5px) scale(1.05) rotate(-1deg)}24%{transform:translate(8px,-6px) rotate(1deg)}30%{transform:translate(-5px,3px)}36%{transform:translate(3px,-2px)}44%{transform:none}100%{transform:scale(1.07)}}
+.ob.pop{animation:popIn .6s cubic-bezier(.2,.9,.25,1.35) both;animation-delay:calc(var(--k,0) * .13s)}
+@keyframes popIn{0%{opacity:0;transform:translateY(-60px) scale(2) rotate(-14deg);filter:brightness(2.4)}60%{opacity:1;transform:scale(.94);filter:brightness(1.4)}100%{opacity:1;transform:none;filter:none}}
+.col.arrive{animation:colArr .7s ease-out}
+@keyframes colArr{0%{filter:brightness(2.2) saturate(1.8)}100%{filter:none}}
+#vManche{background:radial-gradient(ellipse at 50% 42%,rgba(24,18,48,.95),rgba(3,3,7,.98))}
+#vManche .box{background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none}
+#vManche .tit{font:800 clamp(26px,5vw,44px) Inter,sans-serif;letter-spacing:.03em;margin:0;animation:titIn .7s cubic-bezier(.2,.9,.25,1.2) both}
+#vManche .tit.win{color:#ffe08a;text-shadow:0 0 28px rgba(255,200,90,.7)}#vManche .tit.lose{color:#ff8a7e;text-shadow:0 0 28px rgba(220,60,50,.6)}
+#vManche .mcN{font:700 13px Inter,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin:16px 0 4px;animation:titIn .5s .25s both}
+#vManche .sc{animation:titIn .6s .15s both}
+#vManche .lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#cfc8b6;margin:14px 0 2px;opacity:0;animation:fadeUp .4s var(--d,0s) forwards}
+#vManche .jetons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:6px 0 2px;min-height:40px}
+#vManche .rv{display:flex;flex-direction:column;align-items:center;gap:5px}
+#vManche .rv .ob{opacity:0;animation:slamIn .6s cubic-bezier(.2,.9,.25,1.1) forwards;animation-delay:var(--d)}
+#vManche .rv .nm{font-size:12px;font-weight:700;opacity:0;animation:fadeUp .35s calc(var(--d) + .3s) forwards;text-shadow:0 1px 4px #000}
+#vManche .ob.rvc{width:96px;border-radius:9px;padding:3px}#vManche .jetons.opp .ob.rvc{width:66px}
+#vManche .go{opacity:0;animation:fadeUp .4s var(--dg,2s) forwards}
+#vManche .start{opacity:0;animation:fadeUp .5s var(--ds,2s) forwards;font-weight:700;color:#ffe08a;margin:14px 0 0}
+@keyframes titIn{0%{opacity:0;transform:scale(1.6)}100%{opacity:1;transform:none}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
+@keyframes slamIn{0%{opacity:0;transform:translateY(-130px) scale(2.3) rotate(-14deg)}50%{opacity:1;transform:scale(.93) rotate(2deg)}64%{transform:translate(-6px,4px)}78%{transform:translate(5px,-3px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#annonce,#annonce *,.ob.pop,#vManche *{animation-duration:.01s!important;animation-delay:0s!important}}
+#vManche .box,#vProph .box,#vRafle .box{text-align:center;width:min(100%,480px)}
+#vManche .sc{font-size:20px;font-weight:800;color:#ffe08a}
+#vManche small{display:block;color:var(--muted);margin-top:6px}
+#vProph .jetons{display:flex;gap:12px;justify-content:center;margin:14px 0}
+#vProph .jetons .gc{width:84px;height:118px;cursor:pointer}
+#vProph .jetons .gc .rg{position:absolute;left:0;right:0;bottom:4px;text-align:center;z-index:4;font:800 22px Inter,sans-serif;color:#ffe08a;text-shadow:0 2px 8px #000}
+#vRafle .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
+#vRafle .nums button{padding:14px 0;border-radius:8px;border:1px solid var(--accent);background:transparent;font:800 20px Inter,sans-serif;color:#ffe08a}
+#vRafle .nums button:disabled{opacity:.25;cursor:not-allowed}
+#vRafle .nums button:not(:disabled):hover{background:var(--accent);color:var(--ink)}
+.box .reg-sv li{font-size:13px}
 </style>
 <script>
 // Retour de connexion Twitch lancée depuis le site (page « Mon compte ») : on garde le jeton puis on repart sur le site.
@@ -460,7 +547,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
 </div>
 
 <div class="wrap">
-  <div class="status"><b id="who">…</b><span class="hint" id="hint"></span><div class="bar" id="bar"><i></i></div><span class="secs" id="secs"></span></div>
+  <div class="status"><b id="who">…</b><span class="manche" id="manche"></span><button id="bAnnulObj" type="button" hidden>Annuler l'objet</button><span class="hint" id="hint"></span><div class="bar" id="bar"><i></i></div><span class="secs" id="secs"></span></div>
 
   <div class="table" id="table">
     <div class="boards">
@@ -471,9 +558,9 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       <div class="board" id="boardMe"></div>
     </div>
     <div class="side">
-      <div><div class="tot"><span id="nomOpp">Adversaire</span><b id="totOpp">0</b></div><div class="ohand" id="ohand"></div></div>
+      <div><div class="tot"><span id="nomOpp">Adversaire</span><b id="totOpp">0</b></div><div class="ohand" id="ohand"></div><div class="inv opp" id="invOpp"></div></div>
       <div class="pioche" id="pioche"><small>Pioche</small></div>
-      <div class="tot"><b id="totMe">0</b>Toi</div>
+      <div><div class="inv me" id="invMe"></div><div class="tot"><b id="totMe">0</b>Toi</div></div>
     </div>
     <div class="hand" id="hand"></div>
   </div>
@@ -487,6 +574,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     <div class="pl" id="plOpp"><div class="av">?</div><b>Adversaire</b><span class="etat" id="etOpp">En attente…</span></div>
   </div>
   <div class="cnt" id="cnt"></div>
+  <div class="mdSel" id="mdLobby"><button type="button" data-m="classique">Classique</button><button type="button" data-m="survie">Survie</button></div><p class="mdNote" id="mdNoteL"></p>
   <button class="go big" type="button" id="bJouer">Jouer</button><div style="margin-top:12px"><a class="lienc" href="index.html">&larr; Retour au site</a></div>
   <div class="lhint" id="lhint"></div>
   <button class="go ghost mini" type="button" id="bReglesL">Règles</button><button class="go ghost mini sonBtn" type="button" aria-label="Son">🔊</button>
@@ -503,6 +591,13 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     <li>La partie s'arrête dès qu'un plateau est plein. Le score est la somme de toutes les colonnes. Trois cartes identiques dans une colonne donnent un bonus.</li>
     <li>Le plus haut score gagne. En ligne, le gagnant remporte 10 ClubiGold (5 victoires récompensées par jour, 2 maximum contre le même adversaire). Le Bot du Club ne rapporte rien et ne compte pas au classement.</li>
   </ol>
+  <h3>Mode Survie</h3>
+  <ul class="reg-sv">
+    <li>Un match se joue en <b>manches</b> (premier à 2). Au début de chaque manche, chacun reçoit des <b>objets tirés au hasard</b> : 1 à la première, 2 à la deuxième, 3 ensuite. Celui qui a perdu la manche précédente en reçoit 1 de plus et commence.</li>
+    <li>Tu gardes jusqu'à 4 objets. Les deux inventaires sont visibles. Passe la souris sur un objet pour lire ce qu'il fait.</li>
+    <li>Tu peux utiliser <b>un objet par tour</b>, avant de poser ta carte. Il ne coûte pas ton tour.</li>
+    <li>Les objets ne détruisent pas les cartes de même puissance : seule une carte posée depuis ta main le fait.</li>
+  </ul>
   <h3>Puissance des cartes</h3>
   <p>Commune 1-2 · Peu commune 3-4 · Rare 5-6 · Légendaire 7-8 · Spéciale 9. La pioche est commune à tous : <b id="rPile">77</b> cartes.</p>
   <button class="go" type="button" data-close>Compris</button>
@@ -546,6 +641,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   <div id="mnCw"><div id="mnCard">
     <div class="mn-cf mn-dos"><img id="mnDisc" alt="" src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20200%20200%22%3E%3Cg%20fill=%22none%22%20stroke=%22%23f4d98a%22%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2286%22%20stroke-width=%221.5%22%20stroke-dasharray=%222%206%22/%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2270%22%20stroke-width=%223%22/%3E%3Ccircle%20cx=%22100%22%20cy=%22100%22%20r=%2254%22%20stroke-width=%221.5%22/%3E%3C/g%3E%3Cg%20stroke=%22%23d4a53c%22%20stroke-width=%222.2%22%20opacity=%22.85%22%3E%3Cpath%20d=%22M100%204V30M100%20170V196M4%20100H30M170%20100H196M32%2032l18%2018M150%20150l18%2018M168%2032l-18%2018M50%20150l-18%2018%22/%3E%3C/g%3E%3C/svg%3E"><div class="mn-shine"></div></div>
     <div class="mn-cf mn-men"><h3>MENU</h3>
+      <div class="mdSel"><button type="button" data-m="classique">Classique</button><button type="button" data-m="survie">Survie</button></div>
       <button class="mn-bt main" type="button" id="mnRap"><span class="ic"><svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg></span>Partie rapide</button>
       <button class="mn-bt" type="button" id="mnLig"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></span>En ligne</button>
       <button class="mn-bt" type="button" id="mnReg"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M9 9h6M9 13h6"/></svg></span>Règles</button>
@@ -564,6 +660,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   </div>
   <div id="mJeu" hidden>
     <div id="mChoix">
+      <div class="mdSel"><button type="button" data-m="classique">Classique</button><button type="button" data-m="survie">Survie</button></div><p class="mdNote mdNoteTxt"></p>
       <button class="go big" type="button" id="bRapide">Partie rapide</button>
       <div class="mdeux"><button class="go" type="button" id="bDefi">Défier un ami</button></div>
       <div class="mcode"><input id="iCode" type="text" maxlength="60" placeholder="Code ou lien d'un défi" autocomplete="off"><button class="go ghost" type="button" id="bCode">Rejoindre</button></div>
@@ -578,6 +675,10 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   <div class="mbas"><a class="go ghost mini" href="index.html" id="lSite">&larr; Quitter et revenir au site</a></div>
   <div class="mbas"><button class="go ghost mini" type="button" id="bEntr">Entraînement (Bot du Club)</button><a class="go ghost mini" href="index.html#classement">Classement</a><button class="go ghost mini" type="button" id="bRegMenu">Règles</button><button class="go ghost mini sonBtn" type="button" aria-label="Son">🔊</button><button class="go ghost mini" type="button" id="bDeco">Se déconnecter</button></div>
 </div></div>
+<div class="veil" id="vManche" hidden><div class="box"><div id="mcCorps"></div><button class="go" type="button" id="bMancheGo">C'est parti</button></div></div>
+<div class="veil" id="vProph" hidden><div class="box"><h2>Prophétie</h2><p>Voici les prochaines cartes de la pioche. Clique-les dans l'ordre où tu veux les piocher : la première cliquée sera la première piochée.</p><div class="jetons" id="phCartes"></div><button class="go" type="button" id="bPhOk" disabled>Valider l'ordre</button><button class="go ghost" type="button" id="bPhAnnul">Annuler</button></div></div>
+<div class="veil" id="vRafle" hidden><div class="box"><h2>Rafle</h2><p>Choisis une puissance : toutes les cartes de cette puissance seront détruites, sur les deux plateaux.</p><div class="nums" id="rfNums"></div><button class="go ghost" type="button" id="bRfAnnul">Annuler</button></div></div>
+<div id="tip" hidden></div>
 <div id="toast" hidden></div>
 
 <script src="config-jeu.js"></script>
@@ -1134,7 +1235,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   }
   function etiquette(c){ return c.art.replace('halloween', 'H').replace('s1', 'S1').replace('-', '·'); }
   function carte(c, cls, extra){
-    return '<div class="gc r-' + c.r + (cls ? ' ' + cls : '') + '" data-id="' + c.id + '"' + (extra || '') + '><img src="cartes/' + c.art + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()"><b class="pw">' + c.power + '</b><span class="ar">' + etiquette(c) + '</span></div>';
+    return '<div class="gc r-' + c.r + (c.sc ? ' sealed' : '') + (c.mod ? (c.power > c.base ? ' pup' : ' pdn') : '') + (cls ? ' ' + cls : '') + '" data-id="' + c.id + '"' + (extra || '') + '><img src="cartes/' + c.art + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()"><b class="pw">' + c.power + '</b><span class="ar">' + etiquette(c) + '</span></div>';
   }
   function colHtml(p, ci){
     var col = G.board[p][ci], h = '';
@@ -1148,7 +1249,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     var humanTurn = G.turn === ME && !G.over;
     $('boardOpp').innerHTML = [0, 1, 2].map(function(ci){ return '<div class="col opp' + (J.scoreColonne(G.board[BOT][ci], G.opts).triple ? ' tri' : '') + '" data-ci="' + ci + '">' + colHtml(BOT, ci) + '</div>'; }).join('');
     $('boardMe').innerHTML = [0, 1, 2].map(function(ci){
-      var full = G.board[ME][ci].length >= 3, can = humanTurn && sel >= 0 && !full && !busy;
+      var full = G.board[ME][ci].length >= 3, can = humanTurn && sel >= 0 && !full && !busy && !(G.sv && J.verrouillee(G, ME, ci));
       var tri = J.scoreColonne(G.board[ME][ci], G.opts).triple;
       return '<div class="col me' + (can ? ' can' : '') + (tri ? ' tri' : '') + '" data-ci="' + ci + '" role="button" tabindex="' + (can ? 0 : -1) + '" aria-label="Colonne ' + (ci + 1) + (full ? ', pleine' : '') + '">' + colHtml(ME, ci) + '</div>';
     }).join('');
@@ -1160,12 +1261,13 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     });
     total('totOpp', BOT); total('totMe', ME);
     $('pioche').classList.toggle('vide', !G.pioche.length && !G.defausse.length);
-    $('ohand').innerHTML = G.hands[BOT].map(function(c){ return '<i data-id="' + c.id + '"' + (cache[c.id] ? ' class="vh"' : '') + '></i>'; }).join('');
+    $('ohand').innerHTML = G.hands[BOT].map(function(c){ var vu = G.sv && G.sv.vu[ME] && c.art !== undefined; return '<i data-id="' + c.id + '"' + (cache[c.id] ? ' class="vh' + (vu ? ' vu' : '') + '"' : vu ? ' class="vu"' : '') + '>' + (vu ? c.power : '') + '</i>'; }).join('');
     $('hand').innerHTML = G.hands[ME].map(function(c, i){
       return carte(c, (i === sel ? 'sel ' : '') + (humanTurn && !busy ? '' : 'off ') + (cache[c.id] ? 'vh' : ''), ' data-h="' + i + '"');
     }).join('');
     $('who').textContent = G.over ? 'Partie terminée' : humanTurn ? 'À toi de jouer' : (busy && G.turn !== BOT ? '' : 'L\'adversaire réfléchit…');
-    if(!busy) $('hint').textContent = humanTurn ? (sel < 0 ? 'Choisis une carte dans ta main.' : 'Choisis une colonne.') : '';
+    if(!busy) $('hint').textContent = humanTurn ? (OBJ.on ? OBJ.hint : G.sv && G.sv.pacte[ME] === 2 ? 'Pacte : pose une deuxième carte.' : sel < 0 ? 'Choisis une carte dans ta main.' : 'Choisis une colonne.') : '';
+    renderSv();
     majStats();
   }
   // le total compte jusqu'à sa nouvelle valeur, rebondit, et un "+N" s'envole
@@ -1285,6 +1387,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   // ----- déroulé -----
   function debutTour(){
     if(G.over){ fin(); return; }
+    if(OBJ.on) annulerObjet(true);
     render();
     if(G.turn === ME){ Son.play('tour'); startTimer(); }
     else {
@@ -1293,9 +1396,8 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       var my = gen;
       botTimer = setTimeout(function(){
         if(my !== gen) return;
-        var m = J.BOTS[S.level](G, BOT);
-        if(!m){ J.abandon(G, BOT); fin(); return; }
-        jouerCoup(BOT, m.h, m.ci);
+        if(G.sv){ var ob = J.BOTS_OBJET[S.level](G, BOT); if(ob){ botObjet(ob, my); return; } }
+        botJoue();
       }, 700 + Math.random() * 900);
     }
   }
@@ -1307,6 +1409,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     var colEl = (p === ME ? $('boardMe') : $('boardOpp')).children[ci];
     var to = rectOf(colEl && colEl.children[G.board[p][ci].length]);
     var idx = J.apercu(G, p, h, ci), row = G.board[p][ci].length, wasTri = J.scoreColonne(G.board[p][ci], G.opts).triple;
+    var parade = !!(G.sv && idx.length && G.sv.parade[opp]); if(parade) idx = [];       // Parade : rien n'est détruit
     var oppCards = idx.map(function(r){ return G.board[opp][ci][r]; });
     $('hint').textContent = '';
     // 1) la carte vole de la main vers sa colonne
@@ -1318,6 +1421,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       // 2) les cartes détruites de l'adversaire disparaissent
       FX.impact(rectOf(f), card);
       Son.play('pose', {rate: 1.15 - card.power * .035});
+      if(parade){ var rp = rectOf(f); FX.texte(rp.left + rp.width / 2, rp.top, 'PARADE !', 'combo'); Son.play('colonne', {rate: 1.3}); }
       if(f && f.animate && !reduce) f.animate([{scale: '1.2'}, {scale: '.94', offset: .5}, {scale: '1'}], {duration: 300, easing: 'ease-out'});
       var big = card.power >= 7, rc = rectOf(f) || to;
       if(big) Fond.burst(rc.left + rc.width / 2, rc.top + rc.height, 12, card.r === 'speciale' ? 'teal' : 'gold', 200);
@@ -1347,6 +1451,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       if(my !== gen) return;
       var avant = snap();
       var r = ONL.actif ? jouerMiroir(p, h, ci) : J.jouer(G, p, h, ci);
+      if(ONL.actif && G.sv && ONL.cur && ONL.cur.sv) syncSv(ONL.cur);
       if(r && r.pioche){ cache[r.pioche.id] = true; }
       render();
       deplacer(avant);
@@ -1378,21 +1483,26 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     chain.then(function(){ if(my !== gen) return; busy = false; debutTour(); });
   }
   function fin(){
+    if(G.sv && !G.forfait){
+      if(ONL.actif){ if(!ONL.finMsg && ONL.mancheMsg){ stopTimer(); return; } }      // en ligne : le serveur enchaîne avec la manche suivante
+      else if(!G.svTraite){ G.svTraite = true; if(mancheFinieLocal()) return; }
+    }
     if(ONL.actif && !ONL.finMsg && ONL.attFin++ < 40){ setTimeout(fin, 100); return; }      // en ligne : on attend le verdict du serveur
     stopTimer(); clearTimeout(botTimer); render();
     var w = G.winner, a = G.scores[ME], b = G.scores[BOT], en = ONL.actif && ONL.finMsg, f = ONL.finMsg;
-    if(en){ ONL.moi = f.moi; majStats(); } else if(!EN_LIGNE){ if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++; majStats(); }
+    if(en){ ONL.moi = f.moi; ONL.lastMode = f.jeu === 'survie' ? 'survie' : 'classique'; majStats(); } else if(!EN_LIGNE){ if(w === ME) stats.w++; else if(w === BOT) stats.l++; else stats.n++; majStats(); }
     Son.musiqueOff();
     var t = $('finTitre');
     var so = Fond.nom() === 'souls';
     t.textContent = w === ME ? (so ? 'Victoire accomplie' : 'Victoire !') : w === BOT ? (so ? 'Tu as péri' : 'Défaite') : 'Égalité';
     t.className = 'big ' + (w === ME ? 'win' : w === BOT ? 'lose' : '');
     var pseudoOpp = en ? $('nomOpp').textContent : 'Adversaire';
-    $('finPts').textContent = G.forfait != null ? (G.forfait === ME ? (en && f.raison === 'abandon' ? 'Tu as abandonné la partie.' : 'Trop de tours sans jouer : forfait.') : (en && f.raison === 'abandon' ? pseudoOpp + ' a abandonné.' : pseudoOpp + ' a été absent trop longtemps : forfait.')) : 'Toi ' + a + ' — ' + b + ' ' + pseudoOpp;
+    var wm = G.sv ? (en && f.wins ? [f.wins[ONL.seat], f.wins[1 - ONL.seat]] : MT ? MT.wins : null) : null;
+    $('finPts').textContent = G.sv && G.forfait == null && wm ? 'Manches : toi ' + wm[ME] + ' — ' + wm[BOT] + ' ' + pseudoOpp : G.forfait != null ? (G.forfait === ME ? (en && f.raison === 'abandon' ? 'Tu as abandonné la partie.' : 'Trop de tours sans jouer : forfait.') : (en && f.raison === 'abandon' ? pseudoOpp + ' a abandonné.' : pseudoOpp + ' a été absent trop longtemps : forfait.')) : 'Toi ' + a + ' — ' + b + ' ' + pseudoOpp;
     $('finStats').textContent = 'Cartes détruites : ' + gs.dest + ' · Colonnes triples : ' + gs.tri;
     $('finGain').textContent = en ? gainTexte(f, w) : EN_LIGNE ? 'Entraînement : pas de ClubiGold et pas de point au classement.' : (w === ME ? 'Dans le vrai jeu : +10 ClubiGold (5 victoires récompensées par jour).' : '');
     $('finGain').style.color = en && w === ME && f.or.gain > 0 ? '#ffe08a' : '';
-    $('finRang').textContent = en && f.moi ? 'Classement : ' + f.moi.victoires + ' victoire' + (f.moi.victoires > 1 ? 's' : '') + ' sur ' + f.moi.parties + ' partie' + (f.moi.parties > 1 ? 's' : '') + ' · n°' + f.moi.rang : '';
+    $('finRang').textContent = en && f.moi && f.jeu === 'survie' && f.moi.survie ? 'Classement Survie : ' + f.moi.survie.victoires + ' victoire' + (f.moi.survie.victoires > 1 ? 's' : '') + ' sur ' + f.moi.survie.parties + ' match' + (f.moi.survie.parties > 1 ? 's' : '') + ' · n°' + f.moi.survie.rang : en && f.moi ? 'Classement : ' + f.moi.victoires + ' victoire' + (f.moi.victoires > 1 ? 's' : '') + ' sur ' + f.moi.parties + ' partie' + (f.moi.parties > 1 ? 's' : '') + ' · n°' + f.moi.rang : '';
     $('lClass').hidden = !en;
     if(en){ ONL.actif = false; $('bQuit').hidden = true; }
     var my = gen;
@@ -1404,7 +1514,8 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     }, 700);
   }
   function reinit(){
-    gen++; clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; cache = {};
+    gen++; clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; cache = {}; OBJ = {on:false, i:-1, id:'', t:null, step:0, a:null, hint:''};
+    $('vManche').hidden = true; $('vProph').hidden = true; $('vRafle').hidden = true; finMancheCb = null; clearTimeout(tMancheAuto); ONL.mancheMsg = false;
     lob.my++; clearTimeout(lob.t); $('vLobby').hidden = true; gs = {dest:0, tri:0}; shown = [0, 0]; twk[0]++; twk[1]++; wasHot = [false, false]; wasWarm = [false, false];
     ['totMe', 'totOpp'].forEach(function(id){ $(id).classList.remove('warm', 'hot', 'inferno'); });
     Fond.theme(choisirFond()); Fond.setHeat(0);
@@ -1417,19 +1528,431 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     ONL.actif = false; ONL.mode = 'bot'; ONL.pending = null; reinit();
     $('nomOpp').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('bQuit').hidden = !EN_LIGNE;
     var first = S.first === 'me' ? ME : S.first === 'bot' ? BOT : null;
+    if(MODE === 'survie'){
+      MT = J.nouveauMatch(options(), Math.random); G = J.lancerManche(MT);
+      demarrerMancheLocal(null);
+      return;
+    }
+    MT = null;
     G = J.nouvellePartie(options(), Math.random, first);
     distribuer();
   }
 
+  // =====================================================================
+  //  MODE SURVIE — objets tirés au hasard, match en manches
+  //  (le moteur est dans jeu-core.js ; ici : affichage, choix des cibles, animations)
+  // =====================================================================
+  var FAMC = {attaque:'#ff7a6b', defense:'#7cc0ff', controle:'#c9a2ff', pioche:'#6fe0b8', chaos:'#ffc766'};
+  var FAML = {attaque:'Attaque', defense:'Défense', controle:'Contrôle', pioche:'Pioche', chaos:'Chaos'};
+  var RARL = {commun:'◆ COMMUN', peu:'◆◆ PEU COMMUN', rare:'◆◆◆ RARE'};
+  var MODE = 'classique'; try{ if(localStorage.getItem('leclubi-modejeu') === 'survie') MODE = 'survie'; }catch(e){}
+  var MT = null;                                   // match hors ligne (contre le Bot)
+  var OBJ = {on:false, i:-1, id:'', t:null, step:0, a:null, hint:''};
+  var PROPH = null;
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function objHtml(id, o){
+    var d = J.OBJETS[id.replace('!', '')]; if(!d) return ''; o = o || {};
+    return '<div class="ob r-' + d.r + ' f-' + d.fam + (o.cls ? ' ' + o.cls : '') + '" data-ob="' + id.replace('!', '') + '"' + (o.i != null ? ' data-i="' + o.i + '"' : '') + '><img src="objets/' + id.replace('!', '') + '.svg" alt="' + esc(d.nom) + '"></div>';
+  }
+  function setMode(m){
+    MODE = m === 'survie' ? 'survie' : 'classique'; try{ localStorage.setItem('leclubi-modejeu', MODE); }catch(e){}
+    Array.prototype.forEach.call(document.querySelectorAll('.mdSel button'), function(b){ b.classList.toggle('on', b.getAttribute('data-m') === MODE); });
+    var t = MODE === 'survie' ? 'Survie : des objets tirés au hasard à chaque manche, match en 2 manches gagnantes.' : 'Classique : les règles de base, une seule partie.';
+    Array.prototype.forEach.call(document.querySelectorAll('.mdNoteTxt,#mdNoteL'), function(e){ e.textContent = t; });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.mdSel button'), function(b){ b.onclick = function(e){ e.stopPropagation(); setMode(b.getAttribute('data-m')); }; });
+  setMode(MODE);
+
+  // ----- état Survie reçu du serveur : on se met à notre point de vue (ME = nous, BOT = l'adversaire) -----
+  function mapSv(sv, seat){
+    var o = 1 - seat, sw = function(a){ return [a[seat], a[o]]; };
+    return {inv:[sv.inv[seat].slice(), sv.inv[o].slice()], used:sw(sv.used), parade:sw(sv.parade), pacte:sw(sv.pacte), vu:sw(sv.vu),
+            cim:[new Array(sv.cim[seat]).fill(null), new Array(sv.cim[o]).fill(null)],
+            shield:sv.shield.map(function(x){ return {p:sI(x.p), ci:x.ci, left:x.left}; }), lock:sv.lock.map(function(x){ return {p:sI(x.p), ci:x.ci}; })};
+  }
+  function carteVue(c){ return c.art !== undefined ? c : masque(c); }
+  function appliquerEtat(m){                         // photographie complète envoyée par le serveur (objets utilisés, reprise)
+    var seat = ONL.seat;
+    G.board[ME] = m.plateau[seat].map(function(col){ return col.slice(); }); G.board[BOT] = m.plateau[1 - seat].map(function(col){ return col.slice(); });
+    G.hands[ME] = m.main.slice(); G.hands[BOT] = m.adv.map(carteVue);
+    G.scores = [m.scores[seat], m.scores[1 - seat]]; G.turn = sI(m.tour); G.sv = mapSv(m.sv, seat); G.pioche = vide(m.pioche_n); G.defausse = [];
+    if(m.tours) G.tours = [m.tours[seat], m.tours[1 - seat]];
+  }
+  function syncSv(m){                                // après une carte posée : on recale les mains, le tour et les objets sur le serveur
+    var seat = ONL.seat;
+    G.sv = mapSv(m.sv, seat); G.hands[ME] = m.main.slice(); G.hands[BOT] = m.adv.map(carteVue); G.turn = sI(m.tour);
+    G.scores = [m.scores[seat], m.scores[1 - seat]];
+  }
+
+  // ----- inventaires, colonnes, bulle -----
+  function peutObjet(i){
+    var sv = G.sv, id = sv && sv.inv[ME][i]; if(!id) return false;
+    if(G.over || G.turn !== ME || sv.used[ME] || sv.pacte[ME] !== 0) return false;
+    if(ONL.actif && id === 'resurrection') return sv.cim[ME].length > 0 && G.hands[ME].length < J.MAIN_MAX;
+    return J.enumerer(G, ME, id).length > 0;
+  }
+  function chips(p){
+    var sv = G.sv, h = '';
+    if(sv.parade[p]) h += '<span class="chip">Parade prête</span>';
+    if(sv.pacte[p] === 2) h += '<span class="chip">Pacte : 2e carte</span>';
+    return h;
+  }
+  var invPrev = [0, 0];
+  function renderSv(){
+    var sv = G.sv, on = !!sv; document.body.classList.toggle('survie', on);
+    if(!on){ $('invOpp').innerHTML = ''; $('invMe').innerHTML = ''; $('manche').textContent = ''; $('bAnnulObj').hidden = true; return; }
+    var tour = G.turn === ME && !G.over && !busy;
+    var pm = invPrev[ME], po = invPrev[BOT];
+    $('invMe').innerHTML = sv.inv[ME].map(function(id, i){ return objHtml(id, {i:i, cls:'me' + (tour && peutObjet(i) ? '' : ' off') + (OBJ.on && OBJ.i === i ? ' sel' : '') + (i >= pm ? ' pop' : '')}).replace('<div class="ob', '<div style="--k:' + Math.max(0, i - pm) + '" class="ob'); }).join('') + chips(ME);
+    $('invOpp').innerHTML = sv.inv[BOT].map(function(id, i){ return objHtml(id, {cls:'opp' + (i >= po ? ' pop' : '')}).replace('<div class="ob', '<div style="--k:' + Math.max(0, i - po) + '" class="ob'); }).join('') + chips(BOT);
+    if($('vManche').hidden) invPrev = [sv.inv[ME].length, sv.inv[BOT].length];
+    $('manche').textContent = ' · Manche ' + (G.manche || 1) + ' · ' + (G.wins ? G.wins[ME] + '–' + G.wins[BOT] : '');
+    $('bAnnulObj').hidden = !OBJ.on;
+    ['boardOpp', 'boardMe'].forEach(function(id){
+      var p = id === 'boardMe' ? ME : BOT;
+      Array.prototype.forEach.call($(id).children, function(col, ci){
+        var sh = sv.shield.filter(function(x){ return x.p === p && x.ci === ci; })[0];
+        col.classList.toggle('shield', !!sh); if(sh) col.setAttribute('data-left', sh.left);
+        col.classList.toggle('lock', sv.lock.some(function(x){ return x.p === p && x.ci === ci; }));
+      });
+    });
+    marquerCibles();
+  }
+  var tip = $('tip');
+  function montrerTip(el){
+    var id = el.getAttribute('data-ob'), d = J.OBJETS[id]; if(!d) return;
+    tip.innerHTML = '<span class="fam" style="color:' + FAMC[d.fam] + '">' + FAML[d.fam] + '</span><b>' + esc(d.nom) + '</b><p>' + esc(d.txt) + '</p><small>' + RARL[d.r] + '</small>';
+    tip.hidden = false;
+    var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    var x = r.left - w - 10; if(x < 8) x = Math.min(innerWidth - w - 8, r.right + 10);
+    var y = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2));
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  document.addEventListener('mouseover', function(e){ var ob = e.target.closest && e.target.closest('.ob'); if(ob && ob.closest('#invMe,#invOpp,#vManche')) montrerTip(ob); else tip.hidden = true; });
+  document.addEventListener('mouseleave', function(){ tip.hidden = true; });
+
+  // ----- choisir une cible -----
+  var HINTS = {colAdv:'Choisis une colonne adverse.', colMoi:'Choisis une de tes colonnes.', carteAdv:'Choisis une carte adverse.', carteMoi:'Choisis une de tes cartes.',
+               deuxMoi:'Choisis deux de tes cartes (1/2).', derive:'Choisis la carte adverse à déplacer.', rien:'Clique à nouveau sur l\'objet pour l\'utiliser.'};
+  function annulerObjet(muet){
+    var etait = OBJ.on; OBJ = {on:false, i:-1, id:'', t:null, step:0, a:null, hint:''};
+    $('vRafle').hidden = true; clearCibles();
+    if(!muet && etait && G){ render(); }
+  }
+  function clearCibles(){ Array.prototype.forEach.call(document.querySelectorAll('.cible,.pick'), function(x){ x.classList.remove('cible', 'pick'); }); }
+  function colsDe(p){ return $(p === ME ? 'boardMe' : 'boardOpp').children; }
+  function marquerCibles(){
+    clearCibles(); if(!OBJ.on || !G || !G.sv) return;
+    var t = OBJ.t, v = J.enumerer(G, ME, OBJ.id), cs, set = {};
+    if(t === 'colAdv' || t === 'colMoi'){ cs = colsDe(t === 'colAdv' ? BOT : ME); v.forEach(function(c){ if(cs[c.ci]) cs[c.ci].classList.add('cible'); }); }
+    else if(t === 'carteAdv' || t === 'carteMoi'){ var p = t === 'carteAdv' ? BOT : ME; cs = colsDe(p); v.forEach(function(c){ var e = cs[c.ci] && cs[c.ci].children[c.r]; if(e) e.classList.add('cible'); }); }
+    else if(t === 'deuxMoi'){
+      cs = colsDe(ME);
+      v.forEach(function(c){
+        var ka = c.a.ci + '_' + c.a.r, kb = c.b.ci + '_' + c.b.r;
+        if(OBJ.step === 0){ set[ka] = 1; set[kb] = 1; }
+        else { var k0 = OBJ.a.ci + '_' + OBJ.a.r; if(ka === k0) set[kb] = 1; if(kb === k0) set[ka] = 1; }
+      });
+      Object.keys(set).forEach(function(k){ var a = k.split('_'), e = cs[+a[0]] && cs[+a[0]].children[+a[1]]; if(e) e.classList.add('cible'); });
+      if(OBJ.step === 1){ var e0 = cs[OBJ.a.ci].children[OBJ.a.r]; if(e0){ e0.classList.remove('cible'); e0.classList.add('pick'); } }
+    }
+    else if(t === 'derive'){
+      cs = colsDe(BOT);
+      if(OBJ.step === 0){ v.forEach(function(c){ var e = cs[c.ci] && cs[c.ci].children[c.r]; if(e) e.classList.add('cible'); }); }
+      else {
+        var e1 = cs[OBJ.a.ci].children[OBJ.a.r]; if(e1) e1.classList.add('pick');
+        v.forEach(function(c){ if(c.ci === OBJ.a.ci && c.r === OBJ.a.r && cs[c.dst]) cs[c.dst].classList.add('cible'); });
+      }
+    }
+  }
+  function cliquerObjet(el){
+    if(!G || !G.sv || G.over) return;
+    var i = +el.getAttribute('data-i'), id = G.sv.inv[ME][i];
+    if(G.turn !== ME || busy || ONL.envoi){ return; }
+    if(OBJ.on && OBJ.i === i){ if(OBJ.t === null){ lancerObjet(i, null); } else annulerObjet(); return; }
+    annulerObjet(true);
+    if(G.sv.used[ME]){ toast('Un seul objet par tour.', 2200); Son.play('erreur'); return; }
+    if(G.sv.pacte[ME] !== 0){ toast('Pose ta deuxième carte (Pacte).', 2200); Son.play('erreur'); return; }
+    if(!peutObjet(i)){ toast('Cet objet ne peut pas être utilisé maintenant.', 2400); Son.play('erreur'); return; }
+    sel = -1;
+    var t = J.OBJETS[id].cible;
+    OBJ = {on:true, i:i, id:id, t:t, step:0, a:null, hint:HINTS[t || 'rien'] || ''};
+    Son.play('selection');
+    if(t === 'puissance'){ ouvrirRafle(i); }
+    else if(t === 'ordre'){ OBJ.hint = 'Prophétie…'; demanderProphetie(i); }
+    render();
+  }
+  function cibleCliquee(e){                           // vrai si le clic a servi à choisir une cible
+    if(!OBJ.on) return false;
+    var t = OBJ.t, cardEl = e.target.closest('#boardMe .gc, #boardOpp .gc'), colEl = e.target.closest('#boardMe .col, #boardOpp .col');
+    if(!colEl) return false;
+    var p = colEl.parentNode.id === 'boardMe' ? ME : BOT, ci = +colEl.getAttribute('data-ci'), r = cardEl ? Array.prototype.indexOf.call(colEl.children, cardEl) : -1;
+    if(t === 'colAdv' || t === 'colMoi'){ if(colEl.classList.contains('cible')){ lancerObjet(OBJ.i, {ci:ci}); return true; } return false; }
+    if(t === 'carteAdv' || t === 'carteMoi'){ if(cardEl && cardEl.classList.contains('cible')){ lancerObjet(OBJ.i, {ci:ci, r:r}); return true; } return false; }
+    if(t === 'deuxMoi'){
+      if(!cardEl || p !== ME) return false;
+      if(OBJ.step === 0){ if(!cardEl.classList.contains('cible')) return false; OBJ.a = {ci:ci, r:r}; OBJ.step = 1; OBJ.hint = 'Choisis la deuxième carte (2/2).'; Son.play('selection'); render(); return true; }
+      if(OBJ.a.ci === ci && OBJ.a.r === r){ OBJ.step = 0; OBJ.a = null; OBJ.hint = HINTS.deuxMoi; render(); return true; }
+      if(!cardEl.classList.contains('cible')) return false;
+      lancerObjet(OBJ.i, {a:OBJ.a, b:{ci:ci, r:r}}); return true;
+    }
+    if(t === 'derive'){
+      if(OBJ.step === 0){ if(!cardEl || p !== BOT || !cardEl.classList.contains('cible')) return false; OBJ.a = {ci:ci, r:r}; OBJ.step = 1; OBJ.hint = 'Choisis la colonne adverse où la placer.'; Son.play('selection'); render(); return true; }
+      if(p === BOT && colEl.classList.contains('cible')){ lancerObjet(OBJ.i, {ci:OBJ.a.ci, r:OBJ.a.r, dst:ci}); return true; }
+      if(cardEl && p === BOT && cardEl.classList.contains('pick')){ OBJ.step = 0; OBJ.a = null; OBJ.hint = HINTS.derive; render(); return true; }
+      return false;
+    }
+    return false;
+  }
+  function ouvrirRafle(i){
+    var ok = {}; J.enumerer(G, ME, OBJ.id).forEach(function(c){ ok[c.n] = 1; });
+    $('rfNums').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function(n){ return '<button type="button" data-n="' + n + '"' + (ok[n] ? '' : ' disabled') + '>' + n + '</button>'; }).join('');
+    Array.prototype.forEach.call($('rfNums').querySelectorAll('button'), function(b){ b.onclick = function(){ $('vRafle').hidden = true; lancerObjet(i, {n:+b.getAttribute('data-n')}); }; });
+    $('vRafle').hidden = false;
+  }
+  $('bRfAnnul').onclick = function(){ annulerObjet(); };
+  $('bAnnulObj').onclick = function(){ annulerObjet(); };
+  function demanderProphetie(i){
+    if(ONL.actif){ ONL.envoi = true; envoyer({t:'objet', i:i, cible:null}); clearTimeout(ONL.tEnvoi); ONL.tEnvoi = setTimeout(function(){ if(ONL.envoi){ ONL.envoi = false; annulerObjet(); envoyer({t:'reprise'}); } }, 6000); return; }
+    var pre = J.utiliser(G, ME, i, null);                                  // regarder ne consomme rien
+    if(pre.ok && pre.attente) ouvrirProph(i, pre.cartes);
+  }
+  function ouvrirProph(i, cartes){
+    PROPH = {i:i, cartes:cartes, ordre:[]};
+    $('phCartes').innerHTML = cartes.map(function(c, k){ return carte(c, '', ' data-k="' + k + '"'); }).join('');
+    Array.prototype.forEach.call($('phCartes').children, function(el){ el.onclick = function(){
+      var k = +el.getAttribute('data-k'), pos = PROPH.ordre.indexOf(k);
+      if(pos >= 0) PROPH.ordre.splice(pos, 1); else PROPH.ordre.push(k);
+      Array.prototype.forEach.call($('phCartes').children, function(x){ var q = PROPH.ordre.indexOf(+x.getAttribute('data-k')); var rg = x.querySelector('.rg'); if(rg) rg.remove(); if(q >= 0) x.insertAdjacentHTML('beforeend', '<span class="rg">' + (q + 1) + '</span>'); });
+      $('bPhOk').disabled = PROPH.ordre.length !== PROPH.cartes.length;
+    }; });
+    $('bPhOk').disabled = true; $('vProph').hidden = false;
+  }
+  $('bPhOk').onclick = function(){
+    var P = PROPH; if(!P) return; $('vProph').hidden = true; PROPH = null;
+    var ordre = P.ordre.slice(); OBJ.on = false;
+    if(ONL.actif){ ONL.envoi = true; envoyer({t:'objet', i:P.i, cible:{ordre:ordre}}); clearTimeout(ONL.tEnvoi); ONL.tEnvoi = setTimeout(function(){ if(ONL.envoi){ ONL.envoi = false; envoyer({t:'reprise'}); } }, 5000); annulerObjet(true); render(); return; }
+    annulerObjet(true); utiliserLocal(ME, P.i, {ordre:ordre}).then(function(r){ finUsage(r); });
+  };
+  $('bPhAnnul').onclick = function(){ $('vProph').hidden = true; PROPH = null; ONL.envoi = false; clearTimeout(ONL.tEnvoi); annulerObjet(); };
+
+  function lancerObjet(i, cible){
+    annulerObjet(true);
+    if(ONL.actif){
+      ONL.envoi = true; envoyer({t:'objet', i:i, cible:cible});
+      clearTimeout(ONL.tEnvoi); ONL.tEnvoi = setTimeout(function(){ if(ONL.envoi){ ONL.envoi = false; envoyer({t:'reprise'}); } }, 5000);
+      render(); return;
+    }
+    utiliserLocal(ME, i, cible).then(function(r){ finUsage(r); });
+  }
+  function finUsage(r){ if(r && r.fin){ fin(); return; } busy = false; render(); }
+
+  // ----- l'objet est utilisé : annonce, effets, puis nouvel état -----
+  var OFX = (function(){
+    var L = document.createElement('div'); L.id = 'ofx'; L.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:47;overflow:hidden'; document.body.appendChild(L);
+    function R(a, b){ return a + Math.random() * (b - a); }
+    function el(css, html){ var e = document.createElement('div'); e.style.cssText = 'position:absolute;' + css; if(html) e.innerHTML = html; L.appendChild(e); return e; }
+    function an(e, kf, o){ if(!e.animate){ e.remove(); return null; } var a = e.animate(kf, o); a.onfinish = a.oncancel = function(){ e.remove(); }; return a; }
+    function ctr(r){ return {x: r.left + r.width / 2, y: r.top + r.height / 2}; }
+    var NS = 'http://www.w3.org/2000/svg';
+    function svg(){ var v = document.createElementNS(NS, 'svg'); v.setAttribute('width', innerWidth); v.setAttribute('height', innerHeight); v.style.cssText = 'position:absolute;left:0;top:0;overflow:visible'; L.appendChild(v); return v; }
+    return {
+      flash: function(col, a, d){ if(reduce) return; an(el('inset:0;background:' + col), [{opacity: a == null ? .45 : a}, {opacity: 0}], {duration: d || 340, easing: 'ease-out'}); },
+      anneau: function(r, col, n){ if(reduce || !r) return; var c = ctr(r), s = Math.max(r.width, r.height) * .55;
+        for(var k = 0; k < (n || 2); k++) an(el('left:' + (c.x - s) + 'px;top:' + (c.y - s) + 'px;width:' + (s * 2) + 'px;height:' + (s * 2) + 'px;border-radius:50%;border:3px solid ' + col + ';box-shadow:0 0 22px ' + col + ',inset 0 0 18px ' + col), [{opacity: .95, transform: 'scale(.25)'}, {opacity: 0, transform: 'scale(' + (2.4 + k * .7) + ')'}], {duration: 520 + k * 140, delay: k * 90, easing: 'ease-out', fill: 'backwards'}); },
+      etincelles: function(r, col, n){ if(reduce || !r) return; var c = ctr(r);
+        for(var k = 0; k < (n || 14); k++){ var a = R(0, 6.283), d = R(40, 120), sz = R(3, 8);
+          an(el('left:' + c.x + 'px;top:' + c.y + 'px;width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;background:' + col + ';box-shadow:0 0 10px ' + col), [{opacity: 1, transform: 'translate(0,0)'}, {opacity: 0, transform: 'translate(' + Math.cos(a) * d + 'px,' + (Math.sin(a) * d + 30) + 'px) scale(.2)'}], {duration: R(450, 900), easing: 'cubic-bezier(.2,.7,.3,1)'}); } },
+      eclair: function(a, b, col){ if(reduce) return; var v = svg(), dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, pts = [];
+        for(var k = 0; k <= 9; k++){ var t = k / 9, o = k === 0 || k === 9 ? 0 : R(-1, 1) * 26; pts.push((a.x + dx * t + nx * o).toFixed(1) + ',' + (a.y + dy * t + ny * o).toFixed(1)); }
+        [['#fff', 3], [col, 9]].reverse().forEach(function(w){ var pl = document.createElementNS(NS, 'polyline'); pl.setAttribute('points', pts.join(' ')); pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', w[0]); pl.setAttribute('stroke-width', w[1]); pl.setAttribute('stroke-linejoin', 'round'); pl.setAttribute('stroke-linecap', 'round'); if(w[1] > 3){ pl.setAttribute('opacity', '.55'); pl.style.filter = 'blur(3px)'; } v.appendChild(pl); });
+        an(v, [{opacity: 1}, {opacity: .2}, {opacity: 1}, {opacity: .15}, {opacity: .9}, {opacity: 0}], {duration: 420}); },
+      entaille: function(r, col){ if(reduce || !r) return; var v = svg(), l = document.createElementNS(NS, 'line'), x1 = r.left - 14, y1 = r.top - 8, x2 = r.right + 14, y2 = r.bottom + 8, len = Math.hypot(x2 - x1, y2 - y1);
+        l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.setAttribute('stroke', '#fff'); l.setAttribute('stroke-width', 5); l.setAttribute('stroke-linecap', 'round'); l.style.filter = 'drop-shadow(0 0 8px ' + col + ')'; l.setAttribute('stroke-dasharray', len); v.appendChild(l);
+        an(l, [{strokeDashoffset: len}, {strokeDashoffset: 0}], {duration: 170, easing: 'ease-in', fill: 'forwards'}); an(v, [{opacity: 1}, {opacity: 1, offset: .6}, {opacity: 0}], {duration: 520}); },
+      flotte: function(r, txt, col){ if(reduce || !r) return; var c = ctr(r), e = el('left:' + c.x + 'px;top:' + (c.y - 6) + 'px;transform:translate(-50%,-50%);font:900 ' + Math.max(22, r.width * .42) + 'px Inter,sans-serif;color:' + col + ';text-shadow:0 0 14px ' + col + ',0 2px 6px #000;white-space:nowrap', txt);
+        an(e, [{opacity: 0, transform: 'translate(-50%,-30%) scale(.4)'}, {opacity: 1, transform: 'translate(-50%,-80%) scale(1.25)', offset: .3}, {opacity: 1, transform: 'translate(-50%,-120%) scale(1)', offset: .7}, {opacity: 0, transform: 'translate(-50%,-170%) scale(.9)'}], {duration: 1100, easing: 'ease-out'}); },
+      bouclier: function(r, col){ if(reduce || !r) return; var c = ctr(r), w = r.width * 1.1, h = r.height * 1.1;
+        an(el('left:' + (c.x - w / 2) + 'px;top:' + (c.y - h / 2) + 'px;width:' + w + 'px;height:' + h + 'px;border-radius:18px;border:4px solid ' + col + ';background:radial-gradient(ellipse,rgba(124,192,255,.35),rgba(124,192,255,0) 70%);box-shadow:0 0 40px ' + col + ',inset 0 0 40px ' + col), [{opacity: 0, transform: 'scale(1.6)'}, {opacity: 1, transform: 'scale(1)', offset: .35}, {opacity: .9, offset: .7}, {opacity: 0, transform: 'scale(1.04)'}], {duration: 900, easing: 'ease-out'}); },
+      secouer: function(amp, ms){ var t = $('table'); if(reduce || !t || !t.animate) return; amp = amp || 8; var kf = []; for(var k = 0; k < 9; k++){ var f = 1 - k / 9; kf.push({translate: (k ? R(-amp, amp) * f : 0) + 'px ' + (k ? R(-amp, amp) * f : 0) + 'px'}); } kf.push({translate: '0 0'}); t.animate(kf, {duration: ms || 420, easing: 'ease-out'}); }
+    };
+  })();
+  function annonceObjet(p, id){
+    return new Promise(function(res){
+      var d = J.OBJETS[id]; if(!d || reduce){ res(); return; }
+      var a = document.createElement('div'); a.id = 'annonce'; a.style.setProperty('--fc', FAMC[d.fam]);
+      a.innerHTML = '<div class="qui">' + (p === ME ? 'Tu utilises' : 'L\'adversaire utilise') + '</div>' + objHtml(id, {cls:'big'}) + '<div class="nom" style="color:' + FAMC[d.fam] + '">' + esc(d.nom) + '</div>';
+      document.body.appendChild(a); Son.play('colonne', {rate: p === ME ? 1.1 : .9});
+      setTimeout(function(){                       // l'instant de l'impact
+        var o = a.querySelector('.ob'); if(!o) return; var r = o.getBoundingClientRect();
+        OFX.anneau(r, FAMC[d.fam], 3); OFX.flash(FAMC[d.fam], d.r === 'rare' ? .5 : .32); OFX.secouer(d.r === 'rare' ? 14 : 8, 460); OFX.etincelles(r, FAMC[d.fam], d.r === 'rare' ? 26 : 14);
+        Son.play('pose', {rate: .8});
+      }, 210);
+      setTimeout(function(){ a.remove(); res(); }, 1450);
+    });
+  }
+  function texteTable(txt, cls){ var r = rectOf($('table')); if(r) FX.texte(r.left + r.width / 2, r.top + r.height / 2, txt, cls || 'combo'); }
+  // r = {obj, detruites:[ids], parade, valeur, pile, n, fin} ; appliquer = fonction qui met G à jour (en ligne) ; (hors ligne G est déjà à jour)
+  function capturer(){
+    var ancienne = {}, modif = {};
+    G.hands[ME].forEach(function(c){ ancienne[c.id] = 1; });
+    [ME, BOT].forEach(function(q){ G.board[q].forEach(function(col){ col.forEach(function(c){ modif[c.id] = c.power + '|' + (c.sc ? 1 : 0); }); }); });
+    return {ancienne: ancienne, modif: modif, flags: flagsCols()};
+  }
+  function flagsCols(){
+    var o = {};
+    ['boardOpp', 'boardMe'].forEach(function(id){ Array.prototype.forEach.call($(id).children, function(col, ci){ o[id + ci] = (col.classList.contains('shield') ? 's' : '') + (col.classList.contains('lock') ? 'l' : ''); }); });
+    return o;
+  }
+  function effetObjet(p, r, appliquer, pre){
+    var my = gen; busy = true; pre = pre || capturer();
+    return annonceObjet(p, r.obj).then(function(){
+      if(my !== gen) return;
+      var els = (r.detruites || []).map(function(id){ return document.querySelector('#boardOpp [data-id="' + id + '"],#boardMe [data-id="' + id + '"]'); }).filter(Boolean);
+      var dd = J.OBJETS[r.obj] || {}, fc = FAMC[dd.fam] || '#fff';
+      els.forEach(function(e, k){ var rr = rectOf(e), c0 = {x: rr.left + rr.width / 2, y: rr.top + rr.height / 2};
+        if(r.obj === 'foudre') OFX.eclair({x: c0.x + (Math.random() * 120 - 60), y: -10}, c0, '#8ec8ff');
+        else if(r.obj === 'faux' || r.obj === 'rafle') OFX.entaille(rr, fc);
+        else OFX.anneau(rr, fc, 1);
+        setTimeout(function(){ FX.eclater(e); FX.onde(rr, 'rare'); FX.eclats(rr, 'rare'); FX.fumeeSombre(rr); OFX.etincelles(rr, fc, 10); e.style.visibility = 'hidden'; }, 140 + k * 70); });
+      if(r.obj === 'foudre' && els.length) OFX.flash('#dff0ff', .7, 260);
+      if(r.obj === 'seisme'){ OFX.secouer(22, 700); OFX.flash('#d9a066', .35, 500); var tr = rectOf($('table')); if(tr) OFX.anneau({left: tr.left + tr.width / 2 - 40, top: tr.top + tr.height / 2 - 40, width: 80, height: 80, right: 0, bottom: 0}, '#d9a066', 3); }
+      if(els.length){ Son.play('destruction', {rate: 1 + (els.length - 1) * .08}); FX.secousse(3 + els.length * 3); }
+      if(r.parade) texteTable('PARADE !');
+      if(r.pile != null) texteTable(r.pile ? 'PILE !' : 'FACE !');
+      if(r.obj === 'de' && r.valeur) texteTable('Dé : ' + r.valeur);
+      return wait(els.length ? 620 : 160);
+    }).then(function(){
+      if(my !== gen) return;
+      var avant = snap(), ancienne = pre.ancienne, modif = pre.modif;
+      if(appliquer) appliquer();
+      var nouvelles = G.hands[ME].filter(function(c){ return !ancienne[c.id] && c.art !== undefined; });
+      nouvelles.forEach(function(c){ cache[c.id] = true; });
+      render(); deplacer(avant);
+      [ME, BOT].forEach(function(q){ G.board[q].forEach(function(col){ col.forEach(function(c){
+        if(modif[c.id] !== undefined && modif[c.id] !== c.power + '|' + (c.sc ? 1 : 0)){ var e = document.querySelector('[data-id="' + c.id + '"]');
+          if(e){ e.classList.add('pulse'); Son.play('pose', {rate: 1.2}); var rr = rectOf(e), old = modif[c.id].split('|'), dl = c.power - Number(old[0]);
+            if(dl > 0){ OFX.flotte(rr, '+' + dl, '#7dffa8'); OFX.anneau(rr, '#7dffa8', 1); OFX.etincelles(rr, '#7dffa8', 8); }
+            else if(dl < 0){ OFX.flotte(rr, '−' + (-dl), '#ff6a5c'); OFX.anneau(rr, '#ff6a5c', 1); }
+            else if(c.sc && old[1] !== '1'){ OFX.anneau(rr, '#ffe08a', 2); OFX.flotte(rr, '🔒', '#ffe08a'); } } }
+      }); }); });
+      var fl = flagsCols();
+      Object.keys(fl).forEach(function(k){ var oldf = pre.flags ? pre.flags[k] || '' : '', nw = fl[k];
+        var col = $(k.replace(/\d+$/, '')).children[Number(k.match(/\d+$/)[0])]; if(!col) return; var rr = rectOf(col);
+        if(nw.indexOf('s') >= 0 && oldf.indexOf('s') < 0){ OFX.bouclier(rr, '#7cc0ff'); Son.play('colonne', {rate: 1.4}); col.classList.add('arrive'); }
+        if(nw.indexOf('l') >= 0 && oldf.indexOf('l') < 0){ OFX.anneau(rr, '#c9a2ff', 2); OFX.flotte(rr, '⛓', '#c9a2ff'); OFX.secouer(6, 300); Son.play('pose', {rate: .7}); col.classList.add('arrive'); }
+      });
+      var ch = Promise.resolve();
+      nouvelles.forEach(function(c){ ch = ch.then(function(){ if(my !== gen) return; return piocheVers(ME, c); }); });
+      return ch.then(function(){ if(my !== gen) return; return wait(150); });
+    }).then(function(){ if(my !== gen) return; busy = false; return r; });
+  }
+  function utiliserLocal(p, i, cible){                  // hors ligne : on applique tout de suite au moteur, puis on joue l'animation
+    var id = G.sv.inv[p][i], my = gen;
+    if(id === 'prophetie' && p === BOT){ var pre = J.utiliser(G, p, i, null); if(!pre.ok) return Promise.resolve(null); cible = {ordre: J.ordreRobot(pre.cartes)}; }
+    var pre = capturer(), r = J.utiliser(G, p, i, cible);
+    if(!r.ok){ busy = false; return Promise.resolve(null); }
+    var info = {obj:r.obj, detruites:(r.detruites || []).map(function(x){ return x.c.id; }), parade:r.parade, valeur:r.valeur, pile:r.pile, fin:!!r.fin};
+    // l'affichage doit montrer l'ancien plateau pendant l'annonce : on ne rend pas avant la fin des effets
+    return effetObjet(p, info, null, pre).then(function(x){ return my === gen ? info : null; });
+  }
+  function botObjet(ob, my){
+    utiliserLocal(BOT, ob.i, ob.cible).then(function(r){
+      if(my !== gen) return;
+      if(r && r.fin){ busy = false; fin(); return; }
+      busy = false; render();
+      botTimer = setTimeout(function(){ if(my !== gen) return; botJoue(); }, 450);
+    });
+  }
+  function botJoue(){
+    var m = J.BOTS[S.level](G, BOT);
+    if(!m){ J.abandon(G, BOT); fin(); return; }
+    jouerCoup(BOT, m.h, m.ci);
+  }
+
+  // ----- écran entre les manches -----
+  var finMancheCb = null, tMancheAuto = null;
+  function fermerManche(){
+    clearTimeout(tMancheAuto); if($('vManche').hidden) return; $('vManche').hidden = true;
+    var cb = finMancheCb; finMancheCb = null; if(cb) cb();
+  }
+  $('bMancheGo').onclick = fermerManche;
+  var tRev = [];
+  function afficherManche(o, cb){
+    tRev.forEach(clearTimeout); tRev = [];
+    var h = '', t = o.prec ? 900 : 350, cards = [];
+    if(o.prec){
+      var gw = o.prec.gagnant, titre = gw === -1 ? 'Manche ' + o.prec.manche + ' : égalité' : gw === ME ? 'Manche ' + o.prec.manche + ' gagnée !' : 'Manche ' + o.prec.manche + ' perdue';
+      h += '<h2 class="tit ' + (gw === ME ? 'win' : gw === -1 ? '' : 'lose') + '">' + titre + '</h2><div class="sc">Toi ' + o.prec.scores[ME] + ' — ' + o.prec.scores[BOT] + ' Adversaire</div><p style="margin:6px 0 0">Score du match : <b>' + o.wins[ME] + ' – ' + o.wins[BOT] + '</b></p>';
+    }
+    h += '<div class="mcN">Manche ' + o.manche + '</div>';
+    var lot = function(l, side){
+      if(!l.length) return '<div class="jetons ' + side + '"><span style="color:var(--muted)">aucun objet</span></div>';
+      return '<div class="jetons ' + side + '">' + l.map(function(id){
+        var d = J.OBJETS[id.replace('!', '')], dl = t; cards.push({d: dl, id: id.replace('!', ''), me: side === 'me'}); t += 460;
+        return '<div class="rv">' + objHtml(id, {cls:'rvc' + (id.charAt(0) === '!' ? ' perdu' : ''), i:null}).replace('<div class="ob', '<div style="--d:' + (dl / 1000).toFixed(2) + 's" class="ob') + '<span class="nm" style="--d:' + (dl / 1000).toFixed(2) + 's;color:' + FAMC[d.fam] + '">' + esc(d.nom) + '</span></div>';
+      }).join('') + '</div>';
+    };
+    h += '<div class="lbl" style="--d:' + ((t - 200) / 1000).toFixed(2) + 's">Tes objets' + (o.bonus && o.bonus[ME] ? ' · dont 1 de rattrapage' : '') + '</div>' + lot(o.recus[ME], 'me');
+    if(o.recus[ME].some(function(x){ return x.charAt(0) === '!'; })) h += '<small>Inventaire plein : les objets grisés sont perdus.</small>';
+    t += 250;
+    h += '<div class="lbl" style="--d:' + ((t - 200) / 1000).toFixed(2) + 's">Objets de l\'adversaire</div>' + lot(o.recus[BOT], 'opp');
+    t += 200;
+    h += '<p class="start" style="--ds:' + (t / 1000).toFixed(2) + 's">' + (o.premier === ME ? 'Tu commences.' : 'L\'adversaire commence.') + '</p>';
+    $('mcCorps').innerHTML = h; $('bMancheGo').style.setProperty('--dg', ((t + 150) / 1000).toFixed(2) + 's');
+    $('vManche').hidden = false; finMancheCb = cb;
+    if(o.prec) tRev.push(setTimeout(function(){ Son.play(o.prec.gagnant === ME ? 'victoire' : o.prec.gagnant === -1 ? 'egalite' : 'defaite'); }, 60));
+    Son.play('pret', {rate: .9});
+    cards.forEach(function(c, k){
+      tRev.push(setTimeout(function(){
+        if($('vManche').hidden) return; var e = $('vManche').querySelectorAll('.rv .ob')[k]; if(!e) return;
+        var d = J.OBJETS[c.id], r = e.getBoundingClientRect(), col = FAMC[d.fam];
+        Son.play('pose', {rate: .75 + (d.r === 'rare' ? .15 : d.r === 'peu' ? .08 : 0)});
+        OFX.anneau(r, col, d.r === 'rare' ? 3 : 1); OFX.etincelles(r, col, d.r === 'rare' ? 24 : c.me ? 12 : 6);
+        if(d.r === 'rare'){ OFX.flash('#ffd978', .4, 420); Son.play('colonne', {rate: 1.2}); }
+        var v = $('vManche'); if(v.animate && !reduce){ var a = c.me ? (d.r === 'rare' ? 12 : 7) : 3; v.animate([{translate: '0 0'}, {translate: a + 'px ' + (-a / 2) + 'px'}, {translate: -a + 'px ' + a / 2 + 'px'}, {translate: a / 2 + 'px 0'}, {translate: '0 0'}], {duration: 320}); }
+      }, c.d + 330));
+    });
+    clearTimeout(tMancheAuto); tMancheAuto = setTimeout(fermerManche, t + 5500);
+  }
+  function cacherMains(){ [ME, BOT].forEach(function(q){ G.hands[q].forEach(function(c){ cache[c.id] = true; }); }); }
+  function reinitManche(){                            // nouvelle manche : on garde le match, on repart d'un plateau vide
+    gen++; clearTimeout(botTimer); stopTimer(); busy = false; sel = -1; timeouts = 0; cache = {}; annulerObjet(true); invPrev = [0, 0];
+    shown = [0, 0]; twk[0]++; twk[1]++; wasHot = [false, false]; wasWarm = [false, false];
+    ['totMe', 'totOpp'].forEach(function(id){ $(id).classList.remove('warm', 'hot', 'inferno'); });
+    Fond.setHeat(0); ONL.cur = null;
+    Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
+  }
+  function demarrerMancheLocal(prec){
+    var info = {prec:prec, manche:MT.manche, wins:MT.wins.slice(), recus:MT.recu.slice(), bonus:MT.bonus, premier:G.first};
+    G.manche = MT.manche; G.wins = MT.wins; cacherMains(); render();
+    afficherManche(info, function(){ distribuer(); });
+  }
+  function mancheFinieLocal(){                        // hors ligne : la manche vient de se terminer
+    var gagnant = G.winner, scores = G.scores.slice(), numero = MT.manche;
+    J.finManche(MT);
+    if(MT.fini){ G.winner = MT.gagnant; return false; }
+    var my = gen; stopTimer(); clearTimeout(botTimer);
+    setTimeout(function(){
+      if(my !== gen) return;
+      reinitManche(); G = J.lancerManche(MT);
+      demarrerMancheLocal({gagnant:gagnant, scores:scores, manche:numero});
+    }, 1300);
+    return true;
+  }
+
   // ----- actions du joueur -----
   document.addEventListener('click', function(e){
+    var ob = e.target.closest('#invMe .ob.me'); if(ob){ cliquerObjet(ob); return; }
+    if(OBJ.on && cibleCliquee(e)) return;
     var c = e.target.closest('#hand .gc');
-    if(c && G && G.turn === ME && !busy && !G.over && !ONL.envoi){ var i = +c.dataset.h; Son.play(sel === i ? 'deselection' : 'selection', {rate: 1 + c.classList.contains('r-legendaire') * .12}); sel = sel === i ? -1 : i; render(); return; }
+    if(c && G && G.turn === ME && !busy && !G.over && !ONL.envoi){ if(OBJ.on) annulerObjet(true); var i = +c.dataset.h; Son.play(sel === i ? 'deselection' : 'selection', {rate: 1 + c.classList.contains('r-legendaire') * .12}); sel = sel === i ? -1 : i; render(); return; }
     var col = e.target.closest('#boardMe .col');
     if(col && G && G.turn === ME && !busy && !G.over && !ONL.envoi){
       var ci = +col.dataset.ci;
       if(sel < 0){ Son.play('erreur'); $('hint').textContent = 'Choisis d\'abord une carte dans ta main.'; return; }
       if(G.board[ME][ci].length >= 3){ Son.play('erreur'); $('hint').textContent = 'Cette colonne est pleine.'; return; }
+      if(G.sv && J.verrouillee(G, ME, ci)){ Son.play('erreur'); $('hint').textContent = 'Cette colonne est bloquée par une Chaîne pour ce tour.'; return; }
       if(ONL.actif){                                              // en ligne : on propose le coup au serveur, il le rejoue chez les deux joueurs
         ONL.envoi = true; $('hint').textContent = '';
         envoyer({t:'jouer', id:G.hands[ME][sel].id, ci:ci});
@@ -1440,6 +1963,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     }
   });
   document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && OBJ.on){ annulerObjet(); return; }
     if(e.key !== 'Enter' && e.key !== ' ') return;
     var col = e.target.closest && e.target.closest('#boardMe .col.can'); if(col){ e.preventDefault(); col.click(); }
   });
@@ -1531,6 +2055,9 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       case 'debut': ONL.enFile = false; ONL.q = []; ONL.finMsg = null; ONL.attFin = 0; montrerMatch(m); break;
       case 'reprise': clearTimeout(ONL.tRep); if(ONL.actif && G && !G.over) ONL.q.push(m); else if(!G || G.over || !ONL.actif) demarrerReprise(m); break;
       case 'coup': ONL.q.push(m); break;
+      case 'objet': ONL.q.push(m); break;
+      case 'manche': ONL.mancheMsg = true; ONL.q.push(m); break;
+      case 'prophetie': clearTimeout(ONL.tEnvoi); ONL.envoi = false; if(OBJ.on && G && G.sv) ouvrirProph(m.i, m.cartes); break;
       case 'fin': ONL.finMsg = m; ONL.q.push(m); break;
       case 'adv_deco': toast('L\'adversaire s\'est déconnecté… il a quelques secondes pour revenir.', 5000); break;
       case 'adv_retour': toast('L\'adversaire est de retour.', 2500); break;
@@ -1539,6 +2066,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
         if(m.code === 'auth'){ oublierJeton(); $('mInfo').textContent = 'Ta connexion Twitch a expiré : reconnecte-toi.'; if(ONL.actif) interrompue(); else majMenu(); }
         else if(m.code === 'banni'){ ONL.voulu = false; $('mInfo').textContent = 'Ce compte n\'a pas accès au jeu.'; majMenu(); }
         else if(m.code === 'coup_invalide'){ ONL.envoi = false; }
+        else if(m.code === 'objet_invalide'){ ONL.envoi = false; clearTimeout(ONL.tEnvoi); annulerObjet(); toast('Cet objet ne peut pas être utilisé maintenant.', 2400); }
         else if(MSG_ERREUR[m.code]){ toast(MSG_ERREUR[m.code]); }
         break;
     }
@@ -1552,7 +2080,8 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     ONL.seat = m.siege;
     var g = {opts:J.reglages(m.regles), pioche:vide(m.pioche), defausse:[], board:[[[], [], []], [[], [], []]], hands:[[], []], first:sI(m.premier), turn:sI(m.premier),
              tours:[0, 0], over:false, winner:null, scores:[0, 0], rng:Math.random};
-    g.hands[ME] = m.main.slice(); g.hands[BOT] = m.adv.map(masque);
+    g.hands[ME] = m.main.slice(); g.hands[BOT] = m.adv.map(carteVue);
+    if(m.sv){ g.sv = mapSv(m.sv, m.siege); g.manche = m.manche; g.wins = [m.wins[m.siege], m.wins[1 - m.siege]]; }
     if(m.t === 'reprise'){
       g.board[ME] = m.plateau[m.siege]; g.board[BOT] = m.plateau[1 - m.siege]; g.turn = sI(m.tour);
       g.scores = [m.scores[m.siege], m.scores[1 - m.siege]]; g.tours = [m.tours[m.siege], m.tours[1 - m.siege]]; ONL.resteMs = m.reste;
@@ -1568,6 +2097,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   }
   function traiter(m){
     if(m.t === 'coup'){
+      $('vProph').hidden = true; if(OBJ.on) annulerObjet(true);
       var p = sI(m.p), h = -1;
       G.hands[p].forEach(function(c, i){ if(c.id === m.carte.id) h = i; });
       if(h < 0){ envoyer({t:'reprise'}); return; }
@@ -1576,6 +2106,23 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
       ONL.cur = m;
       if(m.auto && p === ME) toast('Temps écoulé (' + m.timeouts[ONL.seat] + '/' + G.opts.tolerance + ') : une carte a été jouée au hasard.', 3500);
       jouerCoup(p, h, m.ci);
+    } else if(m.t === 'objet'){
+      var po = sI(m.p); if(po === ME){ ONL.envoi = false; clearTimeout(ONL.tEnvoi); }
+      $('vProph').hidden = true;
+      var inf = {obj:m.obj, detruites:m.detruites, parade:m.parade, valeur:m.valeur, pile:m.pile, fin:m.fin};
+      effetObjet(po, inf, function(){ appliquerEtat(m); }).then(function(){ if(inf.fin) fin(); else render(); });
+    } else if(m.t === 'manche'){
+      ONL.mancheMsg = false; busy = true; stopTimer();
+      var pr = m.precedente, sd = ONL.seat, my2 = gen;
+      var o = {prec:{gagnant:pr.gagnant === -1 ? -1 : sI(pr.gagnant), scores:[pr.scores[sd], pr.scores[1 - sd]], manche:pr.manche}, manche:m.manche, wins:[m.wins[sd], m.wins[1 - sd]],
+               recus:[m.recu[sd], m.recu[1 - sd]], bonus:[m.bonus[sd], m.bonus[1 - sd]], premier:sI(m.premier)};
+      setTimeout(function(){
+        if(my2 !== gen) return;
+        afficherManche(o, function(){
+          if(my2 !== gen) return;
+          reinitManche(); G = bati(m); ONL.resteMs = null; G.svTraite = false; cacherMains(); render(); distribuer();
+        });
+      }, 1200);
     } else if(m.t === 'fin'){
       if(G.over) return;
       G.over = true; G.winner = m.gagnant === -1 ? -1 : sI(m.gagnant); if(m.forfait != null) G.forfait = sI(m.forfait);
@@ -1592,7 +2139,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     $('vMenu').hidden = true; $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = false;
     $('plMe').querySelector('b').textContent = ONL.moi ? ONL.moi.pseudo : 'Toi'; $('plMe').querySelector('.av').textContent = (ONL.moi ? ONL.moi.pseudo : 'T').charAt(0).toUpperCase();
     $('plOpp').querySelector('b').textContent = m.adversaire.pseudo; $('plOpp').querySelector('.av').textContent = m.adversaire.pseudo.charAt(0).toUpperCase();
-    $('lnote').textContent = m.mode === 'defi' ? 'Défi entre amis.' : '';
+    $('lnote').textContent = (m.jeu === 'survie' ? 'Mode Survie. ' : '') + (m.mode === 'defi' ? 'Défi entre amis.' : ''); $('mdLobby').hidden = true; $('mdNoteL').hidden = true;
     lob.me = true; lob.opp = true; lob.cd = false; lob.my++; clearTimeout(lob.t); $('cnt').textContent = '';
     majLobby(); Son.play('pret'); verifier();
   }
@@ -1602,12 +2149,19 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     reinit(); G = bati(m); ONL.resteMs = null;
     $('nomOpp').textContent = m.adversaire.pseudo; $('bQuit').hidden = false;
     $('rPile').textContent = J.composerPioche(G.opts.pile).length; $('rHand').textContent = G.opts.hand; $('rStart').textContent = +G.opts.startMax || 'sans limite'; $('rSecs').textContent = G.opts.seconds + ' secondes';
+    ONL.lastMode = G.sv ? 'survie' : 'classique'; MT = null; ONL.mancheMsg = false;
+    if(G.sv){
+      var sd = m.siege; cacherMains(); render();
+      afficherManche({prec:null, manche:m.manche, wins:[0, 0], recus:[m.recu[sd], m.recu[1 - sd]], bonus:[m.bonus[sd], m.bonus[1 - sd]], premier:sI(m.premier)}, function(){ distribuer(); });
+      return;
+    }
     distribuer();
   }
   function demarrerReprise(m){
     ONL.mode = 'ligne'; ONL.actif = true; ONL.pending = null; ONL.envoi = false; ONL.q = []; ONL.finMsg = null; ONL.attFin = 0;
     reinit(); G = bati(m); shown = [G.scores[0], G.scores[1]];
     $('vMenu').hidden = true; $('vLobby').hidden = true; $('nomOpp').textContent = m.adversaire.pseudo; $('bQuit').hidden = false;
+    MT = null; ONL.lastMode = G.sv ? 'survie' : 'classique'; ONL.mancheMsg = false; G.svTraite = false;
     busy = false; render(); debutTour();
   }
 
@@ -1646,8 +2200,8 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
   }
   function brancherMenu(){
     $('bTwitch').onclick = function(){ Son.init(); connexionTwitch(); };
-    $('bRapide').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'file'}); };
-    $('bDefi').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'defi'}); };
+    $('bRapide').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'file', mode:MODE}); };
+    $('bDefi').onclick = function(){ Son.init(); $('mInfo').textContent = ''; envoyer({t:'defi', mode:MODE}); };
     $('bCode').onclick = function(){ var c = $('iCode').value.trim(); if(c.indexOf('defi=') >= 0) c = c.split('defi=')[1]; if(c.length < 4) return; $('mInfo').textContent = ''; envoyer({t:'rejoindre', code:c}); };
     $('bAnnuler').onclick = function(){ envoyer({t:'annuler'}); };
     $('bAnnuler2').onclick = function(){ envoyer({t:'annuler'}); };
@@ -1680,7 +2234,7 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     Array.prototype.forEach.call(document.querySelectorAll('.fly'), function(e){ e.remove(); });
     $('vFin').hidden = true; $('vReglages').hidden = true; $('vLobby').hidden = false;
     lob.me = false; lob.opp = false; lob.cd = false; var id = ++lob.my; $('cnt').textContent = '';
-    $('bJouer').hidden = false; $('nomOpp').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('bQuit').hidden = !EN_LIGNE;
+    $('bJouer').hidden = false; $('mdLobby').hidden = false; $('mdNoteL').hidden = false; $('nomOpp').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('bQuit').hidden = !EN_LIGNE;
     $('plMe').querySelector('b').textContent = ONL.moi ? ONL.moi.pseudo : 'Toi'; $('plMe').querySelector('.av').textContent = (ONL.moi ? ONL.moi.pseudo : 'Toi').charAt(0).toUpperCase();
     $('plOpp').querySelector('b').textContent = EN_LIGNE ? 'Bot du Club' : 'Adversaire'; $('plOpp').querySelector('.av').textContent = EN_LIGNE ? 'B' : '?';
     $('lnote').textContent = EN_LIGNE ? 'Entraînement : le Bot du Club ne rapporte pas de ClubiGold et ne compte pas au classement.' : 'Prototype : l\'adversaire est automatique.';
@@ -1721,13 +2275,13 @@ body[data-theme=souls] .res .big.lose{color:#b01818;text-shadow:0 0 18px rgba(17
     showLobby();
   };
   $('bRejouer').onclick = function(){
-    if(EN_LIGNE && ONL.mode === 'ligne'){ showMenu(); if(ONL.ok) envoyer({t:'file'}); }       // nouvelle recherche tout de suite
+    if(EN_LIGNE && ONL.mode === 'ligne'){ showMenu(); if(ONL.ok) envoyer({t:'file', mode:ONL.lastMode || MODE}); }       // nouvelle recherche tout de suite
     else if(EN_LIGNE) showTraining(true);
     else showLobby();
   };
   $('bMenu').onclick = showLobby;
 
-  window.__jeu = {get G(){ return G; }, nouvelle: nouvelle, S: S, get busy(){ return busy; }};
+  window.__jeu = {get G(){ return G; }, nouvelle: nouvelle, S: S, get busy(){ return busy; }, get OBJ(){ return OBJ; }, get MT(){ return MT; }};
   window.__fond = Fond;   // pour les tests
   if(EN_LIGNE){
     document.body.classList.add('enligne'); $('bNew').textContent = 'Appliquer'; $('regNote').textContent = 'Les règles de la partie sont fixées par le serveur. Ces réglages concernent le fond de table et l\'entraînement contre le Bot.';
