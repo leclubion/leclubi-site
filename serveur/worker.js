@@ -22,7 +22,7 @@ const TYPES_DEFI = ['cartes', 'differentes', 'usages', 'parties', 'visites', 'ma
 const jourParis = () => new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Paris'});
 const rid = (n = 5) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, x => x.toString(16).padStart(2, '0')).join(''); };
 const rng = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
-const pub = c => ({id: c.id, art: c.art, saison: c.saison, n: c.n, power: c.power, r: c.r});
+const pub = c => ({id: c.id, art: c.art, saison: c.saison, n: c.n, power: c.power, r: c.r, ...(c.sc ? {sc: 1} : {}), ...(c.mod ? {mod: 1, base: c.base} : {})});
 const blanc = c => ({id: c.id});
 
 // ---------- Entrée HTTP ----------
@@ -66,7 +66,7 @@ export default {
       if (!originOk(env, req)) return json({erreur: 'origine refusée'}, h, 403);
       return hub.fetch(req);
     }
-    if (url.pathname === '/classement' || url.pathname === '/etat') {
+    if (url.pathname === '/classement' || url.pathname === '/classement-survie' || url.pathname === '/etat') {
       const cache = caches.default, cle = new Request(url.origin + url.pathname);
       let r = await cache.match(cle);
       if (!r) {
@@ -134,7 +134,8 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
-     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`].forEach(a => { try { q(a); } catch (e) {} });
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`,
+     `ALTER TABLE joueurs ADD COLUMN sv_parties INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_victoires INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_defaites INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_nuls INTEGER DEFAULT 0`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS propositions(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, saison TEXT, part TEXT, kind TEXT, texte TEXT, ts INTEGER,
@@ -187,6 +188,7 @@ export class Hub {
     const url = new URL(req.url);
     if (url.pathname === '/ws') return this.ouvrirSocket();
     if (url.pathname === '/classement') return this.classement();
+    if (url.pathname === '/classement-survie') return this.classement(true);
     if (url.pathname === '/etat') return json(this.etat());
     if (url.pathname.startsWith('/admin/')) return this.admin(req, url);
     if (url.pathname === '/journal') return this.journalLire();
@@ -199,9 +201,11 @@ export class Hub {
   etat() {
     return {enLigne: this.users.size, enFile: this.file.length, parties: this.parties.size, partiesJouees: this.nbJouees, orActif: this.reglage('pause', '0') !== '1'};
   }
-  classement() {
-    const l = this.sql.exec('SELECT nom, parties, victoires FROM joueurs WHERE parties>0 AND banni=0 ORDER BY victoires DESC, parties ASC LIMIT 300').toArray();
-    return json({maj: Date.now(), minimumRatio: 10, joueurs: l.map(j => ({pseudo: j.nom, parties: j.parties, victoires: j.victoires, ratio: Math.round(1000 * j.victoires / j.parties) / 10}))});
+  classement(survie) {
+    const l = this.sql.exec(survie ? 'SELECT * FROM joueurs WHERE sv_parties>0 AND banni=0 ORDER BY sv_victoires DESC, sv_parties ASC LIMIT 300'
+      : 'SELECT * FROM joueurs WHERE parties>0 AND banni=0 ORDER BY victoires DESC, parties ASC LIMIT 300').toArray();
+    return json({maj: Date.now(), minimumRatio: 10, joueurs: l.map(j => { const n = survie ? j.sv_parties : j.parties, w = survie ? j.sv_victoires : j.victoires;
+      return {pseudo: j.nom, login: j.login, avatar: j.prive ? '' : (j.avatar || ''), titre: this.titreDe(j), cosm: cosmDe(j), parties: n, victoires: w, ratio: Math.round(1000 * w / n) / 10}; })});
   }
 
   // ----- administration (Authorization: Bearer ADMIN_KEY) -----
@@ -221,7 +225,7 @@ export class Hub {
       for (const u of this.users.values()) if (u.login === login && b.banni !== false) { this.envoyer(u.ws, {t: 'erreur', code: 'banni'}); try { u.ws.close(1008, 'banni'); } catch (e) {} }
       return json({ok: true});
     }
-    if (act === 'remettre' && login) { this.run('UPDATE joueurs SET parties=0, victoires=0, defaites=0, nuls=0 WHERE login=?', login); return json({ok: true}); }
+    if (act === 'remettre' && login) { this.run('UPDATE joueurs SET parties=0, victoires=0, defaites=0, nuls=0, sv_parties=0, sv_victoires=0, sv_defaites=0, sv_nuls=0 WHERE login=?', login); return json({ok: true}); }
     if (act === 'supprimer' && login) { const jj = this.un('SELECT id FROM joueurs WHERE login=?', login); if (jj) { this.run('DELETE FROM succes WHERE joueur=?', jj.id); this.run('DELETE FROM visites WHERE joueur=?', jj.id); } this.run('DELETE FROM joueurs WHERE login=?', login); return json({ok: true}); }
     if (act === 'rejouer-paiements') { await this.traiterPaiements(true); return json({ok: true}); }
     if (act === 'importer-journal') return this.importerJournal(b);
@@ -303,8 +307,9 @@ export class Hub {
     if (m.t === 'hello') return this.hello(ws, m);
     const u = ws.u; if (!u) { this.envoyer(ws, {t: 'erreur', code: 'auth'}); return; }
     switch (m.t) {
-      case 'file': return this.rejoindreFile(u);
-      case 'defi': return this.creerDefi(u);
+      case 'file': return this.rejoindreFile(u, m.mode);
+      case 'defi': return this.creerDefi(u, m.mode);
+      case 'objet': return this.objetDemande(u, m);
       case 'rejoindre': return this.rejoindreDefi(u, m.code);
       case 'annuler': return this.annuler(u);
       case 'jouer': return this.jouerDemande(u, m);
@@ -462,7 +467,8 @@ export class Hub {
     const jour = jourParis();
     return {...relEtat(this, j), id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
-        ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10}};
+        ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10,
+        survie: {parties: j.sv_parties || 0, victoires: j.sv_victoires || 0, defaites: j.sv_defaites || 0, nuls: j.sv_nuls || 0}}};
   }
 
   // ----- défis, titres, badges spéciaux -----
@@ -649,7 +655,9 @@ export class Hub {
   fiche(id) {
     const j = this.joueur(id), jour = jourParis();
     return {pseudo: j.nom, parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total,
-      victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0, rang: this.un('SELECT COUNT(*)+1 AS r FROM joueurs WHERE victoires>? AND banni=0', j.victoires).r};
+      victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0, rang: this.un('SELECT COUNT(*)+1 AS r FROM joueurs WHERE victoires>? AND banni=0', j.victoires).r,
+      survie: {parties: j.sv_parties || 0, victoires: j.sv_victoires || 0, defaites: j.sv_defaites || 0, nuls: j.sv_nuls || 0,
+        rang: this.un('SELECT COUNT(*)+1 AS r FROM joueurs WHERE sv_victoires>? AND banni=0', j.sv_victoires || 0).r}};
   }
   presence() { return {enLigne: this.users.size, enFile: this.file.length, parties: this.parties.size}; }
   diffuser() {
@@ -680,21 +688,23 @@ export class Hub {
     if (u.defi) { this.defis.delete(u.defi); u.defi = null; }
     if (!muet) this.envoyer(u.ws, {t: 'annule'}); this.diffuser();
   }
-  rejoindreFile(u) {
+  rejoindreFile(u, jeu) {
     if (u.game && !u.game.fini) return;
     this.annuler(u, true);
-    const i = this.file.findIndex(id => { const o = this.users.get(id); return id !== u.id && o && o.ws && o.ws.readyState === 1 && !o.game; });
-    if (i >= 0) { const o = this.users.get(this.file.splice(i, 1)[0]); this.lancer(o, u, 'file'); }
-    else { this.file.push(u.id); this.envoyer(u.ws, {t: 'attente', mode: 'file'}); }
+    const jm = jeu === 'survie' ? 'survie' : 'classique'; u.fm = jm;
+    const i = this.file.findIndex(id => { const o = this.users.get(id); return id !== u.id && o && o.ws && o.ws.readyState === 1 && !o.game && o.fm === jm; });
+    if (i >= 0) { const o = this.users.get(this.file.splice(i, 1)[0]); this.lancer(o, u, 'file', jm); }
+    else { this.file.push(u.id); this.envoyer(u.ws, {t: 'attente', mode: 'file', jeu: jm}); }
     this.diffuser();
   }
-  creerDefi(u) {
+  creerDefi(u, jeu) {
     if (u.game && !u.game.fini) return;
+    const jm = jeu === 'survie' ? 'survie' : 'classique';
     this.annuler(u, true);
     const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code;
     do { code = Array.from({length: 6}, () => al[Math.floor(rng() * al.length)]).join(''); } while (this.defis.has(code));
-    this.defis.set(code, {id: u.id, exp: Date.now() + 15 * 60 * 1000}); u.defi = code;
-    this.envoyer(u.ws, {t: 'attente', mode: 'defi', code});
+    this.defis.set(code, {id: u.id, exp: Date.now() + 15 * 60 * 1000, jm}); u.defi = code;
+    this.envoyer(u.ws, {t: 'attente', mode: 'defi', code, jeu: jm});
   }
   rejoindreDefi(u, code) {
     if (u.game && !u.game.fini) return;
@@ -703,14 +713,16 @@ export class Hub {
     if (!d || d.exp < Date.now() || !o || !o.ws || o.game) { this.defis.delete(code); this.envoyer(u.ws, {t: 'erreur', code: 'defi_inconnu'}); return; }
     if (o.id === u.id) { this.envoyer(u.ws, {t: 'erreur', code: 'defi_soi_meme'}); return; }
     this.defis.delete(code); o.defi = null; this.annuler(u, true);
-    this.lancer(o, u, 'defi');
+    this.lancer(o, u, 'defi', d.jm);
   }
 
   // ----- une partie -----
-  lancer(a, b, mode) {
-    const S = J.nouvellePartie(J.reglages({seconds: this.C.tour}), rng);
+  lancer(a, b, mode, jm) {
+    const opts = J.reglages({seconds: this.C.tour});
+    let M = null, S;
+    if (jm === 'survie') { M = J.nouveauMatch(opts, rng); S = J.lancerManche(M); } else S = J.nouvellePartie(opts, rng);
     [S.pioche, S.hands[0], S.hands[1]].forEach(l => l.forEach(c => { c.id = rid(); }));   // identifiants secrets : ils ne révèlent rien sur la carte
-    const g = {id: rid(4), S, joueurs: [a.id, b.id], noms: [a.nom, b.nom], logins: [a.login, b.login], mode, timeouts: [0, 0], deco: [false, false],
+    const g = {id: rid(4), S, M, joueurs: [a.id, b.id], noms: [a.nom, b.nom], logins: [a.login, b.login], mode, timeouts: [0, 0], deco: [false, false],
       fini: false, timer: null, deadline: 0, seq: 0, debut: Date.now()};
     a.game = g; b.game = g; this.parties.set(g.id, g);
     [0, 1].forEach(s => this.envoyer(this.users.get(g.joueurs[s]).ws, this.vueDebut(g, s)));
@@ -721,13 +733,23 @@ export class Hub {
   vueDebut(g, s) {
     const S = g.S;
     return {t: 'debut', partie: g.id, mode: g.mode, siege: s, premier: S.first, regles: this.regles(S), main: S.hands[s].map(pub), adv: S.hands[1 - s].map(blanc),
-      pioche: S.pioche.length + S.defausse.length, adversaire: {pseudo: g.noms[1 - s]}};
+      pioche: S.pioche.length + S.defausse.length, adversaire: {pseudo: g.noms[1 - s]}, ...this.vueSurvie(g)};
+  }
+  vueSurvie(g) {          // informations propres au mode Survie (inventaires, manches) : tout est public
+    if (!g.M) return {};
+    const M = g.M; return {jeu: 'survie', manche: M.manche, wins: M.wins, recu: M.recu, bonus: M.bonus, sv: J.vueSv(g.S)};
+  }
+  etatVue(g, v) {         // photographie de la partie vue par le joueur v (sa main est complète, celle de l'adversaire reste cachée sauf Œil)
+    const S = g.S, oeil = S.sv && S.sv.vu[v];
+    return {tour: S.turn, scores: S.scores, plateau: S.board.map(b => b.map(col => col.map(pub))), main: S.hands[v].map(pub), adv: S.hands[1 - v].map(oeil ? pub : blanc),
+      pioche_n: S.pioche.length + S.defausse.length, sv: J.vueSv(S), tours: S.tours, timeouts: g.timeouts};
   }
   vueReprise(g, s) {
     const S = g.S;
     return {t: 'reprise', partie: g.id, mode: g.mode, siege: s, premier: S.first, regles: this.regles(S), tour: S.turn, reste: Math.max(0, g.deadline - Date.now()),
       plateau: S.board.map(b => b.map(col => col.map(pub))), main: S.hands[s].map(pub), adv: S.hands[1 - s].map(blanc),
-      pioche: S.pioche.length + S.defausse.length, scores: S.scores, timeouts: g.timeouts, tours: S.tours, adversaire: {pseudo: g.noms[1 - s]}};
+      pioche: S.pioche.length + S.defausse.length, scores: S.scores, timeouts: g.timeouts, tours: S.tours, adversaire: {pseudo: g.noms[1 - s]}, ...this.vueSurvie(g),
+      ...(g.M && S.sv.vu[s] ? {adv: S.hands[1 - s].map(pub)} : {})};
   }
   armer(g, bonus = 0) {
     clearTimeout(g.timer); if (g.fini) return;
@@ -765,8 +787,33 @@ export class Hub {
     const res = J.jouer(S, s, h, ci); if (!res) return;
     const base = {t: 'coup', p: s, h, ci, carte: pub(carte), detruites: res.detruites.map(c => c.id), scores: S.scores, auto: !!auto, timeouts: g.timeouts,
       fin: !!res.fin, pioche_n: S.pioche.length + S.defausse.length};
-    [0, 1].forEach(v => this.envoyer(this.users.get(g.joueurs[v])?.ws, {...base, pioche: res.pioche ? (v === s ? pub(res.pioche) : blanc(res.pioche)) : null}));
-    if (res.fin) this.finir(g, 'normal'); else this.armer(g);
+    [0, 1].forEach(v => this.envoyer(this.users.get(g.joueurs[v])?.ws, {...base, pioche: res.pioche ? (v === s ? pub(res.pioche) : blanc(res.pioche)) : null,
+      ...(g.M ? {tour: S.turn, sv: J.vueSv(S), parade: !!res.parade, main: S.hands[v].map(pub), adv: S.hands[1 - v].map(blanc), perdue: res.perdue ? pub(res.perdue) : null} : {})}));
+    if (res.fin) { if (g.M) this.finManche(g); else this.finir(g, 'normal'); } else this.armer(g);
+  }
+  // ----- mode Survie : utiliser un objet, fin de manche -----
+  objetDemande(u, m) {
+    const g = u.game; if (!g || g.fini || !g.M) return;
+    const s = g.joueurs.indexOf(u.id), S = g.S, i = Number.isInteger(m.i) ? m.i : -1;
+    if (S.turn !== s || i < 0) { this.envoyer(u.ws, {t: 'erreur', code: 'objet_invalide'}); this.envoyer(u.ws, this.vueReprise(g, s)); return; }
+    const r = J.utiliser(S, s, i, m.cible == null ? null : m.cible);
+    if (!r.ok) { this.envoyer(u.ws, {t: 'erreur', code: 'objet_invalide'}); this.envoyer(u.ws, this.vueReprise(g, s)); return; }
+    if (r.attente === 'ordre') { this.envoyer(u.ws, {t: 'prophetie', i, cartes: r.cartes.map(pub)}); return; }
+    const info = {t: 'objet', p: s, obj: r.obj, i, cible: r.cible || null, detruites: (r.detruites || []).map(x => x.c.id), parade: !!r.parade, valeur: r.valeur || 0,
+      pile: r.pile == null ? null : !!r.pile, n: r.n || 0, jetees: r.jetees || 0, fin: !!r.fin};
+    [0, 1].forEach(v => this.envoyer(this.users.get(g.joueurs[v])?.ws, {...info, ...this.etatVue(g, v), ...(r.pris ? {pris: v === s ? pub(r.pris) : blanc(r.pris)} : {})}));
+    if (r.fin) this.finManche(g);
+  }
+  finManche(g) {
+    const M = g.M, S = g.S; clearTimeout(g.timer);
+    J.finManche(M);
+    const prec = {gagnant: S.winner, scores: S.scores.slice(), manche: M.manche};
+    if (M.fini) { S.winner = M.gagnant; this.finir(g, 'normal'); return; }
+    const N = J.lancerManche(M); g.S = N; g.seq++;
+    [N.pioche, N.hands[0], N.hands[1]].forEach(l => l.forEach(c => { c.id = rid(); }));
+    g.timeouts = [0, 0];
+    [0, 1].forEach(v => this.envoyer(this.users.get(g.joueurs[v])?.ws, {...this.vueDebut(g, v), t: 'manche', precedente: prec}));
+    this.armer(g, 14);
   }
   forfait(g, s, raison) {
     if (g.fini) return;
@@ -786,8 +833,8 @@ export class Hub {
       this.run('UPDATE paires SET parties=parties+1 WHERE jour=? AND a=? AND b=?', jour, paire.a, paire.b);
       this.nbJouees++;
       [0, 1].forEach(s => {
-        const col = w === -1 ? 'nuls' : (w === s ? 'victoires' : 'defaites');
-        this.run(`UPDATE joueurs SET parties=parties+1, ${col}=${col}+1 WHERE id=?`, g.joueurs[s]);
+        const col = w === -1 ? 'nuls' : (w === s ? 'victoires' : 'defaites'), t = g.M ? 'sv_' : '';
+        this.run(`UPDATE joueurs SET ${t}parties=${t}parties+1, ${t}${col}=${t}${col}+1 WHERE id=?`, g.joueurs[s]);
       });
     }
     // récompense
@@ -812,7 +859,8 @@ export class Hub {
     [0, 1].forEach(s => {
       const u = this.users.get(g.joueurs[s]);
       this.envoyer(u && u.ws, {t: 'fin', gagnant: w, scores: S.scores, raison, forfait: S.forfait == null ? null : S.forfait, compte,
-        or: {gain: w === s ? gain : 0, raison: motifOr}, moi: this.fiche(g.joueurs[s]), orPlafond: this.C.maxJour});
+        or: {gain: w === s ? gain : 0, raison: motifOr}, moi: this.fiche(g.joueurs[s]), orPlafond: this.C.maxJour,
+        ...(g.M ? {jeu: 'survie', wins: g.M.wins, histo: g.M.histo} : {})});
     });
     // nettoyage
     [0, 1].forEach(s => { const u = this.users.get(g.joueurs[s]); if (u) { u.game = null; if (!u.ws) this.users.delete(u.id); } });
