@@ -908,16 +908,32 @@ function qMasque(nom, trouvees) {
   return [...String(nom)].map(c => { const n = nrm(c); return n ? (trouvees.has(n) ? c : '_') : c; }).join('');
 }
 function qResume(texte, erreurs, fini, graine) {
-  const parts = String(texte || '').split(/(\[\[!?[^\]]+\]\])/g), cachables = [];
+  // texte : [[mot]] = censuré, révélé petit à petit ; [[!mot]] = censuré jusqu'à la fin.
+  // En plus (pour corser) : les noms propres au milieu d'une phrase et les nombres sont censurés d'office jusqu'à la fin.
+  const brut = String(texte || '').split(/(\[\[!?[^\]]+\]\])/g), parts = [];
+  let debut = true;
+  brut.forEach(x => {
+    if (/^\[\[!?[^\]]+\]\]$/.test(x)) { parts.push(x); debut = false; return; }
+    x.split(/([A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9'’\-]*)/g).forEach(t => {
+      if (!t) return;
+      if (/^[A-Za-zÀ-ÿ0-9]/.test(t)) {
+        const nom = /^[A-ZÀ-Ý]/.test(t) && !debut && t.length > 2, nombre = /[0-9]/.test(t);
+        parts.push(nom || nombre ? '[[!' + t + ']]' : t); debut = false;
+      } else { parts.push(t); if (/[.!?:«\n]/.test(t)) debut = true; }
+    });
+  });
+  const cachables = [];
   parts.forEach((x, i) => { const m = /^\[\[(!?)([^\]]+)\]\]$/.exec(x); if (m) cachables.push({i, fixe: !!m[1], mot: m[2]}); });
   const libres = cachables.filter(c => !c.fixe).map(c => c.i);
   let s = graine || 1; const alea = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
   libres.sort(() => alea() - .5);
-  const nb = fini ? libres.length : Math.floor(libres.length * Math.min(erreurs, 4) / 5);
+  // 1 erreur = un petit dixième des mots libérés (environ 40 % après 4 erreurs, au moins un mot dès la 1re erreur)
+  const nb = fini ? libres.length : (erreurs > 0 ? Math.ceil(libres.length * Math.min(erreurs, 4) / 10) : 0);
   const ouverts = new Set(libres.slice(0, nb));
   return parts.map((x, i) => {
     const c = cachables.find(z => z.i === i); if (!c) return {t: x};
-    return (fini || ouverts.has(i)) ? {t: c.mot, r: 1} : {t: '█'.repeat(Math.max(3, Math.min(c.mot.length, 10))), h: 1};
+    // la longueur du mot n'est plus un indice : mêmes barres pour tous
+    return (fini || ouverts.has(i)) ? {t: c.mot, r: 1} : {t: '█████', h: 1};
   });
 }
 const joursPlus = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
