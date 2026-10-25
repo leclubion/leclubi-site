@@ -229,7 +229,7 @@
     bouclier:    {nom:'Bouclier',           fam:'defense', r:'commun', cible:'colMoi',   txt:'Protège une de tes colonnes pendant les 2 prochains tours de l\'adversaire.'},
     parade:      {nom:'Parade',             fam:'defense', r:'peu',    cible:null,       txt:'Annule la prochaine destruction que tu subis. Reste active jusqu\'à son déclenchement.'},
     rempart:     {nom:'Rempart',            fam:'defense', r:'rare',   cible:'carteMoi', txt:'Scelle une de tes cartes jusqu\'à la fin de la manche : elle ne peut plus être détruite ni modifiée.'},
-    echange:     {nom:'Échange',            fam:'controle',r:'commun', cible:'deuxMoi',  txt:'Intervertis deux de tes cartes. Aucune destruction n\'est déclenchée.'},
+    echange:     {nom:'Échange',            fam:'controle',r:'commun', cible:'deuxMoi',  txt:'Intervertis deux de tes cartes. Chacune agit comme une pose dans sa nouvelle colonne : elle détruit les cartes adverses de même valeur.'},
     chaine:      {nom:'Chaîne',             fam:'controle',r:'peu',    cible:'colAdv',   txt:'L\'adversaire ne pourra pas poser de carte dans cette colonne à son prochain tour.'},
     derive:      {nom:'Dérive',             fam:'controle',r:'peu',    cible:'derive',   txt:'Déplace une carte adverse vers une autre colonne adverse qui a de la place.'},
     larcin:      {nom:'Larcin',             fam:'controle',r:'rare',   cible:null,       txt:'Prends une carte au hasard dans la main de l\'adversaire.'},
@@ -438,7 +438,20 @@
       case 'de': res.valeur = 1 + aleat(S, 6); modifier(S.board[p][c.ci][c.r], res.valeur); break;
       case 'bouclier': sv.shield.push({p: p, ci: c.ci, left: 2}); break;
       case 'parade': sv.parade[p] = true; break;
-      case 'echange': { var A = S.board[p][c.a.ci], B = S.board[p][c.b.ci], t = A[c.a.r]; A[c.a.r] = B[c.b.r]; B[c.b.r] = t; break; }
+      case 'echange': {
+        var A = S.board[p][c.a.ci], B = S.board[p][c.b.ci], t = A[c.a.r]; A[c.a.r] = B[c.b.r]; B[c.b.r] = t;
+        if(c.a.ci !== c.b.ci){                                    // chaque carte déplacée agit comme une pose dans sa nouvelle colonne
+          var pe = [], ar = [[A[c.a.r], c.a.ci], [B[c.b.r], c.b.ci]];
+          ar.forEach(function(x){
+            var card = x[0], cj = x[1]; if(protegee(S, o, cj)) return;
+            var col = S.board[o][cj];
+            for(var u = 0; u < col.length; u++){
+              if(col[u].power === card.power && !col[u].sc && !pe.some(function(z){ return z.ci === cj && z.r === u; })){ pe.push({ci: cj, r: u}); if(S.opts.destroy !== 'all') break; }
+            }
+          });
+          detr(o, pe); res.echange = true;
+        }
+        break; }
       case 'chaine': sv.lock.push({p: o, ci: c.ci}); break;
       case 'derive': { var cd = S.board[o][c.ci].splice(c.r, 1)[0]; S.board[o][c.dst].push(cd); break; }
       case 'larcin': { var k = aleat(S, S.hands[o].length), x = S.hands[o].splice(k, 1)[0]; S.hands[p].push(x); res.pris = x; break; }

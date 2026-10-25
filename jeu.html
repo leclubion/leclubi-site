@@ -489,6 +489,54 @@ body.survie .inv{display:grid}
 @keyframes colArr{0%{filter:brightness(2.2) saturate(1.8)}100%{filter:none}}
 #vManche{background:radial-gradient(ellipse at 50% 42%,rgba(24,18,48,.95),rgba(3,3,7,.98))}
 #vManche .box{background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none}
+
+/* ===== punch ===== */
+.hand .gc{transition:transform .18s cubic-bezier(.2,.9,.3,1.3),rotate .2s,translate .2s,opacity .3s,filter .3s,box-shadow .25s}
+.hand .gc:not(.off):hover{transform:translateY(-16px) scale(1.1) var(--tilt);z-index:5;box-shadow:0 14px 26px rgba(0,0,0,.6),0 0 0 2px rgba(255,224,138,.9),0 0 26px rgba(255,214,120,.55)}
+.hand .gc.sel{animation:selP 1s ease-in-out infinite}
+@keyframes selP{0%,100%{box-shadow:0 0 0 3px var(--accent),0 10px 22px rgba(0,0,0,.55),0 0 18px rgba(255,214,120,.4)}50%{box-shadow:0 0 0 3px #ffe9a8,0 12px 26px rgba(0,0,0,.55),0 0 38px rgba(255,214,120,.85)}}
+.ob.me:not(.off):not(.sel){animation:obBreath 2.4s ease-in-out infinite}
+@keyframes obBreath{0%,100%{box-shadow:0 3px 8px rgba(0,0,0,.55),0 0 0 rgba(255,224,138,0)}50%{box-shadow:0 3px 8px rgba(0,0,0,.55),0 0 16px rgba(255,224,138,.55)}}
+.ob.me:not(.off):hover{transform:translateY(-8px) scale(1.14) rotate(-2deg);z-index:6}
+.ob.r-rare::after,.ob.big.r-peu::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.5) 48%,transparent 62%);transform:translateX(-120%);animation:obShine 3.6s ease-in-out infinite}
+@keyframes obShine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(130%)}}
+.ob.r-rare{overflow:hidden}
+.col.shield{animation:shP 1.8s ease-in-out infinite}
+@keyframes shP{0%,100%{box-shadow:0 0 0 2px rgba(124,192,255,.7),0 0 14px rgba(124,192,255,.35)}50%{box-shadow:0 0 0 2px #bfe0ff,0 0 32px rgba(124,192,255,.85)}}
+.col.lock{animation:lkP .9s ease-in-out infinite}
+@keyframes lkP{0%,100%{box-shadow:0 0 0 2px rgba(201,162,255,.6),0 0 12px rgba(201,162,255,.3)}50%{box-shadow:0 0 0 2px #e3d0ff,0 0 28px rgba(201,162,255,.8)}}
+.inv .chip{animation:chipP 1.4s ease-in-out infinite}
+@keyframes chipP{0%,100%{box-shadow:0 0 0 rgba(255,224,138,0)}50%{box-shadow:0 0 14px rgba(255,224,138,.7)}}
+.ohand.voit{height:calc(var(--sh) * 1.02);gap:8px}
+.ohand.voit .oc{position:relative;width:calc(var(--sw) * .72);height:calc(var(--sh) * 1);border-radius:7px;overflow:hidden;border:2px solid #c9a2ff;box-shadow:0 0 16px rgba(201,162,255,.65)}
+.ohand.voit .oc.fresh{animation:ocIn .6s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:calc(var(--k) * .1s)}
+.ohand.voit .oc img{width:100%;height:100%;object-fit:cover;display:block}
+.ohand.voit .oc b{position:absolute;left:3px;top:3px;min-width:calc(var(--sh) * .3);height:calc(var(--sh) * .3);border-radius:50%;background:rgba(10,8,22,.85);color:#fff;font-size:calc(var(--sh) * .22);display:flex;align-items:center;justify-content:center;border:1px solid #c9a2ff}
+.ohand.voit .oc.noimg{background:linear-gradient(160deg,#3b2a6a,#1f1540)}
+@keyframes ocIn{0%{opacity:0;transform:rotateY(90deg) scale(.6)}100%{opacity:1;transform:none}}
+#vOeil{position:fixed;inset:0;z-index:46;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at 50% 50%,rgba(40,16,80,.9),rgba(4,2,10,.55) 75%);animation:oeilBg 2.6s ease-out forwards}
+@keyframes oeilBg{0%{opacity:0}10%{opacity:1}85%{opacity:1}100%{opacity:0}}
+#vOeil .tt{font:800 clamp(20px,3.4vw,30px) Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#e3d0ff;text-shadow:0 0 24px #a76dff;animation:titIn .6s both}
+#vOeil .rg{display:flex;gap:18px;justify-content:center}
+#vOeil .oc{position:relative;width:min(24vw,150px);aspect-ratio:5/7;border-radius:12px;overflow:hidden;border:3px solid #e3d0ff;box-shadow:0 0 40px rgba(167,109,255,.9);opacity:0;animation:oFlip .8s cubic-bezier(.2,.9,.3,1.2) forwards;animation-delay:calc(.45s + var(--k) * .22s)}
+#vOeil .oc img{width:100%;height:100%;object-fit:cover;display:block}
+#vOeil .oc b{position:absolute;left:8px;top:8px;width:44px;height:44px;border-radius:50%;background:rgba(10,8,22,.88);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;border:2px solid #e3d0ff}
+#vOeil .oc.noimg{background:linear-gradient(160deg,#3b2a6a,#1f1540)}
+@keyframes oFlip{0%{opacity:0;transform:rotateY(100deg) translateY(40px) scale(.5)}100%{opacity:1;transform:none}}
+#vOeil .eye{font-size:64px;animation:eyeP 1s ease-out both;filter:drop-shadow(0 0 20px #a76dff)}
+@keyframes eyeP{0%{transform:scale(.2) rotate(-30deg);opacity:0}60%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+#tourB{position:fixed;left:0;right:0;top:38%;z-index:44;pointer-events:none;text-align:center;font:900 clamp(30px,6vw,64px) Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff3c8;text-shadow:0 0 30px rgba(255,200,90,.9),0 4px 0 rgba(0,0,0,.5);padding:8px 0;background:linear-gradient(90deg,transparent,rgba(10,8,2,.78) 25%,rgba(10,8,2,.78) 75%,transparent);animation:tourB .95s cubic-bezier(.2,.9,.25,1) forwards}
+#tourB.opp{color:#ffb3a8;text-shadow:0 0 26px rgba(255,90,70,.8),0 4px 0 rgba(0,0,0,.5)}
+@keyframes tourB{0%{opacity:0;transform:translateX(-60%) scaleY(.2)}22%{opacity:1;transform:translateX(0) scaleY(1)}75%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(40%) scaleY(.6)}}
+#introObj{position:fixed;inset:0;z-index:48;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;animation:introA 1.5s ease-in-out var(--di,0s) both}
+#introObj b{font:900 clamp(26px,5.4vw,50px) Inter,sans-serif;letter-spacing:.03em;color:#fff3c8;text-shadow:0 0 34px rgba(255,200,90,.8);text-align:center;padding:0 16px;animation:introT 1.5s ease-out var(--di,0s) both}
+#introObj i{font-style:normal;font-size:60px;filter:drop-shadow(0 0 24px #ffd070);animation:introI 1.5s ease-in-out var(--di,0s) both}
+@keyframes introA{0%{opacity:0}15%,80%{opacity:1}100%{opacity:0}}
+@keyframes introT{0%{transform:scale(.4);letter-spacing:.3em}25%{transform:scale(1.08);letter-spacing:.03em}40%{transform:scale(1)}100%{transform:scale(1.05)}}
+@keyframes introI{0%{transform:scale(.2) rotate(-40deg)}25%{transform:scale(1.3) rotate(8deg)}100%{transform:scale(1) rotate(0) translateY(-6px)}}
+#vManche .rest{opacity:0;animation:fadeUp .01s var(--dr,0s) forwards}
+.sc.gain,.tot.gain{animation:gainP .6s ease-out}
+@keyframes gainP{0%{transform:scale(1.7);filter:brightness(2)}100%{transform:none;filter:none}}
 #vManche .tit{font:800 clamp(26px,5vw,44px) Inter,sans-serif;letter-spacing:.03em;margin:0;animation:titIn .7s cubic-bezier(.2,.9,.25,1.2) both}
 #vManche .tit.win{color:#ffe08a;text-shadow:0 0 28px rgba(255,200,90,.7)}#vManche .tit.lose{color:#ff8a7e;text-shadow:0 0 28px rgba(220,60,50,.6)}
 #vManche .mcN{font:700 13px Inter,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin:16px 0 4px;animation:titIn .5s .25s both}
@@ -1223,6 +1271,7 @@ body.survie .inv{display:grid}
 
 
 
+  var ocVus = {};
   var dernierFond = '';
   function choisirFond(){
     var l = Fond.noms, f = S.bg;
@@ -1261,7 +1310,11 @@ body.survie .inv{display:grid}
     });
     total('totOpp', BOT); total('totMe', ME);
     $('pioche').classList.toggle('vide', !G.pioche.length && !G.defausse.length);
-    $('ohand').innerHTML = G.hands[BOT].map(function(c){ var vu = G.sv && G.sv.vu[ME] && c.art !== undefined; return '<i data-id="' + c.id + '"' + (cache[c.id] ? ' class="vh' + (vu ? ' vu' : '') + '"' : vu ? ' class="vu"' : '') + '>' + (vu ? c.power : '') + '</i>'; }).join('');
+    var voit = !!(G.sv && G.sv.vu[ME] && G.hands[BOT].some(function(c){ return c.art !== undefined; }));
+    $('ohand').classList.toggle('voit', voit);
+    $('ohand').innerHTML = G.hands[BOT].map(function(c, i){ var vu = G.sv && G.sv.vu[ME] && c.art !== undefined;
+      if(vu){ var fr = !ocVus[c.id]; ocVus[c.id] = 1; return '<div class="oc' + (cache[c.id] ? ' vh' : '') + (fr ? ' fresh' : '') + '" data-id="' + c.id + '" style="--k:' + i + '"><img src="cartes/' + c.art + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()"><b>' + c.power + '</b></div>'; }
+      return '<i data-id="' + c.id + '"' + (cache[c.id] ? ' class="vh' + (vu ? ' vu' : '') + '"' : vu ? ' class="vu"' : '') + '>' + (vu ? c.power : '') + '</i>'; }).join('');
     $('hand').innerHTML = G.hands[ME].map(function(c, i){
       return carte(c, (i === sel ? 'sel ' : '') + (humanTurn && !busy ? '' : 'off ') + (cache[c.id] ? 'vh' : ''), ' data-h="' + i + '"');
     }).join('');
@@ -1389,7 +1442,7 @@ body.survie .inv{display:grid}
     if(G.over){ fin(); return; }
     if(OBJ.on) annulerObjet(true);
     render();
-    if(G.turn === ME){ Son.play('tour'); startTimer(); }
+    if(G.turn === ME){ Son.play('tour'); OFX.banniere('À toi de jouer'); startTimer(); }
     else {
       stopTimer(); $('secs').textContent = ''; $('bar').firstElementChild.style.width = '100%';
       if(ONL.actif) return;                                          // en ligne, on attend le coup de l'adversaire
@@ -1408,7 +1461,7 @@ body.survie .inv{display:grid}
     var from = p === ME ? rectOf(document.querySelector('#hand [data-h="' + h + '"]')) : rectOf(document.querySelector('#ohand [data-id="' + card.id + '"]'));
     var colEl = (p === ME ? $('boardMe') : $('boardOpp')).children[ci];
     var to = rectOf(colEl && colEl.children[G.board[p][ci].length]);
-    var idx = J.apercu(G, p, h, ci), row = G.board[p][ci].length, wasTri = J.scoreColonne(G.board[p][ci], G.opts).triple;
+    var scAvant = J.scoreColonne(G.board[p][ci], G.opts).score, idx = J.apercu(G, p, h, ci), row = G.board[p][ci].length, wasTri = J.scoreColonne(G.board[p][ci], G.opts).triple;
     var parade = !!(G.sv && idx.length && G.sv.parade[opp]); if(parade) idx = [];       // Parade : rien n'est détruit
     var oppCards = idx.map(function(r){ return G.board[opp][ci][r]; });
     $('hint').textContent = '';
@@ -1420,6 +1473,8 @@ body.survie .inv{display:grid}
       if(my !== gen){ if(f) f.remove(); return; }
       // 2) les cartes détruites de l'adversaire disparaissent
       FX.impact(rectOf(f), card);
+      var rcol = {speciale:'#6fe0d8', legendaire:'#ffd070', rare:'#ff7a6b', peu:'#9fd19a'}[card.r] || '#e8e4da', rf = rectOf(f);
+      if(rf){ OFX.anneau(rf, rcol, card.power >= 7 ? 2 : 1); OFX.etincelles(rf, rcol, 6 + card.power * 2); if(card.power >= 8){ OFX.flash(rcol, .16, 300); OFX.secouer(5, 300); } }
       Son.play('pose', {rate: 1.15 - card.power * .035});
       if(parade){ var rp = rectOf(f); FX.texte(rp.left + rp.width / 2, rp.top, 'PARADE !', 'combo'); Son.play('colonne', {rate: 1.3}); }
       if(f && f.animate && !reduce) f.animate([{scale: '1.2'}, {scale: '.94', offset: .5}, {scale: '1'}], {duration: 300, easing: 'ease-out'});
@@ -1456,6 +1511,8 @@ body.survie .inv{display:grid}
       render();
       deplacer(avant);
       if(vol && vol.remove) vol.remove();
+      var gn = J.scoreColonne(G.board[p][ci], G.opts).score - scAvant, mel = $(p === ME ? 'midMe' : 'midOpp').children[ci];
+      if(gn > 0 && mel){ mel.classList.add('gain'); OFX.flotte(mel.getBoundingClientRect(), '+' + gn, '#ffe08a'); }
       if(r && J.scoreColonne(G.board[p][ci], G.opts).triple && !wasTri){
         var tt = G.opts.triple, ce = (p === ME ? $('boardMe') : $('boardOpp')).children[ci];
         FX.triple(ce, 'TRIPLE ' + (tt.type === 'mul' ? '×' + tt.value : '+' + tt.value));
@@ -1774,6 +1831,14 @@ body.survie .inv{display:grid}
         an(e, [{opacity: 0, transform: 'translate(-50%,-30%) scale(.4)'}, {opacity: 1, transform: 'translate(-50%,-80%) scale(1.25)', offset: .3}, {opacity: 1, transform: 'translate(-50%,-120%) scale(1)', offset: .7}, {opacity: 0, transform: 'translate(-50%,-170%) scale(.9)'}], {duration: 1100, easing: 'ease-out'}); },
       bouclier: function(r, col){ if(reduce || !r) return; var c = ctr(r), w = r.width * 1.1, h = r.height * 1.1;
         an(el('left:' + (c.x - w / 2) + 'px;top:' + (c.y - h / 2) + 'px;width:' + w + 'px;height:' + h + 'px;border-radius:18px;border:4px solid ' + col + ';background:radial-gradient(ellipse,rgba(124,192,255,.35),rgba(124,192,255,0) 70%);box-shadow:0 0 40px ' + col + ',inset 0 0 40px ' + col), [{opacity: 0, transform: 'scale(1.6)'}, {opacity: 1, transform: 'scale(1)', offset: .35}, {opacity: .9, offset: .7}, {opacity: 0, transform: 'scale(1.04)'}], {duration: 900, easing: 'ease-out'}); },
+      confettis: function(n){ if(reduce) return; var C = ['#ffe08a', '#7dffa8', '#7cc0ff', '#ff7a6b', '#c9a2ff'];
+        for(var k = 0; k < (n || 60); k++){ var x = R(0, innerWidth), sz = R(6, 12); an(el('left:' + x + 'px;top:-20px;width:' + sz + 'px;height:' + sz * .5 + 'px;background:' + C[k % 5]), [{opacity: 1, transform: 'translate(0,0) rotate(0)'}, {opacity: 1, offset: .8}, {opacity: 0, transform: 'translate(' + R(-160, 160) + 'px,' + innerHeight + 'px) rotate(' + R(300, 900) + 'deg)'}], {duration: R(1400, 2600), delay: R(0, 500), easing: 'cubic-bezier(.3,.5,.6,1)', fill: 'backwards'}); } },
+      banniere: function(txt, cls){ var b = document.createElement('div'); b.id = 'tourB'; b.className = cls || ''; b.textContent = txt; document.body.appendChild(b); setTimeout(function(){ b.remove(); }, 1000); },
+      echange: function(a, b){ if(reduce || !a || !b) return Promise.resolve(); var ca = a.cloneNode(true), cb = b.cloneNode(true), ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        [[ca, ra, rb], [cb, rb, ra]].forEach(function(x, k){ var c = x[0]; c.style.cssText = 'position:fixed;left:' + x[1].left + 'px;top:' + x[1].top + 'px;width:' + x[1].width + 'px;height:' + x[1].height + 'px;margin:0;z-index:48;pointer-events:none;visibility:visible;box-shadow:0 0 28px #c9a2ff';
+          document.body.appendChild(c); var dx = x[2].left - x[1].left, dy = x[2].top - x[1].top, side = k ? 1 : -1;
+          c.animate([{transform: 'translate(0,0) scale(1) rotate(0)'}, {transform: 'translate(' + dx / 2 + 'px,' + (dy / 2 + side * 46) + 'px) scale(1.3) rotate(' + side * 12 + 'deg)', offset: .5}, {transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1) rotate(0)'}], {duration: 620, easing: 'ease-in-out', fill: 'forwards'}).onfinish = function(){ c.remove(); }; });
+        a.style.visibility = 'hidden'; b.style.visibility = 'hidden'; return new Promise(function(res){ setTimeout(res, 660); }); },
       secouer: function(amp, ms){ var t = $('table'); if(reduce || !t || !t.animate) return; amp = amp || 8; var kf = []; for(var k = 0; k < 9; k++){ var f = 1 - k / 9; kf.push({translate: (k ? R(-amp, amp) * f : 0) + 'px ' + (k ? R(-amp, amp) * f : 0) + 'px'}); } kf.push({translate: '0 0'}); t.animate(kf, {duration: ms || 420, easing: 'ease-out'}); }
     };
   })();
@@ -1801,7 +1866,7 @@ body.survie .inv{display:grid}
   }
   function flagsCols(){
     var o = {};
-    ['boardOpp', 'boardMe'].forEach(function(id){ Array.prototype.forEach.call($(id).children, function(col, ci){ o[id + ci] = (col.classList.contains('shield') ? 's' : '') + (col.classList.contains('lock') ? 'l' : ''); }); });
+    ['boardOpp', 'boardMe'].forEach(function(id){ Array.prototype.forEach.call($(id).children, function(col, ci){ o[id + ci] = (col.classList.contains('shield') ? 's' : '') + (col.classList.contains('lock') ? 'l' : '') + (col.classList.contains('tri') ? 't' : ''); }); });
     return o;
   }
   function effetObjet(p, r, appliquer, pre){
@@ -1810,6 +1875,9 @@ body.survie .inv{display:grid}
       if(my !== gen) return;
       var els = (r.detruites || []).map(function(id){ return document.querySelector('#boardOpp [data-id="' + id + '"],#boardMe [data-id="' + id + '"]'); }).filter(Boolean);
       var dd = J.OBJETS[r.obj] || {}, fc = FAMC[dd.fam] || '#fff';
+      var pre0 = Promise.resolve();
+      if(r.obj === 'echange' && r.cible && r.cible.a){ var bd = $(p === ME ? 'boardMe' : 'boardOpp'), ea = bd.children[r.cible.a.ci].children[r.cible.a.r], eb = bd.children[r.cible.b.ci].children[r.cible.b.r]; pre0 = OFX.echange(ea, eb); Son.play('colonne', {rate: 1.2}); }
+      return pre0.then(function(){
       els.forEach(function(e, k){ var rr = rectOf(e), c0 = {x: rr.left + rr.width / 2, y: rr.top + rr.height / 2};
         if(r.obj === 'foudre') OFX.eclair({x: c0.x + (Math.random() * 120 - 60), y: -10}, c0, '#8ec8ff');
         else if(r.obj === 'faux' || r.obj === 'rafle') OFX.entaille(rr, fc);
@@ -1821,8 +1889,9 @@ body.survie .inv{display:grid}
       if(r.parade) texteTable('PARADE !');
       if(r.pile != null) texteTable(r.pile ? 'PILE !' : 'FACE !');
       if(r.obj === 'de' && r.valeur) texteTable('Dé : ' + r.valeur);
+      if(els.length > 1){ var tr0 = rectOf($('table')); if(tr0) FX.texte(tr0.left + tr0.width / 2, tr0.top + tr0.height * .4, '×' + els.length + ' ' + ['', '', 'DOUBLE !', 'TRIPLE !', 'MASSACRE !'][Math.min(els.length, 4)], 'combo'); }
       return wait(els.length ? 620 : 160);
-    }).then(function(){
+    }); }).then(function(){
       if(my !== gen) return;
       var avant = snap(), ancienne = pre.ancienne, modif = pre.modif;
       if(appliquer) appliquer();
@@ -1836,15 +1905,22 @@ body.survie .inv{display:grid}
             else if(dl < 0){ OFX.flotte(rr, '−' + (-dl), '#ff6a5c'); OFX.anneau(rr, '#ff6a5c', 1); }
             else if(c.sc && old[1] !== '1'){ OFX.anneau(rr, '#ffe08a', 2); OFX.flotte(rr, '🔒', '#ffe08a'); } } }
       }); }); });
+      if(r.obj === 'oeil'){
+        if(p === ME){ var vs = G.hands[BOT].filter(function(c){ return c.art !== undefined; }); if(vs.length){ var ov = document.createElement('div'); ov.id = 'vOeil';
+          ov.innerHTML = '<div class="eye">👁</div><div class="tt">Tu vois sa main</div><div class="rg">' + vs.map(function(c, k){ return '<div class="oc" style="--k:' + k + '"><img src="cartes/' + c.art + '.png" alt="" onerror="this.parentNode.classList.add(\'noimg\');this.remove()"><b>' + c.power + '</b></div>'; }).join('') + '</div>';
+          document.body.appendChild(ov); Son.play('tension'); OFX.flash('#a76dff', .45, 600); setTimeout(function(){ ov.remove(); }, 2650); } }
+        else { OFX.flash('#a76dff', .35, 600); texteTable('ON REGARDE TA MAIN…'); }
+      }
       var fl = flagsCols();
       Object.keys(fl).forEach(function(k){ var oldf = pre.flags ? pre.flags[k] || '' : '', nw = fl[k];
         var col = $(k.replace(/\d+$/, '')).children[Number(k.match(/\d+$/)[0])]; if(!col) return; var rr = rectOf(col);
         if(nw.indexOf('s') >= 0 && oldf.indexOf('s') < 0){ OFX.bouclier(rr, '#7cc0ff'); Son.play('colonne', {rate: 1.4}); col.classList.add('arrive'); }
+        if(nw.indexOf('t') >= 0 && oldf.indexOf('t') < 0){ var tt = G.opts.triple; FX.triple(col, 'TRIPLE ' + (tt.type === 'mul' ? '×' + tt.value : '+' + tt.value)); Son.play('colonne'); OFX.flash('#ffe08a', .3, 500); Fond.burst(rr.left + rr.width / 2, rr.top + rr.height / 2, 44, 'gold', 300); Fond.sceau('gold'); if(k.indexOf('Me') > 0) gs.tri++; }
         if(nw.indexOf('l') >= 0 && oldf.indexOf('l') < 0){ OFX.anneau(rr, '#c9a2ff', 2); OFX.flotte(rr, '⛓', '#c9a2ff'); OFX.secouer(6, 300); Son.play('pose', {rate: .7}); col.classList.add('arrive'); }
       });
       var ch = Promise.resolve();
       nouvelles.forEach(function(c){ ch = ch.then(function(){ if(my !== gen) return; return piocheVers(ME, c); }); });
-      return ch.then(function(){ if(my !== gen) return; return wait(150); });
+      return ch.then(function(){ if(my !== gen) return; return wait(r.obj === 'oeil' && p === ME ? 2300 : 150); });
     }).then(function(){ if(my !== gen) return; busy = false; return r; });
   }
   function utiliserLocal(p, i, cible){                  // hors ligne : on applique tout de suite au moteur, puis on joue l'animation
@@ -1852,7 +1928,7 @@ body.survie .inv{display:grid}
     if(id === 'prophetie' && p === BOT){ var pre = J.utiliser(G, p, i, null); if(!pre.ok) return Promise.resolve(null); cible = {ordre: J.ordreRobot(pre.cartes)}; }
     var pre = capturer(), r = J.utiliser(G, p, i, cible);
     if(!r.ok){ busy = false; return Promise.resolve(null); }
-    var info = {obj:r.obj, detruites:(r.detruites || []).map(function(x){ return x.c.id; }), parade:r.parade, valeur:r.valeur, pile:r.pile, fin:!!r.fin};
+    var info = {obj:r.obj, cible:r.cible, detruites:(r.detruites || []).map(function(x){ return x.c.id; }), parade:r.parade, valeur:r.valeur, pile:r.pile, fin:!!r.fin};
     // l'affichage doit montrer l'ancien plateau pendant l'annonce : on ne rend pas avant la fin des effets
     return effetObjet(p, info, null, pre).then(function(x){ return my === gen ? info : null; });
   }
@@ -1880,11 +1956,12 @@ body.survie .inv{display:grid}
   var tRev = [];
   function afficherManche(o, cb){
     tRev.forEach(clearTimeout); tRev = [];
-    var h = '', t = o.prec ? 900 : 350, cards = [];
+    var h = '', ti = o.prec ? 1000 : 150, t = ti + 1500, cards = [];
     if(o.prec){
       var gw = o.prec.gagnant, titre = gw === -1 ? 'Manche ' + o.prec.manche + ' : égalité' : gw === ME ? 'Manche ' + o.prec.manche + ' gagnée !' : 'Manche ' + o.prec.manche + ' perdue';
       h += '<h2 class="tit ' + (gw === ME ? 'win' : gw === -1 ? '' : 'lose') + '">' + titre + '</h2><div class="sc">Toi ' + o.prec.scores[ME] + ' — ' + o.prec.scores[BOT] + ' Adversaire</div><p style="margin:6px 0 0">Score du match : <b>' + o.wins[ME] + ' – ' + o.wins[BOT] + '</b></p>';
     }
+    h += '<div class="rest" style="--dr:' + ((ti + 1400) / 1000).toFixed(2) + 's">';
     h += '<div class="mcN">Manche ' + o.manche + '</div>';
     var lot = function(l, side){
       if(!l.length) return '<div class="jetons ' + side + '"><span style="color:var(--muted)">aucun objet</span></div>';
@@ -1898,11 +1975,16 @@ body.survie .inv{display:grid}
     t += 250;
     h += '<div class="lbl" style="--d:' + ((t - 200) / 1000).toFixed(2) + 's">Objets de l\'adversaire</div>' + lot(o.recus[BOT], 'opp');
     t += 200;
-    h += '<p class="start" style="--ds:' + (t / 1000).toFixed(2) + 's">' + (o.premier === ME ? 'Tu commences.' : 'L\'adversaire commence.') + '</p>';
+    h += '<p class="start" style="--ds:' + (t / 1000).toFixed(2) + 's">' + (o.premier === ME ? 'Tu commences.' : 'L\'adversaire commence.') + '</p></div>';
     $('mcCorps').innerHTML = h; $('bMancheGo').style.setProperty('--dg', ((t + 150) / 1000).toFixed(2) + 's');
     $('vManche').hidden = false; finMancheCb = cb;
+    var itx = document.createElement('div'); itx.id = 'introObj'; itx.style.setProperty('--di', (ti / 1000).toFixed(2) + 's');
+    itx.innerHTML = '<i>🎴</i><b>' + (o.recus[ME].length ? 'Tu vas recevoir tes cartes objets !' : 'Aucun objet pour toi cette manche') + '</b>'; document.body.appendChild(itx); tRev.push(setTimeout(function(){ itx.remove(); }, ti + 1700));
     if(o.prec) tRev.push(setTimeout(function(){ Son.play(o.prec.gagnant === ME ? 'victoire' : o.prec.gagnant === -1 ? 'egalite' : 'defaite'); }, 60));
     Son.play('pret', {rate: .9});
+    tRev.push(setTimeout(function(){ if($('vManche').hidden) return; Son.play('tension'); OFX.flash('#ffd070', .22, 600); var v = $('vManche'); OFX.anneau({left: innerWidth / 2 - 40, top: innerHeight / 2 - 40, width: 80, height: 80}, '#ffd070', 3); if(v.animate && !reduce) v.animate([{translate: '0 0'}, {translate: '4px 2px'}, {translate: '-4px -2px'}, {translate: '3px 0'}, {translate: '0 0'}], {duration: 700, iterations: 2}); }, ti + 60));
+    tRev.push(setTimeout(function(){ if($('vManche').hidden) return; OFX.flash('#fff', .5, 380); Son.play('colonne', {rate: 1.1}); }, ti + 1350));
+    if(o.prec && o.prec.gagnant === ME) tRev.push(setTimeout(function(){ if(!$('vManche').hidden) OFX.confettis(70); }, 200));
     cards.forEach(function(c, k){
       tRev.push(setTimeout(function(){
         if($('vManche').hidden) return; var e = $('vManche').querySelectorAll('.rv .ob')[k]; if(!e) return;
@@ -2109,7 +2191,7 @@ body.survie .inv{display:grid}
     } else if(m.t === 'objet'){
       var po = sI(m.p); if(po === ME){ ONL.envoi = false; clearTimeout(ONL.tEnvoi); }
       $('vProph').hidden = true;
-      var inf = {obj:m.obj, detruites:m.detruites, parade:m.parade, valeur:m.valeur, pile:m.pile, fin:m.fin};
+      var inf = {obj:m.obj, cible:m.cible, detruites:m.detruites, parade:m.parade, valeur:m.valeur, pile:m.pile, fin:m.fin};
       effetObjet(po, inf, function(){ appliquerEtat(m); }).then(function(){ if(inf.fin) fin(); else render(); });
     } else if(m.t === 'manche'){
       ONL.mancheMsg = false; busy = true; stopTimer();
