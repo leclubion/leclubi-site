@@ -2592,10 +2592,10 @@ document.getElementById('pform').addEventListener('submit', function(e){
     emoji: {n: 'Emoji', d: "Retrouve le jeu grâce à ces emojis. Chaque erreur en révèle un de plus."},
     pendu: {n: 'Le Pendu', d: "Propose des lettres pour deviner le titre. Une mauvaise lettre fait avancer le pendu."},
     motscles: {n: 'Mots-clés', d: "Des mots liés au jeu, du plus vague au plus parlant. Chaque erreur en dévoile un de plus."},
-    indices: {n: 'Indices', d: "Chaque essai est comparé au bon jeu : genre, année, studio, plateforme…"},
+    indices: {n: 'Indices', d: "Chaque essai est comparé au bon jeu : genre, année, studio, plateforme, perspective…"},
     resume: {n: 'Résumé caviardé', d: "Le résumé du jeu est censuré. Chaque erreur lève un peu de la censure."}
   };
-  var CLUE = {genre: 'Genre', annee: 'Année', studio: 'Studio', plateforme: 'Plateforme', chaine: 'Sur la chaîne'};
+  var CLUE = {genre: 'Genre', annee: 'Année', studio: 'Studio', plateforme: 'Plateforme', vue: 'Perspective'};
   var KB = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
   var g = function(i){ return document.getElementById(i); };
   var E = function(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; };
@@ -2627,7 +2627,7 @@ document.getElementById('pform').addEventListener('submit', function(e){
     }
     else if(f === 'indices'){
       h = '<div class="qclues">' + (st.indices || []).map(function(c){ return '<span class="qclue"><small>' + CLUE[c.k] + '</small>' + E(c.v) + '</span>'; }).join('') + '</div>';
-      if((st.essais || []).length) h += '<table class="qtab"><thead><tr><th></th><th>Genre</th><th>Année</th><th>Studio</th><th>Plateforme</th><th>Chaîne</th></tr></thead><tbody>' +
+      if((st.essais || []).length) h += '<table class="qtab"><thead><tr><th></th><th>Genre</th><th>Année</th><th>Studio</th><th>Plateforme</th><th>Perspective</th></tr></thead><tbody>' +
         st.essais.map(function(e){ return '<tr><td class="nom">' + E(e.g) + '</td>' + (e.cmp || []).map(function(c){ return '<td class="' + c.s + '">' + E(c.v) + (c.dir ? (c.dir === 'up' ? ' ↑' : ' ↓') : '') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
     }
     else if(f === 'anagramme'){
