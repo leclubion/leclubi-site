@@ -4131,7 +4131,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
           if(!r.ok){ res.textContent = 'Oups, ça n\'a pas marché. Réessaie dans un instant.'; busy2 = false; if(r.d && r.d.erreur === 'aucun_tirage'){ o.close(); chargeEtat().then(render); } return; }
           var d = r.d; Array.prototype.forEach.call(bs, function(x){ x.disabled = true; }); b.querySelector('.ff').innerHTML = carte(parId(d.carte), true);
           b.classList.add('on'); var cc = parId(d.carte);
-          setTimeout(function(){ res.innerHTML = (d.nouvelle ? '✨ Nouvelle carte : ' : 'Déjà en ta possession : ') + E(cc.nom); }, 650);
+          setTimeout(function(){ res.innerHTML = (d.nouvelle ? '✨ Nouvelle carte : ' : 'Déjà en ta possession : ') + E(cc.nom) + (d.pts ? '<br><small>+' + d.pts + ' points pour la boutique 🛒</small>' : ''); }, 650);
           setTimeout(function(){ Array.prototype.forEach.call(bs, function(x){ if(x !== b){ x.classList.add('dim'); } }); }, 1100);
           setTimeout(function(){ if(d.attente > 0) o.querySelector('#acnext').hidden = false; o.querySelector('#acclose').hidden = false; }, 1400);
           if(ST){ ST.attente = d.attente; ST.cartes = (ST.cartes || []).concat(d.nouvelle ? [{carte: d.carte, ts: Date.now()}] : []); }
