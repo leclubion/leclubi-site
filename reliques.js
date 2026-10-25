@@ -25,14 +25,15 @@
       function legSet(ix, sw) { var L = ''; ix.forEach(function (n) { var p = legs[n]; L += '<path d="' + p + '"/>'; L += '<path d="' + p.replace(/(\d+) (\d+)/g, function (s, a, b) { return (200 - a) + ' ' + b; }) + '"/>'; }); return '<g fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#0b0516" stroke-width="' + sw + '">' + L + '</g><g stroke="#8a6cff" stroke-width="1.2" opacity=".8">' + L + '</g></g>'; }
       function bob(g, a) { return '<g>' + g + '<animateTransform attributeName="transform" type="translate" values="0 ' + (-4) + ';0 8;0 ' + (-4) + '" dur="5s" repeatCount="indefinite"/></g>'; }
       var body = '<ellipse cx="100" cy="146" rx="26" ry="32" fill="url(#' + u + 'c)" stroke="#0b0516" stroke-width="2.5"/><path d="M92 130Q100 140 108 130L106 146L112 160Q100 150 88 160L94 146Z" fill="#ff2a4a" opacity=".95"/><ellipse cx="92" cy="132" rx="6" ry="12" fill="#fff" opacity=".12" transform="rotate(14 92 132)"/>';
-      body += '<circle cx="100" cy="110" r="14" fill="#1a0e30" stroke="#0b0516" stroke-width="2.5"/><g fill="#ff3a5a"><circle cx="95" cy="107" r="2.6"/><circle cx="105" cy="107" r="2.6"/><circle cx="92" cy="112" r="1.6"/><circle cx="108" cy="112" r="1.6"/><circle cx="97.500" cy="103" r="1.2"/><circle cx="102.500" cy="103" r="1.2"/></g><g fill="#fff" opacity=".9"><circle cx="94.300" cy="106.200" r=".9"/><circle cx="104.300" cy="106.200" r=".9"/></g>';
-      body += '<path d="M95 120l2 7 2-6zM105 120l-2 7-2-6z" fill="#e9e4ff" stroke="#0b0516" stroke-width="1"/>';
+      var head = '<circle cx="100" cy="110" r="14" fill="#1a0e30" stroke="#0b0516" stroke-width="2.5"/><g fill="#ff3a5a"><circle cx="95" cy="107" r="2.6"/><circle cx="105" cy="107" r="2.6"/><circle cx="92" cy="112" r="1.6"/><circle cx="108" cy="112" r="1.6"/><circle cx="97.500" cy="103" r="1.2"/><circle cx="102.500" cy="103" r="1.2"/></g><g fill="#fff" opacity=".9"><circle cx="94.300" cy="106.200" r=".9"/><circle cx="104.300" cy="106.200" r=".9"/></g>';
+      head += '<path d="M95 120l2 7 2-6zM105 120l-2 7-2-6z" fill="#e9e4ff" stroke="#0b0516" stroke-width="1"/>';
       o += '<!--L22-->';
       o += bob('<line x1="100" y1="26" x2="100" y2="112" stroke="#d6d0ff" stroke-width="1" opacity=".7"/>' + legSet([2, 3], 5));
       o += '<!--L55-->';
       o += bob(body);
       o += '<!--L95-->';
       o += '<g transform="translate(100 130) scale(1.12) translate(-100 -130)">' + bob(legSet([0, 1], 6.5)) + '</g>';
+      o += '<!--L118-->' + bob(head);
       o += '<g stroke="#d6d0ff" fill="none" stroke-width="1" opacity=".55"><path d="M24 40Q40 70 34 110"/><path d="M176 40Q160 72 168 116"/></g>';
       o += '<g fill="#fff" opacity=".7"><circle cx="40" cy="170" r="1"><animate attributeName="opacity" values="0;1;0" dur="2.600s" repeatCount="indefinite"/></circle><circle cx="162" cy="60" r="1"><animate attributeName="opacity" values="0;1;0" dur="3.300s" repeatCount="indefinite"/></circle><circle cx="150" cy="180" r="1.200"><animate attributeName="opacity" values="0;1;0" dur="2.100s" repeatCount="indefinite"/></circle></g>';
       o += spark([[22,70,1.1],[178,150,1.3],[30,190,.9]], '#d6c8ff');
