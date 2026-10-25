@@ -16,6 +16,11 @@ input{font:inherit;background:var(--panel);color:var(--text);border:1px solid va
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 textarea{font:inherit;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
 label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}select{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px}.wrapc{white-space:normal!important;min-width:220px;max-width:420px;overflow-wrap:anywhere}.bad{color:var(--bad)}.ok{color:var(--ok)}.box{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}#msg{min-height:22px;color:#e8c37a;margin-top:10px}
+#anav{display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0;margin:6px 0 10px;border-bottom:1px solid var(--line)}
+.ag{position:relative}.ab{padding:9px 16px}.ab.on{border-color:var(--accent);color:var(--accent)}
+.am{position:absolute;left:0;top:calc(100% + 6px);min-width:230px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.am[hidden]{display:none}.am a{display:block;padding:9px 12px;border-radius:6px;color:var(--text);text-decoration:none;font-size:14px}.am a:hover{background:rgba(199,154,75,.14)}.am a.on{color:var(--accent);font-weight:600}
+section[hidden]{display:none}h1.st{font-size:18px;margin:14px 0 10px;color:var(--accent)}
 </style>
 </head>
 <body>
@@ -25,17 +30,27 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
   <div class="row"><input id="cle" type="password" placeholder="Clé admin" autocomplete="off"><button id="ok" type="button">Se connecter</button></div>
   <div id="msg"></div>
   <div id="zone" hidden>
-    <h2>État</h2>
+    <nav id="anav" aria-label="Sections de l'admin">
+      <div class="ag"><button type="button" class="g ab" data-g="cb">Card Battle ▾</button><div class="am" hidden><a href="#" data-go="etat">État et récompenses</a><a href="#" data-go="joueurs">Joueurs</a><a href="#" data-go="paiements">Paiements ClubiGold</a></div></div>
+      <div class="ag"><button type="button" class="g ab" data-g="jdj">Jeu du jour ▾</button><div class="am" hidden><a href="#" data-go="jdj-rapide">Démarrage rapide</a><a href="#" data-go="jdj-liste">Liste des jeux</a><a href="#" data-go="jdj-ajout">Ajouter un jeu à deviner</a><a href="#" data-go="jdj-prets">Jeux préparés</a></div></div>
+      <div class="ag"><button type="button" class="g ab" data-g="def">Défis ▾</button><div class="am" hidden><a href="#" data-go="defis">Défis de la semaine</a><a href="#" data-go="donner">Donner à la main</a></div></div>
+      <div class="ag"><button type="button" class="g ab" data-g="vw">Viewers ▾</button><div class="am" hidden><a href="#" data-go="props">Propositions</a><a href="#" data-go="fiches">Fiches des viewers</a><a href="#" data-go="arcade">Cartes Arcade</a><a href="#" data-go="journal">Journal des cartes</a></div></div>
+    </nav>
+    <section data-sec="etat" hidden>
+<h1 class="st">État et récompenses</h1>
     <div class="box" id="etat"></div>
     <div class="row" style="margin-top:10px"><button id="pause" type="button" class="g"></button><button id="relance" type="button" class="g">Relancer les paiements en attente</button><button id="maj" type="button" class="g">Actualiser</button></div>
-    <h2>Joueurs</h2>
+    </section>
+    <section data-sec="joueurs" hidden>
+<h1 class="st">Joueurs</h1>
     <div class="w"><table><thead><tr><th>Pseudo</th><th>Parties</th><th>Victoires</th><th>ClubiGold gagnés</th><th>Victoires récompensées aujourd'hui</th><th></th></tr></thead><tbody id="joueurs"></tbody></table></div>
-    <h2>Derniers paiements de ClubiGold</h2>
+    </section>
+    <section data-sec="paiements" hidden>
+<h1 class="st">Derniers paiements de ClubiGold</h1>
     <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Montant</th><th>Statut</th><th>Détail</th></tr></thead><tbody id="paiements"></tbody></table></div>
-    <h2>Propositions des viewers</h2>
-    <p>Les propositions envoyées depuis le site avec un compte Twitch. Elles sont secrètes : seul toi les vois (le viewer retrouve la sienne dans « Mon compte »). « Retenue » = tu prépares la carte ; « Masquée » = elle disparaît aussi chez le viewer.</p>
-    <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Pour</th><th>Proposition</th><th>Statut</th><th></th></tr></thead><tbody id="props"></tbody></table></div>
-    <h2>Défis de la semaine</h2>
+    </section>
+    <section data-sec="defis" hidden>
+<h1 class="st">Défis de la semaine</h1>
     <div class="box" id="dhelp"><b>Comment ça marche</b><br>1. Choisis un modèle (ou remplis le formulaire), règle les dates, enregistre : le défi apparaît tout de suite dans l'onglet « Défis » du profil de chaque viewer.<br>
       2. Le serveur compte tout seul ce que fait chaque viewer <u>pendant les dates du défi</u>. Quand le but est atteint, le titre et le badge sont donnés automatiquement, même si le viewer revient sur le site plus tard.<br>
       3. Pour que les défis « cartes » et « utilisations » fonctionnent, la copie du journal doit se remplir en direct (WizeBot et Streamer.bot branchés au serveur). Ci-dessous, « cartes reçues en direct sur 7 jours » doit être supérieur à 0 si tu as eu des tirages.</div>
@@ -52,18 +67,26 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
       <div class="row"><label style="display:flex;gap:6px;align-items:center"><input id="dsecret" type="checkbox" style="min-width:0"> Défi surprise (caché tant qu'il n'est pas réussi)</label></div>
       <div class="row" style="margin-top:12px"><button id="dsave" type="button">Enregistrer le défi</button><button id="dcancel" type="button" class="g" hidden>Annuler la modification</button><span id="dmsg"></span></div>
     </div>
-    <h3 style="font-size:15px;margin:20px 0 8px">Donner à la main</h3>
+    </section>
+    <section data-sec="donner" hidden>
+<h1 class="st">Donner à la main</h1>
     <p style="margin-top:0">Pour un défi « Tu valides toi-même », un cadeau ou un événement. Écris le pseudo Twitch (en minuscules) du viewer, qui doit s'être déjà connecté au moins une fois sur le site.</p>
     <div class="row"><input id="glogin" placeholder="pseudo twitch" style="min-width:160px"><select id="gtype"><option value="titre">Un titre libre</option><option value="defi">Les récompenses d'un défi</option></select><input id="gval" placeholder="Titre à donner" style="min-width:200px"><button id="give" type="button" class="g">Donner</button><span id="gmsg"></span></div>
-    <h2>Jeu du jour</h2>
+    </section>
+    <section data-sec="jdj-rapide" hidden>
+<h1 class="st">Démarrage rapide</h1>
     <div class="box"><b>Comment ça marche</b><br>Chaque jour de la semaine a son mini-jeu : lundi PixelPelé, mardi Silhouette, mercredi Emoji, jeudi Pendu, vendredi Zoom, samedi Indices, dimanche Résumé caviardé. Pour chaque format, tu prépares autant de jeux à deviner que tu veux : le site les fait tourner tout seul, une semaine après l'autre. Tu peux aussi choisir une date précise pour un jeu.<br>
       1. Remplis d'abord la <b>liste des jeux</b> (c'est elle qui sert aux suggestions des joueurs et au format Indices). 2. Ajoute les <b>jeux à deviner</b>. Les images sont préparées toutes seules dans ton navigateur : tu n'envoies que l'image de départ.</div>
     <div class="box" id="qdep"><b>Démarrage rapide</b><br>Pour ne pas partir de zéro : tu peux ajouter une <b>liste de départ de 217 jeux</b> (horreur, dark fantasy, aventure, indé…) et <b>104 jeux à deviner prêts</b> (emoji, pendu, indices, résumé caviardé). Rien n'est écrasé : les doublons sont ignorés. Les images (PixelPelé, Silhouette, Zoom) restent à faire avec tes artworks. Pense ensuite à passer à « oui » les jeux que tu as vraiment joués sur la chaîne (colonne de droite de la liste).<div class="row" style="margin-top:8px"><button id="qdepl" type="button">1. Ajouter la liste de départ</button><button id="qdepp" type="button">2. Ajouter les jeux à deviner prêts</button><button id="qdepx" type="button">3. Ajouter les 9 PixelPelé (images fournies)</button><span id="qdepm" style="color:var(--muted);font-size:13px"></span></div></div>
-    <h3 style="font-size:15px;margin:20px 0 8px">1. Liste des jeux</h3>
+    </section>
+    <section data-sec="jdj-liste" hidden>
+<h1 class="st">Liste des jeux</h1>
     <p style="margin-top:0">Une ligne par jeu, séparée par des « ; » : <b>Nom ; Genre ; Année ; Plateforme(s) ; Studio ; oui/non</b> (le dernier = déjà joué sur la chaîne). Plusieurs genres ou plateformes : sépare-les avec « / ». Exemple : <i>Silent Hill 2 ; Horreur ; 2001 ; PS2/PC ; Konami ; oui</i></p>
     <textarea id="qlist" rows="8" spellcheck="false" placeholder="Silent Hill 2 ; Horreur ; 2001 ; PS2/PC ; Konami ; oui"></textarea>
     <div class="row" style="margin-top:8px"><button id="qsavelist" type="button">Enregistrer la liste</button><span id="qlmsg" style="color:var(--muted);font-size:13px"></span></div>
-    <h3 style="font-size:15px;margin:20px 0 8px">2. Ajouter un jeu à deviner</h3>
+    </section>
+    <section data-sec="jdj-ajout" hidden>
+<h1 class="st">Ajouter un jeu à deviner</h1>
     <div class="box" id="qform">
       <div class="row" style="margin-bottom:8px"><label class="f">Format<select id="qfmt"><option value="pixel">Lundi · PixelPelé</option><option value="anagramme">Mardi · Anagramme</option><option value="emoji">Mercredi · Emoji</option><option value="pendu">Jeudi · Pendu</option><option value="motscles">Vendredi · Mots-clés</option><option value="indices">Samedi · Indices</option><option value="resume">Dimanche · Résumé caviardé</option></select></label>
         <label class="f">Le bon jeu<input id="qjeu" list="qdl" placeholder="Silent Hill 2" autocomplete="off"><datalist id="qdl"></datalist></label>
@@ -76,19 +99,33 @@ label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu
       <div id="qp-resume" hidden style="margin-bottom:8px"><label class="f">Résumé du jeu<textarea id="qtxt" rows="5" placeholder="Un homme reçoit une lettre de sa [[femme]] décédée et part pour [[!Silent Hill]]…"></textarea></label><span style="color:var(--muted);font-size:13px">Entoure les mots à cacher avec [[ ]]. Avec [[! ]] le mot reste caché jusqu'à la fin de la partie (idéal pour le titre).</span></div>
       <div class="row" style="margin-top:10px"><button id="qadd" type="button">Ajouter ce jeu à deviner</button><span id="qmsg2" style="color:var(--muted);font-size:13px"></span></div>
     </div>
-    <h3 style="font-size:15px;margin:20px 0 8px">3. Les jeux préparés</h3>
+    </section>
+    <section data-sec="jdj-prets" hidden>
+<h1 class="st">Les jeux préparés</h1>
     <div class="w"><table><thead><tr><th>Format</th><th>Le bon jeu</th><th>Date</th><th>Taille</th><th></th></tr></thead><tbody id="qtab"></tbody></table></div>
     <div class="box" id="qview" style="margin-top:10px" hidden></div>
-    <h2>Cartes Arcade (donner une carte à un viewer)</h2>
-    <p>Pour tester, ou pour faire un geste : donne une carte Arcade à un viewer (écris son pseudo Twitch en minuscules). Pour tester le coffre caché, donne-lui « la-cle-ancienne ». « Un tirage » lui offre un choix 1 parmi 3 supplémentaire.</p>
-    <div class="row"><input id="adlog" placeholder="pseudo twitch"><input id="adcarte" placeholder="identifiant de la carte, ex. la-cle-ancienne" style="min-width:260px"><button id="adbtn" type="button">Donner la carte</button><button id="adtir" type="button">Offrir un tirage</button><span id="admsg" style="color:var(--muted);font-size:13px"></span></div>
-    <h2>Fiches des viewers (jeu favori et devise)</h2>
+    </section>
+    <section data-sec="props" hidden>
+<h1 class="st">Propositions des viewers</h1>
+    <p>Les propositions envoyées depuis le site avec un compte Twitch. Elles sont secrètes : seul toi les vois (le viewer retrouve la sienne dans « Mon compte »). « Retenue » = tu prépares la carte ; « Masquée » = elle disparaît aussi chez le viewer.</p>
+    <div class="w"><table><thead><tr><th>Date</th><th>Pseudo</th><th>Pour</th><th>Proposition</th><th>Statut</th><th></th></tr></thead><tbody id="props"></tbody></table></div>
+    </section>
+    <section data-sec="fiches" hidden>
+<h1 class="st">Fiches des viewers (jeu favori et devise)</h1>
     <p>Les textes que les viewers écrivent sur leur fiche de collectionneur sont publics. Si un texte est déplacé, clique sur « Effacer » : le jeu favori et la devise de ce viewer sont vidés (il peut en écrire d'autres).</p>
     <div class="w"><table><thead><tr><th>Viewer</th><th>Jeu favori</th><th>Devise</th><th></th></tr></thead><tbody id="fiches"></tbody></table></div>
-    <h2>Journal des cartes (copie sur le serveur)</h2>
+    </section>
+    <section data-sec="arcade" hidden>
+<h1 class="st">Cartes Arcade (donner une carte à un viewer)</h1>
+    <p>Pour tester, ou pour faire un geste : donne une carte Arcade à un viewer (écris son pseudo Twitch en minuscules). Pour tester le coffre caché, donne-lui « la-cle-ancienne ». « Un tirage » lui offre un choix 1 parmi 3 supplémentaire.</p>
+    <div class="row"><input id="adlog" placeholder="pseudo twitch"><input id="adcarte" placeholder="identifiant de la carte, ex. la-cle-ancienne" style="min-width:260px"><button id="adbtn" type="button">Donner la carte</button><button id="adtir" type="button">Offrir un tirage</button><span id="admsg" style="color:var(--muted);font-size:13px"></span></div>
+    </section>
+    <section data-sec="journal" hidden>
+<h1 class="st">Journal des cartes (copie sur le serveur)</h1>
     <div class="box" id="jetat"></div>
     <div class="row" style="margin-top:10px"><button id="jimport" type="button" class="g">Importer depuis Google Sheets</button><button id="jcomp" type="button" class="g">Comparer avec le tableur</button></div>
     <div id="jres" style="margin-top:12px"></div>
+    </section>
   </div>
 </main>
 <script src="config-jeu.js"></script>
@@ -420,6 +457,28 @@ $('adtir').onclick = function(){ var m = $('admsg'); appel('a-tirage', {login: $
   try{ var k = sessionStorage.getItem('leclubi-admin'); if(k && API){ $('cle').value = k; cle = k; charger(); } }catch(e){}
 })();
 
+</script>
+<script>
+(function(){
+  var groupe = {etat:'cb',joueurs:'cb',paiements:'cb','jdj-rapide':'jdj','jdj-liste':'jdj','jdj-ajout':'jdj','jdj-prets':'jdj',defis:'def',donner:'def',props:'vw',fiches:'vw',arcade:'vw',journal:'vw'};
+  var K = 'leclubi-admin-section';
+  function ferme(){ document.querySelectorAll('.am').forEach(function(m){ m.hidden = true; }); }
+  function va(id){
+    if(!groupe[id]) id = 'etat';
+    document.querySelectorAll('[data-sec]').forEach(function(s){ s.hidden = s.getAttribute('data-sec') !== id; });
+    document.querySelectorAll('.ab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-g') === groupe[id]); });
+    document.querySelectorAll('.am a').forEach(function(a){ a.classList.toggle('on', a.getAttribute('data-go') === id); });
+    try{ sessionStorage.setItem(K, id); }catch(e){}
+    ferme(); window.scrollTo(0, 0);
+  }
+  document.getElementById('anav').addEventListener('click', function(e){
+    var a = e.target.closest('[data-go]'); if(a){ e.preventDefault(); va(a.getAttribute('data-go')); return; }
+    var b = e.target.closest('.ab'); if(b){ var m = b.nextElementSibling, ouvert = !m.hidden; ferme(); m.hidden = ouvert; }
+  });
+  document.addEventListener('click', function(e){ if(!e.target.closest('.ag')) ferme(); });
+  var d = 'etat'; try{ d = sessionStorage.getItem(K) || 'etat'; }catch(e){} va(d);
+  window.adminVa = va;
+})();
 </script>
 </body>
 </html>

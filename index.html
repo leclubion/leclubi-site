@@ -484,7 +484,8 @@ nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--red)}
 .cfilter input{flex:1 1 240px;max-width:360px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
 .cfilter span{color:var(--muted);font-size:14px}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
-.cc{display:block;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:border-color .2s,transform .3s}
+.cc-pf{position:absolute;top:12px;right:12px;font-size:12px;font-weight:600;color:var(--accent);padding:4px 9px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer}.cc-pf:hover{border-color:var(--accent)}a.pfl2{color:inherit;text-decoration:none}a.pfl2:hover{text-decoration:underline}
+.cc{position:relative;display:block;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:border-color .2s,transform .3s}
 .cc:hover,.cc:focus-visible{border-color:var(--accent);transform:translateY(-3px)}
 .cc h3{margin:0 0 10px;font-size:17px;font-weight:600;overflow-wrap:anywhere}
 .cc .big{font-size:26px;font-weight:600;line-height:1.2}
@@ -1860,7 +1861,7 @@ function cardImg(id, name){ return id.indexOf('tarot-') === 0 ? 'cartes/' + id +
 function ficheCardHtml(d){
   var f = d.fiche || {}, name = d.name, ok = name && COLLECTIONS[name] && sheetState === 'ok', rk = ok ? rangDe(name) : null;
   var art = ok && f.carte && owns(name, f.carte) ? '<img src="' + esc(cardImg(f.carte, name)) + '" alt="Carte préférée" onerror="this.remove()"><small>Carte préférée</small>' :
-    d.avatar ? '<img class="av" src="' + esc(d.avatar) + '" alt="" onerror="this.remove()">' : '<img class="bal" src="images-site/balise.png" alt="">';
+    d.avatar ? '<img class="av" data-pf="' + esc(name || d.pseudo || '') + '" style="cursor:pointer" title="Voir le profil" src="' + esc(d.avatar) + '" alt="" onerror="this.remove()">' : '<img class="bal" src="images-site/balise.png" alt="">';
   var jeuS = window.CompteJeu && name ? window.CompteJeu(name) : null, bx = null;
   if(f.badge){ bx = ok ? badgeCatalog(name, jeuS).filter(function(z){ return z.id === f.badge && z.got; })[0] : null;
     if(!bx){ var e = (d.ficheBadge || []).filter(function(z){ return z.id === f.badge; })[0]; if(e) bx = {name:e.nom, tier:e.tier, ico:e.ico}; } }
@@ -2311,7 +2312,7 @@ function renderColl(){
   cnt.textContent = q ? shown.length + ' sur ' + rows.length : rows.length + (rows.length > 1 ? ' collectionneurs' : ' collectionneur');
   el.innerHTML = shown.length ? shown.map(function(r){
     var t = titleOf(r.n, total), bd = badgesOf(r.name);
-    return '<a class="cc" href="#collection=' + encodeURIComponent(r.name) + '"><h3>' + esc(r.name) + '</h3>' + (titreDe(r.name) ? '<div style="margin:-4px 0 8px"><span class="ttl-d s" style="margin:0">' + esc(titreDe(r.name)) + '</span></div>' : '') +
+    return '<a class="cc" href="#collection=' + encodeURIComponent(r.name) + '"><span class="cc-pf" data-pf="' + esc(r.name) + '" role="link" tabindex="0" title="Voir le profil">Profil →</span><h3>' + esc(r.name) + '</h3>' + (titreDe(r.name) ? '<div style="margin:-4px 0 8px"><span class="ttl-d s" style="margin:0">' + esc(titreDe(r.name)) + '</span></div>' : '') +
       '<div class="cti">' + (t ? icoK(t.k) + '<b>' + t.name + '</b>' : 'Pas encore de titre') + '</div>' + (tarotTitle(r.name) ? '<div class="tt">✦ ' + esc(tarotTitle(r.name)) + '</div>' : '') +
       '<div class="big">' + r.n + ' <small>/ ' + total + ' cartes</small></div>' +
       '<div class="bar3"><i style="width:' + (total ? Math.round(r.n / total * 100) : 0) + '%"></i></div>' +
@@ -3283,7 +3284,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var body = document.getElementById('kbody'), me = pseudoMoi(), l = liste();
     if(!data){ body.innerHTML = '<tr><td class="none" colspan="5">' + balChg('Chargement…') + '</td></tr>'; return; }
     body.innerHTML = l.length ? l.map(function(j){
-      return '<tr class="' + (j.rang <= 3 ? 'top' + j.rang : '') + (j.pseudo.toLowerCase() === me ? ' me' : '') + '"><td>' + j.rang + '</td><td>' + esc(j.pseudo) + ttag(j.pseudo) + '</td><td class="n">' + j.parties + '</td><td class="n">' + j.victoires + '</td><td class="n">' + String(j.ratio).replace('.', ',') + ' %</td></tr>';
+      return '<tr class="' + (j.rang <= 3 ? 'top' + j.rang : '') + (j.pseudo.toLowerCase() === me ? ' me' : '') + '"><td>' + j.rang + '</td><td><a class="pfl2" href="#profil=' + encodeURIComponent(j.login || j.pseudo) + '" title="Voir le profil">' + esc(j.pseudo) + '</a>' + ttag(j.pseudo) + '</td><td class="n">' + j.parties + '</td><td class="n">' + j.victoires + '</td><td class="n">' + String(j.ratio).replace('.', ',') + ' %</td></tr>';
     }).join('') : '<tr><td class="none" colspan="5">' + balVide(onglet === 'ratio' ? 'Personne n\'a encore joué ' + MIN + ' parties. Les premiers arrivent bientôt !' : 'Aucune partie jouée pour le moment.') + '</td></tr>';
     document.getElementById('knote').textContent = onglet === 'ratio' ? 'Le classement par ratio demande au moins ' + MIN + ' parties jouées, pour éviter les 100 % en une seule partie.' : 'Classé par nombre de victoires.';
     document.getElementById('kinfo').textContent = l.length + ' joueur' + (l.length > 1 ? 's' : '');
@@ -4169,6 +4170,16 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }).catch(ferme);
   });
 })();
+</script>
+<script>
+// un clic sur la photo ou le pseudo d'un viewer ouvre son profil (data-pf = son pseudo)
+document.addEventListener('click', function(e){
+  var t = e.target.closest ? e.target.closest('[data-pf]') : null; if(!t) return;
+  e.preventDefault(); e.stopPropagation();
+  var f = document.getElementById('fichem'); if(f && !f.hidden){ f.hidden = true; document.body.style.overflow = ''; }
+  location.hash = '#profil=' + encodeURIComponent(t.getAttribute('data-pf'));
+}, true);
+document.addEventListener('keydown', function(e){ if((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-pf')){ e.preventDefault(); e.target.click(); } });
 </script>
 </body>
 </html>

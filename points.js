@@ -71,7 +71,7 @@
     '.kz-p .sb{font-size:13px;color:var(--muted);margin-top:2px}',
     '.kz-tb{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}',
     '.kz-r{display:grid;grid-template-columns:56px minmax(0,1fr) 90px 90px 80px;gap:10px;align-items:center;padding:11px 20px;border-bottom:1px solid var(--line);font-size:15px}',
-    '.kz-r:last-child{border-bottom:0}.kz-r.h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}',
+    'a.pfl{color:inherit;text-decoration:none;display:block}a.pfl:hover .nm,a.pfl:hover h3{text-decoration:underline}.kz-r a.who{display:flex}.kz-p a.pfl{display:flex;flex-direction:column;align-items:center}.kz-r:last-child{border-bottom:0}.kz-r.h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}',
     '.kz-r.me{background:rgba(199,154,75,.12)}',
     '.kz-r .rk{font:800 17px var(--display);color:var(--muted)}',
     '.kz-r .who{display:flex;align-items:center;gap:12px;min-width:0}.kz-r .who span.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
@@ -167,14 +167,14 @@
   var TROPHEE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/></svg>';
   function ligne(r, me) {
     var c = r.cosm || {};
-    return '<div class="kz-r' + (me && r.login === me ? ' me' : '') + '"><span class="rk">' + r.rang + '</span><span class="who">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span class="nm">' + LCC.nom(r.pseudo, c.couleur) + (r.titre ? ' <small style="color:var(--accent);font-weight:500">' + esc(r.titre) + '</small>' : '') + '</span></span><span class="num"><b>' + n(r.pts) + '</b></span><span class="num hid">' + n(r.victoires) + '</span><span class="num s hid">' + (r.serie ? r.serie + ' j' : '–') + '</span></div>';
+    return '<div class="kz-r' + (me && r.login === me ? ' me' : '') + '"><span class="rk">' + r.rang + '</span><a class="who pfl" href="#profil=' + encodeURIComponent(r.login || r.pseudo) + '" title="Voir le profil de ' + esc(r.pseudo) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span class="nm">' + LCC.nom(r.pseudo, c.couleur) + (r.titre ? ' <small style="color:var(--accent);font-weight:500">' + esc(r.titre) + '</small>' : '') + '</span></a><span class="num"><b>' + n(r.pts) + '</b></span><span class="num hid">' + n(r.victoires) + '</span><span class="num s hid">' + (r.serie ? r.serie + ' j' : '–') + '</span></div>';
   }
   function podium(l, me) {
     var ordre = [l[1], l[0], l[2]], cl = ['r2', 'r1', 'r3'];
     return '<div class="kz-pod">' + ordre.map(function (r, i) {
       if (!r) return '<div></div>';
       var c = r.cosm || {};
-      return '<div class="kz-p ' + cl[i] + '"><div class="rk">' + r.rang + '</div>' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 76) + '<h3>' + LCC.nom(r.pseudo, c.couleur) + '</h3><div class="kz-t">' + esc(r.titre || '') + '</div><div class="pt">' + n(r.pts) + ' <small>pts</small></div><div class="sb">' + n(r.victoires) + ' victoire' + (r.victoires > 1 ? 's' : '') + (r.serie ? ' · série ' + r.serie : '') + '</div></div>';
+      return '<div class="kz-p ' + cl[i] + '"><div class="rk">' + r.rang + '</div><a class="pfl" href="#profil=' + encodeURIComponent(r.login || r.pseudo) + '" title="Voir le profil de ' + esc(r.pseudo) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 76) + '<h3>' + LCC.nom(r.pseudo, c.couleur) + '</h3></a><div class="kz-t">' + esc(r.titre || '') + '</div><div class="pt">' + n(r.pts) + ' <small>pts</small></div><div class="sb">' + n(r.victoires) + ' victoire' + (r.victoires > 1 ? 's' : '') + (r.serie ? ' · série ' + r.serie : '') + '</div></div>';
     }).join('') + '</div>';
   }
   function kzRendre() {
@@ -214,7 +214,7 @@
     fetch(String(api0).replace(/\/$/, '') + '/classement-quiz').then(function (r) { return r.json(); }).then(function (k) {
       var l = (k.semaine || []).slice(0, 3); if (!l.length) return;
       box.hidden = false;
-      box.innerHTML = '<b>Top de la semaine</b>' + l.map(function (r) { var c = r.cosm || {}; return '<a href="#classement-jeu">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span>' + r.rang + '. ' + LCC.nom(r.pseudo, c.couleur) + ' <small>' + n(r.pts) + ' pts</small></span></a>'; }).join('') + '<a href="#classement-jeu" style="margin-left:auto;color:var(--accent)">Voir le classement →</a>';
+      box.innerHTML = '<b>Top de la semaine</b>' + l.map(function (r) { var c = r.cosm || {}; return '<a href="#profil=' + encodeURIComponent(r.login || r.pseudo) + '" title="Voir le profil de ' + esc(r.pseudo) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span>' + r.rang + '. ' + LCC.nom(r.pseudo, c.couleur) + ' <small>' + n(r.pts) + ' pts</small></span></a>'; }).join('') + '<a href="#classement-jeu" style="margin-left:auto;color:var(--accent)">Voir le classement →</a>';
     }).catch(function () {});
   }
   accueil();
