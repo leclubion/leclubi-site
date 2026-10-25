@@ -3568,6 +3568,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       });
       return;
     }
+    // le lien peut venir d'un pseudo Twitch en minuscules (classement, accueil…) : on retrouve le nom exact de la collection
+    if(!COLLECTIONS[name]){
+      var lp = String((p && p.pseudo) || '').toLowerCase(), kk = Object.keys(COLLECTIONS).filter(function(k){ var lk = k.toLowerCase(); return lk === l || (lp && lk === lp); })[0];
+      if(kk) name = kk;
+    }
     var known = !!COLLECTIONS[name];
     if(!p && !known){ el.innerHTML = '<div class="cp-out"><h1>Profil introuvable</h1><p class="cp-note">Ce viewer n\'a pas encore de profil.</p><p><a class="btn" href="#collectionneurs">Voir les collectionneurs</a></p></div>'; return; }
     p = p || {pseudo: name, prive: true};
