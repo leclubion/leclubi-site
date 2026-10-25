@@ -145,6 +145,7 @@ export class Hub {
        debut INTEGER, fin INTEGER, rec_titre TEXT DEFAULT '', b_nom TEXT DEFAULT '', b_ico TEXT DEFAULT 'star', b_tier TEXT DEFAULT 'argent', secret INTEGER DEFAULT 0, actif INTEGER DEFAULT 1)`);
     q(`CREATE TABLE IF NOT EXISTS succes(joueur TEXT, kind TEXT, cle TEXT, ts INTEGER, src TEXT DEFAULT '', PRIMARY KEY(joueur, kind, cle))`);
     q(`CREATE TABLE IF NOT EXISTS qjeux(nom TEXT PRIMARY KEY, genre TEXT DEFAULT '', annee INTEGER DEFAULT 0, plateforme TEXT DEFAULT '', studio TEXT DEFAULT '', chaine INTEGER DEFAULT 0)`);
+    try { q(`ALTER TABLE qjeux ADD COLUMN vue TEXT DEFAULT ''`); } catch (e) {}
     q(`CREATE TABLE IF NOT EXISTS puzzles(n INTEGER PRIMARY KEY AUTOINCREMENT, fmt TEXT, jeu TEXT, data TEXT, jour TEXT DEFAULT '', ts INTEGER)`);
     q(`CREATE TABLE IF NOT EXISTS acartes(joueur TEXT, carte TEXT, ts INTEGER, src TEXT DEFAULT '', PRIMARY KEY(joueur, carte))`);
     q(`CREATE TABLE IF NOT EXISTS atirages(joueur TEXT, jour TEXT, cartes TEXT, choix INTEGER DEFAULT -1, PRIMARY KEY(joueur, jour))`);
@@ -900,7 +901,7 @@ function qComparer(rep, g) {
     {k: 'annee', v: g.annee || '?', s: g.annee === rep.annee ? 'ok' : 'no', dir: g.annee && rep.annee && g.annee !== rep.annee ? (rep.annee > g.annee ? 'up' : 'down') : ''},
     {k: 'studio', v: g.studio || '?', s: nrm(g.studio) && nrm(g.studio) === nrm(rep.studio) ? 'ok' : 'no'},
     {k: 'plateforme', v: g.plateforme || '?', s: m(g.plateforme, rep.plateforme)},
-    {k: 'chaine', v: g.chaine ? 'Joué sur la chaîne' : 'Pas joué sur la chaîne', s: !!g.chaine === !!rep.chaine ? 'ok' : 'no'}
+    {k: 'vue', v: g.vue || '?', s: nrm(g.vue) && nrm(g.vue) === nrm(rep.vue) ? 'ok' : 'no'}
   ];
 }
 function qMasque(nom, trouvees) {
@@ -962,8 +963,8 @@ function qVue(h, j, p, pa) {
     out.masque = fini && !gagne ? p.jeu : qMasque(p.jeu, trouvees); out.lettres = ess.map(e => ({l: e.g, ok: e.ok})); if (d.indice && (fini || erreurs >= 3)) out.indice = d.indice;
   }
   if (fmt === 'indices') {
-    const rep = d.attrs || qAttrs(h, p.jeu) || {}; const ordre = ['genre', 'annee', 'studio', 'plateforme', 'chaine'], n = fini ? 5 : Math.min(5, 1 + erreurs);
-    const lab = {genre: rep.genre, annee: rep.annee, studio: rep.studio, plateforme: rep.plateforme, chaine: rep.chaine ? 'Joué sur la chaîne' : 'Pas joué sur la chaîne'};
+    const rep = qAttrs(h, p.jeu) || d.attrs || {}; const ordre = ['genre', 'annee', 'studio', 'plateforme', 'vue'], n = fini ? 5 : Math.min(5, 1 + erreurs);
+    const lab = {genre: rep.genre, annee: rep.annee, studio: rep.studio, plateforme: rep.plateforme, vue: rep.vue};
     out.indices = ordre.slice(0, n).map(k => ({k, v: lab[k] || '?'}));
     out.essais = ess.map(e => ({...e, cmp: qComparer(rep, qAttrs(h, e.g))}));
   }
@@ -1298,9 +1299,9 @@ async function shootFin(h, j, req) {
 async function qAdmin(h, act, b) {
   if (act === 'q-jeux') return json(h.sql.exec('SELECT * FROM qjeux ORDER BY nom COLLATE NOCASE').toArray());
   if (act === 'q-jeux-set') {
-    const l = (Array.isArray(b.jeux) ? b.jeux : []).map(x => ({nom: String(x.nom || '').trim().slice(0, 80), genre: String(x.genre || '').slice(0, 60), annee: parseInt(x.annee, 10) || 0, plateforme: String(x.plateforme || '').slice(0, 80), studio: String(x.studio || '').slice(0, 60), chaine: x.chaine ? 1 : 0})).filter(x => x.nom);
-    if (l.length > 2000) return json({erreur: 'trop'}, {}, 400);
-    h.run('DELETE FROM qjeux'); l.forEach(x => h.run('INSERT OR REPLACE INTO qjeux(nom,genre,annee,plateforme,studio,chaine) VALUES(?,?,?,?,?,?)', x.nom, x.genre, x.annee, x.plateforme, x.studio, x.chaine));
+    const l = (Array.isArray(b.jeux) ? b.jeux : []).map(x => ({nom: String(x.nom || '').trim().slice(0, 80), genre: String(x.genre || '').slice(0, 60), annee: parseInt(x.annee, 10) || 0, plateforme: String(x.plateforme || '').slice(0, 80), studio: String(x.studio || '').slice(0, 60), vue: String(x.vue || '').slice(0, 40)})).filter(x => x.nom);
+    if (l.length > 3000) return json({erreur: 'trop'}, {}, 400);
+    h.run('DELETE FROM qjeux'); l.forEach(x => h.run('INSERT OR REPLACE INTO qjeux(nom,genre,annee,plateforme,studio,chaine,vue) VALUES(?,?,?,?,?,0,?)', x.nom, x.genre, x.annee, x.plateforme, x.studio, x.vue));
     return json({ok: true, n: l.length});
   }
   if (act === 'q-liste') return json(h.sql.exec(`SELECT n, fmt, jeu, jour, length(data) AS taille FROM puzzles ORDER BY fmt, n`).toArray());
