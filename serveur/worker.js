@@ -1004,6 +1004,7 @@ function aTirage(h, id, jour, palier) {
   h.run('INSERT INTO atirages(joueur,jour,cartes,choix) VALUES(?,?,?,-1)', id, jour, JSON.stringify(sel));
 }
 function aAttente(h, id) { return h.sql.exec('SELECT COUNT(*) AS c FROM atirages WHERE joueur=? AND choix<0', id).toArray()[0].c; }
+const ARCADE_DOUBLE_PTS = 50;
 async function aArcade(h, j, req) {
   if (req.method === 'POST') {
     let b = {}; try { b = await req.json(); } catch (x) {}
@@ -1013,7 +1014,9 @@ async function aArcade(h, j, req) {
     const cartes = JSON.parse(t.cartes), carte = cartes[k], nouvelle = !h.un('SELECT 1 AS x FROM acartes WHERE joueur=? AND carte=?', j.id, carte);
     h.run('INSERT OR IGNORE INTO acartes(joueur,carte,ts,src) VALUES(?,?,?,?)', j.id, carte, Date.now(), 'jeu');
     h.run('UPDATE atirages SET choix=? WHERE joueur=? AND jour=?', k, j.id, t.jour);
-    return json({ok: true, carte, nouvelle, choix: k, attente: aAttente(h, j.id)});
+    // un double rapporte des points de boutique (jamais comptés au classement)
+    let pts = 0; if (!nouvelle) { pts = ARCADE_DOUBLE_PTS; h.run('INSERT OR IGNORE INTO bonus(joueur,cle,pts,ts) VALUES(?,?,?,?)', j.id, 'double-' + t.jour, pts, Date.now()); }
+    return json({ok: true, carte, nouvelle, choix: k, attente: aAttente(h, j.id), pts});
   }
   const cartes = h.sql.exec('SELECT carte, ts FROM acartes WHERE joueur=? ORDER BY ts', j.id).toArray();
   const t = h.un('SELECT jour FROM atirages WHERE joueur=? AND choix<0 ORDER BY jour LIMIT 1', j.id);
