@@ -2323,6 +2323,7 @@ function renderColl(){
 document.getElementById('cq').addEventListener('input', renderColl);
 
 // ---- Titres et badges ----
+window.lcRenderColl = function(){ render(); };
 window.lcOuvrirReliques = function(){ current = 'reliques'; if(location.hash !== '#collection') location.hash = '#collection'; else render(); };
 function openSeasons(){ return SEASONS.filter(function(x){ return x.groups.length; }); }
 function totalCards(){ return openSeasons().reduce(function(n, x){ return n + cardsOf(x).length; }, 0); }
@@ -3558,7 +3559,15 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     if(!name){ el.innerHTML = '<div class="cp-out"><p class="cp-note">Profil introuvable.</p></div>'; return; }
     if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })){ location.replace('#compte'); return; }
     var p = pubCache[l];
-    if(p === undefined){ el.innerHTML = '<div style="padding:30px 0">' + balChg('Chargement…') + '</div>'; window.CompteProfil(name).then(function(){ if(location.hash.indexOf('#profil=') === 0) rendrePP(name); }); return; }
+    if(p === undefined){
+      el.innerHTML = '<div style="padding:30px 0">' + balChg('Chargement…') + '</div>';
+      chargerPub(l).then(function(v){
+        if(location.hash.indexOf('#profil=') !== 0) return;
+        if(v === undefined) el.innerHTML = '<div class="cp-out"><h1>Profil indisponible</h1><p class="cp-note">Impossible de charger ce profil pour le moment.</p><p><button type="button" class="btn" onclick="location.reload()">Réessayer</button></p></div>';
+        else rendrePP(name);
+      });
+      return;
+    }
     var known = !!COLLECTIONS[name];
     if(!p && !known){ el.innerHTML = '<div class="cp-out"><h1>Profil introuvable</h1><p class="cp-note">Ce viewer n\'a pas encore de profil.</p><p><a class="btn" href="#collectionneurs">Voir les collectionneurs</a></p></div>'; return; }
     p = p || {pseudo: name, prive: true};
@@ -3592,13 +3601,21 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 
   // ----- vitrine sur les profils publics (page d'un collectionneur) -----
   function n0(x){ return window.lcFormatPts ? lcFormatPts(x) : x; }
+  // chargement d'un profil public : une seule requête à la fois par viewer, et le résultat n'est mis en cache que s'il est vraiment arrivé
+  var pending = {};
+  function chargerPub(l){
+    if(pubCache[l] !== undefined) return Promise.resolve(pubCache[l]);
+    if(pending[l]) return pending[l];
+    pending[l] = appel('/profil/' + encodeURIComponent(l)).then(function(r){ pubCache[l] = r.ok ? r.d : false; return pubCache[l]; }).catch(function(){ return undefined; }).then(function(v){ delete pending[l]; return v; });
+    return pending[l];
+  }
+  function majCollection(){ var cv = g('v-collection'); if(cv && !cv.hidden && window.lcRenderColl) window.lcRenderColl(); }
   function vitrinePublique(){
     var el = g('vit'); if(!el) return;
     if(!ON || !who){ el.innerHTML = ''; return; }
     var login = who.toLowerCase(), c = pubCache[login];
     if(c === undefined){
-      pubCache[login] = null;
-      appel('/profil/' + encodeURIComponent(login)).then(function(r){ pubCache[login] = r.ok ? r.d : false; vitrinePublique(); renderBadges(); }).catch(function(){ pubCache[login] = false; });
+      chargerPub(login).then(function(v){ if(v !== undefined){ vitrinePublique(); renderBadges(); majCollection(); } });
       el.innerHTML = ''; return;
     }
     var ids = c && !c.prive && c.vitrine ? c.vitrine.filter(function(id){ return owns(who, id); }) : [];
@@ -3810,8 +3827,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var l = String(nom).toLowerCase();
     if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return Promise.resolve({pseudo:moi.pseudo, avatar:moi.avatar, titre:moi.titre, fiche:moi.fiche, ficheBadge:moi.succes || [], prive:false});
     if(!ON) return Promise.resolve(null);
-    var c = pubCache[l]; if(c) return Promise.resolve(c);
-    return appel('/profil/' + encodeURIComponent(l)).then(function(r){ pubCache[l] = r.ok ? r.d : false; return pubCache[l] || null; }).catch(function(){ return null; });
+    return chargerPub(l).then(function(v){ return v || null; });
   };
 
   // ----- propositions (privées : lues seulement par LeClubi) -----
@@ -4019,7 +4035,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var l = String(name || '').toLowerCase();
     if(moi && [moi.login, moi.pseudo].some(function(z){ return String(z).toLowerCase() === l; })) return moi.reliques || [];
     var p = pubCache[l];
-    if(p === undefined){ window.CompteProfil(name).then(function(){ if(current === 'reliques') render(); }); return []; }
+    if(p === undefined){ chargerPub(l).then(function(v){ if(v !== undefined) majCollection(); }); return []; }
     return (p && p.reliques) || [];
   };
   window.CompteJeu = function(nom){
@@ -4155,7 +4171,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   if(location.hash === '#arcade') setTimeout(window.lcArcadeOuvrir, 0);
   window.lcArcadeMaj = function(){ if(g('acmain')){ chargeEtat().then(render); } };
   var oldUi = window.lcOnUi;
-  window.lcOnUi = function(){ if(oldUi) oldUi(); window.lcArcadeMaj(); };
+  window.lcOnUi = function(){ if(oldUi) oldUi(); window.lcArcadeMaj(); var cv = document.getElementById('v-collection'); if(cv && !cv.hidden && window.lcRenderColl) window.lcRenderColl(); };
   // le coffre caché (page « À propos ») : il ne s'ouvre qu'avec la bonne carte, sans rien dire de plus
   document.addEventListener('click', function(e){
     var cf = e.target.closest ? e.target.closest('#acCoffre') : null; if(!cf) return;
