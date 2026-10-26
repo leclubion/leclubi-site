@@ -1284,6 +1284,7 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 .cbp-m .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#17181a;background:#ffd070;border-radius:6px;padding:3px 9px}
 .cbp-end{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
 @media (max-width:900px){.cbp-rules,.cbp-modes{grid-template-columns:1fr}}
+header nav>a[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1296,6 +1297,7 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
       <div class="dd" id="ddAccueil"><a href="#accueil" data-nav="accueil">Accueil</a><button class="ddt" type="button" aria-label="Ouvrir le menu Accueil" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#accueil" role="menuitem" data-sub="accueil">Accueil</a><a href="#planning" role="menuitem" data-sub="planning">Planning</a></div></div>
       <div class="dd" id="ddJeux" hidden><a href="#cardbattle" data-nav="jeux">Jeux</a><button class="ddt" type="button" aria-label="Ouvrir le menu Jeux" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#cardbattle" role="menuitem" data-sub="cardbattle"><span class="nomjeu">Clubi Card Battle</span></a><a href="#jeudujour" role="menuitem" data-sub="jeudujour" id="navQ">Jeu du jour</a><a href="#classement" role="menuitem" data-sub="classement" id="navClass">Classement</a></div></div>
       <div class="dd" id="ddCartes"><a href="#collection" data-nav="collection">Cartes</a><button class="ddt" type="button" aria-label="Ouvrir le menu Cartes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#collection" role="menuitem" data-sub="collection">Collection</a><a href="#collectionneurs" role="menuitem" data-sub="collectionneurs">Collectionneurs</a></div></div>
+    <a href="#forum" data-nav="forum" id="navForum" hidden>Forum</a>
     </nav>
     <div class="hlinks">
       <nav class="nav-r" aria-label="Informations"><a href="#apropos" data-nav="apropos">À propos</a></nav>
@@ -1471,6 +1473,7 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
   </section>
 </div>
 
+<div class="view" id="v-forum" hidden></div>
 <div class="view" id="v-planning" hidden>
   <section class="plan-sec">
     <div class="wrap wide">
@@ -1799,9 +1802,10 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
   var h = location.hash; if(h === '#arcade'){ current = 'arcade'; h = '#collection'; }
-  var page = h === '#cardbattle' ? 'cardbattle' : h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h.indexOf('#profil=') === 0 ? 'profil' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'cardbattle', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'profil', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var page = h.indexOf('#forum') === 0 ? 'forum' : h === '#cardbattle' ? 'cardbattle' : h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h.indexOf('#profil=') === 0 ? 'profil' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'forum', 'cardbattle', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'profil', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement'){ var qz = h === '#classement-jeu'; document.getElementById('kcb').hidden = qz; document.getElementById('kqz').hidden = !qz; document.getElementById('kswA').setAttribute('aria-selected', !qz); document.getElementById('kswB').setAttribute('aria-selected', qz); if(qz){ if(window.lcClassementQuiz) window.lcClassementQuiz(); } else if(window.chargerClassement) window.chargerClassement(); }
+  if(page === 'forum' && window.lcForum) window.lcForum.aller(h);
   if(page === 'boutique' && window.lcBoutique) window.lcBoutique();
   if(page === 'profil' && window.lcProfilPublic){ var pn = ''; try{ pn = decodeURIComponent(h.slice(8)); }catch(e){} window.lcProfilPublic(pn); }
   if(page === 'jeudujour' && window.lcJeuDuJour) window.lcJeuDuJour();
@@ -3482,7 +3486,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 })();
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10, modeJ = 'classique', datas = {}, charges = {};
-  if(JEU_API){ document.getElementById('ddJeux').hidden = false; }
+  if(JEU_API){ document.getElementById('ddJeux').hidden = false; document.getElementById('navForum').hidden = false; }
   if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
   function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
   function liste(){
@@ -4417,5 +4421,6 @@ document.addEventListener('click', function(e){
 }, true);
 document.addEventListener('keydown', function(e){ if((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-pf')){ e.preventDefault(); e.target.click(); } });
 </script>
+<script src="forum.js"></script>
 </body>
 </html>
