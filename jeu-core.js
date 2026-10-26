@@ -231,7 +231,7 @@
     rempart:     {nom:'Rempart',            fam:'defense', r:'rare',   cible:'carteMoi', txt:'Scelle une de tes cartes jusqu\'à la fin de la manche : elle ne peut plus être détruite ni modifiée.'},
     echange:     {nom:'Échange',            fam:'controle',r:'commun', cible:'deuxMoi',  txt:'Intervertis deux de tes cartes. Chacune agit comme une pose dans sa nouvelle colonne : elle détruit les cartes adverses de même valeur.'},
     chaine:      {nom:'Chaîne',             fam:'controle',r:'peu',    cible:'colAdv',   txt:'L\'adversaire ne pourra pas poser de carte dans cette colonne à son prochain tour.'},
-    derive:      {nom:'Dérive',             fam:'controle',r:'peu',    cible:'derive',   txt:'Déplace une carte adverse vers une autre colonne adverse qui a de la place.'},
+    derive:      {nom:'Dérive',             fam:'controle',r:'peu',    cible:'derive',   txt:'Déplace une carte adverse vers une autre colonne adverse qui a de la place. Si une de tes cartes de même valeur lui fait face dans cette colonne, elle est détruite.'},
     larcin:      {nom:'Larcin',             fam:'controle',r:'rare',   cible:null,       txt:'Prends une carte au hasard dans la main de l\'adversaire.'},
     oeil:        {nom:'Œil',                fam:'pioche',  r:'commun', cible:null,       txt:'Regarde la main de l\'adversaire jusqu\'à la fin de ton tour.'},
     reassort:    {nom:'Réassort',           fam:'pioche',  r:'commun', cible:null,       txt:'Défausse ta main et pioche le même nombre de cartes.'},
@@ -453,7 +453,11 @@
         }
         break; }
       case 'chaine': sv.lock.push({p: o, ci: c.ci}); break;
-      case 'derive': { var cd = S.board[o][c.ci].splice(c.r, 1)[0]; S.board[o][c.dst].push(cd); break; }
+      case 'derive': {
+        var cd = S.board[o][c.ci].splice(c.r, 1)[0]; S.board[o][c.dst].push(cd);
+        // la carte déplacée n'est détruite que si une de tes cartes de même valeur lui fait face dans la colonne d'arrivée (la Parade peut l'annuler)
+        if(S.board[p][c.dst].some(function(x){ return x.power === cd.power; })){ detr(o, [{ci: c.dst, r: S.board[o][c.dst].length - 1}]); res.derive = true; }
+        break; }
       case 'larcin': { var k = aleat(S, S.hands[o].length), x = S.hands[o].splice(k, 1)[0]; S.hands[p].push(x); res.pris = x; break; }
       case 'oeil': sv.vu[p] = true; res.vus = S.hands[o].slice(); break;
       case 'reassort': {
