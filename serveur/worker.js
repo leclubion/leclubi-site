@@ -1172,7 +1172,7 @@ const BQ = [
   ...[['ville', 'Ville sous la pluie', 600], ['salle', 'Salle d’arcade', 700], ['foret', 'Forêt du Renard', 800], ['neon', 'Néons du Ronin', 900], ['station', 'Station du Pilote', 1000], ['tour', 'Tour du Bourreau', 1200], ['ile', 'Île du Pirate Fantôme', 1500], ['manoir', 'Manoir du Veilleur', 2000], ['citrouilles', 'Champ de citrouilles (Halloween)', 900], ['fantomes', 'Bal des fantômes (Halloween)', 1000], ['toile', 'Repaire des araignées (Halloween)', 1100], ['sorciere', 'Nuit de la sorcière (Halloween)', 1300]]
     .map(([k, n, p]) => ({id: 'b-' + k, kind: 'banniere', nom: n, prix: p, desc: 'Une bannière animée en haut de ton profil.'})),
   // fonds de profil : animés et discrets, derrière tout le profil (les deux premiers sont offerts à tout le monde)
-  ...[['etoiles', 'Ciel étoilé', 0], ['neige', 'Neige tranquille', 0], ['nebuleuse', 'Nébuleuse', 500], ['lucioles', 'Lucioles', 500], ['braises', 'Braises', 500], ['petales', 'Pétales', 500], ['pluie', 'Pluie de nuit', 400], ['hyperespace', 'Voyage stellaire', 600], ['constellations', 'Constellations', 600], ['bulles', 'Fonds marins', 600], ['code', 'Pluie de code', 700], ['aurore', 'Aurore boréale', 800], ['orbites', 'Orbites', 900]]
+  ...[['etoiles', 'Ciel étoilé', 0], ['neige', 'Neige tranquille', 0], ['nebuleuse', 'Nébuleuse', 500], ['lucioles', 'Lucioles', 500], ['braises', 'Braises', 500], ['petales', 'Pétales', 500], ['pluie', 'Pluie de nuit', 400], ['hyperespace', 'Voyage stellaire', 600], ['constellations', 'Constellations', 600], ['bulles', 'Fonds marins', 600], ['code', 'Pluie de code', 700], ['aurore', 'Aurore boréale', 800], ['orbites', 'Orbites', 900], ['lunesang', 'Lune de sang (Halloween)', 700], ['cimetiere', 'Brume du cimetière (Halloween)', 700], ['citrouilles', 'Citrouilles flottantes (Halloween)', 800], ['fantomes', 'Bal des fantômes (Halloween)', 800], ['araignees', 'Toiles et araignées (Halloween)', 900]]
     .map(([k, n, p]) => ({id: 'f-' + k, kind: 'fond', nom: n, prix: p, desc: 'Un fond animé et discret derrière ton profil.'})),
   ...[['or', 'Or', 250], ['rose', 'Rose', 250], ['cyan', 'Cyan', 250], ['vert', 'Vert', 250], ['arc', 'Arc-en-ciel animé', 700]]
     .map(([k, n, p]) => ({id: 'p-' + k, kind: 'couleur', nom: n, prix: p, desc: 'Une couleur pour ton pseudo.'}))
@@ -1477,6 +1477,12 @@ function forumTables(h) {
     ajout('annonces', 'Nouveautés des cartes et de la collection', intro + "Je note ici chaque nouvelle carte, nouvelle saison ou nouveauté de la collection.", true);
     ajout('annonces', 'Nouveautés du Jeu du jour', intro + "Je note ici chaque changement du Jeu du jour : nouveaux mini-jeux, récompenses, classement.", true);
   }
+  if (!h.un('SELECT 1 AS x FROM forum_meta WHERE cle=?', 'nouveautes2')) {
+    h.run('INSERT INTO forum_meta(cle) VALUES(?)', 'nouveautes2');
+    const rep = (titre, texte) => { const sj = h.un("SELECT * FROM forum_sujets WHERE cat='annonces' AND titre=?", titre); if (sj) fEnregistrer(h, fCfg(h), {id: 'sys'}, sj, texte, 0); };
+    rep('Nouveautés du Clubi Card Battle', "**26 octobre 2026 : le Mode Survie**\nUn match en plusieurs manches où des objets tirés au hasard changent la partie. Le mode classique reste exactement comme avant.\n\n**Comment ça marche**\n• Le match se joue en **2 manches gagnantes** (5 manches au maximum en cas d'égalité).\n• Au début de chaque manche, tu reçois des objets tirés au hasard : 1 à la manche 1, 2 à la manche 2, 3 à partir de la manche 3. Celui qui a perdu la manche précédente en reçoit 1 de plus.\n• Tu gardes **4 objets** au maximum : un objet de trop est perdu.\n• Tu peux utiliser **1 objet par tour**, quand tu veux pendant ton tour. Un objet utilisé est consommé.\n• En Survie, tu as **5 cartes en main** au maximum.\n• Les objets sont plus ou moins rares : environ 55 % de communs, 33 % de peu communs et 12 % de rares.\n• Le Mode Survie a son propre classement, à côté du classement classique.\n\n**Les 21 objets**\n\n*Attaque*\n**Foudre** : Détruit 1 carte au hasard dans une colonne adverse de ton choix.\n**Sceau de faiblesse** : Divise par 2 (arrondi haut) la puissance d'une carte adverse.\n**Faux** : Détruit la carte la plus forte d'une colonne adverse.\n**Rafle** : Choisis une puissance : toutes les cartes de cette puissance sont détruites sur les deux plateaux, les tiennes aussi.\n**Séisme** : Détruit la carte la plus proche du centre dans chaque colonne adverse.\n\n*Défense*\n**Renfort** : Ajoute +1 à la puissance d'une de tes cartes (9 au maximum).\n**Bouclier** : Protège une de tes colonnes pendant les 2 prochains tours de l'adversaire.\n**Parade** : Annule la prochaine destruction que tu subis. Reste active jusqu'à son déclenchement.\n**Rempart** : Scelle une de tes cartes jusqu'à la fin de la manche : elle ne peut plus être détruite ni modifiée.\n\n*Contrôle*\n**Échange** : Intervertis deux de tes cartes. Chacune agit comme une pose dans sa nouvelle colonne : elle détruit les cartes adverses de même valeur.\n**Chaîne** : L'adversaire ne pourra pas poser de carte dans cette colonne à son prochain tour.\n**Dérive** : Déplace une carte adverse vers une autre colonne adverse qui a de la place. Si une de tes cartes de même valeur lui fait face dans cette colonne, elle est détruite.\n**Larcin** : Prends une carte au hasard dans la main de l'adversaire.\n\n*Pioche*\n**Œil** : Regarde la main de l'adversaire jusqu'à la fin de ton tour.\n**Réassort** : Défausse ta main et pioche le même nombre de cartes.\n**Prophétie** : Regarde les 3 prochaines cartes de la pioche et choisis leur ordre.\n**Trésor** : Pioche 2 cartes (5 cartes en main au maximum).\n**Résurrection** : Reprends en main la dernière de tes cartes détruites.\n\n*Chaos*\n**Dé du destin** : La puissance d'une de tes cartes devient un nombre au hasard de 1 à 6.\n**Pari** : Pile ou face. Pile : 1 carte au hasard détruite dans chaque colonne adverse. Face : dans chacune des tiennes.\n**Pacte** : Tu poses 2 cartes ce tour. Après la deuxième, 1 carte au hasard de ta main est défaussée.");
+    rep('Nouveautés de la boutique', "**26 octobre 2026 : 5 fonds Halloween**\nDe nouveaux fonds de profil pour la saison : **Lune de sang** (chauves-souris devant une lune rouge), **Brume du cimetière**, **Citrouilles flottantes**, **Bal des fantômes** et **Toiles et araignées**.\nIls sont dans l'onglet « Fonds » de la boutique, de 700 à 900 pts.");
+  }
 }
 function fCfg(h) {
   const e = h.env || {};
@@ -1488,15 +1494,21 @@ function fSanction(h, id) {
   if (s.type === 'sourdine' && s.jusqua < Date.now()) { h.run('DELETE FROM forum_sanctions WHERE joueur=?', id); return null; }
   return s;
 }
+// vitrine affichée à côté des messages : les badges que le membre a choisis (jamais ceux des secrets, ni pour un profil privé)
+function fBadges(h, j) {
+  if (j.prive) return [];
+  const bj = h.badgesDe(j);
+  return h.succesDe(j).filter(x => bj.includes(x.id) && x.cat !== 'Secrets').slice(0, 4).map(x => ({id: x.id, nom: x.nom, ico: x.ico, tier: x.tier}));
+}
 function fAuteur(h, C, id, cache) {
   if (cache && cache.has(id)) return cache.get(id);
   let a;
-  if (!id || id === 'sys') a = {pseudo: 'LeClubi', login: 'leclubi', avatar: '', titre: '', cosm: {}, modo: true, sys: true, n: 0};
-  else {
-    const j = h.joueur(id);
-    a = j ? {pseudo: j.nom, login: j.login, avatar: j.prive ? '' : (j.avatar || ''), titre: h.titreDe(j), cosm: cosmDe(j), modo: C.modos.includes(j.login), n: h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE auteur=? AND supprime=0', id).c}
-      : {pseudo: 'Ancien membre', login: '', avatar: '', titre: '', cosm: {}, modo: false, n: 0};
-  }
+  // les messages du système sont signés par le compte du créateur s'il existe (sa photo, son cadre, ses titres)
+  const j = (!id || id === 'sys') ? (C.modos[0] ? h.un('SELECT * FROM joueurs WHERE login=?', C.modos[0]) : null) : h.joueur(id);
+  if (!id || id === 'sys') a = j ? {pseudo: j.nom, login: j.login, avatar: j.prive ? '' : (j.avatar || ''), titre: h.titreDe(j), cosm: cosmDe(j), badges: fBadges(h, j), depuis: j.cree || 0, modo: true, n: 0}
+    : {pseudo: 'LeClubi', login: 'leclubi', avatar: '', titre: '', cosm: {}, badges: [], depuis: 0, modo: true, sys: true, n: 0};
+  else a = j ? {pseudo: j.nom, login: j.login, avatar: j.prive ? '' : (j.avatar || ''), titre: h.titreDe(j), cosm: cosmDe(j), badges: fBadges(h, j), depuis: j.cree || 0, modo: C.modos.includes(j.login), n: h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE auteur=? AND supprime=0', id).c}
+    : {pseudo: 'Ancien membre', login: '', avatar: '', titre: '', cosm: {}, badges: [], depuis: 0, modo: false, n: 0};
   if (cache) cache.set(id, a); return a;
 }
 const fMini = a => ({pseudo: a.pseudo, login: a.login, avatar: a.avatar, cosm: a.cosm});
