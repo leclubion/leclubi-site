@@ -557,6 +557,60 @@ nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--red)}
 .chips span{padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
 .hs .more{font-size:14px;color:var(--accent)}
 .hnote{margin:0;color:var(--muted);font-size:14px}
+
+/* ===== accueil v2 ===== */
+.hz-champ[hidden]{display:none}
+.eb{display:inline-block;font:700 12px Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.eb::before{content:"";display:inline-block;width:28px;height:2px;background:var(--accent);vertical-align:middle;margin-right:10px;border-radius:2px}
+.sh{margin-bottom:26px}.sh h2{margin:0 0 6px}
+.hb{position:relative;overflow:hidden;padding:76px 0}
+#v-accueil .hb h2{font-size:clamp(28px,4.2vw,46px);line-height:1.05}
+[data-rv]{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+[data-rv].in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){[data-rv]{opacity:1;transform:none;transition:none}}
+.hb-vote{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 7%,transparent) 50%,transparent)}
+.hb-cb{background:radial-gradient(ellipse 70% 90% at 75% 50%,#3a2466 0%,#171229 55%,#0d0b17 100%);color:#ece8df;padding:88px 0 70px}
+.hb-cb .lead{color:#c9c3d8}.hb-cb .eb{color:#ffd070}.hb-cb .eb::before{background:#ffd070}.hb-cb h2{color:#fff}
+.hb-cb .btn.ghost{color:#ece8df;border-color:rgba(255,255,255,.35)}
+.hb-glow{position:absolute;inset:-20%;background:conic-gradient(from 0deg at 72% 50%,transparent,rgba(255,208,112,.12),transparent 30%,rgba(167,109,255,.16),transparent 60%);animation:hbSpin 22s linear infinite;pointer-events:none}
+@keyframes hbSpin{to{transform:rotate(360deg)}}
+.cbv{position:relative;display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center}
+.cbv-t .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.cbv-k{display:flex;gap:28px;margin-top:22px}.cbv-k b{display:block;font:400 34px var(--display);color:#ffd070;line-height:1}.cbv-k small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a9a3bb}
+.cbv-f{position:relative;height:340px;display:flex;justify-content:center;align-items:center;perspective:900px}
+.cf{position:absolute;width:150px;aspect-ratio:5/7;border-radius:14px;padding:5px;box-sizing:border-box;box-shadow:0 18px 40px rgba(0,0,0,.6);transition:transform .45s cubic-bezier(.2,.9,.3,1.2),z-index 0s;transform:translateX(calc(var(--i) * 92px)) rotate(calc(var(--i) * 9deg)) translateY(calc(var(--i) * var(--i) * 7px));z-index:calc(10 - var(--i) * var(--i));animation:cfIn .9s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--k) * .12s)}
+.cf:hover{transform:translateX(calc(var(--i) * 92px)) rotate(0) translateY(-26px) scale(1.14);z-index:30}
+.cf.c{background:linear-gradient(150deg,#d39a64,#8a5a30 55%,#4e3015)}.cf.u{background:linear-gradient(150deg,#f4f6fa,#aeb4bd 55%,#626872)}.cf.r{background:linear-gradient(150deg,#fff0b0,#e0b043 50%,#8a5a10);box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 34px rgba(240,185,90,.55)}
+.cf>div{position:relative;width:100%;height:100%;border-radius:10px;overflow:hidden;background:#000}
+.cf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cf>div::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.85));box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.cf em{position:absolute;z-index:2;left:0;right:0;bottom:8px;text-align:center;font:700 14px 'Cinzel',Georgia,serif;font-style:normal;color:#fbf6ea;text-shadow:0 2px 6px #000;letter-spacing:.04em}
+.cf.r>div::before{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 48%,transparent 62%);transform:translateX(-120%);animation:obShine 3.6s ease-in-out infinite}
+@keyframes cfIn{0%{opacity:0;transform:translateX(0) translateY(-90px) scale(2) rotate(-20deg)}100%{opacity:1}}
+@keyframes obShine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(130%)}}
+.cbv-top{position:relative;margin-top:44px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:16px 22px;backdrop-filter:blur(6px)}
+.cbv-top b.t{font:400 15px var(--display);text-transform:uppercase;color:#ffd070}
+.cbv-top a{display:flex;align-items:center;gap:10px;font-weight:600;color:#ece8df}.cbv-top small{color:#a9a3bb;font-weight:500}
+.hb-bo{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 8%,transparent))}
+.tk{margin-top:54px}
+.tk-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:16px}.tk-h b{font:400 16px var(--display);text-transform:uppercase}.tk-h a{font-size:14px;color:var(--accent);font-weight:600}
+.tk-r{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.tk .hlast{display:flex;gap:18px;width:max-content;animation:tkMove 38s linear infinite}
+.tk-r:hover .hlast{animation-play-state:paused}
+.tk .hl{width:132px;flex:none}
+.tk .hl .th{box-shadow:0 10px 24px rgba(0,0,0,.35)}
+@keyframes tkMove{to{transform:translateX(calc(-50% - 9px))}}
+@media (prefers-reduced-motion:reduce){.tk .hlast{animation:none;flex-wrap:wrap;width:auto}}
+.hb-vid{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 5%,transparent),transparent)}
+.hb-vid .vid{transition:transform .25s}.hb-vid .vid:hover{transform:translateY(-6px)}
+.jn{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.jn-c{position:relative;display:flex;flex-direction:column;gap:8px;padding:28px 26px;border-radius:18px;color:#fff;overflow:hidden;min-height:190px;justify-content:flex-end;transition:transform .25s,box-shadow .25s}
+.jn-c:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.jn-c::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% 0%,rgba(255,255,255,.28),transparent 55%)}
+.jn-c b{position:relative;font:400 30px var(--display);text-transform:uppercase}.jn-c span{position:relative;font-size:14px;opacity:.9}.jn-c i{position:relative;font-style:normal;font-weight:700;font-size:14px}
+.jn-tw{background:linear-gradient(135deg,#6a3fd1,#3b1c8c)}.jn-dc{background:linear-gradient(135deg,#6b76f5,#3a44b8)}.jn-yt{background:linear-gradient(135deg,#e0473f,#8f1d17)}
+@media (max-width:900px){.cbv{grid-template-columns:1fr}.cbv-f{height:300px;margin-top:10px}.cf{width:120px;transform:translateX(calc(var(--i) * 66px)) rotate(calc(var(--i) * 9deg)) translateY(calc(var(--i) * var(--i) * 6px))}.cf:hover{transform:translateX(calc(var(--i) * 66px)) translateY(-18px) scale(1.1)}.jn{grid-template-columns:1fr}.hb{padding:56px 0}}
+@media (max-width:520px){.cf{width:96px;transform:translateX(calc(var(--i) * 50px)) rotate(calc(var(--i) * 8deg)) translateY(calc(var(--i) * var(--i) * 5px))}.cf:hover{transform:translateX(calc(var(--i) * 50px)) translateY(-14px) scale(1.08)}.cbv-f{height:250px}}
 @media (max-width:860px){.hc{grid-template-columns:1fr;gap:32px}}
 @media (max-width:700px){.hlast{grid-template-columns:repeat(3,1fr);gap:12px}.hlast .hl:nth-child(n+4){display:none}.hseas{grid-template-columns:1fr}}
 .nx-sec{padding:48px 0 72px}
@@ -1236,10 +1290,10 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
     </div>
   </section>
 
-  <section>
+  <section class="hb hb-vote" data-rv>
     <div class="wrap">
-      <h2>Prochain jeu du stream</h2>
-      <p class="lead">Le jeu qui passera en tête sera l'un des prochains jeux que je ferai en stream.</p>
+      <div class="sh"><span class="eb">Vote · Prochain jeu du stream</span><h2>C'est vous qui choisissez</h2>
+      <p class="lead">Le jeu qui passera en tête sera l'un des prochains jeux que je ferai en stream.</p></div>
       <div class="pollgrid">
         <div class="gal" id="gal" role="region" aria-roledescription="carrousel" aria-label="Aperçu des jeux proposés"></div>
         <div class="poll" id="poll" aria-live="polite"></div>
@@ -1247,14 +1301,36 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
     </div>
   </section>
 
-  <section>
+  <section class="hb hb-cb" id="hcb" data-rv>
+    <div class="hb-glow" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="cbv">
+        <div class="cbv-t">
+          <span class="eb">Clubi Card Battle</span>
+          <h2>Le duel de cartes<br>de la chaîne</h2>
+          <p class="lead">Pose tes cartes, détruis celles de l'adversaire, construis des colonnes triples. Et en <b>Mode Survie</b>, 21 objets tirés au hasard changent tout : foudre, bouclier, œil, échange, pari…</p>
+          <div class="cbv-k"><div><b>21</b><small>objets</small></div><div><b>2</b><small>modes de jeu</small></div><div><b>1 v 1</b><small>en ligne</small></div></div>
+          <div class="row">
+            <a class="btn" id="hcbJouer" href="jeu.html" hidden>Jouer maintenant</a>
+            <a class="btn ghost" href="#classement">Voir le classement</a>
+          </div>
+        </div>
+        <div class="cbv-f" id="hcbFan" aria-label="Quelques objets du Mode Survie"></div>
+      </div>
+      <div class="cbv-top" id="hcbTop" hidden></div>
+    </div>
+  </section>
+
+  <section class="hb hb-bo" data-rv>
     <div class="wrap">
       <div class="bog">
         <div>
+          <span class="eb">Booster · Power-up</span>
           <h2>À chaque tirage, une surprise</h2>
           <p class="lead">Pendant les lives, un Power-up ouvre un booster à l'écran et révèle une carte au hasard. Commune, Rare ou même Spéciale : laquelle sera la tienne ?</p>
           <div class="row">
             <a class="btn" href="#collection">Voir la collection</a>
+            <a class="btn ghost" href="#collectionneurs">Les collectionneurs</a>
             <a class="btn ghost" href="#apropos">Comment ça marche</a>
           </div>
         </div>
@@ -1267,50 +1343,33 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
           <div class="bo-cap" aria-hidden="true">Quelle carte vas-tu <em>tirer</em> ?</div>
         </div>
       </div>
+      <div class="tk" id="tk" hidden>
+        <div class="tk-h"><b id="hlt">Derniers déblocages</b><a href="#collectionneurs">Voir les collectionneurs →</a></div>
+        <div class="tk-r"><div class="hlast" id="hlast"></div></div>
+      </div>
+      <div hidden><div class="htop" id="htop"></div><div class="hseas" id="hseas"></div></div>
     </div>
   </section>
 
-  <section>
+  <section class="hb hb-vid" data-rv>
     <div class="wrap">
       <div class="head">
-        <div>
-          <h2>La communauté en cartes</h2>
-          <p class="lead" style="margin:0">Les cartes débloquées par les viewers, saison après saison.</p>
-        </div>
-        <a class="btn ghost" href="#collectionneurs">Voir les collectionneurs</a>
-      </div>
-      <div class="hc">
-        <div>
-          <h3 class="mini" id="hlt">Derniers déblocages</h3>
-          <div class="hlast" id="hlast"></div>
-        </div>
-        <div>
-          <h3 class="mini">Top 3 des collectionneurs</h3>
-          <div class="htop" id="htop"></div>
-        </div>
-      </div>
-      <div class="hseas" id="hseas"></div>
-    </div>
-  </section>
-  <section>
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <h2>Dernières vidéos</h2>
-          <p class="lead" style="margin:0">Les trois dernières vidéos de la chaîne YouTube.</p>
-        </div>
+        <div class="sh" style="margin:0"><span class="eb">YouTube</span><h2>Dernières vidéos</h2>
+        <p class="lead" style="margin:0">Les trois dernières vidéos de la chaîne YouTube.</p></div>
         <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
       </div>
       <div class="vgrid" id="vgrid" aria-live="polite"></div>
     </div>
   </section>
-  <section>
+
+  <section class="hb hb-join" data-rv>
     <div class="wrap">
-      <h2>Rejoindre la communauté</h2>
-      <p class="lead">Retrouve LeClubi ailleurs que sur Twitch.</p>
-      <div class="row">
-        <a class="btn dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Rejoindre le Discord</a>
-        <a class="btn yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">Voir la chaîne YouTube</a>
+      <div class="sh"><span class="eb">Communauté</span><h2>Rejoindre la communauté</h2>
+      <p class="lead">Retrouve LeClubi ailleurs que sur Twitch.</p></div>
+      <div class="jn">
+        <a class="jn-c jn-tw" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener"><b>Twitch</b><span>Les lives, les Power-ups, les boosters</span><i>Rejoindre le live →</i></a>
+        <a class="jn-c jn-dc" href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener"><b>Discord</b><span>Discuter, proposer des jeux, partager</span><i>Rejoindre le Discord →</i></a>
+        <a class="jn-c jn-yt" href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener"><b>YouTube</b><span>Les vidéos et les meilleurs moments</span><i>Voir la chaîne →</i></a>
       </div>
     </div>
   </section>
@@ -2745,10 +2804,10 @@ function thumb(id){
 function renderHome(){
   var last = document.getElementById('hlast');
   if(!last) return;
-  var top = document.getElementById('htop'), seas = document.getElementById('hseas'), lt = document.getElementById('hlt');
+  var top = document.getElementById('htop'), seas = document.getElementById('hseas'), lt = document.getElementById('hlt'); var tkb = document.getElementById('tk');
   var note = function(t, k){ return k === 'c' ? balChg(t) : k === 'v' ? balVide(t) : '<p class="hnote">' + t + '</p>'; };
-  if(sheetState === 'loading'){ last.innerHTML = top.innerHTML = note('Chargement…', 'c'); return; }
-  if(sheetState === 'error'){ last.innerHTML = top.innerHTML = note('Les collections sont momentanément indisponibles.'); }
+  if(sheetState === 'loading'){ if(tkb) tkb.hidden = true; return; }
+  if(sheetState === 'error'){ if(tkb) tkb.hidden = true; }
   var names = Object.keys(COLLECTIONS), seasons = SEASONS.filter(function(x){ return x.groups.length; });
   var total = seasons.reduce(function(n, x){ return n + cardsOf(x).length; }, 0);
   var count = function(n){ return seasons.reduce(function(k, x){ return k + cardsOf(x).filter(function(c){ return owns(n, c.id); }).length; }, 0); };
@@ -2773,9 +2832,9 @@ function renderHome(){
         return {id:c.id, who:one ? o[0] : o.length + ' viewers', href:one ? '#collection=' + encodeURIComponent(o[0]) : '#collectionneurs', sub:c.r};
       });
     }
-    last.innerHTML = items.length ? items.map(function(i){
-      return '<a class="hl" href="' + i.href + '">' + thumb(i.id) + '<p><b>' + esc(i.who) + '</b>' + i.sub + '</p></a>';
-    }).join('') : note('Aucune carte débloquée pour le moment.', 'v');
+    var htm = items.map(function(i){ return '<a class="hl" href="' + i.href + '">' + thumb(i.id) + '<p><b>' + esc(i.who) + '</b>' + i.sub + '</p></a>'; }).join('');
+    if(tkb) tkb.hidden = !items.length;
+    last.innerHTML = items.length ? (items.length < 7 ? htm + htm + htm : htm + htm) : '';
 
     // Top 3
     var rows = names.map(function(n){ return {name:n, n:count(n)}; }).filter(function(r){ return r.n > 0; })
@@ -3266,6 +3325,30 @@ loadTitres();
 var JEU_API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, '');      // réglages dans le fichier config-jeu.js
 var JEU_OUVERT = !!(window.JEU_CONFIG || {}).OUVERT;
 if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(function(e){ e.textContent = JEU_CONFIG.NOM; });
+
+// ---- Accueil : vitrine Card Battle + apparition au défilement ----
+(function(){
+  var OB = [['bouclier', 'Bouclier', 'c'], ['foudre', 'Foudre', 'c'], ['seisme', 'Séisme', 'r'], ['oeil', 'Œil', 'c'], ['pari', 'Pari', 'r']];
+  var fan = document.getElementById('hcbFan');
+  if(fan) fan.innerHTML = OB.map(function(o, k){ return '<div class="cf ' + o[2] + '" style="--i:' + (k - 2) + ';--k:' + k + '"><div><img src="objets/' + o[0] + '.svg" alt="" loading="lazy" onerror="this.remove()"><em>' + o[1] + '</em></div></div>'; }).join('');
+  if(JEU_API && JEU_OUVERT){ var bj = document.getElementById('hcbJouer'); if(bj) bj.hidden = false; }
+  function top3(){
+    if(!JEU_API) return;
+    var box = document.getElementById('hcbTop'); if(!box) return;
+    fetch(JEU_API + '/classement').then(function(r){ return r.json(); }).then(function(d){
+      var l = (d.joueurs || []).slice().sort(function(a, b){ return b.victoires - a.victoires || b.ratio - a.ratio; }).slice(0, 3);
+      if(!l.length) return;
+      box.innerHTML = '<b class="t">Meilleurs duellistes</b>' + l.map(function(j, i){ var c = j.cosm || {};
+        return '<a href="#profil=' + encodeURIComponent(j.login || j.pseudo) + '">' + (window.LCC ? LCC.avatar(j.avatar, j.pseudo, c.cadre, 34) : '') + ['🥇', '🥈', '🥉'][i] + ' ' + esc(j.pseudo) + ' <small>' + j.victoires + ' victoire' + (j.victoires > 1 ? 's' : '') + '</small></a>'; }).join('');
+      box.hidden = false;
+    }).catch(function(){});
+  }
+  top3();
+  var els = document.querySelectorAll('[data-rv]');
+  if(!('IntersectionObserver' in window)){ Array.prototype.forEach.call(els, function(e){ e.classList.add('in'); }); return; }
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold: .12});
+  Array.prototype.forEach.call(els, function(e){ io.observe(e); });
+})();
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10, modeJ = 'classique', datas = {}, charges = {};
   if(JEU_API){ document.getElementById('navClass').hidden = false; document.getElementById('navQ').hidden = false; }
