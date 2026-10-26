@@ -144,7 +144,7 @@ export class Hub {
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
     [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
-     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`,
+     `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fond TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`,
      `ALTER TABLE joueurs ADD COLUMN sv_parties INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_victoires INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_defaites INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_nuls INTEGER DEFAULT 0`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
     q(`CREATE TABLE IF NOT EXISTS journal_usages(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, choix TEXT)`);
@@ -1171,6 +1171,9 @@ const BQ = [
     .map(([k, n, p]) => ({id: 'c-' + k, kind: 'cadre', nom: n, prix: p, desc: 'Un cadre autour de ton avatar.'})),
   ...[['ville', 'Ville sous la pluie', 600], ['salle', 'Salle d’arcade', 700], ['foret', 'Forêt du Renard', 800], ['neon', 'Néons du Ronin', 900], ['station', 'Station du Pilote', 1000], ['tour', 'Tour du Bourreau', 1200], ['ile', 'Île du Pirate Fantôme', 1500], ['manoir', 'Manoir du Veilleur', 2000], ['citrouilles', 'Champ de citrouilles (Halloween)', 900], ['fantomes', 'Bal des fantômes (Halloween)', 1000], ['toile', 'Repaire des araignées (Halloween)', 1100], ['sorciere', 'Nuit de la sorcière (Halloween)', 1300]]
     .map(([k, n, p]) => ({id: 'b-' + k, kind: 'banniere', nom: n, prix: p, desc: 'Une bannière animée en haut de ton profil.'})),
+  // fonds de profil : animés et discrets, derrière tout le profil (les deux premiers sont offerts à tout le monde)
+  ...[['etoiles', 'Ciel étoilé', 0], ['neige', 'Neige tranquille', 0], ['nebuleuse', 'Nébuleuse', 500], ['lucioles', 'Lucioles', 500], ['braises', 'Braises', 500], ['petales', 'Pétales', 500], ['pluie', 'Pluie de nuit', 400], ['hyperespace', 'Voyage stellaire', 600], ['constellations', 'Constellations', 600], ['bulles', 'Fonds marins', 600], ['code', 'Pluie de code', 700], ['aurore', 'Aurore boréale', 800], ['orbites', 'Orbites', 900]]
+    .map(([k, n, p]) => ({id: 'f-' + k, kind: 'fond', nom: n, prix: p, desc: 'Un fond animé et discret derrière ton profil.'})),
   ...[['or', 'Or', 250], ['rose', 'Rose', 250], ['cyan', 'Cyan', 250], ['vert', 'Vert', 250], ['arc', 'Arc-en-ciel animé', 700]]
     .map(([k, n, p]) => ({id: 'p-' + k, kind: 'couleur', nom: n, prix: p, desc: 'Une couleur pour ton pseudo.'}))
 ];
@@ -1189,7 +1192,7 @@ function ptsPaliers(h, id) {
   const s = ptsScore(h, id);
   PALIERS.forEach(([n, cle, titre]) => { if (s >= n) { h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, id, 'badge', cle, Date.now(), 'points'); h.run(`INSERT OR IGNORE INTO succes(joueur,kind,cle,ts,src) VALUES(?,?,?,?,?)`, id, 'titre', titre, Date.now(), 'points'); } });
 }
-function cosmDe(j) { return {cadre: j.cadre_av || '', banniere: j.banniere || '', couleur: j.couleur || ''}; }
+function cosmDe(j) { return {cadre: j.cadre_av || '', banniere: j.banniere || '', couleur: j.couleur || '', fond: j.fond || ''}; }
 // classement : deb/fin = bornes (jours) ou null pour « depuis le début » ; les profils privés et bannis n'apparaissent pas
 function ptsClassement(h, deb, fin, lim) {
   const w = deb ? ' AND q.jour>=? AND q.jour<=?' : '', args = deb ? [deb, fin] : [];
@@ -1221,7 +1224,7 @@ function ptsClassementVue(h) {
 function bqCatalogue(h, j) {
   const possede = new Set(h.sql.exec('SELECT item FROM bq_achats WHERE joueur=? AND item!=?', j.id, 'pioche').toArray().map(r => r.item));
   const e = ptsEtat(h, j);
-  return {...e, equipe: cosmDe(j), articles: BQ.map(x => ({id: x.id, kind: x.kind, nom: x.nom, prix: x.prix, desc: x.desc, possede: x.kind === 'pioche' ? false : possede.has(x.id)}))};
+  return {...e, equipe: cosmDe(j), articles: BQ.map(x => ({id: x.id, kind: x.kind, nom: x.nom, prix: x.prix, desc: x.desc, possede: x.kind === 'pioche' ? false : (x.prix === 0 || possede.has(x.id))}))};
 }
 async function bqRoute(h, j, req) {
   ptsPaliers(h, j.id);
@@ -1230,7 +1233,7 @@ async function bqRoute(h, j, req) {
   if (b.act === 'acheter') {
     const x = BQ_PAR_ID[String(b.id)]; if (!x) return json({erreur: 'article'}, {}, 400);
     const e = ptsEtat(h, j), jour = jourParis();
-    if (x.kind !== 'pioche' && h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, x.id)) return json({erreur: 'deja'}, {}, 400);
+    if (x.kind !== 'pioche' && (x.prix === 0 || h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, x.id))) return json({erreur: 'deja'}, {}, 400);
     if (x.kind === 'pioche' && e.piocheFaite) return json({erreur: 'pioche_du_jour'}, {}, 400);
     if (e.solde < x.prix) return json({erreur: 'solde'}, {}, 400);
     h.run('INSERT INTO bq_achats(joueur,item,prix,jour,ts) VALUES(?,?,?,?,?)', j.id, x.id, x.prix, jour, Date.now());
@@ -1240,9 +1243,9 @@ async function bqRoute(h, j, req) {
     return json({ok: true, article: x.id, ...bqCatalogue(h, j), attente: aAttente(h, j.id)});
   }
   if (b.act === 'equiper') {
-    const kind = String(b.kind), id = String(b.id || ''), col = {cadre: 'cadre_av', banniere: 'banniere', couleur: 'couleur'}[kind];
+    const kind = String(b.kind), id = String(b.id || ''), col = {cadre: 'cadre_av', banniere: 'banniere', couleur: 'couleur', fond: 'fond'}[kind];
     if (!col) return json({erreur: 'type'}, {}, 400);
-    if (id) { const x = BQ_PAR_ID[id]; if (!x || x.kind !== kind || !h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, id)) return json({erreur: 'pas_possede'}, {}, 400); }
+    if (id) { const x = BQ_PAR_ID[id]; if (!x || x.kind !== kind || !(x.prix === 0 || h.un('SELECT 1 AS y FROM bq_achats WHERE joueur=? AND item=?', j.id, id))) return json({erreur: 'pas_possede'}, {}, 400); }
     h.run(`UPDATE joueurs SET ${col}=? WHERE id=?`, id.replace(/^[a-z]-/, ''), j.id);
     return json({ok: true, equipe: cosmDe(h.joueur(j.id))});
   }
