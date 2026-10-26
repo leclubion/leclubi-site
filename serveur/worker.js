@@ -1425,7 +1425,7 @@ const FORUM_CATS = [
   {id: 'horssujet', g: 'Discussions', nom: 'Hors sujet', desc: 'Musique, séries, jeux vidéo, tout le reste.', lettre: 'H', couleur: '#9d6bff', ink: '#17181a'},
   {id: 'secrets', g: 'Le site et les jeux', nom: 'Secrets et énigmes', desc: "La chasse aux secrets, en équipe. On s'entraide avec des indices, jamais avec la solution.", lettre: 'S', couleur: '#e0243b', ink: '#ffffff', spoilers: true, etiq: ['Indice', 'Théorie', 'Question']},
   {id: 'cardbattle', g: 'Le site et les jeux', nom: 'Clubi Card Battle', desc: "Stratégies, combos d'objets, mode Survie, défis entre viewers.", lettre: 'B', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Stratégie', 'Question']},
-  {id: 'cartes', g: 'Le site et les jeux', nom: 'Cartes et collection', desc: 'Boosters, raretés, ta plus belle pull, échanges entre collectionneurs.', lettre: 'C', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Échange', 'Question']},
+  {id: 'cartes', g: 'Le site et les jeux', nom: 'Cartes et collection', desc: 'Boosters, raretés, échanges entre collectionneurs.', lettre: 'C', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Échange', 'Question']},
   {id: 'jeudujour', g: 'Le site et les jeux', nom: 'Jeu du jour et classements', desc: 'Discuter du jeu à deviner, des points, des titres et du classement.', lettre: 'J', couleur: '#4d86ff', ink: '#ffffff'},
   {id: 'aide', g: 'Le site et les jeux', nom: 'Aide et bugs', desc: 'Un souci sur le site ou dans le jeu ? Décris-le ici, avec ton navigateur si possible.', lettre: '?', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Bug', 'Question']}
 ];
