@@ -249,11 +249,11 @@
     var ids = ['ile', 'manoir', 'tour', 'station', 'foret', 'neon', 'salle', 'ville'], d = Math.floor(Date.now() / 864e5);
     var bg = g('hzbg'); if (bg && window.LCC) bg.innerHTML = LCC.banniere(ids[d % ids.length]);
     document.querySelectorAll('.hz-th[data-sc]').forEach(function (e) { if (window.LCC) e.innerHTML = LCC.banniere(e.dataset.sc); });
-    var api0 = (window.JEU_CONFIG || {}).API_URL, box = g('hzTop'); if (!api0 || !box) return;
+    var api0 = (window.JEU_CONFIG || {}).API_URL, box = g('hzTopT'); if (!api0 || !box) return;
     fetch(String(api0).replace(/\/$/, '') + '/classement-quiz').then(function (r) { return r.json(); }).then(function (k) {
       var l = (k.semaine || []).slice(0, 3); if (!l.length) return;
       box.hidden = false;
-      box.innerHTML = '<b>Top de la semaine</b>' + l.map(function (r) { var c = r.cosm || {}; return '<a href="#profil=' + encodeURIComponent(r.login || r.pseudo) + '" title="Voir le profil de ' + esc(r.pseudo) + '">' + LCC.avatar(r.avatar, r.pseudo, c.cadre, 36) + '<span>' + r.rang + '. ' + LCC.nom(r.pseudo, c.couleur) + ' <small>' + n(r.pts) + ' pts</small></span></a>'; }).join('') + '<a href="#classement-jeu" style="margin-left:auto;color:var(--accent)">Voir le classement →</a>';
+      box.innerHTML = l.map(function (r) { var c = r.cosm || {}; return '<span class="r"><span>' + r.rang + '. ' + LCC.nom(r.pseudo, c.couleur) + '</span><small>' + n(r.pts) + ' pts</small></span>'; }).join('');
     }).catch(function () {});
   }
   accueil();

@@ -1254,6 +1254,36 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 @keyframes lgfl{0%,100%{filter:none}15%,55%{filter:brightness(2.2) drop-shadow(0 0 10px #ffe66b)}35%{filter:none}}
 .hz-ind{margin:14px 0 0;font-size:12.5px;letter-spacing:.04em;color:var(--muted,#8a8780);opacity:.6;font-style:italic}
+
+/* ===== menus Accueil / Jeux + accueil v3 + page Card Battle ===== */
+.dd[hidden],.cbv-top[hidden]{display:none}
+.hz-live{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(10,11,14,.68);border:1px solid rgba(199,154,75,.4);border-radius:999px;padding:8px 18px 8px 14px;font-size:13px;color:#ece8df;margin-bottom:24px;transition:border-color .2s}
+.hz-live:hover{border-color:var(--accent)}
+.hz-live i{width:9px;height:9px;border-radius:50%;background:#e0473f;box-shadow:0 0 0 4px rgba(224,71,63,.25);animation:hzlv 1.8s ease-in-out infinite}
+.hz-live b{color:#e0b866;font-weight:600}
+@keyframes hzlv{50%{box-shadow:0 0 0 8px rgba(224,71,63,0)}}
+@media (prefers-reduced-motion:reduce){.hz-live i{animation:none}}
+.hz .row{align-items:center;gap:14px 24px}
+.hz-lk{font-size:15px;color:#ece8df;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:3px;transition:border-color .2s}.hz-lk:hover{border-color:#fff}
+.hz-duelf{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-top:12px;font-size:13px}
+.hz-duelf em{color:#bdb8ac}.hz-duelf a{font-weight:600;color:#e0b866}.hz-duelf a::after{content:" \2192"}
+.hz-mini[hidden]{display:none}
+.hz-mini{display:flex;flex-direction:column;gap:5px;margin:2px 0 4px;font-size:13px}
+.hz-mini .r{display:flex;justify-content:space-between;gap:8px}.hz-mini small{color:var(--muted);font-weight:500}
+.hz-mini .r>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbp-h{position:relative}.cbp-h h1{font-family:var(--display);text-transform:uppercase;font-weight:400;font-size:clamp(34px,5vw,58px);line-height:1.02;color:#fff;margin:0 0 14px}
+.cbp-rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cbp-r{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 22px 24px;display:flex;flex-direction:column;gap:8px}
+.cbp-r b.n{font:400 34px var(--display);color:var(--accent);line-height:1}
+.cbp-r h3{margin:4px 0 0;font:400 19px var(--display);text-transform:uppercase}.cbp-r p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.55}
+.cbp-win{margin-top:16px;background:color-mix(in srgb,var(--accent) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:14px;padding:16px 22px;font-weight:500}
+.cbp-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cbp-m{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:10px}
+.cbp-m.sv{background:radial-gradient(ellipse at 80% 0,#3a2466 0,#171229 70%);border-color:#4a3a7a;color:#ece8df}.cbp-m.sv p{color:#c9c3d8}
+.cbp-m h3{margin:0;font:400 22px var(--display);text-transform:uppercase}.cbp-m p{margin:0;color:var(--muted);line-height:1.55}
+.cbp-m .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#17181a;background:#ffd070;border-radius:6px;padding:3px 9px}
+.cbp-end{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+@media (max-width:900px){.cbp-rules,.cbp-modes{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1263,11 +1293,9 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
   <div class="wrap bar">
     <a class="logo" href="#accueil" aria-label="LeClubi, accueil"><span aria-hidden="true">LE</span>CLUBI</a>
     <nav aria-label="Navigation principale">
-      <a href="#accueil" data-nav="accueil">Accueil</a>
-      <a href="#planning" data-nav="planning">Planning</a>
-      <a href="#jeudujour" data-nav="jeudujour" id="navQ" hidden>Jeu du jour</a>
+      <div class="dd" id="ddAccueil"><a href="#accueil" data-nav="accueil">Accueil</a><button class="ddt" type="button" aria-label="Ouvrir le menu Accueil" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#accueil" role="menuitem" data-sub="accueil">Accueil</a><a href="#planning" role="menuitem" data-sub="planning">Planning</a></div></div>
+      <div class="dd" id="ddJeux" hidden><a href="#cardbattle" data-nav="jeux">Jeux</a><button class="ddt" type="button" aria-label="Ouvrir le menu Jeux" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#cardbattle" role="menuitem" data-sub="cardbattle"><span class="nomjeu">Clubi Card Battle</span></a><a href="#jeudujour" role="menuitem" data-sub="jeudujour" id="navQ">Jeu du jour</a><a href="#classement" role="menuitem" data-sub="classement" id="navClass">Classement</a></div></div>
       <div class="dd" id="ddCartes"><a href="#collection" data-nav="collection">Cartes</a><button class="ddt" type="button" aria-label="Ouvrir le menu Cartes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddm" role="menu"><a href="#collection" role="menuitem" data-sub="collection">Collection</a><a href="#collectionneurs" role="menuitem" data-sub="collectionneurs">Collectionneurs</a></div></div>
-      <a href="#classement" data-nav="classement" id="navClass" hidden>Classement</a>
     </nav>
     <div class="hlinks">
       <nav class="nav-r" aria-label="Informations"><a href="#apropos" data-nav="apropos">À propos</a></nav>
@@ -1292,21 +1320,20 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
     <div class="hz-bg" id="hzbg" aria-hidden="true"></div>
     <div class="wrap hz-in">
       <div class="hz-txt">
-        <div class="hz-eye">Chaîne Twitch · LeClubi</div>
+        <a class="hz-live" id="hzLive" href="#planning"><i></i><b>Prochain live</b><span>Voir le planning</span></a>
         <h1>Jouez. Choisissez. Collectionnez.</h1>
-        <p class="lead">Bienvenue sur la chaîne ! Ici, on découvre des jeux, on partage de bons moments en stream et c’est la communauté qui choisit nos prochaines aventures. Chaque saison, des cartes uniques à débloquer et à collectionner.</p>
-        <p class="hz-ind">LeClubi a toujours 2 coups d’avance.</p>
-        <p class="lead end">À vous de jouer. À vous de choisir. Et surtout… à vous de toutes les collectionner !</p>
+        <p class="lead">Ici, on découvre des jeux, on partage de bons moments en stream et c’est la communauté qui choisit nos prochaines aventures.</p>
         <div class="row">
           <a class="btn" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Rejoindre le live</a>
-          <a class="btn ghost" href="#jeudujour">Jeu du jour</a>
-          <a class="btn ghost" href="#collection">Voir la collection</a>
-          <a class="btn ghost" id="hjouer" href="jeu.html" hidden>Jouer à <span class="nomjeu">Clash des Piliers</span></a>
+          <a class="hz-lk" href="#planning">Voir le planning</a>
         </div>
       </div>
-      <div class="player" role="img" aria-label="Emplacement du lecteur Twitch">
-        <p>Le live s'affiche ici dès que le site est en ligne.</p>
-        <a class="btn ghost" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Ouvrir la chaîne</a>
+      <div class="hz-duel">
+        <div class="player" role="img" aria-label="Emplacement du lecteur Twitch">
+          <p>Le live s'affiche ici dès que le site est en ligne.</p>
+          <a class="btn ghost" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Ouvrir la chaîne</a>
+        </div>
+        <div class="hz-duelf"><em>LeClubi a toujours 2 coups d’avance.</em><a href="#cardbattle">Découvrir le jeu</a></div>
       </div>
     </div>
   </section>
@@ -1316,16 +1343,9 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
       <div class="hz-tiles">
         <a class="hz-t" href="#jeudujour"><div class="hz-th" data-sc="salle"></div><div class="hz-tb"><h3>Jeu du jour</h3><p>Un mini-jeu chaque jour. Devine, gagne des points et garde ta série.</p><span class="hz-go">Jouer</span></div></a>
         <a class="hz-t" href="#boutique"><div class="hz-th" data-sc="ville"></div><div class="hz-tb"><h3>Boutique</h3><p>Cadres d’avatar, bannières animées, titres, badges et pioches Arcade.</p><span class="hz-go">Dépenser mes points</span></div></a>
-        <a class="hz-t" href="#classement-jeu"><div class="hz-th" data-sc="neon"></div><div class="hz-tb"><h3>Classement</h3><p>Le top 3 de la semaine gagne une pioche Arcade et le titre de champion.</p><span class="hz-go">Voir le classement</span></div></a>
+        <a class="hz-t" href="#classement-jeu"><div class="hz-th" data-sc="neon"></div><div class="hz-tb"><h3>Classement</h3><div class="hz-mini" id="hzTopT" hidden></div><p>Le top 3 de la semaine gagne une pioche Arcade et le titre de champion.</p><span class="hz-go">Voir le classement</span></div></a>
         <a class="hz-t" href="#collection"><div class="hz-th" data-sc="foret"></div><div class="hz-tb"><h3>Collection</h3><p>Les cartes des saisons, l’Arcade et les Dieux Oubliés, tout de suite visibles.</p><span class="hz-go">Voir les cartes</span></div></a>
       </div>
-      <div class="hz-champ" id="hzTop" hidden></div>
-    </div>
-  </section>
-
-  <section class="nx-sec">
-    <div class="wrap">
-      <a class="nx" id="nx" href="#planning" aria-live="polite"></a>
     </div>
   </section>
 
@@ -1337,26 +1357,6 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
         <div class="gal" id="gal" role="region" aria-roledescription="carrousel" aria-label="Aperçu des jeux proposés"></div>
         <div class="poll" id="poll" aria-live="polite"></div>
       </div>
-    </div>
-  </section>
-
-  <section class="hb hb-cb" id="hcb" data-rv>
-    <div class="hb-glow" aria-hidden="true"></div>
-    <div class="wrap">
-      <div class="cbv">
-        <div class="cbv-t">
-          <span class="eb">Clubi Card Battle</span>
-          <h2>Le duel de cartes<br>de la chaîne</h2>
-          <p class="lead">Pose tes cartes, détruis celles de l'adversaire, construis des colonnes triples. Et en <b>Mode Survie</b>, 21 objets tirés au hasard changent tout : foudre, bouclier, œil, échange, pari…</p>
-          <div class="cbv-k"><div><b>21</b><small>objets</small></div><div><b>2</b><small>modes de jeu</small></div><div><b>1 v 1</b><small>en ligne</small></div></div>
-          <div class="row">
-            <a class="btn" id="hcbJouer" href="jeu.html" hidden>Jouer maintenant</a>
-            <a class="btn ghost" href="#classement">Voir le classement</a>
-          </div>
-        </div>
-        <div class="cbv-f" id="hcbFan" aria-label="Quelques objets du Mode Survie"></div>
-      </div>
-      <div class="cbv-top" id="hcbTop" hidden></div>
     </div>
   </section>
 
@@ -1415,6 +1415,62 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 </div>
 
 <!-- PLANNING -->
+<!-- CLUBI CARD BATTLE -->
+<div class="view" id="v-cardbattle" hidden>
+  <section class="hb hb-cb cbp-h" id="hcb">
+    <div class="hb-glow" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="cbv">
+        <div class="cbv-t">
+          <span class="eb">Le jeu de la chaîne</span>
+          <h1><span class="nomjeu">Clubi Card Battle</span></h1>
+          <p class="lead">Un duel de cartes en 1 contre 1, en ligne. Pose tes cartes, détruis celles de l'adversaire, construis des colonnes triples. En <b>Mode Survie</b>, 21 objets tirés au hasard changent tout : foudre, bouclier, œil, échange, pari…</p>
+          <div class="cbv-k"><div><b>21</b><small>objets</small></div><div><b>2</b><small>modes de jeu</small></div><div><b>1 v 1</b><small>en ligne</small></div></div>
+          <div class="row">
+            <a class="btn cbp-jouer" id="hcbJouer" href="jeu.html" hidden>Jouer maintenant</a>
+            <a class="btn ghost" href="#classement">Voir le classement</a>
+          </div>
+        </div>
+        <div class="cbv-f" id="hcbFan" aria-label="Quelques objets du Mode Survie"></div>
+      </div>
+      <div class="cbv-top" id="hcbTop" hidden></div>
+    </div>
+  </section>
+
+  <section class="hb">
+    <div class="wrap">
+      <div class="sh"><span class="eb">Comment ça marche</span><h2>Trois règles, et tu sais jouer</h2></div>
+      <div class="cbp-rules">
+        <div class="cbp-r"><b class="n">1</b><h3>Pose tes cartes</h3><p>Le plateau a 3 colonnes de 3 cartes. À ton tour, tu poses une carte dans la colonne de ton choix.</p></div>
+        <div class="cbp-r"><b class="n">2</b><h3>Détruis en face</h3><p>Quand tu poses une carte, les cartes de même puissance dans la colonne d'en face sont détruites.</p></div>
+        <div class="cbp-r"><b class="n">3</b><h3>Fais un triple</h3><p>Trois cartes identiques dans une colonne rapportent +10 points. Pense à bien préparer tes colonnes.</p></div>
+      </div>
+      <div class="cbp-win">À la fin de la partie, le plus gros total gagne.</div>
+    </div>
+  </section>
+
+  <section class="hb">
+    <div class="wrap">
+      <div class="sh"><span class="eb">Deux façons de jouer</span><h2>Choisis ton mode</h2></div>
+      <div class="cbp-modes">
+        <div class="cbp-m"><h3>Mode classique</h3><p>Les règles de base, sans surprise : cartes, colonnes, destructions. Idéal pour apprendre et pour le classement.</p></div>
+        <div class="cbp-m sv"><span class="tag">Nouveau</span><h3>Mode Survie</h3><p>Chaque manche, des objets tirés au hasard changent la partie : foudre, bouclier, séisme, œil, échange, pari… 21 objets à maîtriser.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hb">
+    <div class="wrap cbp-end">
+      <h2>Prêt pour un duel ?</h2>
+      <p class="lead" style="margin:0">Connecte-toi avec Twitch, trouve un adversaire et grimpe au classement.</p>
+      <div class="row" style="justify-content:center;display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn cbp-jouer" href="jeu.html" hidden>Jouer maintenant</a>
+        <a class="btn ghost" href="#classement">Voir le classement</a>
+      </div>
+    </div>
+  </section>
+</div>
+
 <div class="view" id="v-planning" hidden>
   <section class="plan-sec">
     <div class="wrap wide">
@@ -1743,16 +1799,16 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 function route(){
   if(window.CompteParkColl) window.CompteParkColl();
   var h = location.hash; if(h === '#arcade'){ current = 'arcade'; h = '#collection'; }
-  var page = h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h.indexOf('#profil=') === 0 ? 'profil' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
-  ['accueil', 'planning', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'profil', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
+  var page = h === '#cardbattle' ? 'cardbattle' : h === '#planning' ? 'planning' : h === '#classement' || h === '#classement-jeu' ? 'classement' : h === '#boutique' ? 'boutique' : h.indexOf('#profil=') === 0 ? 'profil' : h === '#jeudujour' ? 'jeudujour' : h === '#collectionneurs' ? 'collectionneurs' : h === '#apropos' ? 'apropos' : h === '#compte' ? 'compte' : h === '#mentions' ? 'mentions' : h === '#confidentialite' ? 'confidentialite' : (h.indexOf('#collection') === 0 ? 'collection' : 'accueil');
+  ['accueil', 'planning', 'cardbattle', 'jeudujour', 'collection', 'collectionneurs', 'arcade', 'classement', 'boutique', 'profil', 'apropos', 'compte', 'mentions', 'confidentialite'].forEach(function(p){ document.getElementById('v-' + p).hidden = page !== p; });
   if(page === 'classement'){ var qz = h === '#classement-jeu'; document.getElementById('kcb').hidden = qz; document.getElementById('kqz').hidden = !qz; document.getElementById('kswA').setAttribute('aria-selected', !qz); document.getElementById('kswB').setAttribute('aria-selected', qz); if(qz){ if(window.lcClassementQuiz) window.lcClassementQuiz(); } else if(window.chargerClassement) window.chargerClassement(); }
   if(page === 'boutique' && window.lcBoutique) window.lcBoutique();
   if(page === 'profil' && window.lcProfilPublic){ var pn = ''; try{ pn = decodeURIComponent(h.slice(8)); }catch(e){} window.lcProfilPublic(pn); }
   if(page === 'jeudujour' && window.lcJeuDuJour) window.lcJeuDuJour();
   if(page === 'compte' && window.rendreCompte) window.rendreCompte();
-  document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'collectionneurs' || page === 'arcade' ? page : 'collection')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  document.querySelectorAll('[data-sub]').forEach(function(a){ if(a.dataset.sub === (page === 'arcade' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   document.querySelectorAll('[data-nav]').forEach(function(a){
-    if(a.dataset.nav === (page === 'collectionneurs' || page === 'arcade' || page === 'profil' ? 'collection' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    if(a.dataset.nav === (page === 'collectionneurs' || page === 'arcade' || page === 'profil' ? 'collection' : page === 'planning' ? 'accueil' : (page === 'cardbattle' || page === 'jeudujour' || page === 'classement') ? 'jeux' : page)) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
   document.body.classList.toggle('planw', page === 'planning');
   window.scrollTo(0,0);
@@ -1760,14 +1816,18 @@ function route(){
 (function(){ var m = String((window.JEU_CONFIG || {}).CONTACT_EMAIL || '').trim();
   if(/^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i.test(m)) document.querySelectorAll('.lmail').forEach(function(e){ e.textContent = ' ou par e-mail : ' + m; }); })();
 
-// menu « Cartes » : la flèche ouvre/ferme (utile au toucher), un clic ailleurs ou Échap referme
+// menus déroulants (Accueil, Jeux, Cartes) : la flèche ouvre/ferme (utile au toucher), un clic ailleurs ou Échap referme
 (function(){
-  var dd = document.getElementById('ddCartes'); if(!dd) return; var bt = dd.querySelector('.ddt');
-  function set(o){ dd.classList.toggle('open', o); bt.setAttribute('aria-expanded', o ? 'true' : 'false'); }
-  bt.addEventListener('click', function(e){ e.stopPropagation(); set(!dd.classList.contains('open')); });
-  document.addEventListener('click', function(e){ if(!dd.contains(e.target)) set(false); else if(e.target.closest('.ddm a')) set(false); });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') set(false); });
-  window.addEventListener('hashchange', function(){ set(false); });
+  var tous = Array.prototype.slice.call(document.querySelectorAll('header .dd'));
+  function set(dd, o){ dd.classList.toggle('open', o); var bt = dd.querySelector('.ddt'); if(bt) bt.setAttribute('aria-expanded', o ? 'true' : 'false'); }
+  function fermer(sauf){ tous.forEach(function(d){ if(d !== sauf) set(d, false); }); }
+  tous.forEach(function(dd){
+    var bt = dd.querySelector('.ddt'); if(!bt) return;
+    bt.addEventListener('click', function(e){ e.stopPropagation(); var o = !dd.classList.contains('open'); fermer(dd); set(dd, o); });
+  });
+  document.addEventListener('click', function(e){ tous.forEach(function(dd){ if(!dd.contains(e.target) || e.target.closest('.ddm a')) set(dd, false); }); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') fermer(null); });
+  window.addEventListener('hashchange', function(){ fermer(null); });
 })();
 window.addEventListener('hashchange', route);
 route();
@@ -2922,11 +2982,11 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
+  {date:'2026-10-30', time:'23:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'},
   {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-12', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:'', annule:true},
-  {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''},
-  {date:'2026-10-30', time:'23:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'}
+  {date:'2026-10-15', time:'22:00', game:'Control Resonant', steam:'https://store.steampowered.com/app/3669870/CONTROL_Resonant/', img:'', note:''}
 ];
 var JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -2961,7 +3021,13 @@ function nextLive(){
   return best;
 }
 function renderNext(){
-  var el = document.getElementById('nx'), n = nextLive();
+  var n = nextLive(), hl = document.getElementById('hzLive');
+  if(hl){
+    var on = n && n.d.getTime() <= Date.now();
+    hl.innerHTML = !n ? '<b>Prochain live</b><span>Bientôt annoncé</span>' :
+      '<i></i><b>' + (on ? 'En direct' : 'Prochain live') + '</b><span>' + esc(n.e.game) + ' · ' + JOURS[(n.d.getDay() + 6) % 7].toLowerCase() + ' ' + n.d.getDate() + ' ' + MOIS[n.d.getMonth()] + ' · ' + hh(n.e.time) + '</span>';
+  }
+  var el = document.getElementById('nx'); if(!el) return;
   if(!n){ el.innerHTML = '<span class="eb">Prochain live</span><h2>À venir</h2><p class="when">La date du prochain live sera annoncée bientôt.</p><span class="go">Voir le planning &rarr;</span>'; return; }
   var now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), d0 = new Date(n.d.getFullYear(), n.d.getMonth(), n.d.getDate());
   var diff = Math.round((d0 - t0) / 86400000);
@@ -3396,7 +3462,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   var OB = [['bouclier', 'Bouclier', 'c'], ['foudre', 'Foudre', 'c'], ['seisme', 'Séisme', 'r'], ['oeil', 'Œil', 'c'], ['pari', 'Pari', 'r']];
   var fan = document.getElementById('hcbFan');
   if(fan) fan.innerHTML = OB.map(function(o, k){ return '<div class="cf ' + o[2] + '" style="--i:' + (k - 2) + ';--k:' + k + '"><div><img src="objets/' + o[0] + '.svg" alt="" loading="lazy" onerror="this.remove()"><em>' + o[1] + '</em></div></div>'; }).join('');
-  if(JEU_API && JEU_OUVERT){ var bj = document.getElementById('hcbJouer'); if(bj) bj.hidden = false; }
+  if(JEU_API && JEU_OUVERT){ document.querySelectorAll('.cbp-jouer').forEach(function(bj){ bj.hidden = false; }); }
   function top3(){
     if(!JEU_API) return;
     var box = document.getElementById('hcbTop'); if(!box) return;
@@ -3416,7 +3482,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 })();
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10, modeJ = 'classique', datas = {}, charges = {};
-  if(JEU_API){ document.getElementById('navClass').hidden = false; document.getElementById('navQ').hidden = false; }
+  if(JEU_API){ document.getElementById('ddJeux').hidden = false; }
   if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
   function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
   function liste(){
