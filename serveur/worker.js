@@ -96,7 +96,17 @@ export default {
       }
       const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
     }
-    if (PROXIES.has(url.pathname) || url.pathname.startsWith('/profil/')) {
+    if (url.pathname.startsWith('/forum/') && req.method === 'GET' && !req.headers.get('Authorization')) {   // lectures du forum sans connexion : petit cache de 10 secondes
+      const cache = caches.default, cle = new Request(url.origin + url.pathname + url.search);
+      let r = await cache.match(cle);
+      if (!r) {
+        const d = await hub.fetch(new Request('https://hub' + url.pathname + url.search, {headers: {'X-Ip': req.headers.get('CF-Connecting-IP') || ''}}));
+        r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=10'}});
+        if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
+      }
+      const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+    }
+    if (PROXIES.has(url.pathname) || url.pathname.startsWith('/profil/') || url.pathname.startsWith('/forum/')) {
       const ecriture = url.pathname.startsWith('/journal/');
       if (req.method === 'POST' && !ecriture && !originOk(env, req)) return json({erreur: 'origine refusée'}, h, 403);
       if (url.pathname.startsWith('/profil/')) {       // profil public : petit cache pour ne pas solliciter le salon à chaque visite
@@ -195,6 +205,7 @@ export class Hub {
     if (url.pathname === '/titres') return this.titresPublics();
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
+    if (url.pathname.startsWith('/forum/')) return forumRoute(this, req, url);
     if (url.pathname === '/auth' || url.pathname === '/moi' || url.pathname === '/vitrine' || url.pathname === '/vitrine-badges' || url.pathname === '/reglage-profil' || url.pathname === '/defis' || url.pathname === '/titre' || url.pathname === '/araignee' || url.pathname === '/cache' || url.pathname === '/fiche' || url.pathname === '/quotidien' || url.pathname === '/arcade' || url.pathname === '/arcade/coffre' || url.pathname === '/boutique' || url.pathname === '/classement-quiz' || url.pathname === '/shoot/debut' || url.pathname === '/shoot/fin' || url.pathname === '/reliques' || url.pathname === '/reliques/recuperer' || url.pathname.startsWith('/profil/')) return this.compte(req, url);
     return json({erreur: 'inconnu'}, {}, 404);
   }
@@ -1400,4 +1411,341 @@ async function qAdmin(h, act, b) {
   }
   if (act === 'q-stats') { const jour = jourParis(); return json({jour, format: fmtDuJour(jour), joueursAujourdhui: h.un('SELECT COUNT(*) AS c FROM qparties WHERE jour=?', jour).c, victoiresAujourdhui: h.un('SELECT COUNT(*) AS c FROM qparties WHERE jour=? AND gagne=1', jour).c}); }
   return null;
+}
+
+// ---------- Le ClubiForum ----------
+// Catégories (écrites ici : pour en ajouter ou en renommer, on change cette liste). modo:true = seul LeClubi peut écrire. etiq = étiquettes proposées à la création d'un sujet.
+const FORUM_CATS = [
+  {id: 'annonces', g: 'Accueil', nom: 'Annonces', desc: 'Nouveautés du site, mises à jour, événements et lives spéciaux. Je suis le seul à écrire ici.', lettre: 'A', couleur: '#c79a4b', ink: '#17181a', modo: true},
+  {id: 'regles', g: 'Accueil', nom: 'Règles et bienvenue', desc: 'Comment fonctionne le forum et comment parler des secrets sans jamais les dévoiler.', lettre: 'R', couleur: '#c79a4b', ink: '#17181a', modo: true},
+  {id: 'presentation', g: 'Accueil', nom: 'Présente-toi', desc: 'Nouveau dans la commu ? Dis bonjour et présente-toi en quelques mots.', lettre: 'P', couleur: '#c79a4b', ink: '#17181a'},
+  {id: 'general', g: 'Discussions', nom: 'Discussion générale', desc: 'Tout ce qui touche à la commu, sans thème précis.', lettre: 'G', couleur: '#9d6bff', ink: '#17181a'},
+  {id: 'lives', g: 'Discussions', nom: 'Lives, clips et jeux', desc: 'Revenir sur un live, proposer un jeu à jouer, partager un clip marquant.', lettre: 'L', couleur: '#9d6bff', ink: '#17181a'},
+  {id: 'idees', g: 'Discussions', nom: 'Idées et suggestions', desc: 'Des idées pour améliorer le site : nouvelles pages, fonctions, confort, affichage.', lettre: 'I', couleur: '#9d6bff', ink: '#17181a'},
+  {id: 'horssujet', g: 'Discussions', nom: 'Hors sujet', desc: 'Musique, séries, jeux vidéo, tout le reste.', lettre: 'H', couleur: '#9d6bff', ink: '#17181a'},
+  {id: 'secrets', g: 'Le site et les jeux', nom: 'Secrets et énigmes', desc: "La chasse aux secrets, en équipe. On s'entraide avec des indices, jamais avec la solution.", lettre: 'S', couleur: '#e0243b', ink: '#ffffff', spoilers: true, etiq: ['Indice', 'Théorie', 'Question']},
+  {id: 'cardbattle', g: 'Le site et les jeux', nom: 'Clubi Card Battle', desc: "Stratégies, combos d'objets, mode Survie, défis entre viewers.", lettre: 'B', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Stratégie', 'Question']},
+  {id: 'cartes', g: 'Le site et les jeux', nom: 'Cartes et collection', desc: 'Boosters, raretés, ta plus belle pull, échanges entre collectionneurs.', lettre: 'C', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Échange', 'Question']},
+  {id: 'jeudujour', g: 'Le site et les jeux', nom: 'Jeu du jour et classements', desc: 'Discuter du jeu à deviner, des points, des titres et du classement.', lettre: 'J', couleur: '#4d86ff', ink: '#ffffff'},
+  {id: 'aide', g: 'Le site et les jeux', nom: 'Aide et bugs', desc: 'Un souci sur le site ou dans le jeu ? Décris-le ici, avec ton navigateur si possible.', lettre: '?', couleur: '#4d86ff', ink: '#ffffff', etiq: ['Bug', 'Question']}
+];
+const FORUM_EMOJIS = ['👍', '🔥', '👀', '❤️', '😂', '🎉'];
+const fCat = id => FORUM_CATS.find(c => c.id === id) || null;
+const fTexte = (t, max) => String(t == null ? '' : t).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f​-‏‪-‮﻿]/g, '').replace(/\n{4,}/g, '\n\n\n').trim().slice(0, max);
+const fNorm = t => String(t).toLowerCase().replace(/\s+/g, ' ').trim();
+const fLike = q => '%' + String(q).replace(/[\\%_]/g, m => '\\' + m) + '%';
+
+function forumTables(h) {
+  const q = s => h.sql.exec(s);
+  q(`CREATE TABLE IF NOT EXISTS forum_sujets(n INTEGER PRIMARY KEY AUTOINCREMENT, cat TEXT, titre TEXT, auteur TEXT, etiq TEXT DEFAULT '', ts INTEGER, dernier INTEGER, dmsg INTEGER DEFAULT 0, nrep INTEGER DEFAULT 0, vues INTEGER DEFAULT 0, epingle INTEGER DEFAULT 0, ferme INTEGER DEFAULT 0, resolu INTEGER DEFAULT 0, supprime INTEGER DEFAULT 0, dauteur TEXT DEFAULT '')`);
+  q(`CREATE TABLE IF NOT EXISTS forum_messages(n INTEGER PRIMARY KEY AUTOINCREMENT, sujet INTEGER, auteur TEXT, texte TEXT, ts INTEGER, cite INTEGER DEFAULT 0, utile INTEGER DEFAULT 0, masque INTEGER DEFAULT 0, valide INTEGER DEFAULT 0, supprime INTEGER DEFAULT 0, edite INTEGER DEFAULT 0)`);
+  q(`CREATE INDEX IF NOT EXISTS forum_m_sujet ON forum_messages(sujet, n)`);
+  q(`CREATE INDEX IF NOT EXISTS forum_m_auteur ON forum_messages(auteur, ts)`);
+  q(`CREATE INDEX IF NOT EXISTS forum_s_cat ON forum_sujets(cat, dernier)`);
+  q(`CREATE TABLE IF NOT EXISTS forum_reactions(msg INTEGER, joueur TEXT, emoji TEXT, PRIMARY KEY(msg, joueur, emoji))`);
+  q(`CREATE TABLE IF NOT EXISTS forum_signalements(msg INTEGER, joueur TEXT, ts INTEGER, PRIMARY KEY(msg, joueur))`);
+  q(`CREATE TABLE IF NOT EXISTS forum_suivis(sujet INTEGER, joueur TEXT, PRIMARY KEY(sujet, joueur))`);
+  q(`CREATE TABLE IF NOT EXISTS forum_suivis_cat(cat TEXT, joueur TEXT, PRIMARY KEY(cat, joueur))`);
+  q(`CREATE TABLE IF NOT EXISTS forum_lus(sujet INTEGER, joueur TEXT, msg INTEGER, PRIMARY KEY(sujet, joueur))`);
+  q(`CREATE TABLE IF NOT EXISTS forum_membres(joueur TEXT PRIMARY KEY, depuis INTEGER)`);
+  q(`CREATE TABLE IF NOT EXISTS forum_notifs(n INTEGER PRIMARY KEY AUTOINCREMENT, joueur TEXT, type TEXT, sujet INTEGER, msg INTEGER, de TEXT, ts INTEGER, lu INTEGER DEFAULT 0)`);
+  q(`CREATE INDEX IF NOT EXISTS forum_n_joueur ON forum_notifs(joueur, n)`);
+  q(`CREATE TABLE IF NOT EXISTS forum_sanctions(joueur TEXT PRIMARY KEY, type TEXT, jusqua INTEGER DEFAULT 0, raison TEXT DEFAULT '', ts INTEGER)`);
+  h.fVues = new Map(); h.fPresence = new Map();
+  if (!h.un('SELECT 1 AS x FROM forum_sujets LIMIT 1')) {        // premiers sujets (modifiables ensuite en mode modération)
+    const now = Date.now(), ajout = (cat, titre, texte, epingle) => {
+      h.run('INSERT INTO forum_sujets(cat,titre,auteur,ts,dernier,epingle,dauteur) VALUES(?,?,?,?,?,?,?)', cat, titre, 'sys', now, now, epingle ? 1 : 0, 'sys');
+      const n = h.un('SELECT MAX(n) AS n FROM forum_sujets').n;
+      h.run('INSERT INTO forum_messages(sujet,auteur,texte,ts) VALUES(?,?,?,?)', n, 'sys', texte, now);
+      h.run('UPDATE forum_sujets SET dmsg=? WHERE n=?', h.un('SELECT MAX(n) AS n FROM forum_messages').n, n);
+    };
+    ajout('annonces', 'Bienvenue sur le ClubiForum !', "Le ClubiForum est ouvert. Tu te connectes avec ton compte Twitch, sans rien créer d'autre.\n\nPrends une minute pour lire les [règles du forum](#forum/regles), puis lance-toi : présente-toi, discute, cherche les secrets avec les autres.", true);
+    ajout('regles', 'Les règles du ClubiForum en bref', "Respect, pas de spam (1 minute entre deux messages), et jamais de solution pour les secrets.\n\nLe détail complet, avec les raisons de chaque règle, est sur la page des [règles du forum](#forum/regles).", true);
+    ajout('secrets', 'Comment fonctionnent les secrets : lis ça avant de chercher', "**On s'entraide, mais on ne dévoile jamais un secret.** Chaque secret doit pouvoir être trouvé par chacun, sans qu'on le lui souffle.\n\n**Permis** : donner un indice vague, dire « cherche du côté de telle page », encourager, comparer vos pistes sans conclure.\n**Interdit** : donner la réponse, montrer une capture qui la révèle, expliquer pas à pas comment le déclencher.\n**Un doute ?** Utilise « Masquer en spoiler » : le message reste caché tant que personne ne clique.\n\nJe ne confirme et ne révèle aucun secret, pour que la découverte reste la même pour tout le monde. Un message qui dévoile une solution est masqué puis supprimé.", true);
+  }
+}
+function fCfg(h) {
+  const e = h.env || {};
+  return {delaiMsg: num(e.FORUM_DELAI_MSG, 60), delaiSujet: num(e.FORUM_DELAI_SUJET, 300), seuil: num(e.FORUM_SEUIL_SIGNALEMENT, 3), parPage: 20, parListe: 25,
+    modos: String(e.FORUM_MODOS || 'leclubi').toLowerCase().split(',').map(s => s.trim()).filter(Boolean)};
+}
+function fSanction(h, id) {
+  const s = h.un('SELECT * FROM forum_sanctions WHERE joueur=?', id); if (!s) return null;
+  if (s.type === 'sourdine' && s.jusqua < Date.now()) { h.run('DELETE FROM forum_sanctions WHERE joueur=?', id); return null; }
+  return s;
+}
+function fAuteur(h, C, id, cache) {
+  if (cache && cache.has(id)) return cache.get(id);
+  let a;
+  if (!id || id === 'sys') a = {pseudo: 'LeClubi', login: 'leclubi', avatar: '', titre: '', cosm: {}, modo: true, sys: true, n: 0};
+  else {
+    const j = h.joueur(id);
+    a = j ? {pseudo: j.nom, login: j.login, avatar: j.prive ? '' : (j.avatar || ''), titre: h.titreDe(j), cosm: cosmDe(j), modo: C.modos.includes(j.login), n: h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE auteur=? AND supprime=0', id).c}
+      : {pseudo: 'Ancien membre', login: '', avatar: '', titre: '', cosm: {}, modo: false, n: 0};
+  }
+  if (cache) cache.set(id, a); return a;
+}
+const fMini = a => ({pseudo: a.pseudo, login: a.login, avatar: a.avatar, cosm: a.cosm});
+function fNotif(h, joueur, type, sujet, msg, de) {
+  if (!joueur || joueur === 'sys' || joueur === de) return;
+  h.run('INSERT INTO forum_notifs(joueur,type,sujet,msg,de,ts) VALUES(?,?,?,?,?,?)', joueur, type, sujet, msg, de, Date.now());
+  h.run('DELETE FROM forum_notifs WHERE joueur=? AND n NOT IN (SELECT n FROM forum_notifs WHERE joueur=? ORDER BY n DESC LIMIT 60)', joueur, joueur);
+}
+function fNonLusSql(cat) { return `SELECT s.n FROM forum_sujets s LEFT JOIN forum_lus l ON l.sujet=s.n AND l.joueur=? WHERE s.supprime=0 ${cat ? 'AND s.cat=?' : ''} AND ((l.msg IS NULL AND s.dernier>?) OR (l.msg IS NOT NULL AND l.msg<s.dmsg))`; }
+function fNonLus(h, me, depuis, cat) { return h.sql.exec(fNonLusSql(cat), ...(cat ? [me.id, cat, depuis] : [me.id, depuis])).toArray().map(r => r.n); }
+
+function fLigne(h, C, s, me, cache, nonLus, suivis) {
+  const parts = h.sql.exec('SELECT DISTINCT auteur FROM forum_messages WHERE sujet=? AND supprime=0 ORDER BY n DESC LIMIT 4', s.n).toArray().map(r => r.auteur).filter(a => a !== s.auteur).slice(0, 3);
+  const cat = fCat(s.cat);
+  return {n: s.n, cat: s.cat, catNom: cat ? cat.nom : s.cat, titre: s.titre, etiq: s.etiq, resolu: !!s.resolu, epingle: !!s.epingle, ferme: !!s.ferme, nrep: s.nrep, vues: s.vues, ts: s.ts, dernier: s.dernier,
+    auteur: fMini(fAuteur(h, C, s.auteur, cache)), dernierAuteur: s.dauteur ? fMini(fAuteur(h, C, s.dauteur, cache)) : null, participants: parts.map(p => fMini(fAuteur(h, C, p, cache))),
+    nonLu: !!(nonLus && nonLus.has(s.n)), suivi: !!(suivis && suivis.has(s.n))};
+}
+function fListe(h, C, me, depuis, where, params, ordre, page, extra) {
+  const total = h.un(`SELECT COUNT(*) AS c FROM forum_sujets s WHERE s.supprime=0 AND ${where}`, ...params).c;
+  const pages = Math.max(1, Math.ceil(total / C.parListe)); page = Math.min(Math.max(1, page | 0 || 1), pages);
+  const rows = h.sql.exec(`SELECT s.* FROM forum_sujets s WHERE s.supprime=0 AND ${where} ORDER BY ${ordre} LIMIT ${C.parListe} OFFSET ${(page - 1) * C.parListe}`, ...params).toArray();
+  const cache = new Map(), nl = me ? new Set(fNonLus(h, me, depuis)) : null, sv = me ? new Set(h.sql.exec('SELECT sujet FROM forum_suivis WHERE joueur=?', me.id).toArray().map(r => r.sujet)) : null;
+  return {total, page, pages, sujets: rows.map(s => fLigne(h, C, s, me, cache, nl, sv)), ...(extra || {})};
+}
+function fMessage(h, C, m, me, modo, cache, premier, reacts) {
+  const masque = m.masque === 1, cacher = masque && !modo;
+  let cite = null;
+  if (m.cite) { const c = h.un('SELECT * FROM forum_messages WHERE n=? AND supprime=0', m.cite); if (c) cite = {n: c.n, pseudo: fAuteur(h, C, c.auteur, cache).pseudo, extrait: c.masque === 1 && !modo ? '' : String(c.texte).replace(/\|\|[\s\S]*?\|\|/g, '▮▮▮').slice(0, 160)}; }
+  const rx = {}; (reacts[m.n] || []).forEach(r => { rx[r.emoji] = {e: r.emoji, n: r.c, moi: !!r.moi}; });
+  return {n: m.n, auteur: fAuteur(h, C, m.auteur, cache), texte: cacher ? '' : m.texte, masque, ts: m.ts, edite: !!m.edite, utile: !!m.utile, cite, premier, reactions: FORUM_EMOJIS.filter(e => rx[e]).map(e => rx[e]),
+    moi: !!(me && m.auteur === me.id), signale: me ? !!h.un('SELECT 1 AS x FROM forum_signalements WHERE msg=? AND joueur=?', m.n, me.id) : false, ...(modo ? {nSignalements: h.un('SELECT COUNT(*) AS c FROM forum_signalements WHERE msg=?', m.n).c} : {})};
+}
+function fMentions(h, texte, de) {
+  const vus = new Set(); let m; const re = /@([A-Za-z0-9_]{3,25})/g;
+  while ((m = re.exec(texte)) && vus.size < 5) { const j = h.un('SELECT id FROM joueurs WHERE login=? AND banni=0', m[1].toLowerCase()); if (j && j.id !== de) vus.add(j.id); }
+  return [...vus];
+}
+
+// Création d'un message (réponse ou premier message d'un sujet). Retourne {erreur, ...} ou {ok}
+function fVerifier(h, C, me, modo, texte, estSujet) {
+  const sa = fSanction(h, me.id);
+  if (sa) return sa.type === 'ban' ? {erreur: 'banni_forum', code: 403} : {erreur: 'sourdine', jusqua: sa.jusqua, code: 403};
+  if (texte.length < 2) return {erreur: 'trop_court', code: 400};
+  if (modo) return null;                                   // LeClubi n'est pas freiné par les délais
+  const now = Date.now(), dm = h.un('SELECT ts, texte FROM forum_messages WHERE auteur=? ORDER BY n DESC LIMIT 1', me.id);
+  if (dm && now - dm.ts < C.delaiMsg * 1000) return {erreur: 'delai', reste: Math.ceil((C.delaiMsg * 1000 - (now - dm.ts)) / 1000), code: 429};
+  if (estSujet) {
+    const ds = h.un('SELECT ts FROM forum_sujets WHERE auteur=? ORDER BY n DESC LIMIT 1', me.id);
+    if (ds && now - ds.ts < C.delaiSujet * 1000) return {erreur: 'delai_sujet', reste: Math.ceil((C.delaiSujet * 1000 - (now - ds.ts)) / 1000), code: 429};
+  }
+  if (dm && fNorm(dm.texte) === fNorm(texte)) return {erreur: 'doublon', code: 409};
+  return null;
+}
+function fEnregistrer(h, C, me, sujet, texte, cite) {
+  const now = Date.now();
+  h.run('INSERT INTO forum_messages(sujet,auteur,texte,ts,cite) VALUES(?,?,?,?,?)', sujet.n, me.id, texte, now, cite || 0);
+  const n = h.un('SELECT MAX(n) AS n FROM forum_messages').n;
+  h.run('UPDATE forum_sujets SET dernier=?, dmsg=?, dauteur=?, nrep=(SELECT COUNT(*)-1 FROM forum_messages WHERE sujet=? AND supprime=0) WHERE n=?', now, n, me.id, sujet.n, sujet.n);
+  h.run('INSERT OR IGNORE INTO forum_suivis(sujet,joueur) VALUES(?,?)', sujet.n, me.id);
+  h.run('INSERT INTO forum_lus(sujet,joueur,msg) VALUES(?,?,?) ON CONFLICT(sujet,joueur) DO UPDATE SET msg=excluded.msg', sujet.n, me.id, n);
+  const deja = new Set([me.id]), notif = (id, type) => { if (id && !deja.has(id)) { deja.add(id); fNotif(h, id, type, sujet.n, n, me.id); } };
+  if (cite) { const c = h.un('SELECT auteur FROM forum_messages WHERE n=?', cite); if (c) notif(c.auteur, 'citation'); }
+  fMentions(h, texte, me.id).forEach(id => notif(id, 'mention'));
+  notif(sujet.auteur, 'reponse');
+  h.sql.exec('SELECT joueur FROM forum_suivis WHERE sujet=?', sujet.n).toArray().forEach(r => notif(r.joueur, 'suivi'));
+  return n;
+}
+
+async function forumRoute(h, req, url) {
+  if (!h.fVues) forumTables(h);
+  const C = fCfg(h), p = url.pathname.slice(6), me = await h.lireSession(req), modo = !!(me && C.modos.includes(me.login)), now = Date.now();
+  let depuis = 0;
+  if (me) {
+    h.run('INSERT OR IGNORE INTO forum_membres(joueur,depuis) VALUES(?,?)', me.id, now);
+    depuis = h.un('SELECT depuis FROM forum_membres WHERE joueur=?', me.id).depuis;
+    h.fPresence.set(me.login, now); if (h.fPresence.size > 500) for (const [k, t] of h.fPresence) if (now - t > 300000) h.fPresence.delete(k);
+  }
+  let b = {}; if (req.method === 'POST') { try { b = await req.json(); } catch (e) {} }
+  const niv = (code, o) => json(o, {}, code), cache = new Map();
+  const sujetDe = n => { const s = h.un('SELECT * FROM forum_sujets WHERE n=? AND supprime=0', n | 0); return s || null; };
+  const requis = () => me ? null : niv(401, {erreur: 'session'});
+
+  // ---------- lectures ----------
+  if (p === '/accueil' && req.method === 'GET') {
+    const nl = me ? new Set(fNonLus(h, me, depuis)) : null;
+    const cats = FORUM_CATS.map(c => {
+      const d = h.un('SELECT * FROM forum_sujets WHERE cat=? AND supprime=0 ORDER BY dernier DESC LIMIT 1', c.id);
+      const nonLus = me ? h.sql.exec('SELECT n, cat FROM forum_sujets WHERE cat=? AND supprime=0', c.id).toArray().filter(r => nl.has(r.n)).length : 0;
+      return {...c, nsujets: h.un('SELECT COUNT(*) AS c FROM forum_sujets WHERE cat=? AND supprime=0', c.id).c, nonLus, suivie: me ? !!h.un('SELECT 1 AS x FROM forum_suivis_cat WHERE cat=? AND joueur=?', c.id, me.id) : false,
+        dernier: d ? {n: d.n, titre: d.titre, ts: d.dernier, auteur: fMini(fAuteur(h, C, d.dauteur || d.auteur, cache))} : null};
+    });
+    const sinceJ = now - 86400000;
+    const actifs = h.sql.exec(`SELECT s.n, s.titre, COUNT(m.n) AS c FROM forum_sujets s JOIN forum_messages m ON m.sujet=s.n AND m.ts>? AND m.supprime=0 WHERE s.supprime=0 GROUP BY s.n ORDER BY c DESC, s.dernier DESC LIMIT 3`, sinceJ).toArray();
+    const dernieres = h.sql.exec(`SELECT m.n, m.sujet, m.auteur, m.ts, s.titre FROM forum_messages m JOIN forum_sujets s ON s.n=m.sujet WHERE m.supprime=0 AND m.masque=0 AND s.supprime=0 AND m.n>(SELECT MIN(n) FROM forum_messages WHERE sujet=m.sujet) ORDER BY m.n DESC LIMIT 4`).toArray()
+      .map(r => ({n: r.n, sujet: r.sujet, titre: r.titre, ts: r.ts, auteur: fMini(fAuteur(h, C, r.auteur, cache))}));
+    for (const [k, t] of h.fPresence) if (now - t > 300000) h.fPresence.delete(k);
+    const sanction = me ? fSanction(h, me.id) : null;
+    return json({cats, actifs, dernieres, stats: {sujets: h.un('SELECT COUNT(*) AS c FROM forum_sujets WHERE supprime=0').c, messages: h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE supprime=0').c, membres: h.un('SELECT COUNT(*) AS c FROM joueurs WHERE banni=0').c, enLigne: h.fPresence.size},
+      moi: me ? {login: me.login, pseudo: me.nom, modo, nonLus: nl.size, notifs: h.un('SELECT COUNT(*) AS c FROM forum_notifs WHERE joueur=? AND lu=0', me.id).c, sanction: sanction ? {type: sanction.type, jusqua: sanction.jusqua} : null} : null, delais: {msg: C.delaiMsg, sujet: C.delaiSujet}});
+  }
+  if (p === '/liste' && req.method === 'GET') {            // vue : derniers | nonlus | miens | suivis | cat
+    const vue = url.searchParams.get('vue') || 'derniers', page = +url.searchParams.get('page') || 1;
+    if (vue === 'cat') {
+      const c = fCat(url.searchParams.get('cat')); if (!c) return niv(404, {erreur: 'inconnu'});
+      const tri = url.searchParams.get('tri') || 'recents';
+      let w = 's.cat=?', pa = [c.id], o = 's.epingle DESC, s.dernier DESC';
+      if (tri === 'populaires') o = 's.epingle DESC, s.nrep DESC, s.vues DESC';
+      else if (tri === 'sans') { w += ' AND s.nrep=0'; }
+      else if (tri === 'resolus') { w += ' AND s.resolu=1'; }
+      const l = fListe(h, C, me, depuis, w, pa, o, page, {cat: {...c, suivie: me ? !!h.un('SELECT 1 AS x FROM forum_suivis_cat WHERE cat=? AND joueur=?', c.id, me.id) : false}});
+      return json(l);
+    }
+    if (['nonlus', 'miens', 'suivis'].includes(vue) && !me) return niv(401, {erreur: 'session'});
+    if (vue === 'nonlus') { const ids = fNonLus(h, me, depuis); return json(fListe(h, C, me, depuis, ids.length ? `s.n IN (${ids.map(() => '?').join(',')})` : '0', ids, 's.dernier DESC', page)); }
+    if (vue === 'miens') return json(fListe(h, C, me, depuis, 's.auteur=?', [me.id], 's.dernier DESC', page));
+    if (vue === 'suivis') return json(fListe(h, C, me, depuis, 's.n IN (SELECT sujet FROM forum_suivis WHERE joueur=?)', [me.id], 's.dernier DESC', page));
+    return json(fListe(h, C, me, depuis, '1=1', [], 's.dernier DESC', page));
+  }
+  if (p === '/sujet' && req.method === 'GET') {
+    const s = sujetDe(+url.searchParams.get('id')); if (!s) return niv(404, {erreur: 'inconnu'});
+    const total = h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE sujet=? AND supprime=0', s.n).c, pages = Math.max(1, Math.ceil(total / C.parPage));
+    const lusAvant = me ? ((h.un('SELECT msg FROM forum_lus WHERE sujet=? AND joueur=?', s.n, me.id) || {}).msg || 0) : 0;
+    let page = url.searchParams.get('page') || '1';
+    if (page === 'dernier') page = pages;
+    else if (page === 'nouveau') { const f = h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE sujet=? AND supprime=0 AND n<=?', s.n, lusAvant); page = lusAvant ? Math.floor(f.c / C.parPage) + 1 : 1; }
+    page = Math.min(Math.max(1, +page || 1), pages);
+    const ms = h.sql.exec('SELECT * FROM forum_messages WHERE sujet=? AND supprime=0 ORDER BY n LIMIT ? OFFSET ?', s.n, C.parPage, (page - 1) * C.parPage).toArray();
+    const premierN = (h.un('SELECT MIN(n) AS n FROM forum_messages WHERE sujet=? AND supprime=0', s.n) || {}).n;
+    const reacts = {};
+    if (ms.length) h.sql.exec(`SELECT msg, emoji, COUNT(*) AS c, SUM(joueur=?) AS moi FROM forum_reactions WHERE msg IN (${ms.map(() => '?').join(',')}) GROUP BY msg, emoji`, me ? me.id : '', ...ms.map(m => m.n)).toArray().forEach(r => { (reacts[r.msg] = reacts[r.msg] || []).push(r); });
+    const cle = (me ? me.login : (req.headers.get('X-Ip') || '?')) + ':' + s.n; if (!h.fVues.has(cle) || now - h.fVues.get(cle) > 1800000) { h.fVues.set(cle, now); if (h.fVues.size > 2000) h.fVues.clear(); h.run('UPDATE forum_sujets SET vues=vues+1 WHERE n=?', s.n); s.vues++; }
+    if (me && ms.length) {
+      const dernier = Math.max(...ms.map(m => m.n));
+      if (dernier > lusAvant) h.run('INSERT INTO forum_lus(sujet,joueur,msg) VALUES(?,?,?) ON CONFLICT(sujet,joueur) DO UPDATE SET msg=MAX(msg, excluded.msg)', s.n, me.id, dernier);
+    }
+    const c = fCat(s.cat), participants = h.un('SELECT COUNT(DISTINCT auteur) AS c FROM forum_messages WHERE sujet=? AND supprime=0', s.n).c;
+    return json({sujet: {n: s.n, cat: s.cat, catNom: c ? c.nom : s.cat, catG: c ? c.g : '', titre: s.titre, etiq: s.etiq, resolu: !!s.resolu, epingle: !!s.epingle, ferme: !!s.ferme, nrep: s.nrep, vues: s.vues, ts: s.ts, participants,
+        auteurMoi: !!(me && s.auteur === me.id), spoilers: !!(c && c.spoilers), modoSeul: !!(c && c.modo), suivi: me ? !!h.un('SELECT 1 AS x FROM forum_suivis WHERE sujet=? AND joueur=?', s.n, me.id) : false},
+      messages: ms.map(m => fMessage(h, C, m, me, modo, cache, m.n === premierN, reacts)), page, pages, lusAvant, moi: me ? {modo, login: me.login} : null, delais: {msg: C.delaiMsg},
+      reste: me && !modo ? Math.max(0, Math.ceil((C.delaiMsg * 1000 - (now - ((h.un('SELECT MAX(ts) AS t FROM forum_messages WHERE auteur=?', me.id) || {}).t || 0))) / 1000)) : 0});
+  }
+  if (p === '/recherche' && req.method === 'GET') {
+    const q = fTexte(url.searchParams.get('q'), 60); if (q.length < 2) return json({sujets: [], membres: [], total: 0, page: 1, pages: 1});
+    const like = fLike(q);
+    const l = fListe(h, C, me, depuis, `(s.titre LIKE ? ESCAPE '\\' OR s.n IN (SELECT sujet FROM forum_messages WHERE supprime=0 AND masque=0 AND texte LIKE ? ESCAPE '\\'))`, [like, like], 's.dernier DESC', +url.searchParams.get('page') || 1);
+    l.membres = h.sql.exec(`SELECT login, nom, avatar, prive FROM joueurs WHERE banni=0 AND (nom LIKE ? ESCAPE '\\' OR login LIKE ? ESCAPE '\\') LIMIT 5`, like, like).toArray().map(j => ({login: j.login, pseudo: j.nom, avatar: j.prive ? '' : (j.avatar || '')}));
+    return json(l);
+  }
+  if (p === '/notifs' && req.method === 'GET') {
+    if (!me) return niv(401, {erreur: 'session'});
+    const l = h.sql.exec('SELECT * FROM forum_notifs WHERE joueur=? ORDER BY n DESC LIMIT 30', me.id).toArray().map(r => {
+      const s = h.un('SELECT titre, supprime FROM forum_sujets WHERE n=?', r.sujet);
+      return {n: r.n, type: r.type, sujet: r.sujet, msg: r.msg, titre: s && !s.supprime ? s.titre : '(sujet supprimé)', ts: r.ts, lu: !!r.lu, de: fMini(fAuteur(h, C, r.de, cache))};
+    });
+    return json({notifs: l});
+  }
+  if (p === '/moderation' && req.method === 'GET') {
+    if (!modo) return niv(403, {erreur: 'interdit'});
+    const rows = h.sql.exec(`SELECT m.* FROM forum_messages m WHERE m.supprime=0 AND m.valide=0 AND (m.masque=1 OR m.n IN (SELECT msg FROM forum_signalements)) ORDER BY m.n DESC LIMIT 50`).toArray();
+    const reacts = {};
+    return json({signales: rows.map(m => ({...fMessage(h, C, m, me, true, cache, false, reacts), sujet: m.sujet, titre: (h.un('SELECT titre FROM forum_sujets WHERE n=?', m.sujet) || {}).titre || ''})),
+      sanctions: h.sql.exec('SELECT * FROM forum_sanctions ORDER BY ts DESC LIMIT 50').toArray().map(s => { const j = h.joueur(s.joueur); return {login: j ? j.login : s.joueur, pseudo: j ? j.nom : s.joueur, type: s.type, jusqua: s.jusqua, raison: s.raison, ts: s.ts}; })});
+  }
+
+  // ---------- écritures ----------
+  if (req.method !== 'POST') return niv(404, {erreur: 'inconnu'});
+  const non = requis(); if (non) return non;
+  if (p === '/sujet') {
+    const c = fCat(String(b.cat || '')); if (!c) return niv(400, {erreur: 'categorie'});
+    if (c.modo && !modo) return niv(403, {erreur: 'interdit'});
+    const titre = fTexte(b.titre, 120).replace(/\n/g, ' '), texte = fTexte(b.texte, 6000), etiq = (c.etiq || []).includes(String(b.etiquette || '')) ? String(b.etiquette) : '';
+    if (titre.length < 3) return niv(400, {erreur: 'titre_court'});
+    const v = fVerifier(h, C, me, modo, texte, true); if (v) return niv(v.code, v);
+    h.run('INSERT INTO forum_sujets(cat,titre,auteur,etiq,ts,dernier,dauteur) VALUES(?,?,?,?,?,?,?)', c.id, titre, me.id, etiq, now, now, me.id);
+    const s = h.un('SELECT * FROM forum_sujets WHERE n=(SELECT MAX(n) FROM forum_sujets)');
+    fEnregistrer(h, C, me, s, texte, 0);
+    h.sql.exec('SELECT joueur FROM forum_suivis_cat WHERE cat=?', c.id).toArray().forEach(r => fNotif(h, r.joueur, 'nouveau', s.n, 0, me.id));
+    return json({ok: true, sujet: s.n});
+  }
+  if (p === '/message') {
+    const s = sujetDe(b.sujet); if (!s) return niv(404, {erreur: 'inconnu'});
+    const c = fCat(s.cat); if (c && c.modo && !modo) return niv(403, {erreur: 'interdit'});
+    if (s.ferme && !modo) return niv(403, {erreur: 'ferme'});
+    const texte = fTexte(b.texte, 6000), v = fVerifier(h, C, me, modo, texte, false); if (v) return niv(v.code, v);
+    const cite = b.cite && h.un('SELECT n FROM forum_messages WHERE n=? AND sujet=? AND supprime=0', b.cite | 0, s.n) ? b.cite | 0 : 0;
+    const n = fEnregistrer(h, C, me, s, texte, cite);
+    return json({ok: true, msg: n, page: Math.max(1, Math.ceil(h.un('SELECT COUNT(*) AS c FROM forum_messages WHERE sujet=? AND supprime=0', s.n).c / C.parPage))});
+  }
+  if (p === '/reaction') {
+    const m = h.un('SELECT m.*, s.supprime AS ss FROM forum_messages m JOIN forum_sujets s ON s.n=m.sujet WHERE m.n=? AND m.supprime=0', b.msg | 0), e = String(b.emoji || '');
+    if (!m || m.ss || !FORUM_EMOJIS.includes(e)) return niv(400, {erreur: 'invalide'});
+    const sa = fSanction(h, me.id); if (sa) return niv(403, {erreur: sa.type === 'ban' ? 'banni_forum' : 'sourdine', jusqua: sa.jusqua});
+    if (h.un('SELECT 1 AS x FROM forum_reactions WHERE msg=? AND joueur=? AND emoji=?', m.n, me.id, e)) h.run('DELETE FROM forum_reactions WHERE msg=? AND joueur=? AND emoji=?', m.n, me.id, e);
+    else h.run('INSERT INTO forum_reactions(msg,joueur,emoji) VALUES(?,?,?)', m.n, me.id, e);
+    return json({ok: true, reactions: FORUM_EMOJIS.map(x => ({e: x, n: h.un('SELECT COUNT(*) AS c FROM forum_reactions WHERE msg=? AND emoji=?', m.n, x).c, moi: !!h.un('SELECT 1 AS x FROM forum_reactions WHERE msg=? AND joueur=? AND emoji=?', m.n, me.id, x)})).filter(x => x.n)});
+  }
+  if (p === '/signaler') {
+    const m = h.un('SELECT * FROM forum_messages WHERE n=? AND supprime=0', b.msg | 0);
+    if (!m) return niv(404, {erreur: 'inconnu'});
+    if (m.auteur === me.id) return niv(400, {erreur: 'propre_message'});
+    h.run('INSERT OR IGNORE INTO forum_signalements(msg,joueur,ts) VALUES(?,?,?)', m.n, me.id, now);
+    const nb = h.un('SELECT COUNT(*) AS c FROM forum_signalements WHERE msg=?', m.n).c; let masque = m.masque === 1;
+    if (nb >= C.seuil && !m.valide && !masque) { h.run('UPDATE forum_messages SET masque=1 WHERE n=?', m.n); masque = true; }
+    return json({ok: true, masque});
+  }
+  if (p === '/suivre') {
+    const on = b.on !== false;
+    if (b.cat) { if (!fCat(String(b.cat))) return niv(400, {erreur: 'invalide'}); if (on) h.run('INSERT OR IGNORE INTO forum_suivis_cat(cat,joueur) VALUES(?,?)', String(b.cat), me.id); else h.run('DELETE FROM forum_suivis_cat WHERE cat=? AND joueur=?', String(b.cat), me.id); return json({ok: true}); }
+    const s = sujetDe(b.sujet); if (!s) return niv(404, {erreur: 'inconnu'});
+    if (on) h.run('INSERT OR IGNORE INTO forum_suivis(sujet,joueur) VALUES(?,?)', s.n, me.id); else h.run('DELETE FROM forum_suivis WHERE sujet=? AND joueur=?', s.n, me.id);
+    return json({ok: true});
+  }
+  if (p === '/utile') {
+    const m = h.un('SELECT * FROM forum_messages WHERE n=? AND supprime=0', b.msg | 0), s = m && sujetDe(m.sujet);
+    if (!m || !s) return niv(404, {erreur: 'inconnu'});
+    if (!(modo || s.auteur === me.id)) return niv(403, {erreur: 'interdit'});
+    const nouveau = m.utile ? 0 : 1;
+    h.run('UPDATE forum_messages SET utile=0 WHERE sujet=?', s.n); if (nouveau) h.run('UPDATE forum_messages SET utile=1 WHERE n=?', m.n);
+    if (nouveau) fNotif(h, m.auteur, 'utile', s.n, m.n, me.id);
+    return json({ok: true, utile: !!nouveau});
+  }
+  if (p === '/resolu') {
+    const s = sujetDe(b.sujet); if (!s) return niv(404, {erreur: 'inconnu'});
+    if (!(modo || s.auteur === me.id)) return niv(403, {erreur: 'interdit'});
+    h.run('UPDATE forum_sujets SET resolu=? WHERE n=?', b.on === false ? 0 : 1, s.n); return json({ok: true});
+  }
+  if (p === '/modifier') {
+    const m = h.un('SELECT * FROM forum_messages WHERE n=? AND supprime=0', b.msg | 0); if (!m) return niv(404, {erreur: 'inconnu'});
+    if (!(modo || (m.auteur === me.id && now - m.ts < 600000))) return niv(403, {erreur: 'interdit'});
+    const sa = fSanction(h, me.id); if (sa && !modo) return niv(403, {erreur: sa.type === 'ban' ? 'banni_forum' : 'sourdine'});
+    const texte = fTexte(b.texte, 6000); if (texte.length < 2) return niv(400, {erreur: 'trop_court'});
+    h.run('UPDATE forum_messages SET texte=?, edite=1 WHERE n=?', texte, m.n); return json({ok: true});
+  }
+  if (p === '/modo') {
+    if (!modo) return niv(403, {erreur: 'interdit'});
+    const a = String(b.action || ''), s = b.sujet ? sujetDe(b.sujet) : null;
+    const sup = n => { h.run('UPDATE forum_messages SET supprime=1 WHERE n=?', n); };
+    if (a === 'epingler' && s) h.run('UPDATE forum_sujets SET epingle=? WHERE n=?', b.on === false ? 0 : 1, s.n);
+    else if (a === 'fermer' && s) h.run('UPDATE forum_sujets SET ferme=? WHERE n=?', b.on === false ? 0 : 1, s.n);
+    else if (a === 'supprimer_sujet' && s) { h.run('UPDATE forum_sujets SET supprime=1 WHERE n=?', s.n); }
+    else if (a === 'deplacer' && s && fCat(String(b.cat || ''))) h.run('UPDATE forum_sujets SET cat=? WHERE n=?', String(b.cat), s.n);
+    else if (a === 'supprimer_msg' || a === 'masquer' || a === 'valider') {
+      const m = h.un('SELECT * FROM forum_messages WHERE n=?', b.msg | 0); if (!m) return niv(404, {erreur: 'inconnu'});
+      if (a === 'valider') { h.run('UPDATE forum_messages SET masque=0, valide=1 WHERE n=?', m.n); h.run('DELETE FROM forum_signalements WHERE msg=?', m.n); }
+      else if (a === 'masquer') h.run('UPDATE forum_messages SET masque=1 WHERE n=?', m.n);
+      else {
+        const premier = (h.un('SELECT MIN(n) AS n FROM forum_messages WHERE sujet=?', m.sujet) || {}).n;
+        if (m.n === premier) h.run('UPDATE forum_sujets SET supprime=1 WHERE n=?', m.sujet); else sup(m.n);
+        h.run('UPDATE forum_sujets SET nrep=MAX(0,(SELECT COUNT(*)-1 FROM forum_messages WHERE sujet=? AND supprime=0)) WHERE n=?', m.sujet, m.sujet);
+        h.run('UPDATE forum_sujets SET dmsg=COALESCE((SELECT MAX(n) FROM forum_messages WHERE sujet=? AND supprime=0),0) WHERE n=?', m.sujet, m.sujet);
+      }
+    } else if (a === 'sourdine' || a === 'ban' || a === 'deban') {
+      const j = h.un('SELECT * FROM joueurs WHERE login=?', String(b.login || '').toLowerCase().slice(0, 40)); if (!j) return niv(404, {erreur: 'membre'});
+      if (C.modos.includes(j.login)) return niv(400, {erreur: 'modo'});
+      if (a === 'deban') h.run('DELETE FROM forum_sanctions WHERE joueur=?', j.id);
+      else {
+        const minutes = Math.min(Math.max(1, +b.minutes || 60), 60 * 24 * 90), raison = fTexte(b.raison, 200);
+        h.run('INSERT INTO forum_sanctions(joueur,type,jusqua,raison,ts) VALUES(?,?,?,?,?) ON CONFLICT(joueur) DO UPDATE SET type=excluded.type, jusqua=excluded.jusqua, raison=excluded.raison, ts=excluded.ts', j.id, a, a === 'ban' ? 0 : now + minutes * 60000, raison, now);
+      }
+    } else return niv(400, {erreur: 'invalide'});
+    return json({ok: true});
+  }
+  if (p === '/notifs-lu') { if (b.n) h.run('UPDATE forum_notifs SET lu=1 WHERE joueur=? AND n=?', me.id, b.n | 0); else h.run('UPDATE forum_notifs SET lu=1 WHERE joueur=?', me.id); return json({ok: true}); }
+  return niv(404, {erreur: 'inconnu'});
 }
