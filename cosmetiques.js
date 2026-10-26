@@ -327,7 +327,8 @@
      LCC.fondVue(vue, id) pose (ou retire) le fond derrière toute une page de profil. */
   var FONDS = {
     etoiles: 'Ciel étoilé', neige: 'Neige tranquille', nebuleuse: 'Nébuleuse', lucioles: 'Lucioles', braises: 'Braises', petales: 'Pétales', pluie: 'Pluie de nuit',
-    hyperespace: 'Voyage stellaire', constellations: 'Constellations', bulles: 'Fonds marins', code: 'Pluie de code', aurore: 'Aurore boréale', orbites: 'Orbites'
+    hyperespace: 'Voyage stellaire', constellations: 'Constellations', bulles: 'Fonds marins', code: 'Pluie de code', aurore: 'Aurore boréale', orbites: 'Orbites',
+    lunesang: 'Lune de sang', cimetiere: 'Brume du cimetière', citrouilles: 'Citrouilles flottantes', fantomes: 'Bal des fantômes', araignees: 'Toiles et araignées'
   };
   function fRng(n) { var s = n || 7; return function () { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
   function fGrad(c, w, h, stops) { var g = c.createLinearGradient(0, 0, 0, h); stops.forEach(function (s, i) { g.addColorStop(i / (stops.length - 1), s); }); c.fillStyle = g; c.fillRect(0, 0, w, h); }
@@ -448,6 +449,71 @@
         c.fillStyle = '#04050e'; c.fillRect(0, 0, w, h); fDrawStars(c, S.st, t, .7); var cx = w * .5, cy = h * .45, k = Math.max(1, Math.min(w, h * 1.6) / 900 + .6);
         fGlow(c, cx, cy, 120 * k, 'rgba(255,200,110,A)', .3); c.fillStyle = 'rgba(255,225,150,.9)'; c.beginPath(); c.arc(cx, cy, 6 * k, 0, 6.2832); c.fill();
         S.o.forEach(function (o) { c.strokeStyle = 'rgba(190,200,255,.1)'; c.lineWidth = 1; c.beginPath(); c.ellipse(cx, cy, o.a * k * 1.6, o.b * k * 1.6, o.t, 0, 6.2832); c.stroke(); var an = t * o.v + o.p, x = Math.cos(an) * o.a * k * 1.6, y = Math.sin(an) * o.b * k * 1.6, cs = Math.cos(o.t), sn = Math.sin(o.t); var px = cx + x * cs - y * sn, py = cy + x * sn + y * cs; fGlow(c, px, py, o.r * 5, 'rgba(255,255,255,A)', .12); c.fillStyle = o.c; c.beginPath(); c.arc(px, py, o.r * k * .9, 0, 6.2832); c.fill(); });
+      }
+    }
+    ,
+    lunesang: {
+      init: function (w, h, r) { var b = [], cl = [], i; for (i = 0; i < Math.max(5, Math.round(w / 220)); i++) b.push({x: r() * w, y: h * (.08 + r() * .5), v: 26 + r() * 40, s: .7 + r() * .9, p: r() * 6.28, d: r() < .5 ? 1 : -1}); for (i = 0; i < 4; i++) cl.push({x: r() * w, y: h * (.12 + r() * .4), wd: 160 + r() * 260, v: 5 + r() * 9}); return {b: b, cl: cl}; },
+      draw: function (c, w, h, t, S, dt) {
+        fGrad(c, w, h, ['#08030a', '#1a0510', '#34091b']);
+        var R = Math.max(40, Math.min(w, h) * .13), mx = w * .72, my = h * .28; fGlow(c, mx, my, R * 3.4, 'rgba(255,50,40,A)', .26);
+        var g = c.createRadialGradient(mx - R * .3, my - R * .3, R * .1, mx, my, R); g.addColorStop(0, '#ff7a55'); g.addColorStop(1, '#a3121c'); c.fillStyle = g; c.beginPath(); c.arc(mx, my, R, 0, 6.2832); c.fill();
+        c.fillStyle = 'rgba(80,0,10,.22)'; [[-.3, -.2, .22], [.25, .15, .28], [-.1, .4, .16], [.4, -.35, .13]].forEach(function (k) { c.beginPath(); c.arc(mx + k[0] * R, my + k[1] * R, k[2] * R, 0, 6.2832); c.fill(); });
+        S.cl.forEach(function (k) { k.x += k.v * dt; if (k.x - k.wd > w) k.x = -k.wd; c.fillStyle = 'rgba(10,3,9,.55)'; c.beginPath(); c.ellipse(k.x, k.y, k.wd, k.wd * .09, 0, 0, 6.2832); c.fill(); c.beginPath(); c.ellipse(k.x + k.wd * .3, k.y - k.wd * .05, k.wd * .55, k.wd * .06, 0, 0, 6.2832); c.fill(); });
+        S.b.forEach(function (b) { b.x += b.d * b.v * dt; if (b.x > w + 40) b.x = -40; if (b.x < -40) b.x = w + 40; b.y += Math.sin(t * 1.3 + b.p) * 10 * dt; var f = Math.sin(t * 9 + b.p), s = b.s; c.save(); c.translate(b.x, b.y); c.scale(s, s); c.fillStyle = 'rgba(6,2,8,.88)'; c.beginPath(); c.ellipse(0, 1, 3, 5, 0, 0, 6.2832); c.fill(); [-1, 1].forEach(function (sd) { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(sd * 8, -6 * f - 4, sd * 17, 2 - f * 5); c.lineTo(sd * 11, 4); c.quadraticCurveTo(sd * 6, 1, 0, 5); c.closePath(); c.fill(); }); c.restore(); });
+      }
+    },
+    cimetiere: {
+      init: function (w, h, r) { var f = [], t = [], i; for (i = 0; i < 8; i++) f.push({x: r() * w, y: h * (.55 + r() * .4), r: 170 + r() * 220, v: 5 + r() * 12, a: .05 + r() * .06}); for (var x = -20; x < w + 40; x += 46 + r() * 70) t.push({x: x, wd: 22 + r() * 22, ht: 36 + r() * 70, k: r() < .3 ? 1 : 0, y: h * (.8 + r() * .1)}); return {f: f, t: t}; },
+      draw: function (c, w, h, t, S, dt) {
+        fGrad(c, w, h, ['#04060a', '#0b1417', '#14211f']); fGlow(c, w * .2, h * .2, Math.max(w, h) * .3, 'rgba(190,230,210,A)', .1);
+        c.fillStyle = '#04080a'; S.t.forEach(function (k) { if (k.k) { c.fillRect(k.x + k.wd * .4, k.y - k.ht, k.wd * .2, k.ht + 40); c.fillRect(k.x + k.wd * .1, k.y - k.ht * .75, k.wd * .8, k.wd * .18); } else { c.beginPath(); c.moveTo(k.x, k.y + 40); c.lineTo(k.x, k.y - k.ht + k.wd / 2); c.arc(k.x + k.wd / 2, k.y - k.ht + k.wd / 2, k.wd / 2, Math.PI, 0); c.lineTo(k.x + k.wd, k.y + 40); c.closePath(); c.fill(); } });
+        c.fillRect(0, h * .9, w, h * .1);
+        S.f.forEach(function (f) { f.x += f.v * dt; if (f.x - f.r > w) f.x = -f.r; fGlow(c, f.x, f.y, f.r, 'rgba(170,210,190,A)', f.a); });
+      }
+    },
+    citrouilles: {
+      init: function (w, h, r) { var a = []; for (var i = 0; i < Math.max(6, Math.round(w * h / 90000)); i++) a.push({x: r() * w, y: r() * h, s: .5 + r() * .9, v: 8 + r() * 14, p: r() * 6.28}); return {a: a}; },
+      draw: function (c, w, h, t, S, dt) {
+        fGrad(c, w, h, ['#0b0612', '#170a1e', '#2a1020']);
+        S.a.forEach(function (q) {
+          q.y -= q.v * dt; q.x += Math.sin(t * .5 + q.p) * 10 * dt; if (q.y < -60) { q.y = h + 60; q.x = Math.random() * w; }
+          var r = 24 * q.s, al = .4 + q.s * .3, gl = .75 + .25 * Math.sin(t * 2 + q.p);
+          fGlow(c, q.x, q.y, r * 2.8, 'rgba(255,140,30,A)', .2 * gl); c.save(); c.translate(q.x, q.y); c.globalAlpha = al;
+          c.fillStyle = '#b84d0c'; c.beginPath(); c.ellipse(-r * .55, 0, r * .6, r * .92, 0, 0, 6.2832); c.fill(); c.beginPath(); c.ellipse(r * .55, 0, r * .6, r * .92, 0, 0, 6.2832); c.fill();
+          c.fillStyle = '#d9691a'; c.beginPath(); c.ellipse(0, 0, r * .75, r, 0, 0, 6.2832); c.fill();
+          c.fillStyle = '#2f5a1e'; c.fillRect(-r * .1, -r * 1.15, r * .2, r * .3);
+          c.fillStyle = 'rgba(255,214,110,' + (.6 + .4 * gl).toFixed(2) + ')'; c.beginPath(); c.moveTo(-r * .5, -r * .3); c.lineTo(-r * .2, -r * .3); c.lineTo(-r * .35, -r * .02); c.fill(); c.beginPath(); c.moveTo(r * .5, -r * .3); c.lineTo(r * .2, -r * .3); c.lineTo(r * .35, -r * .02); c.fill();
+          c.beginPath(); c.moveTo(-r * .5, r * .22); c.lineTo(-r * .25, r * .45); c.lineTo(-r * .1, r * .28); c.lineTo(0, r * .46); c.lineTo(r * .1, r * .28); c.lineTo(r * .25, r * .45); c.lineTo(r * .5, r * .22); c.lineTo(r * .3, r * .6); c.lineTo(-r * .3, r * .6); c.closePath(); c.fill();
+          c.restore();
+        });
+      }
+    },
+    fantomes: {
+      init: function (w, h, r) { var a = []; for (var i = 0; i < Math.max(4, Math.round(w * h / 160000)); i++) a.push({x: r() * w, y: h * (.12 + r() * .7), s: .6 + r() * 1, p: r() * 6.28, v: 5 + r() * 9}); return {a: a, st: fStars(r, Math.round(w * h / 12000), w, h)}; },
+      draw: function (c, w, h, t, S, dt) {
+        fGrad(c, w, h, ['#060813', '#0f1530', '#1c2447']); fDrawStars(c, S.st, t, .6);
+        S.a.forEach(function (g) {
+          g.x += g.v * dt; if (g.x > w + 80) g.x = -80; var u = 32 * g.s, x = g.x + Math.sin(t * .5 + g.p) * 22, y = g.y + Math.cos(t * .35 + g.p) * 18;
+          fGlow(c, x, y, u * 2.4, 'rgba(170,195,255,A)', .1); c.save(); c.translate(x, y);
+          var gr = c.createLinearGradient(0, -u, 0, u * 1.3); gr.addColorStop(0, 'rgba(235,242,255,.28)'); gr.addColorStop(1, 'rgba(235,242,255,.04)'); c.fillStyle = gr;
+          c.beginPath(); c.moveTo(-u, u * 1.2); c.lineTo(-u, 0); c.arc(0, 0, u, Math.PI, 0); c.lineTo(u, u * 1.2);
+          for (var k = 0; k < 4; k++) { var x0 = u - k * u / 2, wob = Math.sin(t * 2 + g.p + k) * u * .08; c.quadraticCurveTo(x0 - u * .25, u * 1.2 + u * .28 + wob, x0 - u * .5, u * 1.2); }
+          c.closePath(); c.fill(); c.fillStyle = 'rgba(8,10,28,.45)'; c.beginPath(); c.ellipse(-u * .35, -u * .1, u * .14, u * .2, 0, 0, 6.2832); c.fill(); c.beginPath(); c.ellipse(u * .35, -u * .1, u * .14, u * .2, 0, 0, 6.2832); c.fill(); c.beginPath(); c.ellipse(0, u * .3, u * .12, u * .18, 0, 0, 6.2832); c.fill(); c.restore();
+        });
+      }
+    },
+    araignees: {
+      init: function (w, h, r) { var a = []; for (var i = 0; i < Math.max(3, Math.round(w / 260)); i++) a.push({x: w * (.08 + r() * .84), len: h * (.25 + r() * .5), s: .7 + r(), p: r() * 6.28, v: .18 + r() * .2}); return {a: a}; },
+      draw: function (c, w, h, t, S) {
+        fGrad(c, w, h, ['#06040a', '#110b1c', '#1c1230']);
+        function web(cx, cy, a0, a1, R) { c.strokeStyle = 'rgba(225,225,255,.16)'; c.lineWidth = 1; var n = 6, i, j; for (i = 0; i <= n; i++) { var a = a0 + (a1 - a0) * i / n; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); c.stroke(); } for (j = 1; j <= 5; j++) { var rr = R * j / 5; c.beginPath(); for (i = 0; i <= n; i++) { var b = a0 + (a1 - a0) * i / n, px = cx + Math.cos(b) * rr, py = cy + Math.sin(b) * rr; if (i) { var m = a0 + (a1 - a0) * (i - .5) / n; c.quadraticCurveTo(cx + Math.cos(m) * rr * .9, cy + Math.sin(m) * rr * .9, px, py); } else c.moveTo(px, py); } c.stroke(); } }
+        var R = Math.max(180, Math.min(380, Math.min(w, h) * .5)); web(0, 0, 0, Math.PI / 2, R); web(w, 0, Math.PI / 2, Math.PI, R);
+        S.a.forEach(function (q) {
+          var y = q.len * (.55 + .45 * Math.sin(t * q.v + q.p)); c.strokeStyle = 'rgba(230,230,255,.2)'; c.lineWidth = 1; c.beginPath(); c.moveTo(q.x, 0); c.lineTo(q.x, y); c.stroke();
+          c.save(); c.translate(q.x, y); c.scale(q.s, q.s); c.strokeStyle = '#0a060e'; c.lineWidth = 1.6; for (var i = 0; i < 4; i++) [-1, 1].forEach(function (sd) { var k = 8 + i * 2; c.beginPath(); c.moveTo(0, 3); c.quadraticCurveTo(sd * (6 + i * 3), -4 + i * 4 - 2, sd * k, 6 + i * 4); c.stroke(); });
+          c.fillStyle = '#0a060e'; c.strokeStyle = 'rgba(175,145,225,.45)'; c.lineWidth = .8; c.beginPath(); c.arc(0, 6, 5, 0, 6.2832); c.fill(); c.stroke(); c.beginPath(); c.arc(0, -1, 3.2, 0, 6.2832); c.fill(); c.stroke(); c.fillStyle = '#b02a3a'; c.fillRect(-1.6, -2, 1, 1); c.fillRect(.7, -2, 1, 1); c.restore();
+        });
       }
     }
   };
