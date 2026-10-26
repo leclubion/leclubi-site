@@ -127,9 +127,9 @@
     }).join('');
     var actifs = d.actifs.length ? d.actifs.map(function(a, i){ return '<a class="fo-top3" href="#forum/s/' + a.n + '"><i>' + (i + 1) + '</i><span><b>' + esc(a.titre) + '</b><small>' + plur(a.c, 'message', 'messages') + " aujourd'hui</small></span></a>"; }).join('') : '<p class="fo-vide">Rien pour le moment : lance la discussion !</p>';
     var dern = d.dernieres.length ? d.dernieres.map(function(r){ return '<a class="fo-last3" href="#forum/s/' + r.sujet + '/dernier">' + avatar(r.auteur, 30) + '<span><b>' + esc(r.auteur.pseudo) + '</b> dans ' + esc(r.titre) + '<small>' + ago(r.ts) + '</small></span></a>'; }).join('') : '<p class="fo-vide">Pas encore de réponse.</p>';
-    root.innerHTML = '<div class="fo wrap">' + '<div class="fo-hero"><div><span class="fo-eb">Forum de la commu</span>' + titreH1('Le ClubiForum') +
+    root.innerHTML = '<div class="fo wrap">' + '<div class="fo-ban">' + (window.LCC ? LCC.banniere('veillee', 'fo-bn') : '') + '<div class="fo-banc"><div class="fo-bant"><span class="fo-eb">Forum de la commu</span>' + titreH1('Le ClubiForum') +
       '<p class="fo-lead">Discute avec la commu, partage tes stratégies et cherche les secrets du site. Connexion avec ton compte Twitch, rien d\'autre à créer.</p></div>' +
-      '<div class="fo-hact">' + outils(true) + '<a class="btn fo-new" href="#forum/c/' + (d.cats[2] ? 'general' : 'general') + '/nouveau">Nouveau sujet</a></div></div>' + onglets('') +
+      '<div class="fo-hact">' + outils(true) + '<a class="btn fo-new" href="#forum/c/general/nouveau">Nouveau sujet</a></div></div></div>' + onglets('') +
       '<div class="fo-cols"><div class="fo-main">' + cols + '</div><aside class="fo-side" aria-label="Le forum en direct">' +
       '<div class="fo-card fo-sc"><h3>En ce moment</h3>' + actifs + '</div><div class="fo-card fo-sc"><h3>Dernières réponses</h3>' + dern + '</div>' +
       '<div class="fo-card fo-sc"><h3>La commu</h3><dl class="fo-st"><div><dt>Sujets</dt><dd>' + nb(d.stats.sujets) + '</dd></div><div><dt>Messages</dt><dd>' + nb(d.stats.messages) + '</dd></div><div><dt>Membres</dt><dd>' + nb(d.stats.membres) + '</dd></div><div><dt>En ligne</dt><dd><i class="fo-on"></i>' + nb(d.stats.enLigne) + '</dd></div></dl></div>' +
@@ -466,6 +466,11 @@
   '.fo-load{color:var(--muted);padding:40px 0}.fo-eb{display:inline-block;font:700 12px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}' +
   '.fo-h1{font-family:var(--display);text-transform:uppercase;font-weight:400;font-size:clamp(30px,4.6vw,46px);line-height:1.04;margin:0 0 8px}.fo-h2{font-family:var(--display);text-transform:uppercase;font-weight:400;font-size:20px;margin:28px 0 12px}' +
   '.fo-narrow>.fo-lead{margin-bottom:22px}.fo-lead{color:var(--muted);font-size:16px;line-height:1.55;max-width:60ch;margin:0}' +
+  '.fo-ban{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);margin-bottom:26px;min-height:340px;display:flex;background:#0a0a14;color:#f6efe0}.fo-ban .lcb{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0}.fo-ban::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,6,14,.78),rgba(6,6,14,.25) 62%,rgba(6,6,14,.05)),linear-gradient(0deg,rgba(6,6,14,.7),transparent 45%);pointer-events:none}'+
+  '.fo-banc{position:relative;z-index:1;flex:1;display:flex;flex-wrap:wrap;gap:22px 28px;align-items:flex-end;justify-content:space-between;padding:34px 38px}.fo-bant{max-width:560px;align-self:flex-start}.fo-ban .fo-h1{color:#fff;font-size:clamp(34px,5.4vw,58px);text-shadow:0 2px 24px rgba(0,0,0,.6)}.fo-ban .fo-lead{color:#e6dfcf;text-shadow:0 1px 12px rgba(0,0,0,.7)}.fo-ban .fo-eb{color:#f0c878}'+
+  '.fo-ban .fo-search{background:rgba(10,10,20,.6);border-color:rgba(255,255,255,.22);color:#d8d2c4;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.fo-ban .fo-search input{color:#fff}.fo-ban .fo-ib{background:rgba(10,10,20,.6);color:#fff;border-color:rgba(255,255,255,.22)}'+
+  '@media (max-width:760px){.fo-ban{min-height:300px}.fo-banc{padding:24px 20px}}'+
+  ''+
   '.fo-hero{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between;margin-bottom:26px}.fo-hact{display:flex;flex-wrap:wrap;gap:12px;align-items:center}' +
   '.fo-new{height:46px;display:inline-flex;align-items:center;font-weight:600}' +
   '.fo-toprow{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}.fo-toprow .fo-fil{margin:0}' +
