@@ -611,6 +611,45 @@ nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--red)}
 .jn-tw{background:linear-gradient(135deg,#6a3fd1,#3b1c8c)}.jn-dc{background:linear-gradient(135deg,#6b76f5,#3a44b8)}.jn-yt{background:linear-gradient(135deg,#e0473f,#8f1d17)}
 @media (max-width:900px){.cbv{grid-template-columns:1fr}.cbv-f{height:300px;margin-top:10px}.cf{width:120px;transform:translateX(calc(var(--i) * 66px)) rotate(calc(var(--i) * 9deg)) translateY(calc(var(--i) * var(--i) * 6px))}.cf:hover{transform:translateX(calc(var(--i) * 66px)) translateY(-18px) scale(1.1)}.jn{grid-template-columns:1fr}.hb{padding:56px 0}}
 @media (max-width:520px){.cf{width:96px;transform:translateX(calc(var(--i) * 50px)) rotate(calc(var(--i) * 8deg)) translateY(calc(var(--i) * var(--i) * 5px))}.cf:hover{transform:translateX(calc(var(--i) * 50px)) translateY(-14px) scale(1.08)}.cbv-f{height:250px}}
+
+/* ===== planning v2 ===== */
+.pl-next{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 30px;margin:6px 0 30px;padding:26px 30px;border-radius:20px;overflow:hidden;color:#ece8df;border:1px solid rgba(199,154,75,.45);background:radial-gradient(ellipse 80% 140% at 85% 50%,#3a2466,#171229 60%,#0d0b17);box-shadow:0 18px 44px rgba(0,0,0,.35);isolation:isolate;animation:cbUp .7s cubic-bezier(.2,.9,.3,1.1) both}
+.pl-next[hidden]{display:none}
+.pl-next img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;opacity:.5;transition:transform .8s}
+.pl-next:hover img{transform:scale(1.04)}
+.pl-next::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,9,18,.94) 0%,rgba(10,9,18,.7) 55%,rgba(10,9,18,.3))}
+.pl-next .eb{color:#ffd070;margin:0}.pl-next .eb::before{background:#ffd070}
+.pl-next h2{margin:6px 0 4px;font-size:clamp(26px,3.8vw,42px);color:#fff}
+.pl-next .when{margin:0;color:#d8d4ca}
+.pl-cd{display:flex;gap:10px}
+.pl-cd div{min-width:68px;text-align:center;padding:10px 8px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(4px)}
+.pl-cd b{display:block;font:400 30px var(--display);color:#ffd070;line-height:1;font-variant-numeric:tabular-nums}
+.pl-cd small{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#bdb8ac}
+.pl-live{display:inline-flex;align-items:center;gap:10px;font:800 15px Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:#d4202f;padding:10px 18px;border-radius:999px;box-shadow:0 0 28px rgba(230,40,50,.7)}
+.pl-live i{width:10px;height:10px;border-radius:50%;background:#fff;animation:plPulse 1s ease-in-out infinite}
+@keyframes plPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.5)}}
+.plan-sec .wk{padding:6px;border:1px solid var(--line);border-radius:999px;background:var(--panel);display:inline-flex;margin-bottom:26px}
+.plan-sec .wk .btn{border:0;border-radius:999px;background:transparent}
+.plan-sec .wk .btn:hover{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.plan-sec .pweek{align-items:start}
+.plan-sec .pd{animation:cbUp .6s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(var(--k,0) * .06s)}
+.plan-sec .pdh{padding:12px 6px;border:1px solid var(--line);border-radius:14px;background:var(--panel);transition:border-color .25s}
+.plan-sec .pdh span{font-size:13px}
+.plan-sec .pd.today .pdh{border-color:var(--accent);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 22%,var(--panel)),var(--panel));box-shadow:0 0 26px color-mix(in srgb,var(--accent) 35%,transparent)}
+.plan-sec .pd.today .pdh span::after{content:""}
+.plan-sec .pd.today .pdh span{font-weight:700;color:var(--accent)}
+.plan-sec .pdc{transition:transform .3s cubic-bezier(.2,.9,.3,1.2),border-color .3s,box-shadow .3s}
+.plan-sec a.pdc:hover,.plan-sec div.pdc:not(.empty):not(.annule):hover{transform:translateY(-8px) scale(1.02);border-color:var(--accent);box-shadow:0 18px 36px rgba(0,0,0,.45),0 0 26px color-mix(in srgb,var(--accent) 35%,transparent)}
+.plan-sec .pdc .tm{box-shadow:0 0 16px color-mix(in srgb,var(--accent) 60%,transparent)}
+.plan-sec .pdc .gn{text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.plan-sec .pdc.live{border-color:#e63946;box-shadow:0 0 0 2px rgba(230,57,70,.5),0 0 34px rgba(230,57,70,.5);animation:plGlow 2s ease-in-out infinite}
+@keyframes plGlow{0%,100%{box-shadow:0 0 0 2px rgba(230,57,70,.5),0 0 20px rgba(230,57,70,.35)}50%{box-shadow:0 0 0 2px rgba(255,90,100,.9),0 0 44px rgba(230,57,70,.7)}}
+.pdc .lv{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:4px 10px;border-radius:999px;background:#d4202f;color:#fff;font:800 12px Inter,sans-serif;letter-spacing:.16em}
+.pdc .lv i{width:7px;height:7px;border-radius:50%;background:#fff;animation:plPulse 1s infinite}
+.pdc .st{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;letter-spacing:.08em;color:#ffd070}
+.plan-sec .pdc.empty{min-height:150px;border-radius:14px;border:1px dashed var(--line);background:repeating-linear-gradient(135deg,transparent 0 10px,color-mix(in srgb,var(--line) 45%,transparent) 10px 11px);flex-direction:column;gap:8px}
+.plan-sec .pdc.empty::after{content:"☾";font-size:28px;opacity:.5}
+@media (max-width:980px){.plan-sec .wk{display:flex}.pl-next{padding:20px}.pl-cd div{min-width:58px}.plan-sec .pdc.empty{min-height:56px;flex-direction:row}.plan-sec .pdc.empty::after{display:none}}
 @media (max-width:860px){.hc{grid-template-columns:1fr;gap:32px}}
 @media (max-width:700px){.hlast{grid-template-columns:repeat(3,1fr);gap:12px}.hlast .hl:nth-child(n+4){display:none}.hseas{grid-template-columns:1fr}}
 .nx-sec{padding:48px 0 72px}
@@ -1379,8 +1418,10 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 <div class="view" id="v-planning" hidden>
   <section class="plan-sec">
     <div class="wrap wide">
+      <span class="eb">Les lives de LeClubi</span>
       <h1>Planning</h1>
       <p class="lead">Les prochains lives de LeClubi, du lundi au dimanche (heure de Paris).</p>
+      <a class="pl-next" id="plNext" href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener" hidden></a>
       <div class="wk">
         <button class="btn ghost" data-wk="-1" aria-label="Semaine précédente">&lsaquo;</button>
         <strong id="wklabel"></strong>
@@ -2942,11 +2983,34 @@ function renderPlan(){
       if(e.annule) return '<div class="pdc annule"><img class="bt" src="images-site/balise-triste.png" alt="" onerror="this.remove()"><span class="tm">' + hh(e.time) + '</span><span class="fin">ANNULÉ</span><span class="tx"><span class="gn">' + esc(e.game) + '</span><small class="nt">' + esc(e.note || 'Live annulé, la Balise est triste…') + '</small></span></div>';
       var tag = e.steam ? 'a href="' + esc(e.steam) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(e.game) + ', ' + hh(e.time) + ' (page Steam, nouvel onglet)"' : 'div';
       var done = mkDate(e.date, e.time).getTime() + 4 * 3600000 < now.getTime();   // un live est « terminé » 4 h après son heure de début
-      return '<' + tag.split(' ')[0] + tag.slice(tag.split(' ')[0].length) + ' class="pdc' + (done ? ' done' : '') + '">' + planImg(e) + '<span class="tm">' + hh(e.time) + '</span>' + (done ? '<span class="fin">TERMINÉ</span>' : '') +
-        '<span class="tx"><span class="gn">' + esc(e.game) + '</span>' + (e.note ? '<small class="nt">' + esc(e.note) + '</small>' : '') + '</span></' + tag.split(' ')[0] + '>';
+      var st0 = mkDate(e.date, e.time).getTime(), onair = !done && st0 <= now.getTime();
+      return '<' + tag.split(' ')[0] + tag.slice(tag.split(' ')[0].length) + ' class="pdc' + (done ? ' done' : '') + (onair ? ' live' : '') + '">' + planImg(e) + '<span class="tm">' + hh(e.time) + '</span>' + (onair ? '<span class="lv"><i></i>EN DIRECT</span>' : '') + (done ? '<span class="fin">TERMINÉ</span>' : '') +
+        '<span class="tx"><span class="gn">' + esc(e.game) + '</span>' + (e.note ? '<small class="nt">' + esc(e.note) + '</small>' : '') + (e.steam && !done ? '<small class="st">Voir sur Steam →</small>' : '') + '</span></' + tag.split(' ')[0] + '>';
     }).join('') : '<div class="pdc empty">Pas de live</div>';
-    return '<div class="pd' + cls + '">' + head + body + '</div>';
+    return '<div class="pd' + cls + '" style="--k:' + i + '">' + head + body + '</div>';
   }).join('');
+  renderPlNext();
+}
+var plTimer = null;
+function renderPlNext(){
+  var el = document.getElementById('plNext'); if(!el) return;
+  var n = nextLive();
+  if(!n){ el.hidden = true; return; }
+  var onair = n.d.getTime() <= Date.now();
+  el.hidden = false;
+  var day = JOURS[(n.d.getDay() + 6) % 7] + ' ' + n.d.getDate() + ' ' + MOIS[n.d.getMonth()];
+  el.innerHTML = planImg(n.e, true) + '<div><span class="eb">' + (onair ? 'En ce moment' : 'Prochain live') + '</span><h2>' + esc(n.e.game) + '</h2><p class="when">' + day + ' à ' + hh(n.e.time) + (n.e.note ? ' · ' + esc(n.e.note) : '') + '</p></div>' +
+    (onair ? '<span class="pl-live"><i></i>En direct · Rejoindre</span>' : '<div class="pl-cd" id="plCd"></div>');
+  clearInterval(plTimer);
+  if(!onair){
+    var tick = function(){
+      var ms = n.d.getTime() - Date.now(); if(ms <= 0){ renderPlNext(); renderPlan(); return; }
+      var j = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000), sc = Math.floor(ms % 60000 / 1000), c = document.getElementById('plCd');
+      if(!c){ clearInterval(plTimer); return; }
+      c.innerHTML = [[j, 'jours'], [h, 'heures'], [m, 'min'], [sc, 'sec']].map(function(x){ return '<div><b>' + String(x[0]).padStart(2, '0') + '</b><small>' + x[1] + '</small></div>'; }).join('');
+    };
+    tick(); plTimer = setInterval(tick, 1000);
+  }
 }
 document.addEventListener('click', function(e){
   var b = e.target.closest('[data-wk]');
