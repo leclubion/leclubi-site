@@ -1234,15 +1234,15 @@ details.coll-more{margin-top:36px;border-top:1px solid var(--line);padding-top:1
 #v-accueil .hz-tiles-sec{padding-top:28px;padding-bottom:8px;border-bottom:0}
 .hz-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .hz-t{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s}
-.hz-t:hover{transform:translateY(-3px);border-color:var(--accent)}
+.hz-t[hidden]{display:none}.hz-tiles.f5{grid-template-columns:repeat(5,minmax(0,1fr))}.hz-tiles.f5 .hz-tb{padding:16px 16px 18px}.hz-tiles.f5 .hz-go{font-size:13px;white-space:nowrap}.hz-t:hover{transform:translateY(-3px);border-color:var(--accent)}
 .hz-th .lcb{border-radius:0;aspect-ratio:3/1}
 .hz-tb{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .hz-tb h3{margin:0;font:400 19px var(--display);text-transform:uppercase}.hz-tb p{margin:0;font-size:14px;color:var(--muted);line-height:1.5;flex:1}
 .hz-go{margin-top:8px;font-size:14px;font-weight:600;color:var(--accent)}.hz-go::after{content:" →"}
 .hz-champ{margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 22px}
 .hz-champ b{font:400 15px var(--display);text-transform:uppercase}.hz-champ a{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}.hz-champ small{color:var(--muted);font-weight:500}
-@media (max-width:1000px){.hz-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:520px){.hz-tiles{grid-template-columns:1fr}}
+@media (max-width:1000px){.hz-tiles,.hz-tiles.f5{grid-template-columns:repeat(2,minmax(0,1fr))}.hz-tiles.f5 .hz-forum{grid-column:1/-1}}
+@media (max-width:520px){.hz-tiles,.hz-tiles.f5{grid-template-columns:1fr}}
 #wb9{position:absolute;top:0;left:0;width:100px;height:140px;z-index:6;pointer-events:none;color:var(--text);opacity:.3}
 #wb9 svg{position:absolute;top:0;left:0}
 #wb9 .wt{position:absolute;top:0;width:1px;height:0;background:currentColor;animation:wbd 22s ease-in-out infinite;animation-delay:var(--d)}
@@ -1307,6 +1307,7 @@ header nav>a[hidden]{display:none}
       <button class="btn login" id="login" type="button" hidden>Connexion</button>
       <a class="btn pts" id="pts" href="#boutique" hidden title="Mes points : boutique"></a>
       <a class="btn me" id="moi" href="#compte" hidden></a>
+      <span class="hbw" id="hbw" hidden><button class="btn tgl hbell" id="hbell" type="button" aria-label="Notifications du forum" aria-expanded="false" aria-controls="hnotifs" title="Notifications du forum"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/></svg><b id="hbellN" hidden></b></button><div class="fo-notifs" id="hnotifs" hidden></div></span>
           <button class="btn tgl" id="theme" type="button" aria-label="Changer de thème" title="Changer de thème">
         <svg class="i-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <svg class="i-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -1342,11 +1343,12 @@ header nav>a[hidden]{display:none}
 
   <section class="hz-tiles-sec">
     <div class="wrap">
-      <div class="hz-tiles">
+      <div class="hz-tiles" id="hzTiles">
         <a class="hz-t" href="#jeudujour"><div class="hz-th" data-sc="salle"></div><div class="hz-tb"><h3>Jeu du jour</h3><p>Un mini-jeu chaque jour. Devine, gagne des points et garde ta série.</p><span class="hz-go">Jouer</span></div></a>
         <a class="hz-t" href="#boutique"><div class="hz-th" data-sc="ville"></div><div class="hz-tb"><h3>Boutique</h3><p>Cadres d’avatar, bannières animées, titres, badges et pioches Arcade.</p><span class="hz-go">Dépenser mes points</span></div></a>
         <a class="hz-t" href="#classement-jeu"><div class="hz-th" data-sc="neon"></div><div class="hz-tb"><h3>Classement</h3><div class="hz-mini" id="hzTopT" hidden></div><p>Le top 3 de la semaine gagne une pioche Arcade et le titre de champion.</p><span class="hz-go">Voir le classement</span></div></a>
         <a class="hz-t" href="#collection"><div class="hz-th" data-sc="foret"></div><div class="hz-tb"><h3>Collection</h3><p>Les cartes des saisons, l’Arcade et les Dieux Oubliés, tout de suite visibles.</p><span class="hz-go">Voir les cartes</span></div></a>
+        <a class="hz-t hz-forum" id="hzForum" href="#forum" hidden><div class="hz-th" data-sc="veillee"></div><div class="hz-tb"><h3>Forum</h3><p>Discute avec la commu, partage tes stratégies et cherche les secrets du site.</p><span class="hz-go">Ouvrir le forum</span></div></a>
       </div>
     </div>
   </section>
@@ -3486,7 +3488,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
 })();
 (function(){
   var data = null, onglet = 'ratio', charge = 0, MIN = 10, modeJ = 'classique', datas = {}, charges = {};
-  if(JEU_API){ document.getElementById('ddJeux').hidden = false; document.getElementById('navForum').hidden = false; }
+  if(JEU_API){ document.getElementById('ddJeux').hidden = false; document.getElementById('navForum').hidden = false; document.getElementById('hzForum').hidden = false; document.getElementById('hzTiles').classList.add('f5'); }
   if(JEU_API && JEU_OUVERT){ document.getElementById('kjouer').hidden = false; var hj = document.getElementById('hjouer'); if(hj) hj.hidden = false; }
   function pseudoMoi(){ try{ return (localStorage.getItem('leclubi-pseudo') || '').toLowerCase(); }catch(e){ return ''; } }
   function liste(){
@@ -3633,6 +3635,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   }
   function rendreCompte(){
     var el = g('cp'); if(!el) return;
+    if(!(ON && etat === 'in' && moi) && window.LCC) LCC.fondVue(g('v-compte'), '');
     if(!ON){ el.innerHTML = '<div class="cp-out"><h1>Mon compte</h1><p class="cp-note">Les comptes ne sont pas encore ouverts.</p></div>'; return; }
     if(etat === 'init'){ el.innerHTML = '<div style="padding:30px 0">' + balChg('Chargement…') + '</div>'; return; }
     if(etat === 'banni'){ el.innerHTML = landing('Ce compte n\'a pas accès au site.').replace(/<button[^>]*data-act="login"[\s\S]*?<\/button>/, ''); return; }
@@ -3642,6 +3645,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var h = [];
     // en-tête du profil
     var cm = moi.cosm || {}, pt = moi.points || null;
+    if(window.LCC) LCC.fondVue(g('v-compte'), cm.fond || '');
     var since = moi.cree ? new Date(moi.cree).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}) : '';
     var subl = [t ? t.name : '', name && sheetState === 'ok' ? n + ' / ' + tot + ' cartes' : '', since ? 'membre depuis ' + since : ''].filter(Boolean).join(' · ');
     h.push('<div class="pf-ban">' + LCC.banniere(cm.banniere, 'pf-bn') + '</div><div class="pf-id"><div class="pf-av">' + LCC.avatar(moi.avatar, moi.pseudo, cm.cadre, 148) + '</div>' +
@@ -3793,9 +3797,10 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       if(kk) name = kk;
     }
     var known = !!COLLECTIONS[name];
-    if(!p && !known){ el.innerHTML = '<div class="cp-out"><h1>Profil introuvable</h1><p class="cp-note">Ce viewer n\'a pas encore de profil.</p><p><a class="btn" href="#collectionneurs">Voir les collectionneurs</a></p></div>'; return; }
+    if(!p && !known){ if(window.LCC) LCC.fondVue(document.getElementById('v-profil'), ''); el.innerHTML = '<div class="cp-out"><h1>Profil introuvable</h1><p class="cp-note">Ce viewer n\'a pas encore de profil.</p><p><a class="btn" href="#collectionneurs">Voir les collectionneurs</a></p></div>'; return; }
     p = p || {pseudo: name, prive: true};
     var pseudo = p.pseudo || name, cm = p.cosm || {}, ps = p.pstats || null, pv = !!p.prive;
+    if(window.LCC) LCC.fondVue(document.getElementById('v-profil'), pv ? '' : (cm.fond || ''));
     var tot = totalCards(), n = known ? countOf(name) : 0, t = known ? titleOf(n, tot) : null;
     var since = p.cree ? new Date(p.cree).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}) : '';
     var subl = [t ? t.name : '', known ? n + ' / ' + tot + ' cartes' : '', since ? 'membre depuis ' + since : ''].filter(Boolean).join(' · ');

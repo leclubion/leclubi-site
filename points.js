@@ -36,6 +36,7 @@
     '.bq-h{margin:0 0 4px;font:800 22px var(--display);text-transform:uppercase}.bq-sub{margin:0 0 16px;font-size:14px;color:var(--muted)}',
     '.bq-sec{margin-bottom:36px}',
     '.bq-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}',
+    '.bq-grid.fnd{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}.bq-c.fnd{padding:0;overflow:hidden;align-items:stretch;text-align:left}.bq-fv{position:relative;height:130px;background:#0b0b0d}',
     '.bq-grid.ban{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}.bq-grid.ln{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}',
     '.bq-c{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}',
     '.bq-c.ban{padding:0;overflow:hidden;align-items:stretch;text-align:left}.bq-c.ban .lcb{border-radius:0;aspect-ratio:5/1.15}',
@@ -101,9 +102,9 @@
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   /* ---------------- Boutique ---------------- */
-  var CAT = null, tab = 'tout', msg = '', occupe = false;
-  var ONGLETS = [['tout', 'Tout'], ['pioche', 'Pioche'], ['cadre', 'Cadres'], ['banniere', 'Bannières'], ['titre', 'Titres'], ['badge', 'Badges'], ['couleur', 'Pseudos']];
-  var KIND = {cadre: 'Cadre d’avatar', banniere: 'Bannière animée', titre: 'Titre', badge: 'Badge', couleur: 'Couleur de pseudo'};
+  var CAT = null, tab = 'tout', msg = '', occupe = false, PREV = [];
+  var ONGLETS = [['tout', 'Tout'], ['pioche', 'Pioche'], ['cadre', 'Cadres'], ['banniere', 'Bannières'], ['fond', 'Fonds'], ['titre', 'Titres'], ['badge', 'Badges'], ['couleur', 'Pseudos']];
+  var KIND = {cadre: 'Cadre d’avatar', banniere: 'Bannière animée', fond: 'Fond de profil', titre: 'Titre', badge: 'Badge', couleur: 'Couleur de pseudo'};
   var ERR = {solde: 'Pas assez de points pour le moment.', deja: 'Tu possèdes déjà cet article.', pioche_du_jour: 'Tu as déjà pris ta pioche du jour. Reviens demain !', pas_possede: 'Tu ne possèdes pas encore cet article.'};
 
   function charger() {
@@ -115,8 +116,8 @@
     var cost = a.prix;
     if (a.kind === 'pioche') return '';
     if (a.possede) {
-      if (['cadre', 'banniere', 'couleur'].indexOf(a.kind) > -1) {
-        var cur = CAT.equipe[a.kind === 'cadre' ? 'cadre' : a.kind === 'banniere' ? 'banniere' : 'couleur'], mon = a.id.replace(/^[a-z]-/, '') === cur;
+      if (['cadre', 'banniere', 'couleur', 'fond'].indexOf(a.kind) > -1) {
+        var cur = CAT.equipe[a.kind === 'cadre' ? 'cadre' : a.kind === 'banniere' ? 'banniere' : a.kind === 'fond' ? 'fond' : 'couleur'], mon = a.id.replace(/^[a-z]-/, '') === cur;
         return mon ? '<button class="bq-b on" data-eq="' + a.id + '" data-k="' + a.kind + '" data-off="1" title="Retirer">Équipé ✓</button>' : '<button class="bq-b own" data-eq="' + a.id + '" data-k="' + a.kind + '">Équiper</button>';
       }
       return '<button class="bq-b own" disabled style="cursor:default">Possédé ✓</button>';
@@ -126,6 +127,7 @@
   function carte(a, m) {
     var av = m.avatar, nm = m.pseudo;
     if (a.kind === 'cadre') return '<div class="bq-c">' + LCC.avatar(av, nm, a.id, 84) + '<div><div class="bq-n">' + esc(a.nom) + '</div><div class="bq-k">' + KIND.cadre + '</div></div>' + btn(a) + '</div>';
+    if (a.kind === 'fond') return '<div class="bq-c fnd"><div class="bq-fv" data-fond="' + a.id + '" role="img" aria-label="Aperçu du fond : ' + esc(a.nom) + '"></div><div class="bq-cb"><div><div class="bq-n">' + esc(a.nom) + '</div><div class="bq-k">' + (a.prix ? KIND.fond : 'Fond de profil · offert') + '</div></div>' + btn(a) + '</div></div>';
     if (a.kind === 'banniere') return '<div class="bq-c ban">' + LCC.banniere(a.id) + '<div class="bq-cb"><div><div class="bq-n">' + esc(a.nom) + '</div><div class="bq-k">' + KIND.banniere + '</div></div>' + btn(a) + '</div></div>';
     if (a.kind === 'badge' && LCC.EMB[a.id]) return '<div class="bq-c ln" style="align-items:center;gap:14px"><span class="bq-emb">' + LCC.emb(a.id, 62) + '</span><div style="flex:1"><div class="bq-kk">' + KIND.badge + '</div><div class="bq-n">' + esc(a.nom) + '</div></div>' + btn(a) + '</div>';
     var k = a.kind === 'couleur' ? '<div class="bq-n" style="font-size:18px">' + LCC.nom(nm, a.id) + '</div>' : '<div class="bq-n">' + esc(a.nom) + '</div>';
@@ -150,10 +152,13 @@
       (CAT.piocheFaite ? '<button class="bq-b big" disabled>Déjà prise aujourd’hui</button><small>Reviens demain</small>' : CAT.solde >= 400 ? '<button class="bq-b big" data-buy="pioche">Acheter</button><small>Disponible aujourd’hui</small>' : '<button class="bq-b big" disabled>Acheter</button><small>Il te manque ' + n(400 - CAT.solde) + ' pts</small>') + '</div></section>');
     if (show('cadre')) h.push(section('Cadres d’avatar', 'S’affichent autour de ta photo de profil. Certains sont animés.', of('cadre'), '', m));
     if (show('banniere')) h.push(section('Bannières de profil', 'Le grand visuel en haut de ton profil, en pixel art animé.', of('banniere'), 'ban', m));
+    if (show('fond')) h.push(section('Fonds de profil', 'Un fond animé et discret derrière tout ton profil, comme sur Steam. Les deux premiers sont offerts. Ta bannière reste en haut de ton profil.', of('fond'), 'fnd', m));
     if (show('titre')) h.push(section('Titres', 'Un titre affiché sous ton pseudo. Choisis-le ensuite dans ton profil.', of('titre'), 'ln', m));
     if (show('badge')) h.push(section('Badges', 'À ranger dans ta vitrine de badges.', of('badge'), 'ln', m));
     if (show('couleur')) h.push(section('Couleurs de pseudo', 'Ton pseudo prend des couleurs partout où il s’affiche.', of('couleur'), 'ln', m));
+    PREV.forEach(function (f) { f(); }); PREV = [];
     g('bq').innerHTML = h.join('');
+    el.querySelectorAll('[data-fond]').forEach(function (e) { PREV.push(LCC.fondMonter(e, e.dataset.fond)); });
     el.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { tab = b.dataset.t; rendre(); }; });
     el.querySelectorAll('[data-buy]').forEach(function (b) { b.onclick = function () { acheter(b.dataset.buy); }; });
     el.querySelectorAll('[data-eq]').forEach(function (b) { b.onclick = function () { equiper(b.dataset.k, b.dataset.off ? '' : b.dataset.eq); }; });
@@ -165,7 +170,7 @@
       if (r.ok) {
         CAT = r.d; syncMoi();
         var a = CAT.articles.filter(function (x) { return x.id === id; })[0];
-        msg = id === 'pioche' ? 'Ta pioche t’attend : ouvre l’onglet Arcade de ta collection pour choisir ta carte.' : 'Acheté : ' + (a ? a.nom : '') + (a && ['cadre', 'banniere', 'couleur'].indexOf(a.kind) > -1 ? '. Clique sur « Équiper » pour le porter.' : a && a.kind === 'titre' ? '. Tu peux le choisir dans ton profil.' : '.');
+        msg = id === 'pioche' ? 'Ta pioche t’attend : ouvre l’onglet Arcade de ta collection pour choisir ta carte.' : 'Acheté : ' + (a ? a.nom : '') + (a && ['cadre', 'banniere', 'couleur', 'fond'].indexOf(a.kind) > -1 ? '. Clique sur « Équiper » pour le porter.' : a && a.kind === 'titre' ? '. Tu peux le choisir dans ton profil.' : '.');
         if (window.lcArcadeMaj) try { window.lcArcadeMaj(); } catch (e) {}
       } else msg = ERR[r.d && r.d.erreur] || 'Achat impossible pour le moment.';
       rendre();

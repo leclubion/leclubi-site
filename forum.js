@@ -88,7 +88,7 @@
     var m = S.moi, n = m ? m.notifs : 0;
     return '<div class="fo-tools">' + (avecRecherche ? '<form class="fo-search" data-form="search" role="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><label class="fo-vh" for="foQ">Rechercher</label><input id="foQ" type="search" placeholder="Rechercher un sujet ou un membre" autocomplete="off"></form>' : '') +
       (m && m.modo ? '<a class="fo-ib" href="#forum/moderation">Modération</a>' : '') +
-      '<button type="button" class="fo-bell" data-act="notifs" aria-label="Notifications' + (n ? ' (' + n + ' non lues)' : '') + '" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/></svg>' + (n ? '<b>' + n + '</b>' : '') + '</button><div class="fo-notifs" hidden></div></div>';
+      '</div>';
   }
   function onglets(actif){
     var m = S.moi, o = [['', 'Catégories', '#forum'], ['derniers', 'Derniers sujets', '#forum/derniers']];
@@ -323,17 +323,31 @@
 
   // ---------- notifications ----------
   var NT = {reponse: 'a répondu à ton sujet', suivi: 'a écrit dans un sujet que tu suis', mention: 't\'a mentionné', citation: 'a cité ton message', utile: 'a marqué ton message comme utile', nouveau: 'a créé un sujet dans une catégorie que tu suis'};
-  function ouvrirNotifs(btn){
-    var box = btn.parentNode.querySelector('.fo-notifs');
-    if(!box.hidden){ box.hidden = true; btn.setAttribute('aria-expanded', 'false'); return; }
-    if(!login()) return seConnecter('Connecte-toi avec Twitch pour voir tes notifications.');
-    box.hidden = false; btn.setAttribute('aria-expanded', 'true'); box.innerHTML = '<p class="fo-vide">Chargement…</p>';
+  var hb = document.getElementById('hbell'), hw = document.getElementById('hbw'), hp = document.getElementById('hnotifs'), hn = document.getElementById('hbellN');
+  function badge(n){ if(!hn) return; hn.hidden = !n; hn.textContent = n > 9 ? '9+' : n; if(hb) hb.setAttribute('aria-label', 'Notifications du forum' + (n ? ' (' + n + ' non lue' + (n > 1 ? 's' : '') + ')' : '')); }
+  function sondeNotifs(){
+    var c = C(), ok = !!(hw && c && c.etat && c.etat() === 'in' && String((window.JEU_CONFIG || {}).API_URL || ''));
+    if(!hw) return; hw.hidden = !ok; if(!ok){ if(hp) hp.hidden = true; return; }
+    if(document.hidden) return;
+    api('/forum/notifs').then(function(r){ if(r.ok) badge(r.d.notifs.filter(function(x){ return !x.lu; }).length); });
+  }
+  function ouvrirNotifs(){
+    if(!hp.hidden){ hp.hidden = true; hb.setAttribute('aria-expanded', 'false'); return; }
+    hp.hidden = false; hb.setAttribute('aria-expanded', 'true'); hp.innerHTML = '<p class="fo-vide">Chargement…</p>';
     api('/forum/notifs').then(function(r){
-      if(!r.ok){ box.innerHTML = '<p class="fo-vide">Impossible de charger les notifications.</p>'; return; }
+      if(!r.ok){ hp.innerHTML = '<p class="fo-vide">Impossible de charger les notifications.</p>'; return; }
       var l = r.d.notifs;
-      box.innerHTML = l.length ? l.map(function(x){ return '<a class="' + (x.lu ? '' : 'nw') + '" href="#forum/s/' + x.sujet + '/nouveau">' + avatar(x.de, 30) + '<span><b>' + esc(x.de.pseudo) + '</b> ' + (NT[x.type] || '') + '<em>' + esc(x.titre) + '</em><small>' + ago(x.ts) + '</small></span></a>'; }).join('') : '<p class="fo-vide">Rien de nouveau pour le moment.</p>';
-      if(l.some(function(x){ return !x.lu; })) api('/forum/notifs-lu', {}).then(function(){ if(S.moi) S.moi.notifs = 0; var b = btn.querySelector('b'); if(b) b.remove(); });
+      hp.innerHTML = (l.length ? l.map(function(x){ return '<a class="' + (x.lu ? '' : 'nw') + '" href="#forum/s/' + x.sujet + '/nouveau">' + avatar(x.de, 30) + '<span><b>' + esc(x.de.pseudo) + '</b> ' + (NT[x.type] || '') + '<em>' + esc(x.titre) + '</em><small>' + ago(x.ts) + '</small></span></a>'; }).join('') : '<p class="fo-vide">Rien de nouveau pour le moment.</p>') + '<a class="fo-all" href="#forum">Ouvrir le forum</a>';
+      if(l.some(function(x){ return !x.lu; })) api('/forum/notifs-lu', {}).then(function(){ badge(0); });
     });
+  }
+  if(hb){
+    hb.addEventListener('click', function(e){ e.stopPropagation(); ouvrirNotifs(); });
+    document.addEventListener('click', function(e){ if(hp && !hp.hidden && !e.target.closest('#hbw')){ hp.hidden = true; hb.setAttribute('aria-expanded', 'false'); } });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && hp && !hp.hidden){ hp.hidden = true; hb.setAttribute('aria-expanded', 'false'); hb.focus(); } });
+    hp.addEventListener('click', function(e){ if(e.target.closest('a')) hp.hidden = true; });
+    setTimeout(sondeNotifs, 1200); setInterval(sondeNotifs, 45000); setInterval(function(){ var c = C(), ok = !!(c && c.etat && c.etat() === 'in'); if(hw && hw.hidden === ok) sondeNotifs(); }, 1500);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) sondeNotifs(); });
   }
 
   // ---------- actions ----------
@@ -368,7 +382,6 @@
     var b = e.target.closest('[data-act]'); if(!b){ if(!e.target.closest('.fo-tools')){ var n = $('.fo-notifs'); if(n) n.hidden = true; } return; }
     var a = b.getAttribute('data-act'), msg = +b.getAttribute('data-msg'), sujet = +b.getAttribute('data-sujet');
     switch(a){
-      case 'notifs': return ouvrirNotifs(b);
       case 'login': return seConnecter('Redirection vers Twitch…');
       case 'copy': try{ navigator.clipboard.writeText(location.href); toast('Lien copié.'); }catch(x){ toast('Copie le lien dans la barre d\'adresse.'); } return;
       case 'publier': return envoyer(b);
@@ -463,7 +476,7 @@
   '.fo-ib{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font:500 13px Inter,sans-serif;color:var(--text);cursor:pointer;text-decoration:none;transition:border-color .2s}.fo-ib:hover{border-color:var(--accent)}.fo-ib.danger{color:var(--red)}' +
   '.fo-bell{position:relative;width:42px;height:42px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.fo-bell:hover{border-color:var(--accent)}' +
   '.fo-bell b{position:absolute;top:-5px;right:-5px;background:#e0243b;color:#fff;font:600 11px Inter,sans-serif;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}' +
-  '.fo-notifs{position:absolute;right:0;top:50px;z-index:9;width:min(380px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.35);padding:6px;display:flex;flex-direction:column;max-height:70vh;overflow:auto}.fo-notifs[hidden]{display:none}' +
+  '.hbw{position:relative;display:inline-flex}.hbw[hidden]{display:none}.hbell{position:relative}.hbell b{position:absolute;top:-6px;right:-6px;background:#e0243b;color:#fff;font:600 10px Inter,sans-serif;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}.hbell b[hidden]{display:none}#hnotifs{top:38px}.fo-all{justify-content:center;font-weight:600;color:var(--accent)}.fo-notifs{position:absolute;right:0;top:50px;z-index:9;width:min(380px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.35);padding:6px;display:flex;flex-direction:column;max-height:70vh;overflow:auto}.fo-notifs[hidden]{display:none}' +
   '.fo-notifs a{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;text-decoration:none;font-size:13px}.fo-notifs a:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}.fo-notifs a.nw{background:color-mix(in srgb,var(--accent) 10%,transparent)}.fo-notifs em{display:block;font-style:normal;color:var(--muted);margin-top:2px}.fo-notifs small{color:var(--muted)}.fo-vide{color:var(--muted);font-size:13px;margin:6px 10px}' +
   '.fo-tabs{display:flex;flex-wrap:wrap;gap:8px}.fo-tabs a{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:500;padding:7px 14px;border-radius:999px;text-decoration:none}.fo-tabs a:hover{color:var(--text)}.fo-tabs a[aria-current=page]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}' +
   '.fo>.fo-tabs{margin-bottom:26px}' +
