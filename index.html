@@ -1634,7 +1634,7 @@ header nav>a[hidden]{display:none}
         <details><summary>Comment obtenir des cartes ?</summary><p>Pendant un live, ouvre le menu des Power-ups à côté du chat et choisis une carte avec tes Bits : une Carte Aléatoire de la Saison 1 (25 Bits), de la Saison Halloween (15 Bits), ou la Roue du Destin (100 Bits). Les prix affichés sur Twitch font foi.</p></details>
         <details><summary>Quand puis-je utiliser les Power-ups ?</summary><p>Uniquement quand la chaîne est en direct. Regarde le <a href="#planning"><b>planning</b></a> pour connaître le prochain live.</p></details>
         <details><summary>Puis-je obtenir deux fois la même carte ?</summary><p>Oui. Les tirages sont aléatoires, donc tu peux retomber sur une carte que tu as déjà : c'est un doublon.</p></details>
-        <details><summary>À quoi servent les doublons ?</summary><p>Si tu obtiens <b>5 fois la même carte</b> (par exemple 5 fois la carte 1 de la Saison 1), tu gagnes <b>une roue gratuite</b>. Dès que LeClubi annonce qu'un spectateur a obtenu 5 fois la même carte, il peut lui demander d'utiliser sa roue gratuite.</p></details>
+        <details><summary>À quoi servent les doublons ?</summary><p>Si tu obtiens <b>10 fois la même carte Commune</b> ou <b>5 fois la même carte Peu commune</b> (par exemple 5 fois la carte 7 de la Saison 1), tu gagnes <b>une roue gratuite</b> ou des <b>ClubiGold</b>, au choix (!roue ou !gold). Pour les cartes plus rares, 5 exemplaires suffisent aussi. Dès que LeClubi annonce qu'un spectateur a réuni ce nombre d'exemplaires, il peut lui demander d'utiliser sa roue gratuite.</p></details>
         <details><summary>Où retrouver ma collection ?</summary><p>Dans l'onglet <a href="#collectionneurs"><b>Collectionneurs</b></a> : cherche ton pseudo et clique sur ta fiche. Tu peux ensuite copier le lien de ta collection pour la partager.</p></details>
         <details><summary>J'ai obtenu une carte mais elle n'apparaît pas encore, est-ce normal ?</summary><p>Oui, ça peut arriver. LeClubi met les collections à jour en direct dès que les cartes sont tirées. Si les tirages sont nombreux, la mise à jour peut se faire après le live. Rafraîchis la page (Ctrl+F5) et repasse un peu plus tard.</p></details>
         <details><summary>Que se passe-t-il quand je complète une ligne ou une saison ?</summary><p>Tu débloques une récompense : proposer une carte pour la prochaine saison (lignes Commune et Peu commune, ou saison complète avec une carte Spéciale) ou gagner une roue gratuite (ligne Rare). Le détail est dans la section « Après une ligne complète », plus haut sur cette page.</p></details>
@@ -1865,8 +1865,8 @@ var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRR
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
 var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
 var TCLAIM = {}, TFIRST = {}, TEV = {};   // Tarot : récompenses déjà réclamées, premiers éveillés, ordre des ravivées
-var COPIES = {}, RAW = {}, ORD = {}, NEED = 5, USED_LINES = {};   // RAW : exemplaires déjà obtenus au total, même ceux utilisés ensuite (sert aux badges : un badge obtenu ne se perd jamais)
-   // ORD : ordre d'arrivée du prochain lot de 5 exemplaires de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
+var COPIES = {}, RAW = {}, ORD = {}, NEED = 5, NEED_COMMUNE = 10, USED_LINES = {};   // RAW : exemplaires déjà obtenus au total, même ceux utilisés ensuite (sert aux badges : un badge obtenu ne se perd jamais)
+   // ORD : ordre d'arrivée du prochain lot d'exemplaires (10 Commune, 5 autres) de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
 var SEASONS = [
@@ -2111,18 +2111,22 @@ function cardHtml(c, total, newId){
 function dupHtml(id, got){
   var n = got && who ? copies(who, id) : 0;
   if(n < 2) return '';
-  return '<span class="dup' + (n >= NEED ? ' ok' : '') + '" title="' + n + ' exemplaires (' + NEED + ' = roue ou ' + GOLD + ' ClubiGold)">×' + n + '</span>';
+  return '<span class="dup' + (n >= needOf(id) ? ' ok' : '') + '" title="' + n + ' exemplaires (' + needOf(id) + ' = roue ou ' + GOLD + ' ClubiGold)">×' + n + '</span>';
 }
 var GOLD = 50;
+function needOf(id){   // exemplaires à réunir pour une roue ou des ClubiGold : 10 pour une carte Commune, 5 pour les autres raretés
+  var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0], c = s ? cardsOf(s).filter(function(k){ return k.id === id; })[0] : null;
+  return c && c.r === 'Commune' ? NEED_COMMUNE : NEED;
+}
 function readyHtml(){
   if(!who || !mine()) return '';
   var out = [];
-  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= NEED) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
+  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= needOf(c.id)) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
   if(!out.length) return '';
   out.sort(function(a, b){ return (a.o == null ? 1e9 : a.o) - (b.o == null ? 1e9 : b.o); });
   return '<div class="rws on dupnote"><div><strong>' + (out.length > 1 ? 'Récompenses disponibles !' : 'Récompense disponible !') + '</strong>' +
     out.map(function(o, i){ return '<span>' + (i === 0 ? '<b>Prochaine utilisée</b> : ' : '') + o.n + ' exemplaires de la Carte ' + pad(o.c.n) + ' (' + esc(o.c.r) + ', ' + esc(sidLabel(o.c.id)) + ')' + (i === 0 ? '.' : ' : tape <b>!roue ' + o.c.id + '</b> ou <b>!gold ' + o.c.id + '</b> pour utiliser celle-ci.') + '</span>'; }).join('') +
-    '<span>Tape <b>!roue</b> ou <b>!gold</b> dans le chat : la carte qui a atteint 5 exemplaires en premier est utilisée en premier. Roue de la saison de la carte utilisée. !roue = une roue gratuite · !gold = ' + GOLD + ' ClubiGold. Cinq exemplaires sont utilisés.</span></div></div>';
+    '<span>Tape <b>!roue</b> ou <b>!gold</b> dans le chat : la carte qui a atteint son total d\'exemplaires en premier est utilisée en premier (10 pour une Commune, 5 pour une Peu commune ou plus rare). Roue de la saison de la carte utilisée. !roue = une roue gratuite · !gold = ' + GOLD + ' ClubiGold. Ces exemplaires sont utilisés.</span></div></div>';
 }
 function sidLabel(id){ var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0]; return s ? s.label : sid(id); }
 
@@ -2297,7 +2301,7 @@ function loadSheet(){
         }
       });
     }
-    // 3) Utilisations de 5 exemplaires (roue ou ClubiGold) : chacune détruit 5 exemplaires
+    // 3) Utilisations de 5 exemplaires (roue ou ClubiGold) : chacune détruit 10 exemplaires (Commune) ou 5 (autres raretés)
     if(used && used.length){
       var uh = (used[0] || []).map(function(h){ return (h || '').trim().toLowerCase(); });
       var up = -1, uc = -1;
@@ -2308,7 +2312,7 @@ function loadSheet(){
         var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase(), lm = id.match(/^ligne-([a-z0-9]+)-rare$/);
         if(name && /^(tg-\d+-[1x]|jalon-n\d+)$/.test(id)){ var nk = name.toLowerCase(); TCLAIM[nk] = TCLAIM[nk] || {}; TCLAIM[nk][id] = (TCLAIM[nk][id] || 0) + 1; return; }   // récompenses Tarot déjà réclamées
         if(name && lm){ USED_LINES[name.toLowerCase() + '|' + lm[1]] = 1; return; }
-        if(name && re.test(id)){ cnt(name, id, -NEED); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + 1; }
+        if(name && re.test(id)){ cnt(name, id, -needOf(id)); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + 1; }
       });
     }
     COPIES = {}; ORD = {}; RAW = {};
@@ -2317,7 +2321,7 @@ function loadSheet(){
       var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
       Object.keys(c).forEach(function(id){
         COPIES[n][id] = Math.max(0, c[id]);
-        var q = ((sq[n.toLowerCase()] || {})[id]) || [], need = NEED * ((((ud[n.toLowerCase()] || {})[id]) || 0) + 1);
+        var q = ((sq[n.toLowerCase()] || {})[id]) || [], need = needOf(id) * ((((ud[n.toLowerCase()] || {})[id]) || 0) + 1);
         (ORD[n] = ORD[n] || {})[id] = q.length >= need ? q[need - 1] : 1e9;
       });
     });
@@ -2582,7 +2586,7 @@ function badgeCatalog(name, jeu){
   var mx = 0; seasons.forEach(function(x){ cardsOf(x).forEach(function(c){ mx = Math.max(mx, cp(c.id)); }); });
   add('Doublons', 'd2', 'Doublon', 'Obtenir 2 exemplaires de la même carte.', 'bronze', 'cards', mx, 2);
   add('Doublons', 'd3', 'Triplé', 'Obtenir 3 exemplaires de la même carte.', 'argent', 'cards', mx, 3);
-  add('Doublons', 'd5', 'Quintette', 'Obtenir 5 exemplaires de la même carte : roue gratuite ou ClubiGold.', 'epique', 'dice', mx, NEED);
+  add('Doublons', 'd5', 'Quintette', 'Obtenir 5 exemplaires de la même carte.', 'epique', 'dice', mx, 5);
   // tarot
   var ts = tarotStats(name), tt = TAROT.cartes.length, prem = TAROT.cartes.some(function(c){ var f = TFIRST[tarotId(c.n)]; return f && f.name === name; });
   add('Dieux Oubliés', 't1', 'Éveillé', 'Trouver un Dieu Oublié.', 'epique', 'eye', ts.owned.length, 1);
@@ -3007,8 +3011,6 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
   {date:'2026-10-30', time:'23:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'},
-  {date:'2026-10-29', time:'22:00', game:'Phantom Blade Zero', steam:'https://store.steampowered.com/app/4115450/Phantom_Blade_Zero/', img:'jeux/phantom-blade-zero.jpg', note:''},
-  {date:'2026-10-27', time:'22:00', game:'The Mortuary Assistant', steam:'https://store.steampowered.com/app/1295920/The_Mortuary_Assistant/', img:'', note:''},
   {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-12', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
   {date:'2026-10-13', time:'22:00', game:'Valor Mortis', steam:'https://store.steampowered.com/app/2828710/Valor_Mortis/', img:'', note:'', annule:true},
@@ -4123,8 +4125,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   // ----- commandes du chat (envoi en un clic seulement quand la chaîne est en live) -----
   var CHAINE = 'leclubi', SCOPE_CHAT = 'user:write:chat';
   var COMMANDES = [
-    {c:'!roue', conf:1, t:'Utilise 5 exemplaires d\'une même carte (la première prête) pour une roue gratuite de sa saison.'},
-    {c:'!gold', conf:1, t:'Utilise 5 exemplaires d\'une même carte pour ' + GOLD + ' ClubiGold.'},
+    {c:'!roue', conf:1, t:'Utilise 10 exemplaires d\'une même carte Commune (5 pour les autres raretés), la première prête, pour une roue gratuite de sa saison.'},
+    {c:'!gold', conf:1, t:'Utilise 10 exemplaires d\'une même carte Commune (5 pour les autres raretés) pour ' + GOLD + ' ClubiGold.'},
     {c:'!ligne', conf:1, t:'Roue gratuite offerte quand tu as complété une ligne Rare.'},
     {c:'!tarot', conf:1, t:'Récupère les récompenses de tes Dieux Oubliés (ClubiGold et jalons).'},
     {c:'!account', t:'Affiche ton solde de ClubiGold dans le chat.'}
@@ -4150,7 +4152,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   function prets(name){
     var out = [];
     if(!name) return out;
-    openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(name, c.id); if(owns(name, c.id) && n >= NEED) out.push({id:c.id, n:n, nom:'Carte ' + pad(c.n) + ' (' + c.r + ', ' + x.label + ')'}); }); });
+    openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(name, c.id); if(owns(name, c.id) && n >= needOf(c.id)) out.push({id:c.id, n:n, nom:'Carte ' + pad(c.n) + ' (' + c.r + ', ' + x.label + ')'}); }); });
     return out;
   }
   function boutonCmd(txt, conf, lib){
@@ -4167,7 +4169,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     h += '<div class="cm-list">' + COMMANDES.map(function(x){ return '<div class="cm"><code>' + esc(x.c) + '</code><span>' + esc(x.t) + '</span><div class="cmb">' + boutonCmd(x.c, x.conf) + '</div></div>'; }).join('') + '</div>';
     var pr = prets(name);
     if(pr.length){
-      h += '<div class="cp-h"><h2>Tes cartes prêtes</h2><small>5 exemplaires ou plus</small></div><div class="cm-list">' + pr.map(function(c){
+      h += '<div class="cp-h"><h2>Tes cartes prêtes</h2><small>10 exemplaires (Commune) ou 5 (autres raretés)</small></div><div class="cm-list">' + pr.map(function(c){
         return '<div class="cm"><code>' + esc(c.id) + '</code><span>' + esc(c.nom) + ' : ' + c.n + ' exemplaires</span><div class="cmb">' + boutonCmd('!roue ' + c.id, 1, 'Envoyer !roue') + boutonCmd('!gold ' + c.id, 1, 'Envoyer !gold') + '</div></div>';
       }).join('') + '</div>';
     }
