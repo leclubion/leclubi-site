@@ -801,6 +801,18 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .qemo span{min-width:1.3em;text-align:center}.qemo .q{opacity:.25;filter:grayscale(1)}
 .qemo span:not(.q){animation:qpop .45s cubic-bezier(.2,1.6,.4,1)}
 @keyframes qpop{from{transform:scale(.2);opacity:0}}
+
+.qana{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center;padding:6px 0}
+.qana-h{margin:0;font-size:15px}
+.qana-lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.qana-n{margin:0;font-size:13px;color:var(--muted);max-width:46ch}
+.qana-slots{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center}
+.qana-w{display:flex;gap:4px;flex-wrap:nowrap}
+.qana-w span{width:clamp(22px,6.5vw,36px);height:clamp(28px,8vw,44px);display:flex;align-items:center;justify-content:center;border-radius:6px;font:700 clamp(15px,4.5vw,22px) ui-monospace,Menlo,Consolas,monospace}
+.qana-w .vide{border-bottom:3px solid color-mix(in srgb,var(--text) 45%,transparent);border-radius:2px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.qana-w .ok{background:color-mix(in srgb,#3ccf7a 28%,transparent);border:2px solid #3ccf7a}
+.qana-tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent);width:100%}
+.qana-tiles span{width:clamp(34px,10vw,48px);height:clamp(40px,11.5vw,56px);display:flex;align-items:center;justify-content:center;border-radius:8px;background:color-mix(in srgb,var(--text) 12%,transparent);border:1px solid color-mix(in srgb,var(--text) 25%,transparent);box-shadow:0 3px 0 color-mix(in srgb,var(--text) 22%,transparent);font:700 clamp(18px,5.5vw,26px) ui-monospace,Menlo,Consolas,monospace;animation:qpop .45s cubic-bezier(.2,1.6,.4,1)}
 .qpend{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center}
 @media (max-width:560px){.qpend{grid-template-columns:1fr;justify-items:center}}
 .qmask{font:700 clamp(22px,5vw,34px)/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;word-break:break-word;text-align:center}
@@ -820,7 +832,7 @@ a.pdc:hover,a.pdc:focus-visible{border-color:var(--accent)}
 .qres .h{background:var(--text);color:transparent;border-radius:3px;user-select:none}
 .qres .r{color:var(--accent);font-weight:700}
 .qin{position:relative;display:flex;gap:8px}
-.qin input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.qin input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
 .qsug{position:absolute;left:0;right:90px;top:100%;margin-top:4px;z-index:6;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .qsug button{display:block;width:100%;text-align:left;padding:10px 14px;border:0;background:transparent;color:var(--text);font:inherit;cursor:pointer}
 .qsug button:hover,.qsug button.sel{background:color-mix(in srgb,var(--accent) 22%,transparent)}
@@ -2795,7 +2807,13 @@ document.getElementById('pform').addEventListener('submit', function(e){
         st.essais.map(function(e){ return '<tr><td class="nom">' + E(e.g) + '</td>' + (e.cmp || []).map(function(c){ return '<td class="' + c.s + '">' + E(c.v) + (c.dir ? (c.dir === 'up' ? ' ↑' : ' ↓') : '') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
     }
     else if(f === 'anagramme'){
-      h = '<div class="qpend"><div style="width:100%;text-align:center">' + (st.debut ? '<div class="qmask">' + E(st.debut) + '</div>' : '') + '<div class="qemo" aria-label="Lettres mélangées">' + (st.melange || []).map(function(c){ return '<span>' + E(c) + '</span>'; }).join('') + '</div><p class="qsub" style="text-align:center">Mots : ' + (st.forme || []).join(' · ') + ' lettres</p></div></div>';
+      var dl = String(st.debut || '').split(''), fo = st.forme || [], di = 0, mel = st.melange || [];
+      h = '<div class="qana"><p class="qana-h">Remets les lettres dans l\'ordre pour retrouver le <b>nom du jeu</b>.</p>' +
+        '<div class="qana-lab">Le nom à trouver</div><div class="qana-slots" aria-label="Emplacements du nom">' +
+        fo.map(function(n){ var w = '<div class="qana-w">', i; for(i = 0; i < n; i++){ if(di < dl.length) w += '<span class="ok">' + E(dl[di++]) + '</span>'; else w += '<span class="vide"></span>'; } return w + '</div>'; }).join('') + '</div>' +
+        (dl.length ? '<p class="qana-n">🟩 ' + dl.length + ' lettre' + (dl.length > 1 ? 's' : '') + ' déjà bien placée' + (dl.length > 1 ? 's' : '') + '.</p>' : '') +
+        (mel.length ? '<div class="qana-lab">Lettres mélangées (' + mel.length + ')</div><div class="qana-tiles" aria-label="Lettres mélangées">' + mel.map(function(c){ return '<span>' + E(c) + '</span>'; }).join('') + '</div>' : '') +
+        '<p class="qana-n">Écris le nom complet du jeu dans la case ci-dessous. À chaque erreur, une lettre est remise à sa place.</p></div>';
     }
     else if(f === 'motscles'){
       var mm = st.mots || [], q2; h = '<div class="qemo qmots" aria-label="Mots-clés">'; for(q2 = 0; q2 < mm.length; q2++) h += '<span style="font-size:.9em;padding:8px 14px">' + E(mm[q2]) + '</span>'; for(q2 = mm.length; q2 < (st.totalMots || mm.length); q2++) h += '<span class="q">❓</span>'; h += '</div>';
