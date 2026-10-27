@@ -1865,7 +1865,7 @@ var LOG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRR
 // Journal des utilisations (!roue / !gold) : second Google Form → Sheet publié en CSV (colonnes : Horodateur, Pseudo, Carte, Choix). Laisse vide tant qu'il n'existe pas.
 var USE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
 var TCLAIM = {}, TFIRST = {}, TEV = {};   // Tarot : récompenses déjà réclamées, premiers éveillés, ordre des ravivées
-var COPIES = {}, RAW = {}, ORD = {}, NEED = 5, NEED_COMMUNE = 10, USED_LINES = {};   // RAW : exemplaires déjà obtenus au total, même ceux utilisés ensuite (sert aux badges : un badge obtenu ne se perd jamais)
+var COPIES = {}, RAW = {}, ORD = {}, NEED = 5, NEED_COMMUNE = 10, LEGACY_USES = 59, USED_LINES = {};   // RAW : exemplaires déjà obtenus au total, même ceux utilisés ensuite (sert aux badges : un badge obtenu ne se perd jamais)
    // ORD : ordre d'arrivée du prochain lot d'exemplaires (10 Commune, 5 autres) de chaque carte   // USED_LINES : roues gratuites de lignes complètes déjà utilisées
 function copies(name, id){ return ((COPIES[name] || {})[id]) || 0; }
 if(SHEET_URL || LOG_URL){ COLLECTIONS = {}; sheetState = 'loading'; }
@@ -2308,11 +2308,11 @@ function loadSheet(){
       uh.forEach(function(h, i){ if(up < 0 && h.indexOf('pseudo') > -1) up = i; if(uc < 0 && h.indexOf('carte') > -1) uc = i; });
       if(up < 0) up = 1;
       if(uc < 0) uc = 2;
-      used.slice(1).forEach(function(r){
+      used.slice(1).forEach(function(r, ri){
         var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase(), lm = id.match(/^ligne-([a-z0-9]+)-rare$/);
         if(name && /^(tg-\d+-[1x]|jalon-n\d+)$/.test(id)){ var nk = name.toLowerCase(); TCLAIM[nk] = TCLAIM[nk] || {}; TCLAIM[nk][id] = (TCLAIM[nk][id] || 0) + 1; return; }   // récompenses Tarot déjà réclamées
         if(name && lm){ USED_LINES[name.toLowerCase() + '|' + lm[1]] = 1; return; }
-        if(name && re.test(id)){ cnt(name, id, -needOf(id)); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + 1; }
+        if(name && re.test(id)){ var cost = ri < LEGACY_USES ? NEED : needOf(id); cnt(name, id, -cost); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + cost; }
       });
     }
     COPIES = {}; ORD = {}; RAW = {};
@@ -2321,7 +2321,7 @@ function loadSheet(){
       var c = cp[n.toLowerCase()] || {}; COPIES[n] = {};
       Object.keys(c).forEach(function(id){
         COPIES[n][id] = Math.max(0, c[id]);
-        var q = ((sq[n.toLowerCase()] || {})[id]) || [], need = needOf(id) * ((((ud[n.toLowerCase()] || {})[id]) || 0) + 1);
+        var q = ((sq[n.toLowerCase()] || {})[id]) || [], need = (((ud[n.toLowerCase()] || {})[id]) || 0) + needOf(id);
         (ORD[n] = ORD[n] || {})[id] = q.length >= need ? q[need - 1] : 1e9;
       });
     });
