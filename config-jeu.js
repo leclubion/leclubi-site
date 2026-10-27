@@ -10,5 +10,5 @@ window.JEU_CONFIG = {
   // Nom affiché du jeu
   NOM: "Clubi Card Battle",
   // "tableur" (Google Sheets, comme avant) ou "serveur" (copie sur Cloudflare)
-  CARTES_SOURCE: "tableur"
+  CARTES_SOURCE: "serveur"
 };
