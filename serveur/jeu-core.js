@@ -501,7 +501,7 @@
     S.sv = nouvelEtatSv(M.inv);
     var n = Math.min(M.manche, 3), recu = [[], []], bonus = [0, 0];
     [0, 1].forEach(function(p){
-      var k = n + (M.perdant === p ? 1 : 0); bonus[p] = M.perdant === p ? 1 : 0;
+      var k = Math.min(3, n + (M.perdant === p ? 1 : 0)); bonus[p] = M.perdant === p ? 1 : 0;
       for(var j = 0; j < k; j++){ var ob = tirerObjet(M.rng); if(M.inv[p].length < INV_MAX){ M.inv[p].push(ob); recu[p].push(ob); } else recu[p].push('!' + ob); }   // "!" : inventaire plein, objet perdu
     });
     M.S = S; M.recu = recu; M.bonus = bonus;
