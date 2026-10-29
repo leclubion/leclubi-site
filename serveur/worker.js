@@ -422,7 +422,7 @@ export class Hub {
     if (p === '/titre' && req.method === 'POST') {
       let b = {}; try { b = await req.json(); } catch (x) {}
       const t = String(b.titre || '').slice(0, 40);
-      if (t && !this.un(`SELECT 1 AS x FROM succes WHERE joueur=? AND kind='titre' AND cle=?`, j.id, t)) return json({erreur: 'titre'}, {}, 400);
+      if (t && !this.titresDe(j).includes(t)) return json({erreur: 'titre'}, {}, 400);
       this.run('UPDATE joueurs SET titre=? WHERE id=?', t, j.id);
       return json({ok: true, titre: t});
     }
