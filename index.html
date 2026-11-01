@@ -1986,7 +1986,7 @@ function rIco(r, cls){ return icoK(RSLUG[r] || 'commune', cls); }
 function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
 // ---- Journal ordonné (qui a eu quelle carte, dans l'ordre) : sert aux fiches de carte et de collectionneur ----
-var LOGROWS = [], TJ = {};
+var LOGROWS = [], TJ = {}, PRIV_SET = {};
 function parseT(v){
   v = String(v || '').trim(); if(!v) return 0;
   if(/^\d{10,}$/.test(v)) return +v;
@@ -2259,6 +2259,7 @@ function parseCsv(t){
   if(cur || row.length){ row.push(cur); rows.push(row); }
   return rows;
 }
+window.lcApresConnexion = function(){ var m = window.lcCompte && lcCompte.moi && lcCompte.moi(); if(m && (PRIV_SET[String(m.login || '').toLowerCase()] || PRIV_SET[String(m.pseudo || '').toLowerCase()])) loadSheet(); };
 function loadSheet(){
   if(!SHEET_URL && !LOG_URL) return;
   var re = /^[a-z0-9]+-\d+$/, yes = ['x','1','oui','yes','true','vrai','v','\u2713','\u2714'];
@@ -2275,10 +2276,13 @@ function loadSheet(){
       use: [['Horodateur', 'Pseudo', 'Carte', 'Choix']].concat((d.usages || []).map(function(r){ return ['', r[0], r[1], r[2]]; }))
     };
   }).catch(function(){ return null; }) : Promise.resolve(null);
+  // collections privées : le site ne les montre qu'à leur propriétaire connecté
+  var privP = apiJ ? fetch(apiJ + '/collections-privees').then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : Promise.resolve(null);
   srv.then(function(j){
-    return Promise.all([get(SHEET_URL), j ? j.log : get(LOG_URL), j ? j.use : get(USE_URL)]);
+    return Promise.all([get(SHEET_URL), j ? j.log : get(LOG_URL), j ? j.use : get(USE_URL), privP]);
   }).then(function(res){
-    var manual = res[0], log = res[1], used = res[2];
+    var manual = res[0], log = res[1], used = res[2], priv = res[3];
+    PRIV_SET = {}; ((priv && priv.noms) || []).forEach(function(n){ PRIV_SET[String(n).toLowerCase()] = 1; });
     var cfg = (SHEET_URL ? 1 : 0) + (LOG_URL ? 1 : 0), fails = (SHEET_URL && manual === undefined ? 1 : 0) + (LOG_URL && log === undefined ? 1 : 0);
     if(fails === cfg) throw new Error('sheet');
     var data = {}, names = {}, cp = {};
@@ -2323,17 +2327,28 @@ function loadSheet(){
     // 3) Utilisations de 5 exemplaires (roue ou ClubiGold) : chacune détruit 10 exemplaires (Commune) ou 5 (autres raretés)
     if(used && used.length){
       var uh = (used[0] || []).map(function(h){ return (h || '').trim().toLowerCase(); });
-      var up = -1, uc = -1;
-      uh.forEach(function(h, i){ if(up < 0 && h.indexOf('pseudo') > -1) up = i; if(uc < 0 && h.indexOf('carte') > -1) uc = i; });
+      var up = -1, uc = -1, uch = -1;
+      uh.forEach(function(h, i){ if(up < 0 && h.indexOf('pseudo') > -1) up = i; if(uc < 0 && h.indexOf('carte') > -1) uc = i; if(uch < 0 && h.indexOf('choix') > -1) uch = i; });
       if(up < 0) up = 1;
       if(uc < 0) uc = 2;
+      if(uch < 0) uch = 3;
       used.slice(1).forEach(function(r, ri){
         var name = (r[up] || '').trim(), id = (r[uc] || '').trim().toLowerCase(), lm = id.match(/^ligne-([a-z0-9]+)-rare$/);
+        if(name && re.test(id) && (r[uch] || '').trim().toLowerCase() === 'retrait'){   // exemplaire retiré à la main depuis l'admin
+          var rk = name.toLowerCase(); cp[rk] = cp[rk] || {}; cp[rk][id] = (cp[rk][id] || 0) - 1; rw[rk] = rw[rk] || {}; rw[rk][id] = (rw[rk][id] || 0) - 1; return; }
         if(name && /^(tg-\d+-[1x]|jalon-n\d+)$/.test(id)){ var nk = name.toLowerCase(); TCLAIM[nk] = TCLAIM[nk] || {}; TCLAIM[nk][id] = (TCLAIM[nk][id] || 0) + 1; return; }   // récompenses Tarot déjà réclamées
         if(name && lm){ USED_LINES[name.toLowerCase() + '|' + lm[1]] = 1; return; }
         if(name && re.test(id)){ var cost = ri < LEGACY_USES ? NEED : needOf(id); cnt(name, id, -cost); var uk = name.toLowerCase(); ud[uk] = ud[uk] || {}; ud[uk][id] = (ud[uk][id] || 0) + cost; }
       });
     }
+    // cartes retirées jusqu'à la dernière : elles sortent de la collection
+    Object.keys(data).forEach(function(n){ var k = n.toLowerCase(), o = data[n]; Object.keys(o).forEach(function(sk){ o[sk] = o[sk].filter(function(id){ return !rw[k] || rw[k][id] == null || rw[k][id] > 0; }); }); });
+    // collections privées : on les retire de l'affichage, sauf pour leur propriétaire connecté
+    var moiC = window.lcCompte && lcCompte.moi && lcCompte.moi(), mesNoms = moiC ? [moiC.login, moiC.pseudo].map(function(x){ return String(x || '').toLowerCase(); }) : [];
+    var cache = function(n){ var k = String(n || '').toLowerCase(); return PRIV_SET[k] && mesNoms.indexOf(k) < 0; };
+    Object.keys(data).forEach(function(n){ if(cache(n)) delete data[n]; });
+    LOGROWS = LOGROWS.filter(function(a){ return !cache(a.p); });
+    Object.keys(TFIRST).forEach(function(id){ if(TFIRST[id] && cache(TFIRST[id].name)) delete TFIRST[id]; });
     COPIES = {}; ORD = {}; RAW = {};
     Object.keys(data).forEach(function(n){
       RAW[n] = rw[n.toLowerCase()] || {};
@@ -3597,7 +3612,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
       var t = lire(KT);
       if(!t || !t.token){ etat = 'out'; ui(); return; }
       appel('/auth', {body:{token:t.token}}).then(function(r){
-        if(r.ok && r.d.session){ ecrire(KS, {s:r.d.session}); moi = r.d.moi; etat = 'in'; }
+        if(r.ok && r.d.session){ ecrire(KS, {s:r.d.session}); moi = r.d.moi; etat = 'in'; if(window.lcApresConnexion) setTimeout(window.lcApresConnexion, 0); }
         else { if(r.status === 401) suppr(KT); etat = r.status === 403 ? 'banni' : 'out'; }
         ui();
       }).catch(function(){ etat = 'erreur'; ui(); });
@@ -3605,7 +3620,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     var s = sess();
     if(!s){ viaJeton(); return; }
     appel('/moi', {session:s}).then(function(r){
-      if(r.ok && r.d.moi){ moi = r.d.moi; etat = 'in'; ui(); }
+      if(r.ok && r.d.moi){ moi = r.d.moi; etat = 'in'; ui(); if(window.lcApresConnexion) setTimeout(window.lcApresConnexion, 0); }
       else { suppr(KS); viaJeton(); }
     }).catch(function(){ etat = 'erreur'; ui(); });
   }
@@ -3798,7 +3813,8 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     }
     S = secPerso;
     // réglages
-    S.push('<div class="cp-h"><h2>Mon profil</h2></div><div class="cp-set"><label><input type="checkbox" data-act="pub"' + (moi.prive ? '' : ' checked') + '><span>Profil public<small>Ta vitrine et tes stats de jeu sont visibles par les autres. Ta collection reste visible dans l\'onglet Collectionneurs, comme avant.</small></span></label>' +
+    S.push('<div class="cp-h"><h2>Mon profil</h2></div><div class="cp-set"><label><input type="checkbox" data-act="pub"' + (moi.prive ? '' : ' checked') + '><span>Profil public<small>Ta vitrine et tes stats de jeu sont visibles par les autres.</small></span></label>' +
+      '<label><input type="checkbox" data-act="collpriv"' + (moi.collPrivee ? ' checked' : '') + '><span>Rendre ma collection privée<small>Plus personne ne voit tes cartes (Collectionneurs, activité, premiers obtenus). Toi, tu continues de les voir quand tu es connecté.</small></span></label>' +
       '<div><button type="button" class="btn ghost" data-act="logout" style="padding:8px 16px;font-size:14px">Se déconnecter</button></div></div>');
     h.push(tabs);
     if(cpTab === 'stats') h.push(secStats.join(''));
@@ -4287,6 +4303,11 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
     else if(e.target.id === 'fdev'){ fdraft.devise = e.target.value; majApercu(); }
   });
   cpEl.addEventListener('change', function(e){
+    if(e.target.dataset.act === 'collpriv'){
+      var cp2 = !!e.target.checked;
+      appel('/reglage-profil', {session:sess(), body:{collPrivee:cp2}}).then(function(r){ if(r.ok){ moi.collPrivee = cp2; if(window.loadSheet) setTimeout(loadSheet, 1500); } else e.target.checked = !cp2; }).catch(function(){ e.target.checked = !cp2; });
+      return;
+    }
     if(e.target.dataset.act !== 'pub') return;
     var prive = !e.target.checked;
     appel('/reglage-profil', {session:sess(), body:{prive:prive}}).then(function(r){ if(r.ok){ moi.prive = prive; delete pubCache[moi.login]; } else e.target.checked = !prive; }).catch(function(){ e.target.checked = !prive; });

@@ -34,7 +34,7 @@ section[hidden]{display:none}h1.st{font-size:18px;margin:14px 0 10px;color:var(-
       <div class="ag"><button type="button" class="g ab" data-g="cb">Card Battle ▾</button><div class="am" hidden><a href="#" data-go="etat">État et récompenses</a><a href="#" data-go="joueurs">Joueurs</a><a href="#" data-go="paiements">Paiements ClubiGold</a></div></div>
       <div class="ag"><button type="button" class="g ab" data-g="jdj">Jeu du jour ▾</button><div class="am" hidden><a href="#" data-go="jdj-rapide">Démarrage rapide</a><a href="#" data-go="jdj-liste">Liste des jeux</a><a href="#" data-go="jdj-ajout">Ajouter un jeu à deviner</a><a href="#" data-go="jdj-prets">Jeux préparés</a></div></div>
       <div class="ag"><button type="button" class="g ab" data-g="def">Défis ▾</button><div class="am" hidden><a href="#" data-go="defis">Défis de la semaine</a><a href="#" data-go="donner">Donner à la main</a></div></div>
-      <div class="ag"><button type="button" class="g ab" data-g="vw">Viewers ▾</button><div class="am" hidden><a href="#" data-go="props">Propositions</a><a href="#" data-go="fiches">Fiches des viewers</a><a href="#" data-go="arcade">Cartes Arcade</a><a href="#" data-go="journal">Journal des cartes</a></div></div>
+      <div class="ag"><button type="button" class="g ab" data-g="vw">Viewers ▾</button><div class="am" hidden><a href="#" data-go="props">Propositions</a><a href="#" data-go="fiches">Fiches des viewers</a><a href="#" data-go="arcade">Cartes Arcade</a><a href="#" data-go="collections">Collections des viewers</a><a href="#" data-go="journal">Journal des cartes</a></div></div>
     </nav>
     <section data-sec="etat" hidden>
 <h1 class="st">État et récompenses</h1>
@@ -119,6 +119,13 @@ section[hidden]{display:none}h1.st{font-size:18px;margin:14px 0 10px;color:var(-
 <h1 class="st">Cartes Arcade (donner une carte à un viewer)</h1>
     <p>Pour tester, ou pour faire un geste : donne une carte Arcade à un viewer (écris son pseudo Twitch en minuscules). Pour tester le coffre caché, donne-lui « la-cle-ancienne ». « Un tirage » lui offre un choix 1 parmi 3 supplémentaire.</p>
     <div class="row"><input id="adlog" placeholder="pseudo twitch"><input id="adcarte" placeholder="identifiant de la carte, ex. la-cle-ancienne" style="min-width:260px"><button id="adbtn" type="button">Donner la carte</button><button id="adtir" type="button">Offrir un tirage</button><span id="admsg" style="color:var(--muted);font-size:13px"></span></div>
+    </section>
+    <section data-sec="collections" hidden>
+<h1 class="st">Collections des viewers (ajouter ou retirer des cartes)</h1>
+    <p>Pour corriger un bug ou faire un geste : choisis un viewer, puis ajoute ou retire des exemplaires. L'ajout écrit une ligne dans ton journal des cartes (comme une vraie carte gagnée), le retrait écrit une ligne « retrait » dans le journal des utilisations. Le site, Streamer.bot et la copie du serveur en tiennent compte. <b>Google peut mettre jusqu'à 5 minutes</b> à publier le changement : il reste affiché « en attente » ici en attendant.</p>
+    <div class="row"><button id="clcharge" type="button" class="g">Charger les collections</button><input id="clqui" list="clnoms" placeholder="pseudo du viewer (exactement comme dans le journal)" style="min-width:300px"><datalist id="clnoms"></datalist><button id="clvoir" type="button">Afficher</button><span id="clmsg" style="color:var(--muted);font-size:13px"></span></div>
+    <div class="box" style="margin-top:12px"><b>Ajouter une carte</b><div class="row" style="margin-top:8px"><select id="clcarte"></select><input id="cln" type="number" min="1" max="50" value="1" style="min-width:80px;width:90px"><button id="cladd" type="button">Ajouter au viewer</button></div></div>
+    <div id="clres" style="margin-top:12px"></div>
     </section>
     <section data-sec="journal" hidden>
 <h1 class="st">Journal des cartes (copie sur le serveur)</h1>
@@ -477,8 +484,105 @@ $('adtir').onclick = function(){ var m = $('admsg'); appel('a-tirage', {login: $
 
 </script>
 <script>
+// ----- Collections des viewers : ajout / retrait manuel d'exemplaires -----
 (function(){
-  var groupe = {etat:'cb',joueurs:'cb',paiements:'cb','jdj-rapide':'jdj','jdj-liste':'jdj','jdj-ajout':'jdj','jdj-prets':'jdj',defis:'def',donner:'def',props:'vw',fiches:'vw',arcade:'vw',journal:'vw'};
+  var API = String((window.JEU_CONFIG || {}).API_URL || '').replace(/\/$/, '');
+  var MANUEL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGiYwkeAg_x6Y8UJBWJ5CWWbaMbGBa5a_3P0IHxOvzWOwd0q-j61tRWCvS_C7b3sHTqOzrSktF8IGk/pub?gid=278145956&single=true&output=csv';
+  var LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzwgZttdpplITgRRU0y17JiQD50oajTb1fQYk41ySZNHGtaernsomO-32BPhueEp437OK2dvY1gAU9/pub?gid=1274122633&single=true&output=csv';
+  var USE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGuteqml-J1Ai6CPJK7CwWcMvU0PTGyXexhQZqtvjABpMOk7cOsxuxhL-beZciCXRtD-YWpcuZt78/pub?gid=1289870618&single=true&output=csv';
+  // les deux formulaires Google (les mêmes que l'alerte WizeBot et Streamer.bot)
+  var FORM_CARTES = {url: 'https://docs.google.com/forms/d/e/1FAIpQLScMco9ftQuToN_JH0zcG50iVPx875iQ09XEdYGwf8GieQQZog/formResponse', pseudo: 'entry.1945453290', carte: 'entry.344145677'};
+  var FORM_USAGES = {url: 'https://docs.google.com/forms/d/e/1FAIpQLSdIqhWBzUPn5y5NVFXJgFO4gAYhMlf8WGCfM41cKjYJuQl0ug/formResponse', pseudo: 'entry.269194336', carte: 'entry.2002062707', choix: 'entry.971769531'};
+  var LEGACY = 59;
+  var SAISONS = [['s1', 'Saison 1', 16, 6, [[1,6,'Commune'],[7,11,'Peu commune'],[12,14,'Rare'],[15,15,'Légendaire'],[16,16,'Spéciale']]],
+                 ['halloween', 'Saison Halloween', 17, 6, [[1,6,'Commune'],[7,11,'Peu commune'],[12,14,'Rare'],[15,15,'Légendaire'],[16,17,'Spéciale']]],
+                 ['s2', 'Saison 2', 33, 12, [[1,12,'Commune'],[13,21,'Peu commune'],[22,27,'Rare'],[28,30,'Légendaire'],[31,32,'Spéciale'],[33,33,'Spéciale (bonus)']]],
+                 ['tarot', 'Tarot', 8, 0, [[1,8,'Dieu Oublié']]]];
+  var $ = function(i){ return document.getElementById(i); };
+  function esc(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
+  function cle(){ try{ return $('cle').value || sessionStorage.getItem('leclubi-admin') || ''; }catch(e){ return $('cle').value; } }
+  function rar(id){ var m = id.match(/^([a-z0-9]+)-(\d+)$/); if(!m) return ''; var s = SAISONS.filter(function(x){ return x[0] === m[1]; })[0]; if(!s) return ''; var n = +m[2]; var l = s[4].filter(function(r){ return n >= r[0] && n <= r[1]; })[0]; return l ? l[2] : ''; }
+  function besoin(id){ var m = id.match(/^([a-z0-9]+)-(\d+)$/); if(!m) return 5; var s = SAISONS.filter(function(x){ return x[0] === m[1]; })[0]; return s && +m[2] >= 1 && +m[2] <= s[3] ? 10 : 5; }
+  function csv(t){ var rows = [], row = [], f = '', q = false;
+    for(var i = 0; i < t.length; i++){ var c = t[i];
+      if(q){ if(c === '"'){ if(t[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+      else if(c === '"') q = true; else if(c === ','){ row.push(f); f = ''; }
+      else if(c === '\n' || c === '\r'){ if(c === '\r' && t[i + 1] === '\n') i++; row.push(f); f = ''; rows.push(row); row = []; } else f += c; }
+    if(f !== '' || row.length){ row.push(f); rows.push(row); } return rows; }
+  function lire(u){ return fetch(u + '&_=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.text(); }).then(csv).catch(function(){ return []; }); }
+  function col(h, mot, def){ var i = h.findIndex(function(x){ return (x || '').trim().toLowerCase().indexOf(mot) > -1; }); return i < 0 ? def : i; }
+  var DATA = null, NOMS = {}, ATTENTE = [];   // DATA[pseudo en minuscules][carte] = {obt, ret, cout}
+  function charger(){
+    $('clmsg').textContent = 'Lecture des tableurs…';
+    return Promise.all([lire(MANUEL_CSV), lire(LOG_CSV), lire(USE_CSV)]).then(function(r){
+      var D = {}, re = /^[a-z0-9]+-\d+$/, yes = ['x','1','oui','yes','true','vrai','v'];
+      function e(p, id){ var k = p.toLowerCase(); NOMS[k] = NOMS[k] || p; D[k] = D[k] || {}; return D[k][id] = D[k][id] || {obt: 0, ret: 0, cout: 0}; }
+      var m = r[0], h = (m[0] || []).map(function(x){ return (x || '').trim().toLowerCase(); }), mat = h.length > 1 && re.test(h[1]);
+      m.slice(1).forEach(function(l){ var p = (l[0] || '').trim(); if(!p) return;
+        if(mat) h.forEach(function(id, i){ if(i > 0 && re.test(id) && yes.indexOf((l[i] || '').trim().toLowerCase()) > -1) e(p, id).obt++; });
+        else (l[1] || '').split(/[\s,;]+/).forEach(function(id){ id = id.trim().toLowerCase(); if(re.test(id)) e(p, id).obt++; }); });
+      var g = r[1], gh = g[0] || [], ip = col(gh, 'pseudo', 1), ic = col(gh, 'carte', 2);
+      g.slice(1).forEach(function(l){ var p = (l[ip] || '').trim(), id = (l[ic] || '').trim().toLowerCase(); if(p && re.test(id)) e(p, id).obt++; });
+      var u = r[2], uh = u[0] || [], up = col(uh, 'pseudo', 1), uc = col(uh, 'carte', 2), uch = col(uh, 'choix', 3);
+      u.slice(1).forEach(function(l, ri){ var p = (l[up] || '').trim(), id = (l[uc] || '').trim().toLowerCase(); if(!p || !re.test(id) || id.indexOf('tarot-') === 0) return;
+        if((l[uch] || '').trim().toLowerCase() === 'retrait') e(p, id).ret++; else e(p, id).cout += ri < LEGACY ? 5 : besoin(id); });
+      DATA = D;
+      $('clnoms').innerHTML = Object.keys(NOMS).sort().map(function(k){ return '<option value="' + esc(NOMS[k]) + '">'; }).join('');
+      // les changements « en attente » arrivés dans le tableur disparaissent de la liste
+      $('clmsg').textContent = Object.keys(NOMS).length + ' viewers chargés.';
+      afficher();
+    });
+  }
+  function afficher(){
+    var p = $('clqui').value.trim(), k = p.toLowerCase(), res = $('clres');
+    if(!p){ res.innerHTML = ''; return; }
+    var c = (DATA && DATA[k]) || {}, ids = Object.keys(c);
+    ATTENTE.filter(function(a){ return a.k === k; }).forEach(function(a){ if(ids.indexOf(a.carte) < 0) ids.push(a.carte); });
+    var ordre = function(id){ var m = id.match(/^([a-z0-9]+)-(\d+)$/), si = SAISONS.findIndex(function(s){ return s[0] === m[1]; }); return (si < 0 ? 9 : si) * 1000 + +m[2]; };
+    ids.sort(function(a, b){ return ordre(a) - ordre(b); });
+    var lignes = ids.map(function(id){
+      var x = c[id] || {obt: 0, ret: 0, cout: 0}, att = ATTENTE.filter(function(a){ return a.k === k && a.carte === id; }).reduce(function(s, a){ return s + a.n; }, 0);
+      var obt = x.obt - x.ret, ex = Math.max(0, obt - x.cout);
+      if(obt <= 0 && !att) return '';
+      return '<tr><td><b>' + esc(id) + '</b></td><td>' + esc(rar(id)) + '</td><td>' + obt + '</td><td>' + x.cout + '</td><td><b>' + ex + '</b>' + (att ? ' <span class="' + (att > 0 ? 'ok' : 'bad') + '">(' + (att > 0 ? '+' : '') + att + ' en attente)</span>' : '') + '</td>' +
+        '<td><button type="button" class="s g" data-cl="-1" data-id="' + esc(id) + '">− 1</button> <button type="button" class="s" data-cl="1" data-id="' + esc(id) + '">+ 1</button></td></tr>';
+    }).join('');
+    res.innerHTML = '<div class="w"><table><thead><tr><th>Carte</th><th>Rareté</th><th>Obtenues</th><th>Utilisées (!roue/!gold)</th><th>Exemplaires actuels</th><th></th></tr></thead><tbody>' +
+      (lignes || '<tr><td colspan="6">Aucune carte pour ce viewer.</td></tr>') + '</tbody></table></div>' +
+      (DATA && !DATA[k] ? '<p>Ce pseudo n\'est pas encore dans le journal : vérifie l\'orthographe (majuscules comprises) avant d\'ajouter.</p>' : '');
+  }
+  function envoyerForm(f, champs){
+    var body = new URLSearchParams(); Object.keys(champs).forEach(function(k){ body.append(f[k], champs[k]); });
+    return fetch(f.url, {method: 'POST', mode: 'no-cors', body: body}).catch(function(){});
+  }
+  function changer(id, n){
+    var p = $('clqui').value.trim(), k = p.toLowerCase(), m = $('clmsg');
+    if(!p){ m.textContent = 'Écris d\'abord le pseudo du viewer.'; return; }
+    if(!/^[a-z0-9]+-\d+$/.test(id)){ m.textContent = 'Carte invalide.'; return; }
+    if(n < 0){ var x = (DATA && DATA[k] && DATA[k][id]) || {obt: 0, ret: 0}, att = ATTENTE.filter(function(a){ return a.k === k && a.carte === id; }).reduce(function(s, a){ return s + a.n; }, 0);
+      if(x.obt - x.ret + att + n < 0){ m.textContent = 'Ce viewer n\'a pas assez d\'exemplaires de ' + id + '.'; return; }
+      if(!confirm('Retirer ' + (-n) + ' exemplaire(s) de ' + id + ' à ' + p + ' ?')) return; }
+    m.textContent = 'Envoi…';
+    var fois = Math.abs(n), envois = [];
+    for(var i = 0; i < fois; i++) envois.push(n > 0 ? envoyerForm(FORM_CARTES, {pseudo: p, carte: id}) : envoyerForm(FORM_USAGES, {pseudo: p, carte: id, choix: 'retrait'}));
+    if(API && cle()) envois.push(fetch(API + '/admin/' + (n > 0 ? 'coll-ajout' : 'coll-retrait'), {method: 'POST', headers: {Authorization: 'Bearer ' + cle(), 'Content-Type': 'application/json'}, body: JSON.stringify({pseudo: p, carte: id, n: fois})}).catch(function(){}));
+    Promise.all(envois).then(function(){
+      ATTENTE.push({k: k, carte: id, n: n, t: Date.now()});
+      m.textContent = '✓ ' + (n > 0 ? 'Ajouté' : 'Retiré') + ' : ' + Math.abs(n) + ' × ' + id + ' pour ' + p + '. Recharge les collections dans quelques minutes pour voir le tableur à jour.';
+      afficher();
+    });
+  }
+  $('clcarte').innerHTML = SAISONS.map(function(s){ var o = []; for(var n = 1; n <= s[2]; n++){ var id = s[0] + '-' + n; o.push('<option value="' + id + '">' + id + ' · ' + rar(id) + '</option>'); } return '<optgroup label="' + s[1] + '">' + o.join('') + '</optgroup>'; }).join('');
+  $('clcharge').onclick = function(){ ATTENTE = []; charger(); };
+  $('clvoir').onclick = function(){ (DATA ? Promise.resolve() : charger()).then(afficher); };
+  $('clqui').addEventListener('change', function(){ if(DATA) afficher(); });
+  $('cladd').onclick = function(){ changer($('clcarte').value, Math.max(1, Math.min(50, parseInt($('cln').value, 10) || 1))); };
+  $('clres').addEventListener('click', function(e){ var b = e.target.closest('[data-cl]'); if(b) changer(b.getAttribute('data-id'), +b.getAttribute('data-cl')); });
+})();
+</script>
+<script>
+(function(){
+  var groupe = {etat:'cb',joueurs:'cb',paiements:'cb','jdj-rapide':'jdj','jdj-liste':'jdj','jdj-ajout':'jdj','jdj-prets':'jdj',defis:'def',donner:'def',props:'vw',fiches:'vw',arcade:'vw',journal:'vw',collections:'vw'};
   var K = 'leclubi-admin-section';
   function ferme(){ document.querySelectorAll('.am').forEach(function(m){ m.hidden = true; }); }
   function va(id){
