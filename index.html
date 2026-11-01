@@ -156,6 +156,17 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .zc{top:max(14px,env(safe-area-inset-top));right:14px}
 .zp{left:14px;top:50%;margin-top:-23px}
 .zn{right:14px;top:50%;margin-top:-23px}
+#zbody .zh>img{cursor:zoom-in}
+.zlbtn{margin-top:10px;padding:8px 16px;border:1px solid rgba(199,154,75,.6);border-radius:20px;background:rgba(199,154,75,.12);color:#ece8df;font:inherit;font-size:14px;cursor:pointer}
+.zlbtn:hover{background:rgba(199,154,75,.25)}
+#loupe{position:fixed;inset:0;z-index:30;background:#050506;overflow:auto;overscroll-behavior:contain}
+#loupe[hidden]{display:none}
+#loupe .lz{width:max-content;min-width:100%;min-height:100%;box-sizing:border-box;padding:12px;display:flex;align-items:center;justify-content:center}
+#loupe img{display:block;max-width:none;border-radius:10px;cursor:zoom-in;user-select:none;-webkit-user-drag:none}
+#loupe.max img{cursor:zoom-out}
+.lbar{position:fixed;z-index:31;top:max(14px,env(safe-area-inset-top));right:14px;display:flex;gap:8px}
+.lbar .zb{position:static;background:rgba(20,20,22,.75)}
+.lhint{position:fixed;z-index:31;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;text-align:center;font-size:13px;color:#d6d2c8;background:rgba(0,0,0,.7);padding:6px 14px;border-radius:20px;pointer-events:none}
 .opt:disabled{color:var(--text);cursor:default}
 .opt:disabled:hover{border-color:var(--line)}
 .opt.voted:disabled:hover{border-color:var(--accent)}
@@ -1789,6 +1800,16 @@ header nav>a[hidden]{display:none}
   <button class="zb zn" data-z="next" aria-label="Carte suivante">&rsaquo;</button>
 </div>
 
+<div id="loupe" role="dialog" aria-modal="true" aria-label="Carte agrandie" hidden>
+  <div class="lz"><img alt=""></div>
+  <div class="lbar">
+    <button class="zb" data-l="moins" aria-label="Réduire">&minus;</button>
+    <button class="zb" data-l="plus" aria-label="Agrandir">+</button>
+    <button class="zb" data-l="close" aria-label="Fermer">&times;</button>
+  </div>
+  <div class="lhint">Clique sur la carte pour zoomer · bouge la souris (ou glisse le doigt) pour te déplacer</div>
+</div>
+
 <footer><div class="wrap flinks"><span>© LeClubi. Tous droits réservés. · <a href="#mentions">Mentions légales</a> · <a href="#confidentialite">Confidentialité</a></span><span class="fl"><a href="https://discord.gg/hqkDKXTK3T" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@leclubi" target="_blank" rel="noopener">YouTube</a><a href="https://www.twitch.tv/leclubi" target="_blank" rel="noopener">Twitch</a></span></div></footer>
 
 <script>
@@ -2432,6 +2453,7 @@ function openTarotZoom(id){
   zbody.appendChild(zh);
   fitZh(zh, img);
   zbody.appendChild(cap);
+  zbody.insertAdjacentHTML('beforeend', '<button type="button" class="zlbtn">\uD83D\uDD0D Agrandir encore</button>');
   zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
   zoomEl.hidden = false;
   document.body.style.overflow = 'hidden';
@@ -2462,6 +2484,7 @@ function openZoom(id){
   zbody.appendChild(zh);
   fitZh(zh, img);
   zbody.appendChild(cap);
+  zbody.insertAdjacentHTML('beforeend', '<button type="button" class="zlbtn">\uD83D\uDD0D Agrandir encore</button>');
   zbody.insertAdjacentHTML('beforeend', ficheCarteHtml(id));
   zoomEl.querySelector('.zp').style.display = zoomEl.querySelector('.zn').style.display = list.length > 1 ? '' : 'none';
   zoomEl.hidden = false;
@@ -2479,7 +2502,62 @@ function stepZoom(d){
   list.forEach(function(c, k){ if(c.id === zid) i = k; });
   if(i > -1 && list.length) openZoom(list[(i + d + list.length) % list.length].id);
 }
+// ---- Loupe : la carte en plein écran, zoomable (pour lire les petits textes) ----
+var loupe = document.getElementById('loupe'), limg = loupe.querySelector('img'), lvl = 1, LMAX = 4;
+function lFit(){
+  var r = (limg.naturalWidth && limg.naturalHeight) ? limg.naturalWidth / limg.naturalHeight : 2 / 3;
+  return Math.max(100, Math.min(loupe.clientWidth - 24, (loupe.clientHeight - 24) * r));
+}
+function lSet(n, cx, cy){
+  var b = limg.getBoundingClientRect();
+  if(cx == null){ cx = loupe.clientWidth / 2; cy = loupe.clientHeight / 2; }
+  var fx = b.width ? (cx - b.left) / b.width : .5, fy = b.height ? (cy - b.top) / b.height : .5;
+  lvl = Math.max(1, Math.min(LMAX, n));
+  limg.style.width = Math.round(lFit() * lvl) + 'px';
+  loupe.classList.toggle('max', lvl >= LMAX);
+  var b2 = limg.getBoundingClientRect();
+  loupe.scrollLeft += b2.left + fx * b2.width - cx;
+  loupe.scrollTop += b2.top + fy * b2.height - cy;
+}
+function lSuivre(e){   // à la souris : la carte se déplace avec le curseur
+  if(e.pointerType !== 'mouse' || lvl <= 1) return;
+  var x = Math.max(0, Math.min(1, e.clientX / loupe.clientWidth)), y = Math.max(0, Math.min(1, e.clientY / loupe.clientHeight));
+  loupe.scrollLeft = x * (loupe.scrollWidth - loupe.clientWidth);
+  loupe.scrollTop = y * (loupe.scrollHeight - loupe.clientHeight);
+}
+function openLoupe(){
+  var src = zbody.querySelector('.zh>img');
+  if(!src) return;
+  limg.alt = src.alt;
+  limg.style.width = '';
+  var go = function(){ lvl = 1; lSet(1); loupe.scrollLeft = loupe.scrollTop = 0; };
+  limg.onload = go;
+  limg.src = src.src;
+  loupe.hidden = false;
+  if(limg.complete) go();
+  loupe.querySelector('[data-l="close"]').focus();
+}
+function closeLoupe(){ loupe.hidden = true; var b = zbody.querySelector('.zlbtn'); if(b) b.focus(); }
+limg.addEventListener('click', function(e){
+  if(lvl >= LMAX) lSet(1); else lSet(Math.floor(lvl) + 1, e.clientX, e.clientY);
+  lSuivre(e);
+});
+loupe.addEventListener('pointermove', lSuivre);
+loupe.addEventListener('click', function(e){
+  var a = e.target.dataset.l;
+  if(a === 'close' || e.target === loupe || e.target.classList.contains('lz')) closeLoupe();
+  else if(a === 'plus') lSet(lvl + .5);
+  else if(a === 'moins') lSet(lvl - .5);
+});
+loupe.addEventListener('wheel', function(e){
+  if(!e.ctrlKey) return;   // Ctrl + molette (ou pincement sur pavé tactile) : zoom
+  e.preventDefault();
+  lSet(lvl * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY);
+}, {passive: false});
+window.addEventListener('resize', function(){ if(!loupe.hidden) lSet(lvl); });
+
 zoomEl.addEventListener('click', function(e){
+  if(e.target.classList.contains('zlbtn') || (e.target.tagName === 'IMG' && e.target.closest('#zbody .zh'))){ openLoupe(); return; }
   var a = e.target.dataset.z;
   if(e.target.closest && e.target.closest('a[href^="#collection"]')){ closeZoom(); return; }
   if(e.target === zoomEl || a === 'close') closeZoom();
@@ -2487,6 +2565,12 @@ zoomEl.addEventListener('click', function(e){
   else if(a === 'next') stepZoom(1);
 });
 document.addEventListener('keydown', function(e){
+  if(!loupe.hidden){
+    if(e.key === 'Escape') closeLoupe();
+    else if(e.key === '+' || e.key === '=') lSet(lvl + .5);
+    else if(e.key === '-') lSet(lvl - .5);
+    return;
+  }
   if(zoomEl.hidden){
     if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('card')){ e.preventDefault(); e.target.click(); }
     return;
