@@ -86,6 +86,16 @@ export default {
       }
       const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
     }
+    if (url.pathname === '/collections-privees') {      // viewers qui cachent leur collection (le site ne l'affiche qu'à eux)
+      const cache = caches.default, cle = new Request(url.origin + '/collections-privees');
+      let r = await cache.match(cle);
+      if (!r) {
+        const d = await hub.fetch(new Request('https://hub/collections-privees'));
+        r = new Response(d.body, {status: d.status, headers: {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=15'}});
+        if (d.ok) ctx.waitUntil(cache.put(cle, r.clone()));
+      }
+      const out = new Response(r.body, r); Object.entries(h).forEach(([k, v]) => out.headers.set(k, v)); return out;
+    }
     if (url.pathname === '/titres') {                    // titres affichés des joueurs au profil public (classement, collectionneurs)
       const cache = caches.default, cle = new Request(url.origin + '/titres');
       let r = await cache.match(cle);
@@ -143,7 +153,7 @@ export class Hub {
        statut TEXT, essais INTEGER DEFAULT 0, info TEXT DEFAULT '')`);
     q(`CREATE TABLE IF NOT EXISTS reglages(k TEXT PRIMARY KEY, v TEXT)`);
     // compte du site : avatar, vitrine (3 cartes), profil public ou non (ajoutés sans toucher aux données existantes)
-    [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`,
+    [`ALTER TABLE joueurs ADD COLUMN avatar TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN vitrine TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN prive INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN coll_privee INTEGER DEFAULT 0`,
      `ALTER TABLE joueurs ADD COLUMN cree INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN vbadges TEXT DEFAULT '[]'`, `ALTER TABLE joueurs ADD COLUMN titre TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fiche TEXT DEFAULT '{}'`, `ALTER TABLE joueurs ADD COLUMN cadre_av TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN banniere TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN fond TEXT DEFAULT ''`, `ALTER TABLE joueurs ADD COLUMN couleur TEXT DEFAULT ''`,
      `ALTER TABLE joueurs ADD COLUMN sv_parties INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_victoires INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_defaites INTEGER DEFAULT 0`, `ALTER TABLE joueurs ADD COLUMN sv_nuls INTEGER DEFAULT 0`].forEach(a => { try { q(a); } catch (e) {} });
     q(`CREATE TABLE IF NOT EXISTS journal_cartes(n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, pseudo TEXT, carte TEXT, src TEXT)`);
@@ -203,6 +213,7 @@ export class Hub {
     if (url.pathname.startsWith('/admin/')) return this.admin(req, url);
     if (url.pathname === '/journal') return this.journalLire();
     if (url.pathname === '/titres') return this.titresPublics();
+    if (url.pathname === '/collections-privees') return json({noms: this.sql.exec('SELECT login, nom FROM joueurs WHERE coll_privee=1').toArray().flatMap(r => [String(r.login || '').toLowerCase(), String(r.nom || '').toLowerCase()]).filter((x, i, a) => x && a.indexOf(x) === i)});
     if (url.pathname.startsWith('/journal/')) return this.journalAjout(req, url);
     if (url.pathname.startsWith('/propositions')) return this.propositions(req, url);
     if (url.pathname.startsWith('/forum/')) return forumRoute(this, req, url);
@@ -240,6 +251,15 @@ export class Hub {
     if (act === 'supprimer' && login) { const jj = this.un('SELECT id FROM joueurs WHERE login=?', login); if (jj) { this.run('DELETE FROM succes WHERE joueur=?', jj.id); this.run('DELETE FROM visites WHERE joueur=?', jj.id); } this.run('DELETE FROM joueurs WHERE login=?', login); return json({ok: true}); }
     if (act === 'rejouer-paiements') { await this.traiterPaiements(true); return json({ok: true}); }
     if (act === 'importer-journal') return this.importerJournal(b);
+    if (act === 'coll-ajout' || act === 'coll-retrait') {   // gestion manuelle des collections (copie serveur ; la page admin écrit aussi dans les Google Forms)
+      const ps = String(b.pseudo || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 60), c = String(b.carte || '').trim().toLowerCase(), n = Math.max(1, Math.min(50, parseInt(b.n, 10) || 1)), now = Date.now();
+      if (!ps || !/^[a-z0-9]+-\d{1,3}$/.test(c)) return json({erreur: 'invalide'}, {}, 400);
+      for (let i = 0; i < n; i++) {
+        if (act === 'coll-ajout') this.run('INSERT INTO journal_cartes(ts,pseudo,carte,src) VALUES(?,?,?,?)', now, ps, c, 'admin');
+        else this.run('INSERT INTO journal_usages(ts,pseudo,carte,choix) VALUES(?,?,?,?)', now, ps, c, 'retrait');
+      }
+      this.jCache = null; return json({ok: true, n});
+    }
     if (act === 'propositions') return json(this.sql.exec(`SELECT p.n, p.saison, p.part, p.kind, p.texte, p.ts, p.statut, j.nom AS pseudo, j.login, (SELECT COUNT(*) FROM votes v WHERE v.prop=p.n) AS votes
       FROM propositions p JOIN joueurs j ON j.id=p.joueur ORDER BY p.n DESC LIMIT 300`).toArray());
     if (act === 'proposition' && Number.isInteger(b.n)) {
@@ -461,8 +481,10 @@ export class Hub {
     }
     if (p === '/reglage-profil' && req.method === 'POST') {
       let b = {}; try { b = await req.json(); } catch (x) {}
-      this.run('UPDATE joueurs SET prive=? WHERE id=?', b.prive ? 1 : 0, j.id);
-      return json({ok: true, prive: !!b.prive});
+      if ('prive' in b) this.run('UPDATE joueurs SET prive=? WHERE id=?', b.prive ? 1 : 0, j.id);
+      if ('collPrivee' in b) this.run('UPDATE joueurs SET coll_privee=? WHERE id=?', b.collPrivee ? 1 : 0, j.id);
+      const jj = this.un('SELECT prive, coll_privee FROM joueurs WHERE id=?', j.id) || {};
+      return json({ok: true, prive: !!jj.prive, collPrivee: !!jj.coll_privee});
     }
     if (p === '/quotidien') return qQuotidien(this, j, req, url);
     if (p === '/arcade') return aArcade(this, j, req);
@@ -476,7 +498,7 @@ export class Hub {
   cacheDe(j) { return this.sql.exec(`SELECT cle FROM succes WHERE joueur=? AND kind='cache' ORDER BY ts`, j.id).toArray().map(r => r.cle); }
   moi(j) {
     const jour = jourParis();
-    return {...relEtat(this, j), id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
+    return {...relEtat(this, j), id: j.id, login: j.login, pseudo: j.nom, avatar: j.avatar || '', vitrine: this.vitrineDe(j), badges: this.badgesDe(j), prive: !!j.prive, collPrivee: !!j.coll_privee, titre: this.titreDe(j), titres: this.titresDe(j), succes: this.succesDe(j), visites: this.nbVisites(j), fiche: this.ficheDe(j), cache: this.cacheDe(j), cosm: cosmDe(j), points: ptsEtat(this, j), cree: j.cree || 0,
       jeu: {parties: j.parties, victoires: j.victoires, defaites: j.defaites, nuls: j.nuls, orTotal: j.or_total, victoiresOrAujourdhui: j.jour === jour ? j.gains_jour : 0,
         ratio: j.parties ? Math.round(1000 * j.victoires / j.parties) / 10 : null, rang: this.rangs(j), maxJour: this.C.maxJour, minimumRatio: 10,
         survie: {parties: j.sv_parties || 0, victoires: j.sv_victoires || 0, defaites: j.sv_defaites || 0, nuls: j.sv_nuls || 0}}};
@@ -530,7 +552,7 @@ export class Hub {
     const s = d.saison ? ` AND carte LIKE ?` : '', args = d.saison ? [t0, t1, a, b, d.saison + '-%'] : [t0, t1, a, b];
     if (d.type === 'cartes') return this.un(`SELECT COUNT(*) AS c FROM journal_cartes WHERE ${w}${s}`, ...args).c;
     if (d.type === 'differentes') return this.un(`SELECT COUNT(DISTINCT carte) AS c FROM journal_cartes WHERE ${w}${s}`, ...args).c;
-    if (d.type === 'usages') return this.un(`SELECT COUNT(*) AS c FROM journal_usages WHERE ts>0 AND ts>=? AND ts<? AND lower(pseudo) IN (?,?)`, t0, t1, a, b).c;
+    if (d.type === 'usages') return this.un(`SELECT COUNT(*) AS c FROM journal_usages WHERE ts>0 AND ts>=? AND ts<? AND choix!='retrait' AND lower(pseudo) IN (?,?)`, t0, t1, a, b).c;
     if (d.type === 'visites') return this.un(`SELECT COUNT(*) AS c FROM visites WHERE joueur=? AND jour>=? AND jour<=?`, j.id, JOURJ(t0), JOURJ(t1 - 1)).c;
     if (d.type === 'parties') return this.un(`SELECT COALESCE(SUM(parties),0) AS c FROM paires WHERE (a=? OR b=?) AND jour>=? AND jour<=?`, j.id, j.id, JOURJ(t0), JOURJ(t1 - 1)).c;
     return 0;
@@ -1480,7 +1502,7 @@ function forumTables(h) {
   if (!h.un('SELECT 1 AS x FROM forum_meta WHERE cle=?', 'nouveautes2')) {
     h.run('INSERT INTO forum_meta(cle) VALUES(?)', 'nouveautes2');
     const rep = (titre, texte) => { const sj = h.un("SELECT * FROM forum_sujets WHERE cat='annonces' AND titre=?", titre); if (sj) fEnregistrer(h, fCfg(h), {id: 'sys'}, sj, texte, 0); };
-    rep('Nouveautés du Clubi Card Battle', "**26 octobre 2026 : le Mode Survie**\nUn match en plusieurs manches où des objets tirés au hasard changent la partie. Le mode classique reste exactement comme avant.\n\n**Comment ça marche**\n• Le match se joue en **2 manches gagnantes** (5 manches au maximum en cas d'égalité).\n• Au début de chaque manche, tu reçois des objets tirés au hasard : 1 à la manche 1, 2 à la manche 2, 3 à partir de la manche 3. Celui qui a perdu la manche précédente en reçoit 1 de plus.\n• Tu gardes **4 objets** au maximum : un objet de trop est perdu.\n• Tu peux utiliser **1 objet par tour**, quand tu veux pendant ton tour. Un objet utilisé est consommé.\n• En Survie, tu as **5 cartes en main** au maximum.\n• Les objets sont plus ou moins rares : environ 55 % de communs, 33 % de peu communs et 12 % de rares.\n• Le Mode Survie a son propre classement, à côté du classement classique.\n\n**Les 21 objets**\n\n*Attaque*\n**Foudre** : Détruit 1 carte au hasard dans une colonne adverse de ton choix.\n**Sceau de faiblesse** : Divise par 2 (arrondi haut) la puissance d'une carte adverse.\n**Faux** : Détruit la carte la plus forte d'une colonne adverse.\n**Rafle** : Choisis une puissance : toutes les cartes de cette puissance sont détruites sur les deux plateaux, les tiennes aussi.\n**Séisme** : Détruit la carte la plus proche du centre dans chaque colonne adverse.\n\n*Défense*\n**Renfort** : Ajoute +1 à la puissance d'une de tes cartes (9 au maximum).\n**Bouclier** : Protège une de tes colonnes pendant les 2 prochains tours de l'adversaire.\n**Parade** : Annule la prochaine destruction que tu subis. Reste active jusqu'à son déclenchement.\n**Rempart** : Scelle une de tes cartes jusqu'à la fin de la manche : elle ne peut plus être détruite ni modifiée.\n\n*Contrôle*\n**Échange** : Intervertis deux de tes cartes. Chacune agit comme une pose dans sa nouvelle colonne : elle détruit les cartes adverses de même valeur.\n**Chaîne** : L'adversaire ne pourra pas poser de carte dans cette colonne à son prochain tour.\n**Dérive** : Déplace une carte adverse vers une autre colonne adverse qui a de la place. Si une de tes cartes de même valeur lui fait face dans cette colonne, elle est détruite.\n**Larcin** : Prends une carte au hasard dans la main de l'adversaire.\n\n*Pioche*\n**Œil** : Regarde la main de l'adversaire jusqu'à la fin de ton tour.\n**Réassort** : Défausse ta main et pioche le même nombre de cartes.\n**Prophétie** : Regarde les 3 prochaines cartes de la pioche et choisis leur ordre.\n**Trésor** : Pioche 2 cartes (5 cartes en main au maximum).\n**Résurrection** : Reprends en main la dernière de tes cartes détruites.\n\n*Chaos*\n**Dé du destin** : La puissance d'une de tes cartes devient un nombre au hasard de 1 à 6.\n**Pari** : Pile ou face. Pile : 1 carte au hasard détruite dans chaque colonne adverse. Face : dans chacune des tiennes.\n**Pacte** : Tu poses 2 cartes ce tour. Après la deuxième, 1 carte au hasard de ta main est défaussée.");
+    rep('Nouveautés du Clubi Card Battle', "**26 octobre 2026 : le Mode Survie**\nUn match en plusieurs manches où des objets tirés au hasard changent la partie. Le mode classique reste exactement comme avant.\n\n**Comment ça marche**\n• Le match se joue en **2 manches gagnantes** (5 manches au maximum en cas d'égalité).\n• Au début de chaque manche, tu reçois des objets tirés au hasard : 1 à la manche 1, 2 à la manche 2, 3 à partir de la manche 3. Celui qui a perdu la manche précédente en reçoit 1 de plus, sauf à partir de la manche 3 où les deux joueurs en reçoivent 3.\n• Tu gardes **4 objets** au maximum : un objet de trop est perdu.\n• Tu peux utiliser **1 objet par tour**, quand tu veux pendant ton tour. Un objet utilisé est consommé.\n• En Survie, tu as **5 cartes en main** au maximum.\n• Les objets sont plus ou moins rares : environ 55 % de communs, 33 % de peu communs et 12 % de rares.\n• Le Mode Survie a son propre classement, à côté du classement classique.\n\n**Les 21 objets**\n\n*Attaque*\n**Foudre** : Détruit 1 carte au hasard dans une colonne adverse de ton choix.\n**Sceau de faiblesse** : Divise par 2 (arrondi haut) la puissance d'une carte adverse.\n**Faux** : Détruit la carte la plus forte d'une colonne adverse.\n**Rafle** : Choisis une puissance : toutes les cartes de cette puissance sont détruites sur les deux plateaux, les tiennes aussi.\n**Séisme** : Détruit la carte la plus proche du centre dans chaque colonne adverse.\n\n*Défense*\n**Renfort** : Ajoute +1 à la puissance d'une de tes cartes (9 au maximum).\n**Bouclier** : Protège une de tes colonnes pendant les 2 prochains tours de l'adversaire.\n**Parade** : Annule la prochaine destruction que tu subis. Reste active jusqu'à son déclenchement.\n**Rempart** : Scelle une de tes cartes jusqu'à la fin de la manche : elle ne peut plus être détruite ni modifiée.\n\n*Contrôle*\n**Échange** : Intervertis deux de tes cartes. Chacune agit comme une pose dans sa nouvelle colonne : elle détruit les cartes adverses de même valeur.\n**Chaîne** : L'adversaire ne pourra pas poser de carte dans cette colonne à son prochain tour.\n**Dérive** : Déplace une carte adverse vers une autre colonne adverse qui a de la place. Si une de tes cartes de même valeur lui fait face dans cette colonne, elle est détruite.\n**Larcin** : Prends une carte au hasard dans la main de l'adversaire.\n\n*Pioche*\n**Œil** : Regarde la main de l'adversaire jusqu'à la fin de ton tour.\n**Réassort** : Défausse ta main et pioche le même nombre de cartes.\n**Prophétie** : Regarde les 3 prochaines cartes de la pioche et choisis leur ordre.\n**Trésor** : Pioche 2 cartes (5 cartes en main au maximum).\n**Résurrection** : Reprends en main la dernière de tes cartes détruites.\n\n*Chaos*\n**Dé du destin** : La puissance d'une de tes cartes devient un nombre au hasard de 1 à 6.\n**Pari** : Pile ou face. Pile : 1 carte au hasard détruite dans chaque colonne adverse. Face : dans chacune des tiennes.\n**Pacte** : Tu poses 2 cartes ce tour. Après la deuxième, 1 carte au hasard de ta main est défaussée.");
     rep('Nouveautés de la boutique', "**26 octobre 2026 : 5 fonds Halloween**\nDe nouveaux fonds de profil pour la saison : **Lune de sang** (chauves-souris devant une lune rouge), **Brume du cimetière**, **Citrouilles flottantes**, **Bal des fantômes** et **Toiles et araignées**.\nIls sont dans l'onglet « Fonds » de la boutique, de 700 à 900 pts.");
   }
 }
