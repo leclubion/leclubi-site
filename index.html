@@ -1297,6 +1297,7 @@ header .logo.lgfl{animation:lgfl 1.4s ease-in-out 1}
 .cbp-end{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
 @media (max-width:900px){.cbp-rules,.cbp-modes{grid-template-columns:1fr}}
 header nav>a[hidden]{display:none}
+.cl-bonus{margin-top:22px;padding-top:16px;border-top:1px dashed color-mix(in srgb,var(--accent) 45%,transparent)}.cl-bh{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:12px}.cl-bh b{color:var(--accent);letter-spacing:.06em;text-transform:uppercase;font-size:14px}.cl-bh span{color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
@@ -1584,6 +1585,11 @@ header nav>a[hidden]{display:none}
         <li><img class="ri" src="rangs/rang-commune.png" alt="" onerror="this.remove()"><strong>6</strong>Communes</li><li><img class="ri" src="rangs/rang-peu-commune.png" alt="" onerror="this.remove()"><strong>5</strong>Peu Communes</li><li><img class="ri" src="rangs/rang-rare.png" alt="" onerror="this.remove()"><strong>3</strong>Rares</li><li><img class="ri" src="rangs/rang-legendaire.png" alt="" onerror="this.remove()"><strong>1</strong>Légendaire</li><li><img class="ri" src="rangs/rang-speciale.png" alt="" onerror="this.remove()"><strong>2</strong>Spéciales</li>
       </ul>
 
+      <h3>Saison 2 : 32 cartes + 1 carte bonus</h3>
+      <ul class="rar">
+        <li><img class="ri" src="rangs/rang-commune.png" alt="" onerror="this.remove()"><strong>12</strong>Communes</li><li><img class="ri" src="rangs/rang-peu-commune.png" alt="" onerror="this.remove()"><strong>9</strong>Peu Communes</li><li><img class="ri" src="rangs/rang-rare.png" alt="" onerror="this.remove()"><strong>6</strong>Rares</li><li><img class="ri" src="rangs/rang-legendaire.png" alt="" onerror="this.remove()"><strong>3</strong>Légendaires</li><li><img class="ri" src="rangs/rang-speciale.png" alt="" onerror="this.remove()"><strong>2 + 1</strong>Spéciales (dont une carte bonus)</li>
+      </ul>
+
       <h2>Comment obtenir des cartes</h2>
       <ol class="steps">
         <li>Viens sur le live. Les Power-ups ne sont disponibles que pendant que la chaîne est en direct.</li>
@@ -1595,6 +1601,7 @@ header nav>a[hidden]{display:none}
           <thead><tr><th scope="col">Power-up</th><th scope="col">Prix</th><th scope="col">Ce que tu obtiens</th></tr></thead>
           <tbody>
             <tr><td>[Carte Saison 1] Carte Aléatoire</td><td>25 Bits</td><td>Une carte au hasard de la Saison 1</td></tr>
+            <tr><td>[Carte Saison 2] Carte Aléatoire</td><td>25 Bits</td><td>Une carte au hasard de la Saison 2</td></tr>
             <tr><td>[Carte Saison Halloween] Carte Aléatoire</td><td>15 Bits</td><td>Une carte au hasard de la Saison Halloween</td></tr>
             <tr><td>[Carte] Roue du Destin</td><td>100 Bits</td><td>Une carte au hasard, avec de meilleures chances qu'avec un tirage aléatoire classique</td></tr>
           </tbody>
@@ -1874,7 +1881,9 @@ var SEASONS = [
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',1,'Spéciale']]},
   {id:'halloween', label:'Saison Halloween', intro:'La collection spéciale Halloween.',
    groups:[['Commune',6,'Communes'],['Peu commune',5,'Peu Communes'],['Rare',3,'Rares'],['Légendaire',1,'Légendaire'],['Spéciale',2,'Spéciales']]},
-  {id:'s2', label:'Saison 2', groups:[]}
+  {id:'s2', label:'Saison 2', intro:'32 nouvelles cartes à collectionner, et une carte bonus cachée.',
+   groups:[['Commune',12,'Communes'],['Peu commune',9,'Peu Communes'],['Rare',6,'Rares'],['Légendaire',3,'Légendaires'],['Spéciale',2,'Spéciales']],
+   bonus:[[33,'Spéciale']]}   // carte bonus : en plus des 32, ne compte pas dans la complétion de la saison
 ];
 var current = location.hash === '#arcade' ? 'arcade' : 's1', who = '', draft = false;
 
@@ -2090,6 +2099,9 @@ function cardsOf(s){
   s.groups.forEach(function(g){ for(var i = 0; i < g[1]; i++){ n++; out.push({id:s.id + '-' + n, n:n, r:g[0]}); } });
   return out;
 }
+// cartes bonus d'une saison (en plus de la collection officielle : elles ne comptent pas dans le total)
+function bonusOf(s){ return (s.bonus || []).map(function(b){ return {id:s.id + '-' + b[0], n:b[0], r:b[1], bonus:true}; }); }
+function cardsAll(s){ return cardsOf(s).concat(bonusOf(s)); }
 function has(id){ return !!who && !!COLLECTIONS[who] && (COLLECTIONS[who][sid(id)] || []).indexOf(id) > -1; }
 
 // Brouillon du mode streamer (gardé dans ton navigateur jusqu'à ce que tu colles les données dans le fichier)
@@ -2105,7 +2117,7 @@ function cardHtml(c, total, newId){
   return '<div class="card flip' + (got && c.id !== newId ? ' open' : '') + '" tabindex="0" data-id="' + c.id + '" data-r="' + c.r + '" aria-label="' +
     (got ? 'Carte ' + pad(c.n) + ', ' + c.r : 'Carte ' + c.n + ', face cachée') + '">' +
     '<div class="inner"><div class="face back">' + rIco(c.r, 'rb') + '<b>?</b></div>' +
-    '<div class="face front' + (holoOf(c.r) ? ' hl" data-r="' + c.r : '') + '"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>N° ' + pad(c.n) + ' / ' + total + '</small>' +
+    '<div class="face front' + (holoOf(c.r) ? ' hl" data-r="' + c.r : '') + '"><em>' + c.r + '</em><strong>Carte ' + pad(c.n) + '</strong><small>' + (c.bonus ? 'Carte bonus' : 'N° ' + pad(c.n) + ' / ' + total) + '</small>' +
     '<img src="cartes/' + c.id + '.png" alt="" onerror="this.remove()"></div></div>' + dupHtml(c.id, got) + '</div>';
 }
 function dupHtml(id, got){
@@ -2115,13 +2127,13 @@ function dupHtml(id, got){
 }
 var GOLD = 50;
 function needOf(id){   // exemplaires à réunir pour une roue ou des ClubiGold : 10 pour une carte Commune, 5 pour les autres raretés
-  var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0], c = s ? cardsOf(s).filter(function(k){ return k.id === id; })[0] : null;
+  var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0], c = s ? cardsAll(s).filter(function(k){ return k.id === id; })[0] : null;
   return c && c.r === 'Commune' ? NEED_COMMUNE : NEED;
 }
 function readyHtml(){
   if(!who || !mine()) return '';
   var out = [];
-  openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= needOf(c.id)) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
+  openSeasons().forEach(function(x){ cardsAll(x).forEach(function(c){ var n = copies(who, c.id); if(owns(who, c.id) && n >= needOf(c.id)) out.push({c:c, n:n, o:((ORD[who] || {})[c.id])}); }); });
   if(!out.length) return '';
   out.sort(function(a, b){ return (a.o == null ? 1e9 : a.o) - (b.o == null ? 1e9 : b.o); });
   return '<div class="rws on dupnote"><div><strong>' + (out.length > 1 ? 'Récompenses disponibles !' : 'Récompense disponible !') + '</strong>' +
@@ -2183,6 +2195,7 @@ function render(newId){
       var vis = cards.filter(function(c){ return cardFilter === 'all' || (cardFilter === 'missing' ? !has(c.id) : c.r === cardFilter); }), idx = 0;
       var rl = who ? s.groups.map(function(g){ var part = cards.slice(idx, idx + g[1]), n = part.filter(function(c){ return has(c.id); }).length; idx += g[1]; var r = lineReward(s, g, n === g[1]); return r ? '<div class="cl-rl"><span>' + rIco(g[0]) + g[0] + ' · ' + n + ' / ' + g[1] + '</span>' + r + '</div>' : ''; }).join('') : '';
       document.getElementById('panel').innerHTML = '<div class="cl-grid">' + (vis.length ? vis.map(function(c){ return cardHtml(c, cards.length, newId); }).join('') : '<div class="cl-vide">Aucune carte dans ce filtre.</div>') + '</div>' +
+        bonusHtml(s, cards.length, newId) +
         '<div class="cl-rew">' + rl + seasonReward(s, cards) + '</div>';
     }
   }
@@ -2191,6 +2204,12 @@ function render(newId){
     var el = document.querySelector('[data-id="' + newId + '"]');
     if(el) el.classList.add('open');
   }, 80);
+}
+function bonusHtml(s, total, newId){
+  var b = bonusOf(s).filter(function(c){ return cardFilter === 'all' || cardFilter === c.r || (cardFilter === 'missing' && !has(c.id)); });
+  if(!b.length) return '';
+  return '<div class="cl-bonus"><div class="cl-bh"><b>Carte bonus</b><span>En plus des ' + total + ' cartes : elle ne compte pas dans la complétion de la saison.</span></div><div class="cl-grid">' +
+    b.map(function(c){ return cardHtml(c, total, newId); }).join('') + '</div></div>';
 }
 function setMsg(t){ document.getElementById('msg').textContent = t || ''; }
 
@@ -2571,7 +2590,9 @@ function badgeCatalog(name, jeu){
   [[1, 'Premier pas', 'bronze', 'star'], [5, 'Apprenti collectionneur', 'argent', 'cards'], [10, 'Collectionneur', 'argent', 'cards'], [20, 'Grand collectionneur', 'or', 'trophy']].forEach(function(t){
     if(t[0] < tot) add('Collection', 'col' + t[0], t[1], 'Débloquer ' + t[0] + (t[0] > 1 ? ' cartes' : ' carte') + ' au total.', t[2], t[3], n, t[0]);
   });
-  add('Collection', 'legende', LEGENDE.name, 'Débloquer toutes les cartes des saisons ouvertes (' + tot + ').', 'mythique', 'crown', n, tot);
+  // un badge obtenu ne se perd jamais : celui qui avait déjà toute la Saison 1 et la Saison Halloween (avant la Saison 2) garde la Légende
+  var avantS2 = SEASONS.filter(function(x){ return x.id === 's1' || x.id === 'halloween'; }).every(function(x){ return cardsOf(x).every(function(c){ return owns(name, c.id); }); });
+  add('Collection', 'legende', LEGENDE.name, 'Débloquer toutes les cartes des saisons ouvertes (' + tot + ').', 'mythique', 'crown', avantS2 ? tot : n, tot);
   // lignes
   function ligne(r){ var best = {cur:0, max:0}; seasons.forEach(function(x){ var cs = cardsOf(x).filter(function(c){ return c.r === r; }), k = cs.filter(function(c){ return owns(name, c.id); }).length; if(cs.length && (!best.max || k / cs.length > best.cur / best.max)) best = {cur:k, max:cs.length}; }); return best; }
   var lc = ligne('Commune'), lp = ligne('Peu commune'), lr = ligne('Rare'), ll = ligne('Légendaire'), ls = ligne('Spéciale');
@@ -2923,7 +2944,7 @@ var ACTIVITY = null;
 function cardInfo(id){
   var s = SEASONS.filter(function(x){ return x.id === sid(id); })[0];
   if(!s || !s.groups.length) return null;
-  var c = cardsOf(s).filter(function(x){ return x.id === id; })[0];
+  var c = cardsAll(s).filter(function(x){ return x.id === id; })[0];
   return c ? {c:c, s:s} : null;
 }
 function thumb(id){
@@ -3010,7 +3031,7 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-10-30', time:'22:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'},
+  {date:'2026-10-30', time:'23:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'},
   {date:'2026-10-27', time:'22:00', game:'The Mortuary Assistant', steam:'https://store.steampowered.com/app/1295920/The_Mortuary_Assistant/', img:'', note:''},
   {date:'2026-10-29', time:'22:00', game:'Phantom Blade Zero', steam:'https://store.steampowered.com/app/4115450/Phantom_Blade_Zero/', img:'jeux/phantom-blade-zero.jpg', note:''},
   {date:'2026-10-11', time:'22:00', game:'Silent Hill 2 Remake', steam:'https://store.steampowered.com/app/2124490/SILENT_HILL_2/', img:'', note:''},
@@ -4154,7 +4175,7 @@ if((window.JEU_CONFIG || {}).NOM) document.querySelectorAll('.nomjeu').forEach(f
   function prets(name){
     var out = [];
     if(!name) return out;
-    openSeasons().forEach(function(x){ cardsOf(x).forEach(function(c){ var n = copies(name, c.id); if(owns(name, c.id) && n >= needOf(c.id)) out.push({id:c.id, n:n, nom:'Carte ' + pad(c.n) + ' (' + c.r + ', ' + x.label + ')'}); }); });
+    openSeasons().forEach(function(x){ cardsAll(x).forEach(function(c){ var n = copies(name, c.id); if(owns(name, c.id) && n >= needOf(c.id)) out.push({id:c.id, n:n, nom:'Carte ' + pad(c.n) + ' (' + c.r + ', ' + x.label + ')'}); }); });
     return out;
   }
   function boutonCmd(txt, conf, lib){
