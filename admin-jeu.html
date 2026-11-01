@@ -545,9 +545,11 @@ $('adtir').onclick = function(){ var m = $('admsg'); appel('a-tirage', {login: $
       var obt = x.obt - x.ret, ex = Math.max(0, obt - x.cout);
       if(obt <= 0 && !att) return '';
       return '<tr><td><b>' + esc(id) + '</b></td><td>' + esc(rar(id)) + '</td><td>' + obt + '</td><td>' + x.cout + '</td><td><b>' + ex + '</b>' + (att ? ' <span class="' + (att > 0 ? 'ok' : 'bad') + '">(' + (att > 0 ? '+' : '') + att + ' en attente)</span>' : '') + '</td>' +
-        '<td><button type="button" class="s g" data-cl="-1" data-id="' + esc(id) + '">− 1</button> <button type="button" class="s" data-cl="1" data-id="' + esc(id) + '">+ 1</button></td></tr>';
+        '<td style="white-space:nowrap"><input type="number" class="clq" min="1" max="50" value="1" aria-label="Quantité" style="min-width:0;width:64px;padding:4px 6px;font-size:13px"> ' +
+        '<button type="button" class="s g" data-cl="-1" data-id="' + esc(id) + '">− Retirer</button> <button type="button" class="s" data-cl="1" data-id="' + esc(id) + '">+ Ajouter</button>' +
+        (obt + att > 1 ? ' <button type="button" class="s g" data-cl="tout" data-max="' + (obt + att) + '" data-id="' + esc(id) + '" title="Retirer tous les exemplaires">Tout retirer</button>' : '') + '</td></tr>';
     }).join('');
-    res.innerHTML = '<div class="w"><table><thead><tr><th>Carte</th><th>Rareté</th><th>Obtenues</th><th>Utilisées (!roue/!gold)</th><th>Exemplaires actuels</th><th></th></tr></thead><tbody>' +
+    res.innerHTML = '<div class="w"><table><thead><tr><th>Carte</th><th>Rareté</th><th>Obtenues</th><th>Utilisées (!roue/!gold)</th><th>Exemplaires actuels</th><th>Quantité à ajouter / retirer</th></tr></thead><tbody>' +
       (lignes || '<tr><td colspan="6">Aucune carte pour ce viewer.</td></tr>') + '</tbody></table></div>' +
       (DATA && !DATA[k] ? '<p>Ce pseudo n\'est pas encore dans le journal : vérifie l\'orthographe (majuscules comprises) avant d\'ajouter.</p>' : '');
   }
@@ -577,7 +579,16 @@ $('adtir').onclick = function(){ var m = $('admsg'); appel('a-tirage', {login: $
   $('clvoir').onclick = function(){ (DATA ? Promise.resolve() : charger()).then(afficher); };
   $('clqui').addEventListener('change', function(){ if(DATA) afficher(); });
   $('cladd').onclick = function(){ changer($('clcarte').value, Math.max(1, Math.min(50, parseInt($('cln').value, 10) || 1))); };
-  $('clres').addEventListener('click', function(e){ var b = e.target.closest('[data-cl]'); if(b) changer(b.getAttribute('data-id'), +b.getAttribute('data-cl')); });
+  $('clres').addEventListener('click', function(e){
+    var b = e.target.closest('[data-cl]'); if(!b) return;
+    var a = b.getAttribute('data-cl'), id = b.getAttribute('data-id');
+    if(a === 'tout'){ changer(id, -Math.min(50, +b.getAttribute('data-max'))); return; }
+    var q = b.closest('tr').querySelector('.clq'), n = Math.max(1, Math.min(50, parseInt(q && q.value, 10) || 1));
+    changer(id, +a * n);
+  });
+  $('clres').addEventListener('keydown', function(e){   // Entrée dans la case quantité = Ajouter
+    if(e.key === 'Enter' && e.target.classList.contains('clq')){ e.preventDefault(); e.target.closest('tr').querySelector('[data-cl="1"]').click(); }
+  });
 })();
 </script>
 <script>
