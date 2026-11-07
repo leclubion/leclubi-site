@@ -3130,11 +3130,6 @@ if(streamer() && draft) setMsg('Brouillon du mode streamer chargé depuis ce nav
 // Sans img, le site essaie d'abord un fichier du dossier "jeux" (nom du jeu en minuscules avec tirets, ex. silent-hill-2-remake.jpg),
 // puis l'image officielle de Steam grâce au lien.
 var PLANNING = [
-  {date:'2026-11-07', time:'22:00', game:'LUTO', steam:'https://store.steampowered.com/app/1729740/Luto/', img:'', note:''},
-  {date:'2026-11-06', time:'22:00', game:'Silent Hill 3', steam:'', img:'jeux/silent-hill-3', note:''},
-  {date:'2026-11-05', time:'22:00', game:'Phantom Blade Zero', steam:'https://store.steampowered.com/app/4115450/Phantom_Blade_Zero/', img:'jeux/phantom-blade-zero.jpg', note:''},
-  {date:'2026-11-02', time:'22:00', game:'Cam Em All', steam:'https://store.steampowered.com/app/5133900/Can_Em_All/', img:'', note:''},
-  {date:'2026-11-01', time:'22:00', game:'Phantom Blade Zero', steam:'https://store.steampowered.com/app/4115450/Phantom_Blade_Zero/', img:'jeux/phantom-blade-zero.jpg', note:''},
   {date:'2026-10-30', time:'23:00', game:'Soirée Halloween', steam:'', img:'jeux/soiree-halloween.gif', note:'Soirée Halloween en live'},
   {date:'2026-10-27', time:'22:00', game:'The Mortuary Assistant', steam:'https://store.steampowered.com/app/1295920/The_Mortuary_Assistant/', img:'', note:''},
   {date:'2026-10-29', time:'22:00', game:'Phantom Blade Zero', steam:'https://store.steampowered.com/app/4115450/Phantom_Blade_Zero/', img:'jeux/phantom-blade-zero.jpg', note:''},
@@ -3296,8 +3291,8 @@ loadVideos();
 // Sondage partagé grâce à un Google Forms (voir les explications).
 // Tant que formUrl, entry et resultsUrl sont vides, le sondage est un simple aperçu non partagé.
 var POLL = {
-  id: 'sondage-1', // change cet identifiant à chaque nouveau sondage
-  games: ['Luto', 'Signalis', 'Karma : The Dark World', 'Post Trauma', 'Tormented Souls', 'Heartworm'],
+  id: 'sondage-2', // change cet identifiant à chaque nouveau sondage
+  games: ['BrokenLore : Don\'t Lie', 'Post Trauma', 'Darkwood', 'Signalis', 'Karma : The Dark World', 'Heartworm'],
   formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfiuwqLMSEL5mvfy9BgWyOwYAMZMmqYb-Y6T_NxRkYxeJ2tdQ/formResponse',
   entry: 'entry.2036648890', // identifiant de la question du formulaire
   resultsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRPTVuR06cF23-mu4GMuoJkB232Ryb2u3s_IJIPp7ZnC_n34sxK1lEBiVqpQepH4dt1iO8qbzEV9T/pub?gid=1047093953&single=true&output=csv',
@@ -3359,11 +3354,11 @@ loadPoll();
 // Chaque image mène à la page Steam du jeu. La clé doit être identique au nom du jeu dans la liste du sondage.
 // Sans lien pour un jeu, le clic ouvre une recherche Steam avec son nom.
 var GAME_LINKS = {
-  'Luto': 'https://store.steampowered.com/app/1729740/Luto/',
+  'BrokenLore : Don\'t Lie': 'https://store.steampowered.com/app/3886200/BrokenLore_DONT_LIE/',
+  'Darkwood': 'https://store.steampowered.com/app/274520/Darkwood/',
   'Signalis': 'https://store.steampowered.com/app/1262350/SIGNALIS/',
   'Karma : The Dark World': 'https://store.steampowered.com/app/1376200/KARMA_The_Dark_World/',
   'Post Trauma': 'https://store.steampowered.com/app/1750030/Post_Trauma/',
-  'Tormented Souls': 'https://store.steampowered.com/app/1367590/Tormented_Souls/',
   'Heartworm': 'https://store.steampowered.com/app/1257030/Heartworm/'
 };
 // Images : d'abord le dossier "jeux" (nom du jeu en minuscules, sans accents, tirets entre les mots :
